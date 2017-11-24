@@ -1,0 +1,64 @@
+---
+title: "Vignette Title"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(skcm.data)
+library(futile.logger)
+library(verissimo)
+flog.layout(layout.format('[~l] ~m'))
+flog.appender(appender.tee('logger.txt'))
+#
+devtools::load_all(".")
+```
+
+## Build data from `skcm.data` package
+
+```{r}
+data("fpkm.per.tissue", package = 'skcm.data')
+flog.info('Type of tissue in SKCM:\n * %s', paste(names(fpkm.per.tissue), collapse = '\n * '))
+```
+
+## Remove non-expressed genes
+
+```{r}
+xdata.raw <- t(fpkm.per.tissue$primary.solid.tumor)
+sd.xdata  <- sapply(seq(ncol(xdata.raw)), function(ix) { sd(xdata.raw[,ix]) })
+#
+flog.info('Non-expressed genes to be removed (from %d total genes) : %d', ncol(xdata.raw), sum(sd.xdata == 0))
+xdata.raw <- xdata.raw[,sd.xdata != 0]
+rm(sd.xdata)
+#
+xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
+  return(scale(xdata.raw[,ix], center = TRUE, scale = TRUE))
+}, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)
+
+if (!all(xdata[,1] == (xdata.raw[,1] - mean(xdata.raw[,1])) / sd(xdata.raw[,1]))) {
+  stop('Something went wrong in scaling.')
+}
+```
+
+### Build correlation matrix to cache
+```{r}
+#
+cor.parallel(xdata, method = 'pearson', n.cores = 16, build.matrix = F, base.dir = '../cache')
+cor.parallel(xdata, method = 'spearman', n.cores = 16, build.matrix = F, base.dir = '../cache')
+wp1 <- degree.weighted(xdata, method = 'pearson', cutoff = .5, n.cores = 16, base.dir = '../cache')
+wp2 <- degree.weighted(xdata,
+method = 'pearson', cutoff = .5, consider.unweighted = T, n.cores = 16, base.dir = '../cache')
+
+ws1 <- degree.weighted(xdata, method = 'spearman', cutoff = .5, n.cores = 16, base.dir = '../cache')
+ws2 <- degree.weighted(xdata, method = 'spearman', cutoff = .5, consider.unweighted = T, n.cores = 16, base.dir = '../cache')
+```
+
