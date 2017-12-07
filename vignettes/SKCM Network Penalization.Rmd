@@ -58,6 +58,15 @@ devtools::load_all()
 flog.layout(layout.format('[~l] ~m'))
 ```
 
+```{r, eval=FALSE, include=FALSE}
+rmarkdown::render('Melanoma.Rmd', params = list())
+rmarkdown::render('SKCM Network Penalization.Rmd', params = list())
+rmarkdown::render('SKCM Network Penalization.Rmd', params = list(degree.unweighted = TRUE))
+rmarkdown::render('SKCM Network Penalization.Rmd', params = list(degree.correlation = 'spearman'))
+rmarkdown::render('SKCM Network Penalization.Rmd', params = list(degree.correlation = 'spearman', degree.unweighted = TRUE))
+```
+
+
 # Parameters
 
 ```{r parms, echo=FALSE}

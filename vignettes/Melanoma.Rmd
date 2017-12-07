@@ -83,7 +83,7 @@ ggplot(degree.df) + geom_freqpoly(aes(degree), bins = 200, color = verissimo::my
 
 ```{r}
 cor.parallel(xdata, method = 'spearman', n.cores = 16, build.matrix = F, base.dir = '../../network.cox-cache')
-```
+```z
 
 ### Weighted degree
 
