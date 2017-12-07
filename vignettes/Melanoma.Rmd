@@ -30,15 +30,15 @@ data("fpkm.per.tissue", package = 'skcm.data')
 flog.info('Type of tissue in SKCM:\n * %s', paste(names(fpkm.per.tissue), collapse = '\n * '))
 ```
 
-## Remove non-expressed genes
+
+## Metastatic
 
 ```{r}
-xdata.raw <- t(fpkm.per.tissue$primary.solid.tumor)
+xdata.raw <- t(fpkm.per.tissue$metastatic)
 sd.xdata  <- sapply(seq(ncol(xdata.raw)), function(ix) { sd(xdata.raw[,ix]) })
 #
 flog.info('Non-expressed genes to be removed (from %d total genes) : %d', ncol(xdata.raw), sum(sd.xdata == 0))
 xdata.raw <- xdata.raw[,sd.xdata != 0]
-rm(sd.xdata)
 #
 xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
   return(scale(xdata.raw[,ix], center = TRUE, scale = TRUE))
@@ -49,16 +49,140 @@ if (!all(xdata[,1] == (xdata.raw[,1] - mean(xdata.raw[,1])) / sd(xdata.raw[,1]))
 }
 ```
 
-### Build correlation matrix to cache
-```{r}
-#
-cor.parallel(xdata, method = 'pearson', n.cores = 16, build.matrix = F, base.dir = '../cache')
-cor.parallel(xdata, method = 'spearman', n.cores = 16, build.matrix = F, base.dir = '../cache')
-wp1 <- degree.weighted(xdata, method = 'pearson', cutoff = .5, n.cores = 16, base.dir = '../cache')
-wp2 <- degree.weighted(xdata,
-method = 'pearson', cutoff = .5, consider.unweighted = T, n.cores = 16, base.dir = '../cache')
+### Build Pearson correlation matrix to cache
 
-ws1 <- degree.weighted(xdata, method = 'spearman', cutoff = .5, n.cores = 16, base.dir = '../cache')
-ws2 <- degree.weighted(xdata, method = 'spearman', cutoff = .5, consider.unweighted = T, n.cores = 16, base.dir = '../cache')
+```{r}
+cor.parallel(xdata, method = 'pearson', n.cores = 16, build.matrix = F, base.dir = '../../network.cox-cache')
 ```
 
+#### Weighted degree
+
+```{r, echo=FALSE}
+degree <- degree.weighted(xdata, method = 'pearson', cutoff = .5, consider.unweighted = F, n.cores = 16, base.dir = '../../network.cox-cache')
+#
+names(degree) <- rownames(fpkm.per.tissue$primary.solid.tumor[sd.xdata != 0,])
+degree.df <- data.frame(degree = degree)
+ggplot(degree.df) + geom_freqpoly(aes(degree), bins = 200, color = verissimo::my.colors(10)) +
+  scale_y_continuous(breaks = 10^(-2:3), trans = 'log10') +
+  theme_minimal() + ggtitle('Degree frequency') + ylab('Count (log10 scale)') + xlab('Weighted degree')
+```
+
+#### Un-weighted degree
+
+```{r, echo=FALSE}
+degree <- degree.weighted(xdata, method = 'pearson', cutoff = .5, consider.unweighted = T, n.cores = 16, base.dir = '../../network.cox-cache')
+#
+names(degree) <- rownames(fpkm.per.tissue$primary.solid.tumor[sd.xdata != 0,])
+degree.df <- data.frame(degree = degree)
+ggplot(degree.df) + geom_freqpoly(aes(degree), bins = 200, color = verissimo::my.colors(10)) +
+  scale_y_continuous(breaks = 10^(-2:3), trans = 'log10') +
+  theme_minimal() + ggtitle('Degree frequency') + ylab('Count (log10 scale)') + xlab('Weighted degree')
+```
+
+### Build Spearman correlation matrix to cache
+
+```{r}
+cor.parallel(xdata, method = 'spearman', n.cores = 16, build.matrix = F, base.dir = '../../network.cox-cache')
+```
+
+### Weighted degree
+
+```{r, echo=FALSE}
+degree <- degree.weighted(xdata, method = 'spearman', cutoff = .5, n.cores = 16, base.dir = '../../network.cox-cache')
+#
+names(degree) <- rownames(fpkm.per.tissue$primary.solid.tumor[sd.xdata != 0,])
+degree.df <- data.frame(degree = degree)
+ggplot(degree.df) + geom_freqpoly(aes(degree), bins = 200, color = verissimo::my.colors(10)) +
+  scale_y_continuous(breaks = 10^(-2:3), trans = 'log10') +
+  theme_minimal() + ggtitle('Degree frequency') + ylab('Count (log10 scale)') + xlab('Weighted degree')
+```
+
+### Un-weighted degree
+
+```{r, echo=FALSE}
+degree <- degree.weighted(xdata, method = 'pearson', cutoff = .5, consider.unweighted = T, n.cores = 16, base.dir = '../../network.cox-cache')
+#
+names(degree) <- rownames(fpkm.per.tissue$primary.solid.tumor[sd.xdata != 0,])
+degree.df <- data.frame(degree = degree)
+ggplot(degree.df) + geom_freqpoly(aes(degree), bins = 200, color = verissimo::my.colors(10)) +
+  scale_y_continuous(breaks = 10^(-2:3), trans = 'log10') +
+  theme_minimal() + ggtitle('Degree frequency') + ylab('Count (log10 scale)') + xlab('Weighted degree')
+```
+
+## Primary solid tumor
+
+```{r}
+xdata.raw <- t(fpkm.per.tissue$primary.solid.tumor)
+sd.xdata  <- sapply(seq(ncol(xdata.raw)), function(ix) { sd(xdata.raw[,ix]) })
+#
+flog.info('Non-expressed genes to be removed (from %d total genes) : %d', ncol(xdata.raw), sum(sd.xdata == 0))
+xdata.raw <- xdata.raw[,sd.xdata != 0]
+#
+xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
+  return(scale(xdata.raw[,ix], center = TRUE, scale = TRUE))
+}, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)
+
+if (!all(xdata[,1] == (xdata.raw[,1] - mean(xdata.raw[,1])) / sd(xdata.raw[,1]))) {
+  stop('Something went wrong in scaling.')
+}
+```
+
+### Build Pearson correlation matrix to cache
+
+```{r}
+cor.parallel(xdata, method = 'pearson', n.cores = 16, build.matrix = F, base.dir = '../../network.cox-cache')
+```
+
+#### Weighted degree
+
+```{r, echo=FALSE}
+degree <- degree.weighted(xdata, method = 'pearson', cutoff = .5, consider.unweighted = F, n.cores = 16, base.dir = '../../network.cox-cache')
+#
+names(degree) <- rownames(fpkm.per.tissue$primary.solid.tumor[sd.xdata != 0,])
+degree.df <- data.frame(degree = degree)
+ggplot(degree.df) + geom_freqpoly(aes(degree), bins = 200, color = verissimo::my.colors(10)) +
+  scale_y_continuous(breaks = 10^(-2:3), trans = 'log10') +
+  theme_minimal() + ggtitle('Degree frequency') + ylab('Count (log10 scale)') + xlab('Weighted degree')
+```
+
+#### Un-weighted degree
+
+```{r, echo=FALSE}
+degree <- degree.weighted(xdata, method = 'pearson', cutoff = .5, consider.unweighted = T, n.cores = 16, base.dir = '../../network.cox-cache')
+#
+names(degree) <- rownames(fpkm.per.tissue$primary.solid.tumor[sd.xdata != 0,])
+degree.df <- data.frame(degree = degree)
+ggplot(degree.df) + geom_freqpoly(aes(degree), bins = 200, color = verissimo::my.colors(10)) +
+  scale_y_continuous(breaks = 10^(-2:3), trans = 'log10') +
+  theme_minimal() + ggtitle('Degree frequency') + ylab('Count (log10 scale)') + xlab('Weighted degree')
+```
+
+### Build Spearman correlation matrix to cache
+
+```{r}
+cor.parallel(xdata, method = 'spearman', n.cores = 16, build.matrix = F, base.dir = '../../network.cox-cache')
+```
+
+### Weighted degree
+
+```{r, echo=FALSE}
+degree <- degree.weighted(xdata, method = 'spearman', cutoff = .5, n.cores = 16, base.dir = '../../network.cox-cache')
+#
+names(degree) <- rownames(fpkm.per.tissue$primary.solid.tumor[sd.xdata != 0,])
+degree.df <- data.frame(degree = degree)
+ggplot(degree.df) + geom_freqpoly(aes(degree), bins = 200, color = verissimo::my.colors(10)) +
+  scale_y_continuous(breaks = 10^(-2:3), trans = 'log10') +
+  theme_minimal() + ggtitle('Degree frequency') + ylab('Count (log10 scale)') + xlab('Weighted degree')
+```
+
+### Un-weighted degree
+
+```{r, echo=FALSE}
+degree <- degree.weighted(xdata, method = 'pearson', cutoff = .5, consider.unweighted = T, n.cores = 16, base.dir = '../../network.cox-cache')
+#
+names(degree) <- rownames(fpkm.per.tissue$primary.solid.tumor[sd.xdata != 0,])
+degree.df <- data.frame(degree = degree)
+ggplot(degree.df) + geom_freqpoly(aes(degree), bins = 200, color = verissimo::my.colors(10)) +
+  scale_y_continuous(breaks = 10^(-2:3), trans = 'log10') +
+  theme_minimal() + ggtitle('Degree frequency') + ylab('Count (log10 scale)') + xlab('Weighted degree')
+```
