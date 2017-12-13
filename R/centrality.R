@@ -130,22 +130,32 @@ setMethod('degree.weighted', signature('matrix'), function(xdata, method = 'pear
     added.sum <- 1000
     for (ix.outer in seq(1, ncol(xdata) - 1, added.sum)) {
       max.ix <- min(ix.outer + added.sum - 1, ncol(xdata) - 1)
-      res.1000 <- matrix(unlist(parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
+      res.1000 <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
         line <- verissimo::runCache(cor.worker, xdata, ix.i, method = method,
                                     base.dir     = base.dir,
                                     cache.digest = list(xdata.sha256),
                                     cache.prefix = 'correlation',
                                     show.message = F,
                                     force.recalc = force.recalc.correlation)
+        if (any(!is.numeric(line))) {
+          line <- verissimo::runCache(cor.worker, xdata, ix.i, method = method,
+                                      base.dir     = base.dir,
+                                      cache.digest = list(xdata.sha256),
+                                      cache.prefix = 'correlation',
+                                      show.message = F,
+                                      force.recalc = T)
+        }
         #
         line[is.na(line)]   <- 0 # failsafe in case there was a failure in cor (i.e. sd = 0)
         line                <- abs(line)
         line[line < cutoff] <- 0
         if (consider.unweighted) { line[line != 0] <- 1 }
         line <- c(rep(0, ix.i - 1), sum(line), line)
-        return(as.vector(line))
-      }, mc.cores = n.cores, mc.allow.recursive = FALSE)), ncol = ncol(xdata), byrow = TRUE)
-      degree <- degree + colSums(res.1000)
+        return(line)
+      }, mc.cores = n.cores, mc.allow.recursive = FALSE)
+      #
+      res.1000 <- matrix(unlist(res.1000), ncol = ncol(xdata), byrow = TRUE)
+      degree   <- degree + colSums(res.1000)
     }
     names(degree) <- colnames(xdata)
     return(degree)

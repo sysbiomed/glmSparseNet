@@ -83,12 +83,12 @@ ggplot(degree.df) + geom_freqpoly(aes(degree), bins = 200, color = verissimo::my
 
 ```{r}
 cor.parallel(xdata, method = 'spearman', n.cores = 16, build.matrix = F, base.dir = '../../network.cox-cache')
-```z
+```
 
 ### Weighted degree
 
 ```{r, echo=FALSE}
-degree <- degree.weighted(xdata, method = 'spearman', cutoff = .5, n.cores = 16, base.dir = '../../network.cox-cache')
+degree <- degree.weighted(xdata, method = 'spearman', cutoff = .5, n.cores = 16, base.dir = '../../network.cox-cache', show.message = T)
 #
 names(degree) <- rownames(fpkm.per.tissue$primary.solid.tumor[sd.xdata != 0,])
 degree.df <- data.frame(degree = degree)

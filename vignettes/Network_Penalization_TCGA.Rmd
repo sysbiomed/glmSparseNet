@@ -1,5 +1,5 @@
 ---
-title: "SKCM Degree results"
+title: "Network regularization on TCGA Cancer Data"
 author: "André Veríssimo"
 date: "`r Sys.Date()`"
 output:
@@ -14,12 +14,15 @@ output:
 #  %\VignetteEngine{knitr::rmarkdown}
 #  %\VignetteEncoding{UTF-8}
 params:
-  project: 'skcm'
-  tissue: 'metastatic' # primary.solid.tumor metastatic
+  project: 'brca'#'skcm'
+  tissue: 'primary.solid.tumor' # primary.solid.tumor metastatic
   degree.unweighted: !r FALSE
   degree.correlation: 'pearson'
   degree.cutoff: !r .5
   #
+  #
+  normalize: 'max'
+  handle.duplicates: 'keep_all' # keep_all , keep_first
   #
   # glmnet parameter
   alpha: !r 1
@@ -27,12 +30,12 @@ params:
   subset: !r Inf
   train: !r .7
   # number of times that training set is tested
-  ntimes: !r 1000
+  ntimes: !r 100
   # target variables that models should output
   target.vars: !r 33
   #
   seed: !r 1985# 2017
-  mc.cores: !r 14
+  mc.cores: !r 10
 ---
 
 ```{r setup, include=FALSE}
@@ -56,22 +59,43 @@ library(forcats)
 library(survival.owl)
 devtools::load_all()
 flog.layout(layout.format('[~l] ~m'))
+flog.appender(appender.tee('logger.txt'))
 ```
 
 ```{r, eval=FALSE, include=FALSE}
-rmarkdown::render('Melanoma.Rmd', params = list())
-rmarkdown::render('SKCM Network Penalization.Rmd', params = list())
-rmarkdown::render('SKCM Network Penalization.Rmd', params = list(degree.unweighted = TRUE))
-rmarkdown::render('SKCM Network Penalization.Rmd', params = list(degree.correlation = 'spearman'))
-rmarkdown::render('SKCM Network Penalization.Rmd', params = list(degree.correlation = 'spearman', degree.unweighted = TRUE))
+run.me <- list(
+  skcm.metastatic          = list(project = 'skcm', tissue = 'metastatic',          degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
+  skcm.primary.solid.tumor = list(project = 'skcm', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
+  #
+  brca.solid.tissue.normal = list(project = 'brca', tissue = 'solid.tissue.normal', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
+  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
+  #
+  prad.solid.tissue.normal = list(project = 'prad', tissue = 'solid.tissue.normal', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
+  prad.primary.solid.tumor = list(project = 'prad', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5))
+
+for (ix.name in names(run.me)) {
+  el <- run.me[[ix.name]]
+  un <- if(el$degree.unweighted) { 'unweighted' } else { 'weighted' }
+  out.name <- sprintf('%s-%s-%s-%s-%.2f.html', el$project, el$tissue, el$degree.correlation, un, el$degree.cutoff)
+  tryCatch({
+    rmarkdown::render('Network_Penalization_TCGA.Rmd', output_file = out.name, params = el)    
+  }, error = function(str) {
+    flog.error('Error when rendering Rmd: %s', str$message)
+  })
+}
 ```
 
+
+```{r, eval=FALSE, include=FALSE}
+# Melanoma render
+rmarkdown::render('Melanoma.Rmd', params = list())
+```
 
 # Parameters
 
 ```{r parms, echo=FALSE}
 max.chars <- max(sapply(names(params), nchar))
-for (ix.names in names(params)) {
+for (ix.names in sort(names(params))) {
   prefix <- paste(array(' ', max.chars - nchar(ix.names)), collapse = '')
   if (is.vector(params[[ix.names]]) && length(params[[ix.names]]) == 1) {
     if (is.character(params[[ix.names]])) {
@@ -91,7 +115,9 @@ for (ix.names in names(params)) {
 
 # Load and normalize data
 
-```{r, echo=FALSE}
+Description of data
+
+```{r data.desc, echo=FALSE}
 package.name <- paste0(params$project, '.data')
 data("fpkm.per.tissue", package = package.name)
 flog.info('Loading data from %s package', package.name)
@@ -99,28 +125,41 @@ flog.info('Types of tissue:\n * %s', paste(sprintf('%s (%d)', names(fpkm.per.tis
 ```
 
 
-```{r data, echo=FALSE}
+```{r data_normalization, echo=FALSE}
 xdata.raw <- t(fpkm.per.tissue[[params$tissue]])
 sd.xdata  <- sapply(seq(ncol(xdata.raw)), function(ix) { sd(xdata.raw[,ix]) })
 #
 flog.info('Non-expressed genes to be removed (from %d total genes) : %d', ncol(xdata.raw), sum(sd.xdata == 0))
+flog.info('  Remaining genes : %d', ncol(xdata.raw) - sum(sd.xdata == 0))
 xdata.raw <- xdata.raw[,sd.xdata != 0]
 #
-xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
-  return(scale(xdata.raw[,ix], center = TRUE, scale = TRUE))
-}, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)
-
-if (!all(xdata[,1] == (xdata.raw[,1] - mean(xdata.raw[,1])) / sd(xdata.raw[,1]))) {
-  stop('Something went wrong in scaling.')
+degree <- degree.weighted(xdata.raw, 
+  method              = params$degree.correlation, 
+  consider.unweighted = params$degree.unweighted, 
+  cutoff              = params$degree.cutoff, 
+  #
+  n.cores  = params$mc.cores, 
+  base.dir = '../../network.cox-cache')
+#
+if (params$handle.duplicates == 'keep_first') {
+  xdata.raw <- xdata.raw[!duplicated(strtrim(rownames(xdata.raw), 12)),]
 }
-
+#
+if (params$normalize == 'max') {
+  xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
+    return(xdata.raw[,ix] / max(abs(xdata.raw[,ix])))
+  }, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)  
+} else if (params$normalize == 'scale_center') {
+  xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
+    return(scale(xdata.raw[,ix], center = TRUE, scale = TRUE))
+  }, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)  
+} else if (params$normalize == 'scale') {
+  xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
+    return(scale(xdata.raw[,ix], center = FALSE, scale = TRUE))
+  }, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)  
+}
+#
 xdata.digest.cache <- verissimo::digest.cache(xdata)
-
-degree <- degree.weighted(xdata, 
-                       method = params$degree.correlation, consider.unweighted = params$degree.unweighted, cutoff = params$degree.cutoff, 
-                       #
-                       n.cores = params$mc.cores, 
-                       base.dir = '../../network.cox-cache')
 #
 colnames(xdata) <- rownames(fpkm.per.tissue[[params$tissue]])[sd.xdata != 0]
 rownames(xdata) <- colnames(fpkm.per.tissue[[params$tissue]])
@@ -129,11 +168,19 @@ rownames(xdata) <- colnames(fpkm.per.tissue[[params$tissue]])
 
 ## Clinical data
 
-```{r, echo=FALSE}
-data(clinical, package = package.name)
+Load clinical data
+
+```{r load.clinical}
+data('clinical', package = package.name)
+```
+
+```{r clinical_data, echo=FALSE}
+ix.clinical <- !is.na(clinical[[params$tissue]]$bcr_patient_barcode)
+
 ydata <- data.frame(time = clinical[[params$tissue]]$surv_event_time,
-                    status = clinical[[params$tissue]]$vital_status)
-rownames(ydata) <- clinical[[params$tissue]]$bcr_patient_barcode
+                    status = clinical[[params$tissue]]$vital_status)[ix.clinical,]
+
+rownames(ydata) <- clinical[[params$tissue]]$bcr_patient_barcode[ix.clinical]
 
 flog.info('Number of patients removed with: \n * followup time < 0:   %d\n * followup time is.na: %d', 
           sum(!is.na(ydata$time) & ydata$time <= 0), sum(is.na(ydata$time)))
@@ -141,8 +188,17 @@ ydata        <- ydata[!is.na(ydata$time) & ydata$time > 0,]
 ydata$status <- ydata$status == 'Alive'
 
 xdata <- xdata[strtrim(rownames(xdata), 12) %in% rownames(ydata),]
-if (!all(strtrim(rownames(xdata), 12) == unique(strtrim(rownames(xdata), 12)))) {
-  flog.warn('There are multiple samples for the same individual')
+if (length(strtrim(rownames(xdata), 12)) != length(unique(strtrim(rownames(xdata), 12)))) {
+  flog.warn('There are multiple samples for the same individual.. using strategy: \'%s\'', params$handle.duplicates)
+  #
+  new.row.names   <- strtrim(rownames(xdata), 12)
+  rownames(xdata) <- sapply(seq_along(new.row.names), function(ix) {
+    ix.name <- new.row.names[ix]
+    count.b4 <- sum(new.row.names[1:ix] == ix.name)
+    return(sprintf('%s.%d', ix.name, count.b4))
+  })
+  ydata <- ydata[strtrim(rownames(xdata), 12),]
+  rownames(ydata) <- rownames(xdata)
 } else {
   rownames(xdata) <- strtrim(rownames(xdata), 12)
 }
@@ -152,7 +208,7 @@ ydata.digest.cache <- verissimo::digest.cache(ydata)
 
 ## Test / Training sets
 
-```{r, echo=FALSE}
+```{r sets, echo=FALSE}
 set.seed(params$seed)
 ixs <- verissimo::balanced.train.and.test(which(ydata$status), which(!ydata$status), train.perc = params$train)
 xdata.test <- xdata[ixs$test,]
@@ -172,7 +228,7 @@ flog.info('Size of sets: (size/events)\n * Training set: % 4d/% 4d\n * Test set:
 
 ## Summary of Survival Times
 
-```{r, echo=FALSE}
+```{r surv_times, echo=FALSE}
 ydata.month <- ydata
 #ydata.month$time <- ydata$time / 365 * 12
 ydata.month$status <- factor(ydata.month$status)
@@ -188,18 +244,12 @@ ggplot(ydata.month) + geom_freqpoly(aes(time, color = status), bins = 150) +
 
 # Test physiological Variables
 
-Load clinical data
-
-```{r load.clinical}
-data('clinical', package = package.name)
-```
-
 *note:* Plots with p-value `<= 0.05` are shown. Two types of p-values are used as criteria:
 
 1. Univariate cox model
 1. Log rank test when separating between high and low risk group
 
-```{r, fig.height=15, echo=FALSE}
+```{r test.clinical.variables, fig.height=15, echo=FALSE, eval=FALSE}
 #
 df        <- data.frame()
 plot.list <- list()
@@ -209,7 +259,7 @@ for (ix.name in colnames(clinical$all)) {
   if (is.numeric(clinical$all[[ix.name]]) || u == 2) {
     #
     #
-    test.me        <- clinical$all[rownames(ydata), ix.name]
+    test.me        <- clinical$all[strtrim(rownames(ydata), 12), ix.name]
     if (all(sapply(test.me, is.character))) {
       test.me <- factor(test.me)
     }
@@ -288,7 +338,7 @@ xdata.train.digest <- verissimo::digest.cache(xdata.train[, xdata.ix])
 * OrphanCox: degree
 * `trans.fun` is a double power to scale the values
 
-```{r}
+```{r transformation_function}
 trans.fun <- function(x) { .2 + 10^(exp(x) - 1) - 1 }
 ```
 
@@ -362,21 +412,22 @@ suppressWarnings({
 
 # Model Inference
 
-```{r, include=FALSE}
-my.glmnet <- function(prefix, penalty.factor, show.messages = FALSE) {
+```{r model_declaration, include=FALSE}
+my.glmnet <- function(prefix, penalty.factor, lambda.min.ratio = .001, show.messages = FALSE) {
   new.model <- verissimo::runCache(glmnet,
-                                     xdata.train[,xdata.ix], Surv(ydata.train[,1], ydata.train[,2]), 
-                                     family           ='cox', 
-                                     alpha            = params$alpha, 
-                                     nlambda          = 1000,
-                                     lambda.min.ratio = .001,
-                                     standardize      = F,
-                                     penalty.factor   = penalty.factor,
-                                     #
-                                     cache.prefix = prefix,
-                                     base.dir     = file.path('..', '..', 'network.cox-cache'),
-                                     cache.digest = list(xdata.train.digest),
-                                     show.message = show.messages)
+                                   xdata.train[,xdata.ix], Surv(ydata.train[,1], ydata.train[,2]), 
+                                   family           ='cox', 
+                                   alpha            = params$alpha, 
+                                   nlambda          = 1000,
+                                   lambda.min.ratio = lambda.min.ratio,
+                                   standardize      = F,
+                                   penalty.factor   = penalty.factor,
+                                   #
+                                   force.recalc = F,
+                                   cache.prefix = prefix,
+                                   base.dir     = file.path('..', '..', 'network.cox-cache'),
+                                   cache.digest = list(xdata.train.digest),
+                                   show.message = show.messages)
 
 if (any(new.model$df == params$target.vars)) {
   var.ix <- which(new.model$df == params$target.vars)
@@ -393,7 +444,7 @@ if (any(new.model$df == params$target.vars)) {
 }
 ```
 
-```{r, include=FALSE}
+```{r list_init, include=FALSE}
 #
 models  <- list()
 lambdas <- list()
@@ -402,7 +453,7 @@ result  <- list()
 ```
 
 
-```{r calc.en, echo=FALSE}
+```{r calc.models, echo=FALSE}
 #
 # GLMNET without network information
 flog.info('Calculating GLMNET')
@@ -411,8 +462,14 @@ result$glmnet <- my.glmnet('glmnet_models', rep(1, ncol(xdata.train)), show.mess
 cat('\n')
 
 models$glmnet  <- result$glmnet$model
-lambdas$glment <- result$glmnet$lambda
+lambdas$glmnet <- result$glmnet$lambda
 coefs$glmnet   <- result$glmnet$coef
+if (sum(coefs$glmnet != 0) < (params$target.vars - 5)) {
+  result$glmnet <- my.glmnet('glmnet_models', rep(1, ncol(xdata.train)), lambda.min.ratio = .0001, show.messages = FALSE)
+  models$glmnet  <- result$glmnet$model
+  lambdas$glmnet <- result$glmnet$lambda
+  coefs$glmnet   <- result$glmnet$coef
+}
 
 #
 # DegreeCox
@@ -424,6 +481,12 @@ cat('\n')
 models$degree  <- result$degree$model
 lambdas$degree <- result$degree$lambda
 coefs$degree   <- result$degree$coef
+if (sum(coefs$degree != 0) < (params$target.vars - 5)) {
+  result$degree <- my.glmnet('degree_models', penalty.factor.degree, lambda.min.ratio = .0001, show.messages = FALSE)
+  models$degree  <- result$degree$model
+  lambdas$degree <- result$degree$lambda
+  coefs$degree   <- result$degree$coef
+}
 
 #
 # OrphanCox
@@ -435,9 +498,17 @@ cat('\n')
 models$orphan  <- result$orphan$model
 lambdas$orphan <- result$orphan$lambda
 coefs$orphan   <- result$orphan$coef
+
+if (sum(coefs$orphan != 0) < (params$target.vars - 5)) {
+  result$orphan <- my.glmnet('orphan_models', penalty.factor.orphan, lambda.min.ratio = .0001, show.messages = FALSE)
+  models$orphan  <- result$orphan$model
+  lambdas$orphan <- result$orphan$lambda
+  coefs$orphan   <- result$orphan$coef
+}
+
 ```
 
-```{r, echo=FALSE}
+```{r models_variables, echo=FALSE}
 flog.info('Number of variables per model:')
 flog.info('  * ElasticNet: %d variables', sum(coefs$glmnet != 0))
 flog.info('  *  DegreeCox: %d variables', sum(coefs$degree != 0))
@@ -467,7 +538,7 @@ build.fit.df <- function(obj) {
   return(fitted.network)
 }
 
-fitted.network <- build.fit.df(list(Classic = list(model = models$glmnet, target = lambdas$glment),
+fitted.network <- build.fit.df(list(Classic = list(model = models$glmnet, target = lambdas$glmnet),
                                     Degree  = list(model = models$degree,  target = lambdas$degree),
                                     Orphan  = list(model = models$orphan,  target = lambdas$orphan)))
 ```
@@ -484,7 +555,7 @@ ggplot(fitted.network) +
 
 ## Kaplan-Meier Curves
 
-```{r, include=FALSE}
+```{r km.name, include=FALSE}
 km.name <- function(title, alpha, is.network = NULL) {
   l1 <- sprintf('%.1f * L1', alpha)
   l2 <- sprintf('%.1f * L2', 1 - alpha)
@@ -514,7 +585,14 @@ km.name <- function(title, alpha, is.network = NULL) {
 ```
 
 ```{r calc.km, include=FALSE}
-my.draw.kaplan <- function(coef.l, filename) { draw.kaplan(coef.l, xdata.train[,xdata.ix], ydata.train, filename = filename, legend.outside = F) }
+my.draw.kaplan <- function(coef.l, filename, test.set = F) { 
+  if (test.set) {
+    return(draw.kaplan(coef.l, xdata.test[,xdata.ix], ydata.test, filename = filename, legend.outside = F)) 
+  } else {
+    draw.kaplan(coef.l, xdata.train[,xdata.ix], ydata.train, filename = filename, legend.outside = F)
+  }
+}
+
 #
 km.train <- list()
 km.test  <- list()
@@ -522,9 +600,9 @@ km.test  <- list()
 km.train$glmnet <- my.draw.kaplan(list(GLMNET = coefs$glmnet), filename = 'Train set')
 km.train$degree <- my.draw.kaplan(list(Degree = coefs$degree), filename = 'Train set')
 km.train$orphan <- my.draw.kaplan(list(Orphan = coefs$orphan), filename = 'Train set')
-km.test$glmnet  <- my.draw.kaplan(list(GLMNET = coefs$glmnet), filename = 'Test set')
-km.test$degree  <- my.draw.kaplan(list(Degree = coefs$degree), filename = 'Test set')
-km.test$orphan  <- my.draw.kaplan(list(Orphan = coefs$orphan), filename = 'Test set')
+km.test$glmnet  <- my.draw.kaplan(list(GLMNET = coefs$glmnet), filename = 'Test set', test.set = T)
+km.test$degree  <- my.draw.kaplan(list(Degree = coefs$degree), filename = 'Test set', test.set = T)
+km.test$orphan  <- my.draw.kaplan(list(Orphan = coefs$orphan), filename = 'Test set', test.set = T)
 ```
 
 ```{r plot.km, fig.height= 10, echo=FALSE}
@@ -541,7 +619,7 @@ multiplot(plotlist = my.km, ncol = 2, layout = matrix(c(1,2,3,4,5,6), ncol = 2, 
 
 ## C-Index
 
-```{r, include=FALSE}
+```{r c_index_declaration, include=FALSE}
 c.index.fun <- function(all.pairs, fitted.risk, ydata) {
   unlist(mclapply(seq(ncol(all.pairs)), function(ix) {
     ix.1 <- all.pairs[1,ix]
@@ -565,21 +643,21 @@ flog.info('C-index for train set:')
 # Train
 #
 
-fit.risk <- function(coef.v, xdata, ydata, show.message = FALSE) {
-  # fitted.risk  <- as.vector(predict(models$glmnet, newx = xdata.train[,xdata.ix], s = lambdas$glment, type = 'response')) 
+fit.risk <- function(coef.v, xdata, ydata, model.name, show.message = FALSE) {
+  # fitted.risk  <- as.vector(predict(models$glmnet, newx = xdata.train[,xdata.ix], s = lambdas$glmnet, type = 'response')) 
   fitted.risk <- exp(as.vector(xdata[,xdata.ix] %*% coef.v))
   c.res <- verissimo::runCache(c.index.fun, all.pairs, fitted.risk, ydata, show.message = F)
   c.res <- sum(c.res) / sum(c.res != 0)
-  if (show.message) flog.info(' * ElasticNet: %f', c.res)
+  if (show.message) flog.info(' * %s: %f', model.name, c.res)
   return(c.res)
 }
 
 # Classic model
-c.index.train$glmnet <- fit.risk(coefs$glmnet, xdata.train, ydata.train, show.message = TRUE)
+c.index.train$glmnet <- fit.risk(coefs$glmnet, xdata.train, ydata.train, '   GLMNET',  show.message = TRUE)
 # DegreeCox
-c.index.train$degree <- fit.risk(coefs$degree, xdata.train, ydata.train, show.message = TRUE)
+c.index.train$degree <- fit.risk(coefs$degree, xdata.train, ydata.train, 'DegreeCox', show.message = TRUE)
 # OrphanCox
-c.index.train$orphan <- fit.risk(coefs$orphan, xdata.train, ydata.train, show.message = TRUE)
+c.index.train$orphan <- fit.risk(coefs$orphan, xdata.train, ydata.train, 'OrphanCox', show.message = TRUE)
 
 flog.info('')
 #
@@ -592,11 +670,11 @@ all.pairs <- combn(nrow(xdata.test), 2)
 flog.info('C-index for test set:')
 
 # Classic model
-c.index.test$glmnet <- fit.risk(coefs$glmnet, xdata.test, ydata.test, show.message = TRUE)
+c.index.test$glmnet <- fit.risk(coefs$glmnet, xdata.test, ydata.test, '   GLMNET', show.message = TRUE)
 # DegreeCox
-c.index.test$degree <- fit.risk(coefs$degree, xdata.test, ydata.test, show.message = TRUE)
+c.index.test$degree <- fit.risk(coefs$degree, xdata.test, ydata.test, 'DegreeCox', show.message = TRUE)
 # OrphanCox
-c.index.test$orphan <- fit.risk(coefs$orphan, xdata.test, ydata.test, show.message = TRUE)
+c.index.test$orphan <- fit.risk(coefs$orphan, xdata.test, ydata.test, 'OrphanCox', show.message = TRUE)
 
 ```
 
@@ -623,14 +701,21 @@ non.zero.df.out <- cbind(non.zero.df.result,
                          penalty.degree = as.vector(penalty.factor.degree[non.zero.df.result$gene.id]),
                          penalty.orphan = as.vector(penalty.factor.orphan[non.zero.df.result$gene.id]),
                          degree = as.vector(original.penalty.factor[non.zero.df.result$gene.id]))
-library(biomaRt)
 this.name <- function(this.coef) {
-  mart <- useMart(biomart = "ensembl", dataset = "hsapiens_gene_ensembl")
-
-  results <- getBM(attributes = c("external_gene_name", "ensembl_gene_id"),
-                   filters = "ensembl_gene_id", values = this.coef,
-                   mart = mart)
-  return(arrange(results, external_gene_name))
+  tryCatch({
+    marts <- biomaRt::listMarts()
+    index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
+    mart <- biomaRt::useMart(marts$biomart[index])
+    mart    <- biomaRt::useMart(marts$biomart[index], 'hsapiens_gene_ensembl')
+    results <- biomaRt::getBM(attributes = c("external_gene_name", "ensembl_gene_id"),
+                     filters = "ensembl_gene_id", values = this.coef,
+                     mart = mart)
+    return(arrange(results, external_gene_name))
+  }, error = function(msg) {
+    flog.warn('Error when finding gene names:\n\t%s', msg)
+  })
+  return(data.frame(ensembl_gene_id = this.coef, external_gene_name = this.coef, stringsAsFactors = FALSE))
+  
 }
 gene.names <- this.name(non.zero.df.out$gene.id)
 new.t <- non.zero.df.out
@@ -658,16 +743,18 @@ note: it only shows arbitrary `r params$target.vars*3` variables if there are mo
 knitr::kable(head(non.zero.df.out, n = params$target.vars * 3))
 ```
 
-```{r, include=FALSE}
+```{r save_genes_rdata, include=FALSE}
 genes.to.save <- gene.ids 
 save(genes.to.save, file = sprintf('../../network.cox-cache/gene.id-%s.RData',strtrim(digest::digest(non.zero.df.out), 10)))
 ```
 
-```{r}
+# `r params$ntimes` Runs
+
+```{r call.results.decl, echo=FALSE}
 # train.perc <- params$train
 # subset <- params$subset
 # seed <- 1985
-call.results <- function(seed, xdata, ydata, train.perc, subset) {
+call.results <- function(seed, xdata, ydata, train.perc, subset, penalty.factor.degree, penalty.factor.orphan) {
   set.seed(seed)
   
   #
@@ -693,9 +780,10 @@ call.results <- function(seed, xdata, ydata, train.perc, subset) {
   #
   
   # Classic
-  result$glmnet  <- my.glmnet('glmnet_models', rep(1, ncol(xdata.train)), show.messages = FALSE)
+  penalty.factor.glmnet <- rep(1, ncol(xdata.train))
+  result$glmnet  <- my.glmnet('glmnet_models', penalty.factor.glmnet, show.messages = FALSE)
   models$glmnet  <- result$glmnet$model
-  lambdas$glment <- result$glmnet$lambda
+  lambdas$glmnet <- result$glmnet$lambda
   coefs$glmnet   <- result$glmnet$coef
   
   # DegreeCox
@@ -720,9 +808,9 @@ call.results <- function(seed, xdata, ydata, train.perc, subset) {
   km.train$glmnet <- my.draw.kaplan(list(GLMNET = coefs$glmnet), filename = 'Train set')$pvalue
   km.train$degree <- my.draw.kaplan(list(Degree = coefs$degree), filename = 'Train set')$pvalue
   km.train$orphan <- my.draw.kaplan(list(Orphan = coefs$orphan), filename = 'Train set')$pvalue
-  km.test$glmnet  <- my.draw.kaplan(list(GLMNET = coefs$glmnet), filename = 'Test set')$pvalue
-  km.test$degree  <- my.draw.kaplan(list(Degree = coefs$degree), filename = 'Test set')$pvalue
-  km.test$orphan  <- my.draw.kaplan(list(Orphan = coefs$orphan), filename = 'Test set')$pvalue
+  km.test$glmnet  <- my.draw.kaplan(list(GLMNET = coefs$glmnet), filename = 'Test set', test.set = T)$pvalue
+  km.test$degree  <- my.draw.kaplan(list(Degree = coefs$degree), filename = 'Test set', test.set = T)$pvalue
+  km.test$orphan  <- my.draw.kaplan(list(Orphan = coefs$orphan), filename = 'Test set', test.set = T)$pvalue
   
   #
   # C-INDEX
@@ -755,21 +843,22 @@ call.results <- function(seed, xdata, ydata, train.perc, subset) {
 ```
 
 
-```{r}
+```{r calc_ntimes, echo=FALSE}
 if (params$train == 1) {
   flog.info("Train and test sets are the same, won't calculate %d times with random seeds", params$ntimes)
 } else {
   set.seed(params$seed)
-  seed.vec <- sample(1000 + 1:(params$ntimes * 10), size = params$ntimes)
+  seed.vec <- sample(1000 + (max(c(1:1e7,params$ntimes))))[1:params$ntimes]
   
   ntimes.results <- parallel::mclapply(seed.vec, function(seed) {
     return(verissimo::runCache(call.results,
-                               seed, xdata, ydata, params$train, params$subset,
+                               seed, xdata, ydata, params$train, params$subset, 
+                               penalty.factor.degree, penalty.factor.orphan,
                                #
                                cache.digest = list(NULL, xdata.digest.cache, ydata.digest.cache),
                                base.dir     = file.path('..', '..', 'network.cox-cache'),
                                cache.prefix = 'big-diff'))
-  }, mc.cores = params$mc.cores)
+  }, mc.cores = params$mc.cores, mc.allow.recursive = FALSE)
   
   big.df <- data.frame()
   for (ix in seq_along(ntimes.results)) {
@@ -782,28 +871,67 @@ if (params$train == 1) {
       big.df    <- rbind(big.df, new.line)
     }
   }
+  big.df$model <- factor(big.df$model, levels = c('glmnet', 'degree', 'orphan'), labels = c('GLMNET', 'DegreeCox', 'OrphanCox'))
+  big.df$metric <- factor(big.df$metric, levels = c('c.index.train', 'c.index.test', 'km.train', 'km.test'), 
+                                                    labels = c('C-Index (Train set)', 'C-Index (Test set)', 'Log-rank (Train set)', 'Log-rank (Test set)'))
 }
 ```
 
-```{r}
-ggplot(filter(big.df, metric %in% c('c.index.test', 'c.index.train'))) +
+## C-Index distribution
+
+```{r c.index.iter, echo=FALSE}
+ggplot(filter(big.df, metric %in% c('C-Index (Train set)', 'C-Index (Test set)'))) +
     geom_freqpoly(aes(values, color = model), alpha = .75, bins = 100) + 
-    facet_wrap( ~ metric) +
+    facet_wrap(model ~ metric, ncol = 2) +
     theme_minimal() + theme(legend.position = 'top')
+```
+
+## Log-rank test on Kaplan-Meier models
+
+Separated by high and low risk groups
+
+```{r pvalue.itre, echo=FALSE}
+ggplot(filter(big.df, metric %in% c('Log-rank (Test set)', 'Log-rank (Train set)'))) +
+  geom_freqpoly(aes(values, color = model), alpha = .75, bins = 300) + 
+  facet_wrap(model ~ metric, ncol = 2) +
+  ggtitle('Distribution of Log-Rank up until 0.05') +
+  theme_minimal() + theme(legend.position = 'top') + coord_cartesian(xlim = c(0, 0.1))
+
+ggplot(filter(big.df, metric %in% c('Log-rank (Test set)', 'Log-rank (Train set)'))) +
+  geom_freqpoly(aes(values, color = model), alpha = .75, bins = 100) + 
+  facet_wrap(model ~ metric, ncol = 2) +
+  ggtitle('Full distribution Log-rank') +
+  theme_minimal() + theme(legend.position = 'top')
 ```
 
 
 
+```{r, eval=FALSE, include=FALSE}
+library(ModelGood)
 
 
+xdata.df <- data.frame(xdata.train[,sample(seq_along(xdata.ix), size = 100)])
+xdata.df <- cbind(time = ydata.train$time, event = ydata.train$status, xdata.df)
+n <- colnames(xdata.df)
+f <- as.formula(paste("survival::Surv(time, event) ~", paste(n[!n %in% c('time', 'event')], collapse = " + ")))
+my.call <- call('ElasticNet', formula = f, data = xdata.df,
+           nfolds           = 5,
+           #
+           family           ='cox', 
+           alpha            = params$alpha, 
+           nlambda          = 1000,
+           lambda.min.ratio = .001,
+           standardize      = F)
+en.respo <- list(call = my.call, enet = models$glmnet, Lambda = lambdas$glmnet)
+class(en.respo) <- 'ElasticNet'
+Brier(en.respo)
 
 
+                                   #
+#                                   cache.prefix = prefix,
+ #                                  base.dir     = file.path('..', '..', 'network.cox-cache'),
+  #                                 cache.digest = list(xdata.train.digest),
+   #                                show.message = show.messages)
 
-
-
-
-
-
-
-
+```
 
