@@ -14,15 +14,16 @@ output:
 #  %\VignetteEngine{knitr::rmarkdown}
 #  %\VignetteEncoding{UTF-8}
 params:
-  project: 'brca'#'skcm'
-  tissue: 'primary.solid.tumor' # primary.solid.tumor metastatic
+  project: 'brca' # skcm prad brca
+  tissue: 'primary.solid.tumor' # primary.solid.tumor metastatic solid.tissue.normal
   degree.unweighted: !r FALSE
   degree.correlation: 'pearson'
-  degree.cutoff: !r .5
+  degree.cutoff: !r 0
   #
+  degree.type: "covariance" # covariance, correlation
   #
   normalize: 'max'
-  handle.duplicates: 'keep_all' # keep_all , keep_first
+  handle.duplicates: 'keep_first' # keep_all , keep_first
   #
   # glmnet parameter
   alpha: !r 1
@@ -30,12 +31,12 @@ params:
   subset: !r Inf
   train: !r .7
   # number of times that training set is tested
-  ntimes: !r 100
+  ntimes: !r 10
   # target variables that models should output
   target.vars: !r 33
   #
   seed: !r 1985# 2017
-  mc.cores: !r 10
+  mc.cores: !r 16
 ---
 
 ```{r setup, include=FALSE}
@@ -63,15 +64,30 @@ flog.appender(appender.tee('logger.txt'))
 ```
 
 ```{r, eval=FALSE, include=FALSE}
-run.me <- list(
-  skcm.metastatic          = list(project = 'skcm', tissue = 'metastatic',          degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
-  skcm.primary.solid.tumor = list(project = 'skcm', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
+#run.me <- list(
+#  skcm.metastatic          = list(project = 'skcm', tissue = 'metastatic',          degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
+#  skcm.primary.solid.tumor = list(project = 'skcm', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
   #
-  brca.solid.tissue.normal = list(project = 'brca', tissue = 'solid.tissue.normal', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
-  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
+#  brca.solid.tissue.normal = list(project = 'brca', tissue = 'solid.tissue.normal', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
+#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.1),
+#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.2),
+#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.3),
+#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.4),
+#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
+#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.6),
+#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.7),
+#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.8),
+#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.9),
+#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 1),
   #
-  prad.solid.tissue.normal = list(project = 'prad', tissue = 'solid.tissue.normal', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
-  prad.primary.solid.tumor = list(project = 'prad', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5))
+  #prad.solid.tissue.normal = list(project = 'prad', tissue = 'solid.tissue.normal', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
+  #prad.primary.solid.tumor = list(project = 'prad', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5))
+# 
+run.me <- list()
+
+for(ix in seq(0,1,0.05)) {
+  run.me[[paste0("brca.primary.solid.tumor-", sprintf("%.2f", ix))]] <- list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = ix)
+}
 
 for (ix.name in names(run.me)) {
   el <- run.me[[ix.name]]
@@ -124,45 +140,112 @@ flog.info('Loading data from %s package', package.name)
 flog.info('Types of tissue:\n * %s', paste(sprintf('%s (%d)', names(fpkm.per.tissue), sapply(fpkm.per.tissue, ncol)), collapse = '\n * '))
 ```
 
+```{r, eval=FALSE, include=FALSE}
+# testing different methods of calculating degree
+bb <- t(fpkm.per.tissue$primary.solid.tumor)
+sd.bb <- apply(bb, 2, sd)
+
+bb.orig <- bb[,sd.bb != 0]
+
+bb.orig.norm    <- t(apply(bb.orig, 1, function(row) { row / max(row) }))
+sd.bb.orig.norm <- apply(bb.orig.norm, 2, sd)
+bb.orig.norm    <- bb.orig.norm[, sd.bb.orig.norm != 0]
+
+bb.trim    <- bb.orig[rownames(xdata),]
+sd.bb.trim <- apply(bb.trim, 2, sd)
+bb.trim    <- bb.trim[,sd.bb.trim != 0]
+
+bb.trim.norm    <- t(apply(bb.trim, 1, function(row) { row / max(row) }))
+sd.bb.trim.norm <- apply(bb.trim.norm, 2, sd)
+bb.trim.norm    <- bb.trim.norm[, sd.bb.trim.norm != 0]
+
+ix.d <- 2
+pp <- list()
+ss <- list()
+pp$orig <- as.vector(sapply((1:ncol(bb.orig))[-ix.d], function(ix) {abs(cor(bb.orig[,ix.d],bb.orig[,ix], method = 'pearson')) })))
+ss$orig <- as.vector(sapply((1:ncol(bb.orig))[-ix.d], function(ix) {abs(cor(bb.orig[,ix.d],bb.orig[,ix], method = 'spearman')) }))
+pp$orig.norm <- as.vector(sapply((1:ncol(bb.orig.norm))[-ix.d], function(ix) {abs(cor(bb.orig.norm[,ix.d],bb.orig.norm[,ix], method = 'pearson')) }))
+ss$orig.norm <- as.vector(sapply((1:ncol(bb.orig.norm))[-ix.d], function(ix) {abs(cor(bb.orig.norm[,ix.d],bb.orig.norm[,ix], method = 'spearman')) }))
+pp$trim <- as.vector(sapply((1:ncol(bb.trim))[-ix.d], function(ix) {abs(cor(bb.trim[,ix.d],bb.trim[,ix], method = 'pearson')) }))
+ss$trim <- as.vector(sapply((1:ncol(bb.trim))[-ix.d], function(ix) {abs(cor(bb.trim[,ix.d],bb.trim[,ix], method = 'spearman')) }))
+pp$trim.norm <- as.vector(sapply((1:ncol(bb.trim.norm))[-ix.d], function(ix) {abs(cor(bb.trim.norm[,ix.d],bb.trim.norm[,ix], method = 'pearson')) }))
+ss$trim.norm <- as.vector(sapply((1:ncol(bb.trim.norm))[-ix.d], function(ix) {abs(cor(bb.trim.norm[,ix.d],bb.trim.norm[,ix], method = 'spearman')) }))
+
+for (ix.name in names(pp)) {
+  flog.info('%s', ix.name)
+  flog.info('   pearson: %g', sum(pp[[ix.name]][pp[[ix.name]] > 0.5]))
+  flog.info('  spearman: %g', sum(ss[[ix.name]][ss[[ix.name]] > 0.5]))
+}
+```
 
 ```{r data_normalization, echo=FALSE}
-xdata.raw <- t(fpkm.per.tissue[[params$tissue]])
+xdata.raw <- apply(fpkm.per.tissue[[params$tissue]], 1, function(row) {
+  if (max(abs(row)) == 0) {
+    return(row)
+  }
+  return(row / max(abs(row)))
+})
+
+# xdata.raw <- t(fpkm.per.tissue[[params$tissue]])
+
 sd.xdata  <- sapply(seq(ncol(xdata.raw)), function(ix) { sd(xdata.raw[,ix]) })
 #
 flog.info('Non-expressed genes to be removed (from %d total genes) : %d', ncol(xdata.raw), sum(sd.xdata == 0))
 flog.info('  Remaining genes : %d', ncol(xdata.raw) - sum(sd.xdata == 0))
 xdata.raw <- xdata.raw[,sd.xdata != 0]
 #
-degree <- degree.weighted(xdata.raw, 
-  method              = params$degree.correlation, 
-  consider.unweighted = params$degree.unweighted, 
-  cutoff              = params$degree.cutoff, 
-  #
-  n.cores  = params$mc.cores, 
-  base.dir = '../../network.cox-cache')
-#
+
+if (params$degree.type == 'oldie') {
+  load(sprintf('/home/averissimo/work/rpackages/brca.analysis/data/degree-%.6f.RData', params$degree.cutoff))
+} else if (params$degree.type == 'correlation') {
+  degree <- degree.weighted(xdata.raw, 
+    method              = params$degree.correlation, 
+    consider.unweighted = params$degree.unweighted, 
+    cutoff              = params$degree.cutoff, 
+    #
+    n.cores  = params$mc.cores, 
+    base.dir = '../../network.cox-cache')
+
+  save(degree, file = sprintf('../saves/degree-%.5f.RData', params$degree.cutoff))
+  write.csv(degree, file = sprintf('../saves/degree-%.5f.csv', params$degree.cutoff))
+} else if (params$degree.type == 'covariance') {
+  degree.covariance <- degree.cov.weighted(xdata.raw, 
+    method              = params$degree.correlation, 
+    consider.unweighted = params$degree.unweighted, 
+    cutoff              = params$degree.cutoff, 
+    #
+    n.cores  = params$mc.cores, 
+    base.dir = '../../network.cox-cache')
+  
+  save(degree.covariance, file = sprintf('../saves/degree-covariance-%.5f.RData', params$degree.cutoff))
+  write.csv(degree.covariance, file = sprintf('../saves/degree-covariance-%.5f.csv', params$degree.cutoff))
+  degree <- degree.covariance
+  degree <- degree.covariance / max(degree.covariance) * 43799
+}
+
 if (params$handle.duplicates == 'keep_first') {
   xdata.raw <- xdata.raw[!duplicated(strtrim(rownames(xdata.raw), 12)),]
 }
+xdata <- xdata.raw
 #
-if (params$normalize == 'max') {
-  xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
-    return(xdata.raw[,ix] / max(abs(xdata.raw[,ix])))
-  }, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)  
-} else if (params$normalize == 'scale_center') {
-  xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
-    return(scale(xdata.raw[,ix], center = TRUE, scale = TRUE))
-  }, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)  
-} else if (params$normalize == 'scale') {
-  xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
-    return(scale(xdata.raw[,ix], center = FALSE, scale = TRUE))
-  }, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)  
-}
+#if (params$normalize == 'max') {
+#  xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
+#    return(xdata.raw[,ix] / max(abs(xdata.raw[,ix])))
+#  }, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)  
+#} else if (params$normalize == 'scale_center') {
+#  xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
+#    return(scale(xdata.raw[,ix], center = TRUE, scale = TRUE))
+#  }, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)  
+#} else if (params$normalize == 'scale') {
+#  xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
+#    return(scale(xdata.raw[,ix], center = FALSE, scale = TRUE))
+#  }, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)  
+#}
 #
 xdata.digest.cache <- verissimo::digest.cache(xdata)
 #
-colnames(xdata) <- rownames(fpkm.per.tissue[[params$tissue]])[sd.xdata != 0]
-rownames(xdata) <- colnames(fpkm.per.tissue[[params$tissue]])
+#colnames(xdata) <- colnames(xdata.raw)
+#rownames(xdata) <- rownames(xdata.raw)
 #
 ```
 
@@ -242,12 +325,32 @@ ggplot(ydata.month) + geom_freqpoly(aes(time, color = status), bins = 150) +
 ```
 
 
+```{r}
+age.birth <- clinical$all[strtrim(rownames(ydata), 12), 'days_to_birth']
+names(age.birth) <- rownames(ydata)
+age.birth <- age.birth * -1
+age.birth <- age.birth[!is.nan(age.birth)]
+age.birth <- age.birth[!is.na(age.birth)]
+
+age.birth.model <- coxph(Surv(ydata[names(age.birth),1], ydata[names(age.birth),2]) ~ age.birth)
+age.birth.model
+```
+
+
 # Test physiological Variables
 
 *note:* Plots with p-value `<= 0.05` are shown. Two types of p-values are used as criteria:
 
 1. Univariate cox model
 1. Log rank test when separating between high and low risk group
+
+
+Ver KM de month e year of diagnostic
+
+```{r}
+#clinical$all$month_of_form_completion
+```
+
 
 ```{r test.clinical.variables, fig.height=15, echo=FALSE, eval=FALSE}
 #
@@ -339,7 +442,13 @@ xdata.train.digest <- verissimo::digest.cache(xdata.train[, xdata.ix])
 * `trans.fun` is a double power to scale the values
 
 ```{r transformation_function}
-trans.fun <- function(x) { .2 + 10^(exp(x) - 1) - 1 }
+trans.fun <- function(x, 
+                      a = .20,
+                      b = -1, 
+                      g = 1) { 
+  return(a + exp(-b * (exp(x) + g)) - 1)
+}
+#trans.fun <- function(x) { .2 + exp(x) - 1 }
 ```
 
 *note:* If age.at.diag should be added then correlation is calculated
@@ -575,10 +684,10 @@ km.name <- function(title, alpha, is.network = NULL) {
     ''
   } else if (is.network == 'degree') {
     subtitle <- 'DegreeCox: Hubs are promoted'
-    'Penalizes high degree with '
+    'Promotes high degree with '
   } else if (is.network == 'orphan') {
     subtitle <- 'OrphanCox: Low connected nodes are promoted'
-    'Penalizes low degree with '
+    'Promotes low degree with '
   } 
   return(ggtitle(sprintf('%s: %s%s%s%s', title, type, l1, sep, l2), subtitle = subtitle))
 }

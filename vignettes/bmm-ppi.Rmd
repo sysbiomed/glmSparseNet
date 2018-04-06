@@ -1,0 +1,227 @@
+---
+title: "Potential Interactions of Proteins"
+output:
+  html_document:
+    toc: true
+params:
+  cores: 10
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(reshape2)
+library(Matrix)
+library(parallel)
+library(verissimo)
+library(biomaRt)
+library(tidyverse)
+#
+library(futile.logger)
+#
+.Last.value <- flog.layout(layout.format('[~l] ~m'))
+theme_set(theme_minimal())
+```
+
+## Paper *(origin of data)*
+
+[Johnson & Bates (2006). Global topological features of cancer proteins in the human interactome](https://academic.oup.com/bioinformatics/article/22/18/2291/318120)
+
+> Abstract
+>
+> Motivation: The study of interactomes, or networks of protein-protein interactions, is increasingly providing valuable information on biological systems. Here we report a study of cancer proteins in an extensive human protein-protein interaction network constructed by computational methods.
+>
+> Results: We show that human proteins translated from known cancer genes exhibit a network topology that is different from that of proteins not documented as being mutated in cancer. In particular, cancer proteins show an increase in the number of proteins they interact with. They also appear to participate in central hubs rather than peripheral ones, mirroring their greater centrality and participation in networks that form the backbone of the proteome. Moreover, we show that cancer proteins contain a high ratio of highly promiscuous structural domains, i.e., domains with a high propensity for mediating protein interactions. These observations indicate an underlying evolutionary distinction between the two groups of proteins, reflecting the central roles of proteins, whose mutations lead to cancer.
+>
+> Contact:paul.bates@cancer.org.uk
+>
+> Supplementary information: The interactome data are available though the PIP (Potential Interactions of Proteins) web server at . Further additional material is available at 
+
+## Build network from dataset
+
+### Retrieve dataset
+
+```{r download}
+ppi <- read.csv2('https://bmm.crick.ac.uk/servers/pip/bioinformatics/HumanNetworkCutoff11.txt', 
+                 skip = 19, sep = '\t', stringsAsFactors = FALSE)
+
+colnames(ppi) <- c('interaction.confidence', 'ROC validation', 
+                   'Protein.1', 'Gene.1', 'Cancer?.1', 'Cancer class.1', 
+                   'Protein.2', 'Gene.2', 'Cancer?.2', 'Cancer class.2')
+
+ppi$interaction.confidence <- as.numeric(ppi$interaction.confidence)
+
+protein.names <- unique(c(ppi$Protein.1, ppi$Protein.2))
+```
+
+### Build network
+
+```{r build}
+build.network <- function(ppi, protein.names) {
+  #
+  protein.count <- length(protein.names)
+  #
+  ppi.network <- Matrix::sparseMatrix(c(), c(), x = double(), dims = c(protein.count, protein.count))
+  #
+  res <- ppi %>%
+    nrow %>%
+    seq %>%
+    mclapply(function(ix) {
+      line <- ppi[ix,]
+      ix.1 <- which(line$Protein.1 == protein.names)
+      ix.2 <- which(line$Protein.2 == protein.names)
+      value <- as.numeric(line$interaction.confidence)
+      if (ix.1 <= ix.2) {
+        return(c(ix.1, ix.2, value)) 
+      } else {
+        return(c(ix.2, ix.1, value))
+      }
+    }, mc.cores = params$cores) %>%
+    unlist %>%
+    matrix(ncol = 3, byrow = TRUE)
+  
+  return(
+    Matrix::sparseMatrix(i = res[,1], j = res[,2], x = res[,3], 
+                              symmetric = TRUE,
+                              dims = array(protein.count, 2))
+  )
+}
+
+ppi.ix       <- protein.names
+
+ppi.weighted <- verissimo::runCache(build.network, ppi, protein.names, cache.prefix = 'ppi')
+ppi.degree.w <- Matrix::colSums(ppi.weighted)
+
+ppi.unweighted   <- ppi.weighted
+ppi.unweighted@x <- as.numeric(array(1, length(ppi.unweighted@x)))
+ppi.degree.uw    <- Matrix::colSums(ppi.unweighted)
+```
+
+## Network information
+
+### Statistical information
+
+```{r metrics, echo=FALSE, warning=FALSE}
+flog.info('Number of nodes: %d', nrow(ppi.weighted))
+flog.info('Number of edges: %d', sum(ppi.weighted@x > 0))
+flog.info(' Average edge per node: %g', nrow(ppi.weighted) / sum(ppi.weighted@x > 0))
+cat('\n')
+flog.info('Summary of weights:', summary(ppi.weighted@x), capture = T)
+```
+
+### Plots
+
+```{r plots, echo=FALSE, warning=FALSE}
+g1 <- ggplot(melt(ppi.weighted@x)) + 
+  geom_histogram(aes(value), color = 'red', alpha = .3, bins = 100) +
+  geom_freqpoly(aes(value), color = 'blue', alpha = .5, bins = 100) +
+  scale_y_continuous("Count (log10 scale)", trans = 'log10') + 
+  scale_x_continuous(sprintf("Weights (min: %g || max: %g)", min(ppi.weighted@x), max(ppi.weighted@x)),
+                     limits = c(floor(min(ppi.weighted@x)), ceiling(max(ppi.weighted@x))))
+
+g1.data <-subset(ggplot_build(g1)$data[[1]], count > 0)$count
+
+g1 + ggtitle('Weighted edge histogram', sprintf('Hist. stats: min (non-zero): %g | mean: %g | median: %g | max: %g', 
+                                         min(g1.data), mean(g1.data), median(g1.data), max(g1.data)))
+  
+
+g2 <- ggplot(melt(ppi.degree.w)) + 
+  geom_histogram(aes(value), color = 'red', alpha = .3, bins = 100) +
+  geom_freqpoly(aes(value), color = 'blue', alpha = .5, bins = 100) +
+  scale_y_continuous("Count (log10 scale)", trans = 'log10') +
+  scale_x_continuous("Weighted degree", limits = c(floor(min(ppi.degree.w)), ceiling(max(ppi.degree.w))))
+  
+
+g2.data <- subset(ggplot_build(g2)$data[[1]], count > 0)$count
+
+g2 + ggtitle('Weighted-degree histogram', sprintf('Hist. stats: min (non-zero): %g | max: %g', 
+                                         min(g2.data), max(g2.data)))
+  
+
+g3 <- ggplot(melt(ppi.degree.uw)) + 
+  geom_histogram(aes(value), color = 'red', alpha = .3, bins = 100) +
+  geom_freqpoly(aes(value), color = 'blue', alpha = .5, bins = 100) +
+  scale_y_continuous("Count (log10 scale)", trans = 'log10') +
+  scale_x_continuous("Un-weighted degree", limits = c(floor(min(ppi.degree.uw)), ceiling(max(ppi.degree.uw))))
+
+g3.data <- subset(ggplot_build(g3)$data[[1]], count > 0)$count
+
+g3 + ggtitle('Degree histogram', sprintf('Hist. stats: min (non-zero): %g | max: %g', 
+                                         min(g3.data), max(g3.data)))
+```
+
+## Gene names
+
+```{r ensembl, include=FALSE}
+ensembl <- useMart("ensembl")  # using ensembl database data
+
+listDatasets(ensembl)     # function to see which datasets are present in ensembl
+ensembl <- verissimo::runCache(useDataset, "hsapiens_gene_ensembl",mart=ensembl,
+                               cache.prefix = 'ensembl')   # from ensembl using homosapien gene data
+
+# listFilters(ensembl)  # check which filters are available
+# listAttributes(ensembl) # check attributes are available to select.More information on ensembl data base
+
+ensmbl.ids <- getBM(attributes = c("ensembl_gene_id", "ensembl_peptide_id", "external_gene_name", "refseq_peptide"),
+                    filters    = 'ensembl_peptide_id',
+                    values     = c('ENSP00000263025'), 
+                    mart       = ensembl)
+
+protein.result <- getBM(attributes = c("external_gene_name", "refseq_peptide"),
+                        filters    = 'refseq_peptide',
+                        values     = protein.names, 
+                        mart       = ensembl) # fuction to get  gene id's and gene name from data base
+
+ensembl.result <- getBM(attributes = c("ensembl_gene_id", "external_gene_name", "refseq_peptide"),
+                        filters    = 'refseq_peptide',
+                        values     = protein.names, 
+                        mart       = ensembl) # fuction to get  gene id's and gene name from data base
+```
+
+```{r ensembl_stats, echo=FALSE}
+flog.info('Gene names for peptide ids (RefSeq): %d', nrow(protein.result))
+flog.info('                 Unique gene names?: %d', length(unique(protein.result$external_gene_name)))
+flog.info('                   Uniques peptide?: %d', length(unique(protein.result$refseq_peptide)))
+```
+
+
+### Duplicate peptide references
+
+```{r dup_peptide, echo=FALSE}
+protein.result %>% 
+  group_by(refseq_peptide) %>%
+  filter(n() > 1)  %>%
+  arrange(refseq_peptide)
+```
+
+### Duplicate gene references
+
+```{r dup_genes, echo=FALSE}
+protein.result %>% 
+  group_by(external_gene_name) %>%
+  filter(n() > 1) %>%
+  arrange(external_gene_name)
+```
+
+### Duplicate Ensembl
+
+```{r dup_ensmbl, echo=FALSE}
+ensembl.result %>% 
+  group_by(ensembl_gene_id) %>%
+  filter(n() > 1) %>%
+  arrange(ensembl_gene_id)
+```
+
+## Open question?
+
+Multiple genes... how to aggregate? just duplicate values? after calculating degree
+
+
+### Compare genes with data
+
+```{r, echo=FALSE}
+brca.genes <- rownames(brca.data::fpkm.per.tissue$primary.solid.tumor)
+
+flog.info('Overlap with BRCA: %d', sum(brca.genes %in% unique(ensembl.result$ensembl_gene_id)))
+```
+

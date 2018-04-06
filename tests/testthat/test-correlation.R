@@ -1,4 +1,4 @@
-context("correlation")
+context("Correlation function")
 
 set.seed(1985)
 xdata <- matrix(rnorm(30000), nrow = 500)
