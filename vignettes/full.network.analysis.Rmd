@@ -1,0 +1,301 @@
+---
+title: "Analyze full network"
+author: "André Veríssimo"
+date: "`r Sys.Date()`"
+output:
+  #rmarkdown::html_vignette:
+  html_document:
+    toc: true
+    self_contained: true
+    number_sections: true
+    fig_width: 10
+#vignette: >
+#  %\VignetteIndexEntry{Vignette Title}
+#  %\VignetteEngine{knitr::rmarkdown}
+#  %\VignetteEncoding{UTF-8}
+params:
+  project: 'brca' # skcm prad brca
+  tissue: 'primary.solid.tumor' # primary.solid.tumor metastatic solid.tissue.normal
+  degree.correlation: 'pearson'
+  #
+  degree.type: "sparsebn" # covariance, correlation sparsebn
+  probs: !r c(seq(0,1,0.05), .975, .99, .999, .9999, .99999)
+  #
+  seed: !r 1985# 2017
+  mc.cores: !r 5
+---
+
+```{r markdown.generation, eval=FALSE, include=FALSE}
+rm(list = ls())
+gc(reset = TRUE)
+gc(reset = TRUE)
+rmarkdown::render('full.network.analysis.Rmd', output_file = 'Network.Analysis.Covariance.BRCA.html',
+                  params = list(degree.type = 'covariance', project = 'brca', params = c(seq(0,1,0.05), .975, .99, .999, .9999, .99999)))
+#
+rm(list = ls())
+gc(reset = TRUE)
+gc(reset = TRUE)
+rmarkdown::render('full.network.analysis.Rmd', output_file = 'Network.Analysis.Correlation.BRCA.html',
+                  params = list(degree.type = 'correlation', project = 'brca'), params = c(seq(0,1,0.05), .975, .99, .999, .9999, .99999))
+rm(list = ls())
+gc(reset = TRUE)
+gc(reset = TRUE)
+```
+
+
+```{r setup, include=FALSE}
+# ComBat(matrix and category_id)
+# plotMDS(matrix and some color stuff)
+# inSilicoDB is good to understand that and validate results
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, tidy = TRUE)
+library(futile.logger)
+library(parallel)
+library(glmnet)
+library(verissimo)
+library(digest)
+library(ggplot2)
+library(reshape2)
+library(survival)
+library(brca.data)
+library(Vennerable)
+library(limma)
+library(tidyverse)
+library(forcats)
+library(sparsebn)
+library(sparsebnUtils)
+devtools::load_all()
+.Last.value <- flog.layout(layout.format('[~l] ~m'))
+.Last.value <- flog.appender(appender.tee('logger.txt'))
+theme_set(theme_minimal())
+```
+
+# Parameters
+
+```{r params, echo=FALSE}
+max.chars <- max(sapply(names(params), nchar))
+for (ix.names in sort(names(params))) {
+  prefix <- paste(array(' ', max.chars - nchar(ix.names)), collapse = '')
+  if (is.vector(params[[ix.names]]) && length(params[[ix.names]]) == 1) {
+    if (is.character(params[[ix.names]])) {
+      flog.info('  %s%s: %s', prefix, ix.names, params[[ix.names]])
+    }  else if (is.integer(params[[ix.names]])) {
+      flog.info('  %s%s: % 11d', prefix, ix.names, params[[ix.names]])
+    } else {
+      flog.info('  %s%s: % 11.3f', prefix, ix.names, params[[ix.names]])
+    }
+  } else if (is.vector(params[[ix.names]])) {
+    flog.info('  %s%s: %s', prefix, ix.names, paste(params[[ix.names]], collapse = ', '))
+  } else {
+    flog.info('  %s%s: (i do not know how to display this)', prefix, ix.names)
+  }
+}
+```
+
+# Load and normalize data
+
+Description of data
+
+```{r data.desc, echo=FALSE}
+package.name <- paste0(params$project, '.data')
+data("fpkm.per.tissue", package = package.name)
+flog.info('Loading data from %s package', package.name)
+flog.info('Types of tissue:\n * %s', paste(sprintf('%s (%d)', names(fpkm.per.tissue), sapply(fpkm.per.tissue, ncol)), collapse = '\n * '))
+```
+
+```{r}
+my.data <- verissimo::run.cache(prepare.tcga.survival.data, 'brca', 'primary.solid.tumor', 'keep_first',
+                                #
+                                base.dir = '../../network.cox-cache',
+                                cache.prefix = 'tcga-data',
+                                show.message = T)
+#
+xdata     <- my.data$xdata.raw
+ydata     <- my.data$ydata
+#
+xdata.digest.cache <- my.data$xdata.raw.digest
+ydata.digest.cache <- my.data$ydata.digest
+#
+rm(my.data)
+```
+
+## Build network
+
+```{r build.network, echo=FALSE}
+if (params$degree.type == 'covariance') {
+  my.network <- abs(cov.parallel(xdata, method = 'pearson', 
+    base.dir = '../../network.cox-cache',
+    build.matrix = T,
+    n.cores = params$mc.cores,
+    show.message = F
+  ))
+} else if (params$degree.type == 'correlation') {
+  my.network <- abs(cor.parallel(xdata, method = 'pearson', 
+    base.dir = '../../network.cox-cache',
+    build.matrix = T,
+    n.cores = params$mc.cores,
+    show.message = F
+  ))
+} else if (params$degree.type == 'sparsebn') {
+  lambdas <- sparsebnUtils::generate.lambdas(nrow(xdata), lambdas.length = 50)
+  sparse.xdata <- verissimo::run.cache(sparsebnData, xdata, levels = NULL, ivn = NULL, type = 'continuous', 
+                                       cache.prefix = 'sparsebn.data',
+                                       base.dir     = '../../network.cox-cache')
+  #
+  dag <- verissimo::run.cache(sparsebn::estimate.dag, sparse.xdata, lambdas = lambdas, upperbound = ncol(xdata) * 2,
+                              cache.prefix = 'dag',
+                              base.dir     = '../../network.cox-cache')
+} else {
+  stop('Error on degree type')
+}
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+# create sha256 digest to reuse and accelerate cache
+network.digest <- verissimo::digest.cache(my.network)
+```
+
+```{r, echo=FALSE, include=FALSE}
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+quantile.abs <- verissimo::run.cache(quantile, my.network, probs = params$probs,
+                                     #
+                                     cache.digest = list(network.digest),
+                                     base.dir = '../../network.cox-cache',
+                                     cache.prefix = 'quantile')
+save(sprintf('../saves/quantile.abs-%s.RData', params$degree.type))
+#
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+mean.abs <- verissimo::run.cache(mean, my.network,
+                                 #
+                                 cache.digest = list(network.digest),
+                                 base.dir = '../../network.cox-cache',
+                                 cache.prefix = 'quantile')
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+max.abs <- verissimo::run.cache(max, my.network,
+                                #
+                                cache.digest = list(network.digest),
+                                base.dir = '../../network.cox-cache',
+                                cache.prefix = 'max')
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+.Last.value <- gc(reset = TRUE, verbose = FALSE)
+min.abs <- verissimo::run.cache(min, my.network,
+                                #
+                                cache.digest = list(network.digest),
+                                base.dir = '../../network.cox-cache',
+                                cache.prefix = 'min')
+#
+rm(my.network)
+```
+
+## Statistical description
+
+### Summary
+
+```{r summary, echo=FALSE}
+flog.info('Min: %g -- Mean: %g -- Median: %g-- Max: %g', min.abs, mean.abs, quantile.abs[['50%']], max.abs)
+```
+
+### Quantiles
+
+```{r, echo=FALSE}
+data.frame(quantile.abs)
+```
+
+## Weighted Degree
+
+- builds plots
+
+```{r plots.gen, echo=FALSE, include=FALSE}
+#
+result <- mclapply(seq_along(quantile.abs), function(ix.i) {
+  ix <- quantile.abs[ix.i]
+  #
+  if (params$degree.type == 'covariance') {
+    .Last.value <- gc(reset = TRUE, verbose = FALSE)
+    .Last.value <- gc(reset = TRUE, verbose = FALSE)
+    weighted <- degree.cov.weighted(xdata, method = params$degree.correlation, cutoff = ix,
+                                    consider.unweighted = FALSE,
+                                    base.dir = '../../network.cox-cache',
+                                    n.cores = 1,
+                                    show.message = FALSE)
+    #
+    .Last.value <- gc(reset = TRUE, verbose = FALSE)
+    .Last.value <- gc(reset = TRUE, verbose = FALSE)
+    weighted.non <- degree.cov.weighted(xdata, method = params$degree.correlation, cutoff = ix,
+                                        consider.unweighted = TRUE,
+                                        base.dir = '../../network.cox-cache',
+                                        n.cores = 1,
+                                        show.message = FALSE)
+  } else if (params$degree.type == 'correlation') {
+    .Last.value <- gc(reset = TRUE, verbose = FALSE)
+    .Last.value <- gc(reset = TRUE, verbose = FALSE)
+    weighted <- degree.cor.weighted(xdata, method = params$degree.correlation, cutoff = ix,
+                                    consider.unweighted = FALSE,
+                                    base.dir = '../../network.cox-cache',
+                                    n.cores = params$mc.cores,
+                                    show.message = FALSE)
+    #
+    .Last.value <- gc(reset = TRUE, verbose = FALSE)
+    .Last.value <- gc(reset = TRUE, verbose = FALSE)
+    weighted.non <- degree.cor.weighted(xdata, method = params$degree.correlation, cutoff = ix,
+                                        consider.unweighted = TRUE,
+                                        base.dir = '../../network.cox-cache',
+                                        n.cores = params$mc.cores,
+                                        show.message = FALSE)
+  }  
+  #
+  #
+
+  plot.w <- ggplot(melt(weighted)) +
+      geom_freqpoly(aes(value, color = verissimo::my.colors(1)), bins = 200) +
+      theme_minimal() + theme(legend.position = 'none') + 
+      theme(legend.position = 'none') +
+      #scale_x_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 55000)) +
+      ggtitle('Weighted Degree distribution ', 
+              subtitle = sprintf('cutoff: %g (quantile %s)', ix, names(ix))) +
+      #scale_y_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 30000)) +
+      ylab('Frequency (log10 scale)') +
+      xlab('Degree')
+  
+  #
+  plot.u <- ggplot(melt(weighted.non)) +
+      geom_freqpoly(aes(value, color = verissimo::my.colors(1)), bins = 200) +
+      theme_minimal() + theme(legend.position = 'none') + 
+      theme(legend.position = 'none') +
+      #scale_x_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 55000)) +
+      ggtitle('Un-Weighted Degree distribution ', 
+              subtitle = sprintf('cutoff: %g (quantile %s)', ix, names(quantile.abs)[ix.i])) +
+      #scale_y_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 30000)) +
+      ylab('Frequency (log10 scale)') +
+      xlab('Degree')
+  #
+  network.info <- list(nodes        = length(weighted.non), 
+                       disconnected = sum(weighted.non == 0), 
+                       connected    = sum(weighted.non != 0), 
+                       edges        = sum(weighted.non),
+                       max.edges    = length(weighted.non)^2)
+  #
+  return(list(weighted = plot.w, unweighted = plot.u, network.info = network.info, quantile = ix.i))
+}, mc.cores = 1, mc.allow.recursive = FALSE, mc.cleanup = TRUE, mc.preschedule = FALSE)
+```
+
+- shows plots
+
+```{r plot.show, echo=FALSE}
+for (ix in seq_along(result)) {
+  flog.info('Network info for %f quantile:', result[[ix]]$quantile)
+  flog.info('  * nodes: %d', result[[ix]]$network.info$nodes)
+  flog.info('    * disconnected: %d', result[[ix]]$network.info$disconnected)
+  flog.info('    *    connected: %d', result[[ix]]$network.info$connected)
+  flog.info('  * edges: %g', result[[ix]]$network.info$edges)
+  flog.info('    * out of possible: %g', result[[ix]]$network.info$max.edges)
+  #
+  multiplot(plotlist = list(result[[ix]]$weighted, result[[ix]]$unweighted), ncol = 2)
+}
+````
