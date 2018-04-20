@@ -16,28 +16,29 @@ output:
 params:
   project: 'brca' # skcm prad brca
   tissue: 'primary.solid.tumor' # primary.solid.tumor metastatic solid.tissue.normal
-  degree.unweighted: !r FALSE
+  degree.unweighted: !r TRUE
   degree.correlation: 'pearson'
-  degree.cutoff: !r 0
+  degree.cutoff: !r 0.00114616
   #
-  degree.type: "covariance" # covariance, correlation
+  degree.type: "covariance" # covariance, correlation, oldie
   #
-  normalize: 'max'
   handle.duplicates: 'keep_first' # keep_all , keep_first
   #
   # glmnet parameter
-  alpha: !r 1
+  alpha: !r .75
   # subset of variables to be used (Inf for all)
   subset: !r Inf
-  train: !r .7
+  train: !r .8
   # number of times that training set is tested
   ntimes: !r 10
   # target variables that models should output
-  target.vars: !r 33
+  target.vars: !r list(classic.cv = 28, degree.cv = 42, orphan.cv = 3)#list(classic.cv = 33, degree.cv = 22, orphan.cv = 25)
   #
   seed: !r 1985# 2017
-  mc.cores: !r 16
+  mc.cores: !r 2
 ---
+
+
 
 ```{r setup, include=FALSE}
 # ComBat(matrix and category_id)
@@ -59,52 +60,57 @@ library(tidyverse)
 library(forcats)
 library(survival.owl)
 devtools::load_all()
-flog.layout(layout.format('[~l] ~m'))
-flog.appender(appender.tee('logger.txt'))
-```
-
-```{r, eval=FALSE, include=FALSE}
-#run.me <- list(
-#  skcm.metastatic          = list(project = 'skcm', tissue = 'metastatic',          degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
-#  skcm.primary.solid.tumor = list(project = 'skcm', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
-  #
-#  brca.solid.tissue.normal = list(project = 'brca', tissue = 'solid.tissue.normal', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
-#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.1),
-#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.2),
-#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.3),
-#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.4),
-#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
-#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.6),
-#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.7),
-#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.8),
-#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.9),
-#  brca.primary.solid.tumor = list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 1),
-  #
-  #prad.solid.tissue.normal = list(project = 'prad', tissue = 'solid.tissue.normal', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5),
-  #prad.primary.solid.tumor = list(project = 'prad', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = 0.5))
-# 
-run.me <- list()
-
-for(ix in seq(0,1,0.05)) {
-  run.me[[paste0("brca.primary.solid.tumor-", sprintf("%.2f", ix))]] <- list(project = 'brca', tissue = 'primary.solid.tumor', degree.correlation = 'pearson', degree.unweighted = FALSE, degree.cutoff = ix)
-}
-
-for (ix.name in names(run.me)) {
-  el <- run.me[[ix.name]]
-  un <- if(el$degree.unweighted) { 'unweighted' } else { 'weighted' }
-  out.name <- sprintf('%s-%s-%s-%s-%.2f.html', el$project, el$tissue, el$degree.correlation, un, el$degree.cutoff)
-  tryCatch({
-    rmarkdown::render('Network_Penalization_TCGA.Rmd', output_file = out.name, params = el)    
-  }, error = function(str) {
-    flog.error('Error when rendering Rmd: %s', str$message)
-  })
-}
+.Last.value <- flog.layout(layout.format('[~l] ~m'))
+.Last.value <- flog.appender(appender.tee('logger.txt'))
+theme_set(theme_minimal())
 ```
 
 
 ```{r, eval=FALSE, include=FALSE}
-# Melanoma render
-rmarkdown::render('Melanoma.Rmd', params = list())
+run.me <- function(my.params) {
+  rmarkdown::render('Network_Penalization_TCGA.Rmd',
+                    output_file = sprintf('alpha-%.2f__cutoff-%.4f__type-%s__unw-%s.html', 
+                                          my.params$alpha,
+                                          my.params$degree.cutoff,
+                                          my.params$degree.type,
+                                          my.params$degree.unweighted),
+                    params = my.params)
+}
+
+load('../saves/quantile.abs-correlation.RData')
+cor.cor <- result
+load('../saves/quantile.abs-covariance.RData')
+cor.cov <- result
+
+perc <- '75%'
+
+my.list <-list(
+  # Covariance
+  list(alpha = 1.0, degree.cutoff = cor.cov[perc], degree.type = 'covariance',  degree.unweighted = TRUE),
+  list(alpha = 0.5, degree.cutoff = cor.cov[perc], degree.type = 'covariance',  degree.unweighted = TRUE),
+  list(alpha = 1.0, degree.cutoff = cor.cov[perc], degree.type = 'covariance',  degree.unweighted = FALSE),
+  list(alpha = 0.5, degree.cutoff = cor.cov[perc], degree.type = 'covariance',  degree.unweighted = FALSE),
+  # Correlation
+  list(alpha = 0.5, degree.cutoff = cor.cor[perc], degree.type = 'correlation', degree.unweighted = TRUE),
+  list(alpha = 1.0, degree.cutoff = cor.cor[perc], degree.type = 'correlation', degree.unweighted = TRUE),
+  list(alpha = 0.5, degree.cutoff = cor.cor[perc], degree.type = 'correlation', degree.unweighted = FALSE),
+  list(alpha = 1.0, degree.cutoff = cor.cor[perc], degree.type = 'correlation', degree.unweighted = FALSE))
+  #list(alpha = 0.5, degree.cutoff = cor.cor['50%'],   degree.type = 'correlation', degree.unweighted = FALSE),
+  #list(alpha = 1.0, degree.cutoff = cor.cor['50%'],   degree.type = 'correlation', degree.unweighted = FALSE))
+
+library(parallel)
+library(foreach)
+library(doParallel)
+
+cl<-makeCluster(3)
+registerDoParallel(cl)
+
+foreach(ix = my.list, .combine = c) %dopar% {
+ run.me(ix)
+ 1+1
+}
+
+stopCluster(cl)
 ```
 
 # Parameters
@@ -131,79 +137,47 @@ for (ix.names in sort(names(params))) {
 
 # Load and normalize data
 
-Description of data
+## Load TCGA data
 
-```{r data.desc, echo=FALSE}
-package.name <- paste0(params$project, '.data')
-data("fpkm.per.tissue", package = package.name)
-flog.info('Loading data from %s package', package.name)
-flog.info('Types of tissue:\n * %s', paste(sprintf('%s (%d)', names(fpkm.per.tissue), sapply(fpkm.per.tissue, ncol)), collapse = '\n * '))
+```{r, eval=FALSE}
+# xdata     - matrix with FPKM gene level expression
+# ydata     - survival data
+# xdata.raw - original matrix with possible multiple tissue samples from same indiviudal
+prepare.tcga.survival.data('brca', 'primary.solid.tumor', handle.duplicates = 'keep_first')
 ```
 
-```{r, eval=FALSE, include=FALSE}
-# testing different methods of calculating degree
-bb <- t(fpkm.per.tissue$primary.solid.tumor)
-sd.bb <- apply(bb, 2, sd)
 
-bb.orig <- bb[,sd.bb != 0]
-
-bb.orig.norm    <- t(apply(bb.orig, 1, function(row) { row / max(row) }))
-sd.bb.orig.norm <- apply(bb.orig.norm, 2, sd)
-bb.orig.norm    <- bb.orig.norm[, sd.bb.orig.norm != 0]
-
-bb.trim    <- bb.orig[rownames(xdata),]
-sd.bb.trim <- apply(bb.trim, 2, sd)
-bb.trim    <- bb.trim[,sd.bb.trim != 0]
-
-bb.trim.norm    <- t(apply(bb.trim, 1, function(row) { row / max(row) }))
-sd.bb.trim.norm <- apply(bb.trim.norm, 2, sd)
-bb.trim.norm    <- bb.trim.norm[, sd.bb.trim.norm != 0]
-
-ix.d <- 2
-pp <- list()
-ss <- list()
-pp$orig <- as.vector(sapply((1:ncol(bb.orig))[-ix.d], function(ix) {abs(cor(bb.orig[,ix.d],bb.orig[,ix], method = 'pearson')) })))
-ss$orig <- as.vector(sapply((1:ncol(bb.orig))[-ix.d], function(ix) {abs(cor(bb.orig[,ix.d],bb.orig[,ix], method = 'spearman')) }))
-pp$orig.norm <- as.vector(sapply((1:ncol(bb.orig.norm))[-ix.d], function(ix) {abs(cor(bb.orig.norm[,ix.d],bb.orig.norm[,ix], method = 'pearson')) }))
-ss$orig.norm <- as.vector(sapply((1:ncol(bb.orig.norm))[-ix.d], function(ix) {abs(cor(bb.orig.norm[,ix.d],bb.orig.norm[,ix], method = 'spearman')) }))
-pp$trim <- as.vector(sapply((1:ncol(bb.trim))[-ix.d], function(ix) {abs(cor(bb.trim[,ix.d],bb.trim[,ix], method = 'pearson')) }))
-ss$trim <- as.vector(sapply((1:ncol(bb.trim))[-ix.d], function(ix) {abs(cor(bb.trim[,ix.d],bb.trim[,ix], method = 'spearman')) }))
-pp$trim.norm <- as.vector(sapply((1:ncol(bb.trim.norm))[-ix.d], function(ix) {abs(cor(bb.trim.norm[,ix.d],bb.trim.norm[,ix], method = 'pearson')) }))
-ss$trim.norm <- as.vector(sapply((1:ncol(bb.trim.norm))[-ix.d], function(ix) {abs(cor(bb.trim.norm[,ix.d],bb.trim.norm[,ix], method = 'spearman')) }))
-
-for (ix.name in names(pp)) {
-  flog.info('%s', ix.name)
-  flog.info('   pearson: %g', sum(pp[[ix.name]][pp[[ix.name]] > 0.5]))
-  flog.info('  spearman: %g', sum(ss[[ix.name]][ss[[ix.name]] > 0.5]))
-}
+```{r load.data, include=FALSE}
+my.data <- verissimo::run.cache(prepare.tcga.survival.data, 'brca', 'primary.solid.tumor', 'keep_first',
+                                #
+                                base.dir = '../../network.cox-cache',
+                                cache.prefix = 'tcga-data',
+                                show.message = T)
+#
+xdata     <- my.data$xdata
+ydata     <- my.data$ydata
+xdata.raw <- my.data$xdata.raw
+#
+xdata.digest.cache     <- my.data$xdata.digest
+xdata.raw.digest.cache <- my.data$xdata.raw.digest
+ydata.digest.cache     <- my.data$ydata.digest
+#
+rm(my.data)
 ```
 
-```{r data_normalization, echo=FALSE}
-xdata.raw <- apply(fpkm.per.tissue[[params$tissue]], 1, function(row) {
-  if (max(abs(row)) == 0) {
-    return(row)
-  }
-  return(row / max(abs(row)))
-})
+## Load degree data
 
-# xdata.raw <- t(fpkm.per.tissue[[params$tissue]])
-
-sd.xdata  <- sapply(seq(ncol(xdata.raw)), function(ix) { sd(xdata.raw[,ix]) })
-#
-flog.info('Non-expressed genes to be removed (from %d total genes) : %d', ncol(xdata.raw), sum(sd.xdata == 0))
-flog.info('  Remaining genes : %d', ncol(xdata.raw) - sum(sd.xdata == 0))
-xdata.raw <- xdata.raw[,sd.xdata != 0]
-#
-
+```{r degree.load}
 if (params$degree.type == 'oldie') {
   load(sprintf('/home/averissimo/work/rpackages/brca.analysis/data/degree-%.6f.RData', params$degree.cutoff))
 } else if (params$degree.type == 'correlation') {
-  degree <- degree.weighted(xdata.raw, 
+  degree <- degree.cor.weighted(xdata.raw, 
     method              = params$degree.correlation, 
     consider.unweighted = params$degree.unweighted, 
     cutoff              = params$degree.cutoff, 
     #
-    n.cores  = params$mc.cores, 
+    show.message = T,
+    n.cores = params$mc.cores, 
     base.dir = '../../network.cox-cache')
 
   save(degree, file = sprintf('../saves/degree-%.5f.RData', params$degree.cutoff))
@@ -214,86 +188,21 @@ if (params$degree.type == 'oldie') {
     consider.unweighted = params$degree.unweighted, 
     cutoff              = params$degree.cutoff, 
     #
-    n.cores  = params$mc.cores, 
+    n.cores = params$mc.cores, 
+    show.message = T,
     base.dir = '../../network.cox-cache')
   
   save(degree.covariance, file = sprintf('../saves/degree-covariance-%.5f.RData', params$degree.cutoff))
   write.csv(degree.covariance, file = sprintf('../saves/degree-covariance-%.5f.csv', params$degree.cutoff))
   degree <- degree.covariance
-  degree <- degree.covariance / max(degree.covariance) * 43799
 }
-
-if (params$handle.duplicates == 'keep_first') {
-  xdata.raw <- xdata.raw[!duplicated(strtrim(rownames(xdata.raw), 12)),]
-}
-xdata <- xdata.raw
-#
-#if (params$normalize == 'max') {
-#  xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
-#    return(xdata.raw[,ix] / max(abs(xdata.raw[,ix])))
-#  }, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)  
-#} else if (params$normalize == 'scale_center') {
-#  xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
-#    return(scale(xdata.raw[,ix], center = TRUE, scale = TRUE))
-#  }, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)  
-#} else if (params$normalize == 'scale') {
-#  xdata <- matrix(unlist(parallel::mclapply(seq(ncol(xdata.raw)), function(ix) { 
-#    return(scale(xdata.raw[,ix], center = FALSE, scale = TRUE))
-#  }, mc.cores = 16)), ncol = ncol(xdata.raw), byrow = FALSE)  
-#}
-#
-xdata.digest.cache <- verissimo::digest.cache(xdata)
-#
-#colnames(xdata) <- colnames(xdata.raw)
-#rownames(xdata) <- rownames(xdata.raw)
-#
-```
-
-## Clinical data
-
-Load clinical data
-
-```{r load.clinical}
-data('clinical', package = package.name)
-```
-
-```{r clinical_data, echo=FALSE}
-ix.clinical <- !is.na(clinical[[params$tissue]]$bcr_patient_barcode)
-
-ydata <- data.frame(time = clinical[[params$tissue]]$surv_event_time,
-                    status = clinical[[params$tissue]]$vital_status)[ix.clinical,]
-
-rownames(ydata) <- clinical[[params$tissue]]$bcr_patient_barcode[ix.clinical]
-
-flog.info('Number of patients removed with: \n * followup time < 0:   %d\n * followup time is.na: %d', 
-          sum(!is.na(ydata$time) & ydata$time <= 0), sum(is.na(ydata$time)))
-ydata        <- ydata[!is.na(ydata$time) & ydata$time > 0,]
-ydata$status <- ydata$status == 'Alive'
-
-xdata <- xdata[strtrim(rownames(xdata), 12) %in% rownames(ydata),]
-if (length(strtrim(rownames(xdata), 12)) != length(unique(strtrim(rownames(xdata), 12)))) {
-  flog.warn('There are multiple samples for the same individual.. using strategy: \'%s\'', params$handle.duplicates)
-  #
-  new.row.names   <- strtrim(rownames(xdata), 12)
-  rownames(xdata) <- sapply(seq_along(new.row.names), function(ix) {
-    ix.name <- new.row.names[ix]
-    count.b4 <- sum(new.row.names[1:ix] == ix.name)
-    return(sprintf('%s.%d', ix.name, count.b4))
-  })
-  ydata <- ydata[strtrim(rownames(xdata), 12),]
-  rownames(ydata) <- rownames(xdata)
-} else {
-  rownames(xdata) <- strtrim(rownames(xdata), 12)
-}
-
-ydata.digest.cache <- verissimo::digest.cache(ydata)
 ```
 
 ## Test / Training sets
 
 ```{r sets, echo=FALSE}
 set.seed(params$seed)
-ixs <- verissimo::balanced.train.and.test(which(ydata$status), which(!ydata$status), train.perc = params$train)
+ixs        <- verissimo::balanced.train.and.test(which(ydata$status), which(!ydata$status), train.perc = params$train)
 xdata.test <- xdata[ixs$test,]
 ydata.test <- ydata[ixs$test,]
 #
@@ -309,7 +218,18 @@ flog.info('Size of sets: (size/events)\n * Training set: % 4d/% 4d\n * Test set:
           sum(ydata.test$status))
 ```
 
-## Summary of Survival Times
+## Summary of data
+
+### Data
+
+```{r}
+flog.info('Loaded data from %s TCGA', params$project)
+flog.info('              type of tissue: %s', params$tissue)
+flog.info('  observations (individuals): %d (%d event / %d censored)', nrow(xdata), sum(ydata$status), sum(!ydata$status))
+flog.info('           variables (genes): %d', ncol(xdata))
+```
+
+### Survival
 
 ```{r surv_times, echo=FALSE}
 ydata.month <- ydata
@@ -324,19 +244,6 @@ ggplot(ydata.month) + geom_freqpoly(aes(time, color = status), bins = 150) +
   theme(legend.position = 'top')
 ```
 
-
-```{r}
-age.birth <- clinical$all[strtrim(rownames(ydata), 12), 'days_to_birth']
-names(age.birth) <- rownames(ydata)
-age.birth <- age.birth * -1
-age.birth <- age.birth[!is.nan(age.birth)]
-age.birth <- age.birth[!is.na(age.birth)]
-
-age.birth.model <- coxph(Surv(ydata[names(age.birth),1], ydata[names(age.birth),2]) ~ age.birth)
-age.birth.model
-```
-
-
 # Test physiological Variables
 
 *note:* Plots with p-value `<= 0.05` are shown. Two types of p-values are used as criteria:
@@ -344,76 +251,77 @@ age.birth.model
 1. Univariate cox model
 1. Log rank test when separating between high and low risk group
 
-
-Ver KM de month e year of diagnostic
-
-```{r}
-#clinical$all$month_of_form_completion
-```
-
-
-```{r test.clinical.variables, fig.height=15, echo=FALSE, eval=FALSE}
+```{r test.clinical.variables, fig.height=15, echo=FALSE}
 #
-df        <- data.frame()
-plot.list <- list()
-plot.p    <- c()
-for (ix.name in colnames(clinical$all)) {
-  u <- length(unique(clinical$all[[ix.name]]))
-  if (is.numeric(clinical$all[[ix.name]]) || u == 2) {
-    #
-    #
-    test.me        <- clinical$all[strtrim(rownames(ydata), 12), ix.name]
-    if (all(sapply(test.me, is.character))) {
-      test.me <- factor(test.me)
+plot.all.clinical <- function() {
+  df        <- data.frame()
+  plot.list <- list()
+  plot.p    <- c()
+  for (ix.name in colnames(clinical$all)) {
+    if (ix.name %in% c('days_to_death')) {
+      next
     }
-    #
-    names(test.me) <- rownames(ydata)
-    test.me        <- test.me[!is.nan(test.me)]
-    test.me        <- test.me[!is.na(test.me)]
-    test.me.df     <- data.frame(time = ydata[names(test.me),1], status = ydata[names(test.me),2], test.me = test.me)
-    colnames(test.me.df)[3] <- ix.name
-    # build model with a single variable
-    suppressWarnings(
-      test.me.model <- coxph(Surv(time, status) ~ ., data = test.me.df, control = coxph.control(iter.max = 500))  
-    )
-    p.value       <- summary(test.me.model)$coefficients[1,'Pr(>|z|)']
-    #
-    # skip if model is not right
-    if (is.na(p.value)) { next }
-    desc.values <- c(0,0)
-    if (is.factor(test.me)) {
-      desc.values <- paste(levels(test.me), collapse = ', ')
-      my.names        <- names(test.me)
-      levels(test.me) <- c(0,1)
-      test.me         <- as.numeric(as.character(test.me))
-      names(test.me)  <- my.names
-    } else {
-      desc.values <- sprintf('min: %g -- max %g -- median %g', min(test.me), max(test.me), median(test.me))
+    u <- length(unique(clinical$all[[ix.name]]))
+    if (is.numeric(clinical$all[[ix.name]]) || u == 2) {
+      #
+      #
+      test.me        <- clinical$all[strtrim(rownames(ydata), 12), ix.name]
+      if (all(sapply(test.me, is.character))) {
+        test.me <- factor(test.me)
+      }
+      #
+      names(test.me) <- rownames(ydata)
+      test.me        <- test.me[!is.nan(test.me)]
+      test.me        <- test.me[!is.na(test.me)]
+      test.me.df     <- data.frame(time = ydata[names(test.me),1], status = ydata[names(test.me),2], test.me = test.me)
+      colnames(test.me.df)[3] <- ix.name
+      # build model with a single variable
+      suppressWarnings(
+        test.me.model <- coxph(Surv(time, status) ~ ., data = test.me.df, control = coxph.control(iter.max = 500))  
+      )
+      p.value       <- summary(test.me.model)$coefficients[1,'Pr(>|z|)']
+      #
+      # skip if model is not right
+      if (is.na(p.value)) { next }
+      desc.values <- c(0,0)
+      if (is.factor(test.me)) {
+        desc.values <- paste(levels(test.me), collapse = ', ')
+        my.names        <- names(test.me)
+        levels(test.me) <- c(0,1)
+        test.me         <- as.numeric(as.character(test.me))
+        names(test.me)  <- my.names
+      } else {
+        desc.values <- sprintf('min: %g -- max %g -- median %g', min(test.me), max(test.me), median(test.me))
+      }
+      #
+      df <- rbind(df, data.frame(name    = ix.name, 
+                                 numeric = is.numeric(clinical$all[[ix.name]]), 
+                                 unique  = u, 
+                                 p.value = p.value,
+                                 desc    = desc.values))
+      #
+      my.coef        <- coef(test.me.model)
+      names(my.coef) <- 'test.me'
+      ydata.me       <- data.frame(time = ydata[names(test.me),1], status = ydata[names(test.me),2] * 1)
+      test.me.km     <- draw.kaplan(as.vector(my.coef), as.vector(test.me), ydata.me, filename = ix.name, legend.outside = F)
+      # build list to multiplot
+      #  but skip if not significant
+      if (p.value > 0.05 && test.me.km$pvalue > 0.05) { next }
+      plot.list[[length(plot.list) + 1]] <- test.me.km$plot
+      plot.p <- c(plot.p, test.me.km$pvalue)
     }
-    #
-    df <- rbind(df, data.frame(name    = ix.name, 
-                               numeric = is.numeric(clinical$all[[ix.name]]), 
-                               unique  = u, 
-                               p.value = p.value,
-                               desc    = desc.values))
-    #
-    my.coef        <- coef(test.me.model)
-    names(my.coef) <- 'test.me'
-    ydata.me       <- data.frame(time = ydata[names(test.me),1], status = ydata[names(test.me),2] * 1)
-    test.me.km     <- draw.kaplan(as.vector(my.coef), as.vector(test.me), ydata.me, filename = ix.name, legend.outside = F)
-    # build list to multiplot
-    #  but skip if not significant
-    if (p.value > 0.05 && test.me.km$pvalue > 0.05) { next }
-    plot.list[[length(plot.list) + 1]] <- test.me.km$plot
-    plot.p <- c(plot.p, test.me.km$pvalue)
   }
+  ncol       <- 3
+  p.value.ix <- sort(plot.p, index.return = T)$ix # used to sort layout by p.values
+  layout     <- matrix(c((1:length(plot.list))[p.value.ix], rep(NA, (ncol * ceiling(length(plot.list) / ncol)) - (length(plot.list)))),
+                   byrow = T, ncol = ncol) 
+  return(list(plot.list = plot.list, layout = layout, df = df))
 }
-ncol       <- 3
-p.value.ix <- sort(plot.p, index.return = T)$ix # used to sort layout by p.values
-layout     <- matrix(c((1:length(plot.list))[p.value.ix], rep(NA, (ncol * ceiling(length(plot.list) / ncol)) - (length(plot.list)))),
-                 byrow = T, ncol = ncol) 
-multiplot(plotlist = plot.list, layout = layout)
-knitr::kable(dplyr::arrange(dplyr::select(df, name, p.value, desc), p.value))
+
+all.plots <- verissimo::run.cache(plot.all.clinical, show.message = F)
+
+multiplot(plotlist = all.plots$plot.list, layout = all.plots$layout)
+knitr::kable(dplyr::arrange(dplyr::select(all.plots$df, name, p.value, desc), p.value))
 ```
 
 # Pre-processing
@@ -430,7 +338,7 @@ if (params$subset < ncol(xdata.train)) {
   set.seed(params$seed)
   xdata.ix <- sample(xdata.ix, params$subset)
 } 
-
+set.seed(params$seed)
 xdata.train.digest <- verissimo::digest.cache(xdata.train[, xdata.ix])
 ```
 
@@ -443,12 +351,35 @@ xdata.train.digest <- verissimo::digest.cache(xdata.train[, xdata.ix])
 
 ```{r transformation_function}
 trans.fun <- function(x, 
-                      a = .20,
+                      a = .20 - 1,
                       b = -1, 
-                      g = 1) { 
-  return(a + exp(-b * (exp(x) + g)) - 1)
+                      g = -1) { 
+  return(a + 10^(-b * (exp(x) + g)))
 }
-#trans.fun <- function(x) { .2 + exp(x) - 1 }
+
+trans.fun2 <- function(x, 
+                      a = .20 - 1,
+                      b = -1, 
+                      g = -1) { 
+  return(a + exp(-b * (exp(x) + g)))
+}
+
+trans.fun3 <- function(x, 
+                      a = .20 - 1,
+                      b = -1, 
+                      g = -1) { 
+  return(a + 10^(-b * (10^x + g)))
+}
+x <- seq(0,1,.005)
+trans.plot <- melt(data.frame(x, fun1 = trans.fun(x), fun2 = trans.fun2(x), fun3 = trans.fun3(x)), id.vars = 'x') %>%
+  filter(variable == 'fun1') %>%
+  ggplot() + 
+  geom_line(aes(x, value, color = variable)) + 
+  #facet_wrap( ~ variable, scales = 'free_y') +
+  theme(legend.position = 'none') +
+  xlab('Scaled Degree') + 
+  ggtitle('')
+trans.plot
 ```
 
 *note:* If age.at.diag should be added then correlation is calculated
@@ -496,9 +427,10 @@ my.df <- data.frame(ix                    = seq_along(penalty.factor.degree),
 original.freq.plot <- ggplot(melt(my.df[,c('ix', 'original')], id.vars = c('ix'))) +
   geom_freqpoly(aes(value, color = variable), alpha = 0.5, bins = 200) +
   theme_minimal() + theme(legend.position = 'none') + #scale_x_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 55000)) +
-  ggtitle('Original degree distribution', subtitle = sprintf('Number of total variables: %d', ncol(xdata.train))) +
-  xlab('Degree') +  scale_y_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 30000)) +
+  ggtitle('Degree frequency distribution', subtitle = sprintf('Number of total variables: %d', ncol(xdata.train))) +
+  scale_y_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 30000)) +
   ylab('Frequency (log10 scale)')
+  xlab('Degree')
 
 orphan.freq.plot <- ggplot(melt(my.df[,c('ix', 'penalty.factor.orphan')], id.vars = c('ix'))) +
   geom_freqpoly(aes(value, color = variable), alpha = 0.5, bins = 200) +
@@ -519,11 +451,28 @@ suppressWarnings({
 })
 ```
 
+```{r, echo=FALSE}
+transf.d <- melt.data.frame(my.df[,c('ix', 'original', 'penalty.factor.degree')], id.vars = c('ix'), variable_name = 'Type')
+levels(transf.d$Type) <- c('Original', 'Transformed')
+
+
+#degree.factor.freq.plot <- 
+ggplot(transf.d) +
+  geom_freqpoly(aes(value, color = Type), alpha = 0.8, bins = 200, size = 1.5) +
+  theme_minimal() + theme(legend.position = 'top') +
+  facet_wrap( ~ Type, ncol = 1, scale = 'free_x') +
+  scale_y_continuous(trans = 'log10') +
+  #ggtitle('DegreeCox penalty', subtitle = sprintf('Number of total variables: %d', ncol(xdata.train))) +
+  xlab('Degree') +
+  ylab('Frequency count')
+```
+
+
 # Model Inference
 
 ```{r model_declaration, include=FALSE}
-my.glmnet <- function(prefix, penalty.factor, lambda.min.ratio = .001, show.messages = FALSE) {
-  new.model <- verissimo::runCache(glmnet,
+my.glmnet <- function(prefix, penalty.factor, target, lambda.min.ratio = .001, show.messages = FALSE) {
+  new.model <- verissimo::run.cache(glmnet,
                                    xdata.train[,xdata.ix], Surv(ydata.train[,1], ydata.train[,2]), 
                                    family           ='cox', 
                                    alpha            = params$alpha, 
@@ -538,18 +487,86 @@ my.glmnet <- function(prefix, penalty.factor, lambda.min.ratio = .001, show.mess
                                    cache.digest = list(xdata.train.digest),
                                    show.message = show.messages)
 
-if (any(new.model$df == params$target.vars)) {
-  var.ix <- which(new.model$df == params$target.vars)
+if (any(new.model$df == target)) {
+  var.ix <- which(new.model$df == target)
 } else if (any(new.model$df > params$target.vars)) {
-  new.target <- min(new.model$df[new.model$df > params$target.vars])
+  new.target <- min(new.model$df[new.model$df > target])
   var.ix <- which(new.model$df == new.target)
 } else {
-  new.target <- max(new.model$df[new.model$df < params$target.vars])
+  new.target <- max(new.model$df[new.model$df < target])
   var.ix <- which(new.model$df == new.target)
 }
   new.target.lambda <- new.model$lambda[var.ix[sort(var.ix, decreasing = T, index.return = T)$ix[1]]]
-  new.coef <- coef(new.model, s = new.target.lambda)
+  new.coef <- as.vector(coef(new.model, s = new.target.lambda))
+  names(new.coef) <- colnames(xdata.train[,xdata.ix])
   return(list(model = new.model, lambda = new.target.lambda, coef = new.coef))
+}
+```
+
+```{r cvmodel_declaration, include=FALSE}
+my.cv.glmnet <- function(prefix, penalty.factor, nfolds = 10, lambda.min.ratio = .001, show.messages = FALSE) {
+  #
+  set.seed(params$seed)
+  #
+  fold.tmp <- verissimo::balanced.cv.folds(which(ydata$status), which(!ydata$status), nfolds = nfolds)
+  foldid <- array(0, nrow(xdata))
+  foldid[which(ydata$status)] <- fold.tmp$output[[1]]
+  foldid[which(!ydata$status)] <- fold.tmp$output[[2]]
+  #
+  new.model <- verissimo::run.cache(cv.glmnet,
+                                    xdata, Surv(ydata[,1], ydata[,2]), 
+                                    family           ='cox', 
+                                    foldid           = foldid,
+                                    alpha            = params$alpha, 
+                                    nlambda          = 1000,
+                                    lambda.min.ratio = lambda.min.ratio,
+                                    standardize      = F,
+                                    penalty.factor   = penalty.factor,
+                                    #
+                                    mc.cores         = params$mc.cores,
+                                    force.recalc = F,
+                                    cache.prefix = prefix,
+                                    base.dir     = file.path('..', '..', 'network.cox-cache'),
+                                    cache.digest = list(xdata.train.digest),
+                                    show.message = show.messages)
+  new.coef <- as.vector(coef(new.model, s = 'lambda.min'))
+  new.target.lambda <- new.model$lambda.min
+  #
+  return(list(model = new.model, lambda = new.target.lambda, coef = new.coef))
+}
+```
+
+## Cross-validation
+
+Testing classic elastic-net, DegreeCox and OrphanCox with cross-validation to find optimal number of variables for comparisson models.
+
+```{r cv.models, echo=FALSE, eval=FALSE}
+show.cv.info <- function(my.model, name) {
+  selected.genes <- sort(colnames(xdata)[my.model$coef != 0])
+  flog.info(' * %s: %d -- %s', name, sum(my.model$coef != 0), paste(selected.genes, collapse = ', '))
+  return(selected.genes)
+}
+
+cv.classic <- my.cv.glmnet('cv.classic', rep(1, ncol(xdata)), show.messages = FALSE,  lambda.min.ratio = .001)
+cv.degree  <- my.cv.glmnet('cv.degree', penalty.factor.degree, show.messages = FALSE, lambda.min.ratio = .001)
+cv.orphan  <- my.cv.glmnet('cv.degree', penalty.factor.orphan, show.messages = FALSE, lambda.min.ratio = .001)
+
+flog.info('10-fold cross-validation')
+cv.classic.genes <- show.cv.info(cv.classic, 'classic')
+cv.degree.genes  <- show.cv.info(cv.degree, ' degree')
+cv.orphan.genes  <- show.cv.info(cv.orphan, ' orphan')
+
+vv <- Venn(list(Classic = cv.classic.genes, Degree = cv.degree.genes, Orphan = cv.orphan.genes))
+plot(vv, doWeights = FALSE)
+#
+km.cv <- list()
+
+km.cv[['cv.classic']] <- draw.kaplan(list(CV.Classic = cv.classic$coef), xdata[,xdata.ix], ydata, filename = 'CV.Classic', legend.outside = F)
+km.cv[['cv.degree']] <- draw.kaplan(list(CV.Degree = cv.degree$coef), xdata[,xdata.ix], ydata, filename = 'CV.Degree', legend.outside = F)
+km.cv[['cv.orphan']] <- draw.kaplan(list(CV.Orphan = cv.orphan$coef), xdata[,xdata.ix], ydata, filename = 'CV.Orphan', legend.outside = F)
+
+for (ix in names(km.cv)) {
+  print(km.cv[[ix]]$plot)
 }
 ```
 
@@ -561,60 +578,43 @@ coefs   <- list()
 result  <- list()
 ```
 
-
 ```{r calc.models, echo=FALSE}
-#
-# GLMNET without network information
-flog.info('Calculating GLMNET')
-cat('\t')
-result$glmnet <- my.glmnet('glmnet_models', rep(1, ncol(xdata.train)), show.messages = TRUE)
-cat('\n')
+glmnet.params <- list()
 
-models$glmnet  <- result$glmnet$model
-lambdas$glmnet <- result$glmnet$lambda
-coefs$glmnet   <- result$glmnet$coef
-if (sum(coefs$glmnet != 0) < (params$target.vars - 5)) {
-  result$glmnet <- my.glmnet('glmnet_models', rep(1, ncol(xdata.train)), lambda.min.ratio = .0001, show.messages = FALSE)
-  models$glmnet  <- result$glmnet$model
-  lambdas$glmnet <- result$glmnet$lambda
-  coefs$glmnet   <- result$glmnet$coef
+ix <- 1
+for (target.name in names(params$target.vars)) {
+  target <- params$target.vars[[target.name]]
+  glmnet.params[[ix]] <- list(penalty = rep(1, ncol(xdata.train)), name = 'glmnet', target = target, target.name = target.name)
+  glmnet.params[[ix + 1]] <- list(penalty = penalty.factor.degree, name = 'degree', target = target, target.name = target.name)
+  glmnet.params[[ix + 2]] <- list(penalty = penalty.factor.orphan, name = 'orphan', target = target, target.name = target.name)
+  ix <- ix + 3
 }
 
-#
-# DegreeCox
-flog.info('Calculating DegreeCox')
-cat('\t')
-result$degree <- my.glmnet('degree_models', penalty.factor.degree, show.messages = TRUE)
-cat('\n')
+outer.result <- mclapply(seq_along(glmnet.params), function(ix) {
+#for (ix in seq_along(glmnet.params)) {
+  el       <- glmnet.params[[ix]]
+  ix.name  <- sprintf('%s.%s.%d', el$name, el$target.name, el$target)
+  ix.cache <- sprintf('%s_models', el$name)
+  #
+  suppressWarnings(
+  result  <- my.glmnet(ix.cache, el$penalty, el$target, show.messages = F)
+  )
+  
+  if (sum(result$coef != 0) < (target - 5)) {
+    result <- my.glmnet(ix.cache, el$penalty, el$target, lambda.min.ratio = .0001, show.messages = F)
+  }
+  #
+  return(list(result = result, name = ix.name))
+#}
+}, mc.cores = min(params$mc.cores, length(glmnet.params)), mc.allow.recursive = FALSE)
 
-models$degree  <- result$degree$model
-lambdas$degree <- result$degree$lambda
-coefs$degree   <- result$degree$coef
-if (sum(coefs$degree != 0) < (params$target.vars - 5)) {
-  result$degree <- my.glmnet('degree_models', penalty.factor.degree, lambda.min.ratio = .0001, show.messages = FALSE)
-  models$degree  <- result$degree$model
-  lambdas$degree <- result$degree$lambda
-  coefs$degree   <- result$degree$coef
+
+for (ix in outer.result) {
+  result[[ix$name]] <- ix$result
+  models[[ix$name]]  <- ix$result$model
+  lambdas[[ix$name]] <- ix$result$lambda
+  coefs[[ix$name]]   <- ix$result$coef
 }
-
-#
-# OrphanCox
-flog.info('Calculating OrphanCox')
-cat('\t')
-result$orphan <- my.glmnet('orphan_models', penalty.factor.orphan, show.messages = TRUE)
-cat('\n')
-
-models$orphan  <- result$orphan$model
-lambdas$orphan <- result$orphan$lambda
-coefs$orphan   <- result$orphan$coef
-
-if (sum(coefs$orphan != 0) < (params$target.vars - 5)) {
-  result$orphan <- my.glmnet('orphan_models', penalty.factor.orphan, lambda.min.ratio = .0001, show.messages = FALSE)
-  models$orphan  <- result$orphan$model
-  lambdas$orphan <- result$orphan$lambda
-  coefs$orphan   <- result$orphan$coef
-}
-
 ```
 
 ```{r models_variables, echo=FALSE}
@@ -647,9 +647,12 @@ build.fit.df <- function(obj) {
   return(fitted.network)
 }
 
-fitted.network <- build.fit.df(list(Classic = list(model = models$glmnet, target = lambdas$glmnet),
-                                    Degree  = list(model = models$degree,  target = lambdas$degree),
-                                    Orphan  = list(model = models$orphan,  target = lambdas$orphan)))
+this.list <- list()
+for (ix.name in names(models)) {
+  this.list[[ix.name]] <- list(model = models[[ix.name]], target = lambdas[[ix.name]])
+}
+
+fitted.network <- verissimo::run.cache(build.fit.df, this.list, show.message = F)
 ```
 
 ```{r risk, fig.height=8}
@@ -682,13 +685,19 @@ km.name <- function(title, alpha, is.network = NULL) {
   type <- if (is.null(is.network)) {
     subtitle <- 'Classic Elastic Net model'
     ''
-  } else if (is.network == 'degree') {
-    subtitle <- 'DegreeCox: Hubs are promoted'
-    'Promotes high degree with '
-  } else if (is.network == 'orphan') {
-    subtitle <- 'OrphanCox: Low connected nodes are promoted'
-    'Promotes low degree with '
-  } 
+  } else {
+    is.network <- sub('\\..*', '', is.network)
+    type <- if (is.network == 'glmnet') {
+      subtitle <- 'Classic Elastic Net model'
+      ''
+    } else if (is.network == 'degree') {
+      subtitle <- 'DegreeCox: Hubs are promoted'
+      'Promotes high degree with '
+    } else if (is.network == 'orphan') {
+      subtitle <- 'OrphanCox: Low connected nodes are promoted'
+      'Promotes low degree with '
+    } 
+  }
   return(ggtitle(sprintf('%s: %s%s%s%s', title, type, l1, sep, l2), subtitle = subtitle))
 }
 ```
@@ -706,24 +715,22 @@ my.draw.kaplan <- function(coef.l, filename, test.set = F) {
 km.train <- list()
 km.test  <- list()
 #
-km.train$glmnet <- my.draw.kaplan(list(GLMNET = coefs$glmnet), filename = 'Train set')
-km.train$degree <- my.draw.kaplan(list(Degree = coefs$degree), filename = 'Train set')
-km.train$orphan <- my.draw.kaplan(list(Orphan = coefs$orphan), filename = 'Train set')
-km.test$glmnet  <- my.draw.kaplan(list(GLMNET = coefs$glmnet), filename = 'Test set', test.set = T)
-km.test$degree  <- my.draw.kaplan(list(Degree = coefs$degree), filename = 'Test set', test.set = T)
-km.test$orphan  <- my.draw.kaplan(list(Orphan = coefs$orphan), filename = 'Test set', test.set = T)
+for (ix.name in names(coefs)) {
+  km.train[[ix.name]] <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), filename = 'Train set')
+  km.test[[ix.name]]  <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), filename = 'Test set', test.set = T)
+}
 ```
 
-```{r plot.km, fig.height= 10, echo=FALSE}
+```{r plot.km, fig.height= 20, echo=FALSE}
 my.km <- list()
-my.km$classic.train <- km.train$glmnet$plot + km.name('Train', params$alpha)
-my.km$classic.test  <- km.test$glmnet$plot  + km.name('Test',  params$alpha)
-my.km$degree.train  <- km.train$degree$plot + km.name('Train', params$alpha, is.network = 'degree')
-my.km$degree.test   <- km.test$degree$plot  + km.name('Test',  params$alpha, is.network = 'degree')
-my.km$orphan.train  <- km.train$orphan$plot + km.name('Train', params$alpha, is.network = 'orphan')
-my.km$orphan.test   <- km.test$orphan$plot  + km.name('Test',  params$alpha, is.network = 'orphan')
+ix <- 1
+for (ix.name in names(coefs)) {
+  my.km[[ix]] <- km.train[[ix.name]]$plot + km.name('Train', params$alpha, ix.name)
+  my.km[[ix + 1]]  <- km.test[[ix.name]]$plot  + km.name('Test',  params$alpha, ix.name)
+  ix <- ix + 2
+}
 
-multiplot(plotlist = my.km, ncol = 2, layout = matrix(c(1,2,3,4,5,6), ncol = 2, byrow = T))
+multiplot(plotlist = my.km, ncol = 2, layout = matrix(seq_along(my.km), ncol = 2, byrow = T))
 ```
 
 ## C-Index
@@ -755,18 +762,15 @@ flog.info('C-index for train set:')
 fit.risk <- function(coef.v, xdata, ydata, model.name, show.message = FALSE) {
   # fitted.risk  <- as.vector(predict(models$glmnet, newx = xdata.train[,xdata.ix], s = lambdas$glmnet, type = 'response')) 
   fitted.risk <- exp(as.vector(xdata[,xdata.ix] %*% coef.v))
-  c.res <- verissimo::runCache(c.index.fun, all.pairs, fitted.risk, ydata, show.message = F)
+  c.res <- verissimo::run.cache(c.index.fun, all.pairs, fitted.risk, ydata, show.message = F)
   c.res <- sum(c.res) / sum(c.res != 0)
   if (show.message) flog.info(' * %s: %f', model.name, c.res)
   return(c.res)
 }
 
-# Classic model
-c.index.train$glmnet <- fit.risk(coefs$glmnet, xdata.train, ydata.train, '   GLMNET',  show.message = TRUE)
-# DegreeCox
-c.index.train$degree <- fit.risk(coefs$degree, xdata.train, ydata.train, 'DegreeCox', show.message = TRUE)
-# OrphanCox
-c.index.train$orphan <- fit.risk(coefs$orphan, xdata.train, ydata.train, 'OrphanCox', show.message = TRUE)
+for (ix.name in names(coefs)) {
+c.index.train[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name,  show.message = TRUE)
+}
 
 flog.info('')
 #
@@ -778,44 +782,49 @@ all.pairs <- combn(nrow(xdata.test), 2)
 
 flog.info('C-index for test set:')
 
-# Classic model
-c.index.test$glmnet <- fit.risk(coefs$glmnet, xdata.test, ydata.test, '   GLMNET', show.message = TRUE)
-# DegreeCox
-c.index.test$degree <- fit.risk(coefs$degree, xdata.test, ydata.test, 'DegreeCox', show.message = TRUE)
-# OrphanCox
-c.index.test$orphan <- fit.risk(coefs$orphan, xdata.test, ydata.test, 'OrphanCox', show.message = TRUE)
+for (ix.name in names(coefs)) {
+c.index.test[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name,  show.message = TRUE)
+}
 
 ```
 
 ## Non-zero genes
 
-```{r non.zero, include=FALSE}
+```{r, include=FALSE}
 coefs.v <- list()
-coefs.v[['glmnet']] <- coefs$glmnet[,1]
-non.zero.df <- data.frame(gene.id = rownames(coefs$glmnet)[which(coefs.v[['glmnet']] != 0)],
-                          coef = coefs$glmnet[which(coefs.v[['glmnet']] != 0)])
+non.zero.df.result <- NULL
+for (ix.name in names(coefs)){
+  flog.info('Working on %s', ix.name)
+  coefs.v[[ix.name]] <- coefs[[ix.name]]
+  non.zero.ix        <- which(coefs.v[[ix.name]] != 0)
+  #
+  names.tmp <- names(coefs.v[[ix.name]])[non.zero.ix]
+  coef.tmp  <- coefs.v[[ix.name]][non.zero.ix]
+  if (length(coefs.v) == 1) {
+    flog.info('  * Len == 0')
+    non.zero.df.result <- data.frame(gene.id = names.tmp, coef = coef.tmp)
+    first.name <- ix.name
+  } else {
+    flog.info('  * Len > 0')
+    non.zero.df2 <- data.frame(gene.id = names.tmp, coef = coef.tmp)
+    suffix <- c('', sprintf('.%s', ix.name))
+    non.zero.df.result  <- dplyr::full_join(non.zero.df.result, non.zero.df2, by = c('gene.id'), suffix = suffix)
+  }
+}
+colnames(non.zero.df.result)[2] <- sprintf('coef.%s', first.name)
+#
+non.zero.df.out <- cbind(non.zero.df.result, degree = as.vector(original.penalty.factor[non.zero.df.result$gene.id]))
+```
 
-coefs.v[['degree']] <- coefs$degree[,1]
-non.zero.df2 <- data.frame(gene.id = rownames(coefs$degree)[which(coefs.v[['degree']] != 0)],
-                           coef = coefs$degree[which(coefs.v[['degree']] != 0)])
 
-coefs.v[['orphan']] <- coefs$orphan[,1]
-non.zero.df3 <- data.frame(gene.id = rownames(coefs$orphan)[which(coefs.v[['orphan']] != 0)],
-                           coef.orphan = coefs$orphan[which(coefs.v[['orphan']] != 0)])
-
-
-non.zero.df.result <- dplyr::full_join(non.zero.df, non.zero.df2, by = c('gene.id'), suffix = c('.classic', '.degree'))
-non.zero.df.result <- dplyr::full_join(non.zero.df.result, non.zero.df3, by = c('gene.id'), suffix = c('', '.orphan'))
-non.zero.df.out <- cbind(non.zero.df.result, 
-                         penalty.degree = as.vector(penalty.factor.degree[non.zero.df.result$gene.id]),
-                         penalty.orphan = as.vector(penalty.factor.orphan[non.zero.df.result$gene.id]),
-                         degree = as.vector(original.penalty.factor[non.zero.df.result$gene.id]))
+```{r non.zero, include=FALSE}
 this.name <- function(this.coef) {
   tryCatch({
     marts <- biomaRt::listMarts()
     index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
     mart <- biomaRt::useMart(marts$biomart[index])
-    mart    <- biomaRt::useMart(marts$biomart[index], 'hsapiens_gene_ensembl')
+    mart <- verissimo::run.cache(biomaRt::useMart,marts$biomart[index], 'hsapiens_gene_ensembl', 
+                                 cache.prefix = 'biomart', base.dir = '../../network.cox-cache')
     results <- biomaRt::getBM(attributes = c("external_gene_name", "ensembl_gene_id"),
                      filters = "ensembl_gene_id", values = this.coef,
                      mart = mart)
@@ -834,32 +843,59 @@ new.t$gene.id[new.t$gene.id %in% ixs$ensembl_gene_id] <- ixs$external_gene_name
 gene.ids <- non.zero.df.out$gene.id
 non.zero.df.out$gene.id <- gsub('ENSG0*', 'ENSG', non.zero.df.out$gene.id)
 non.zero.df.out$gene.name <- new.t$gene.id
-non.zero.df.out <- non.zero.df.out[, c(1, 8, 2:7)]
+col.ix <- colnames(non.zero.df.out) %in% c('gene.id', 'gene.name', 'degree')
+non.zero.df.out <- non.zero.df.out[,c(which(col.ix), which(!col.ix))]
 ```
 
 ### Venn Diagram of selected genes
 
+#### Overlap between models *(with same target number of variables)*
+
 ```{r venn.coef, echo=FALSE}
-vv <- Venn(list(GLMNET= non.zero.df$gene.id, Degree = non.zero.df2$gene.id, Orphan = non.zero.df3$gene.id))
-plot(vv, doWeights = FALSE)
+all.names  <- names(coefs)
+all.model  <- gsub('^([a-zAZ]+)\\.(.+)$', '\\1', all.names)
+all.origin <- gsub('^([a-zAZ]+)\\.(.+)$', '\\2', all.names)
+
+for (type in unique(all.origin)) {
+  ll <- list()
+  for (ix.name in all.names[which(grepl(type, all.names))]) {
+     label <- gsub(sprintf('\\.%s', type), '', ix.name)
+     label <- gsub('glmnet', 'classic', label)
+     label <- verissimo::proper(label)
+     ll[[label]] <- sort(non.zero.df.out$gene.name[!is.na(non.zero.df.out[, sprintf('coef.%s', ix.name)])])
+  }
+  vv <- Venn(ll)
+  gridExtra::grid.arrange(grid::grid.grabExpr(plot(vv, doWeights = FALSE)), top= sprintf('Target variables: %s', verissimo::proper(type)))
+}
 ```
+
+#### Same model type *(either degree, classic or orphan)* with different lambdas
+
+```{r}
+for (type in unique(all.model)) {
+  ll <- list()
+  for (ix.name in all.names[which(grepl(sprintf('^%s', type), all.names))]) {
+     label <- gsub(sprintf('^%s\\.', type), '', ix.name)
+     label <- gsub('glmnet', 'classic', label)
+     label <- gsub('cv\\.', '', label)
+     label <- verissimo::proper(label)
+     ll[[label]] <- sort(non.zero.df.out$gene.name[!is.na(non.zero.df.out[, sprintf('coef.%s', ix.name)])])
+  }
+  vv <- Venn(ll)
+  gridExtra::grid.arrange(grid::grid.grabExpr(plot(vv, doWeights = FALSE)), top= sprintf('Model: %s', verissimo::proper(type)))
+}
+```
+
 
 ### Table of genes in models
 
-note: it only shows arbitrary `r params$target.vars*3` variables if there are more than those variables selected in models
-
 ```{r genes.table, echo=FALSE}
-knitr::kable(head(non.zero.df.out, n = params$target.vars * 3))
-```
-
-```{r save_genes_rdata, include=FALSE}
-genes.to.save <- gene.ids 
-save(genes.to.save, file = sprintf('../../network.cox-cache/gene.id-%s.RData',strtrim(digest::digest(non.zero.df.out), 10)))
+knitr::kable(head(non.zero.df.out, n = 30))
 ```
 
 # `r params$ntimes` Runs
 
-```{r call.results.decl, echo=FALSE}
+```{r call.results.decl, echo=FALSE, eval=FALSE}
 # train.perc <- params$train
 # subset <- params$subset
 # seed <- 1985
@@ -952,7 +988,7 @@ call.results <- function(seed, xdata, ydata, train.perc, subset, penalty.factor.
 ```
 
 
-```{r calc_ntimes, echo=FALSE}
+```{r calc_ntimes, echo=FALSE, eval=FALSE}
 if (params$train == 1) {
   flog.info("Train and test sets are the same, won't calculate %d times with random seeds", params$ntimes)
 } else {
@@ -960,7 +996,7 @@ if (params$train == 1) {
   seed.vec <- sample(1000 + (max(c(1:1e7,params$ntimes))))[1:params$ntimes]
   
   ntimes.results <- parallel::mclapply(seed.vec, function(seed) {
-    return(verissimo::runCache(call.results,
+    return(verissimo::run.cache(call.results,
                                seed, xdata, ydata, params$train, params$subset, 
                                penalty.factor.degree, penalty.factor.orphan,
                                #
@@ -988,7 +1024,7 @@ if (params$train == 1) {
 
 ## C-Index distribution
 
-```{r c.index.iter, echo=FALSE}
+```{r c.index.iter, echo=FALSE, eval=FALSE}
 ggplot(filter(big.df, metric %in% c('C-Index (Train set)', 'C-Index (Test set)'))) +
     geom_freqpoly(aes(values, color = model), alpha = .75, bins = 100) + 
     facet_wrap(model ~ metric, ncol = 2) +
@@ -999,7 +1035,7 @@ ggplot(filter(big.df, metric %in% c('C-Index (Train set)', 'C-Index (Test set)')
 
 Separated by high and low risk groups
 
-```{r pvalue.itre, echo=FALSE}
+```{r pvalue.itre, echo=FALSE, eval=FALSE}
 ggplot(filter(big.df, metric %in% c('Log-rank (Test set)', 'Log-rank (Train set)'))) +
   geom_freqpoly(aes(values, color = model), alpha = .75, bins = 300) + 
   facet_wrap(model ~ metric, ncol = 2) +
@@ -1013,34 +1049,4 @@ ggplot(filter(big.df, metric %in% c('Log-rank (Test set)', 'Log-rank (Train set)
   theme_minimal() + theme(legend.position = 'top')
 ```
 
-
-
-```{r, eval=FALSE, include=FALSE}
-library(ModelGood)
-
-
-xdata.df <- data.frame(xdata.train[,sample(seq_along(xdata.ix), size = 100)])
-xdata.df <- cbind(time = ydata.train$time, event = ydata.train$status, xdata.df)
-n <- colnames(xdata.df)
-f <- as.formula(paste("survival::Surv(time, event) ~", paste(n[!n %in% c('time', 'event')], collapse = " + ")))
-my.call <- call('ElasticNet', formula = f, data = xdata.df,
-           nfolds           = 5,
-           #
-           family           ='cox', 
-           alpha            = params$alpha, 
-           nlambda          = 1000,
-           lambda.min.ratio = .001,
-           standardize      = F)
-en.respo <- list(call = my.call, enet = models$glmnet, Lambda = lambdas$glmnet)
-class(en.respo) <- 'ElasticNet'
-Brier(en.respo)
-
-
-                                   #
-#                                   cache.prefix = prefix,
- #                                  base.dir     = file.path('..', '..', 'network.cox-cache'),
-  #                                 cache.digest = list(xdata.train.digest),
-   #                                show.message = show.messages)
-
-```
 

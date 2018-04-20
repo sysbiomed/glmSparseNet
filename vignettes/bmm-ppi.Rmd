@@ -156,8 +156,9 @@ g3 + ggtitle('Degree histogram', sprintf('Hist. stats: min (non-zero): %g | max:
 ensembl <- useMart("ensembl")  # using ensembl database data
 
 listDatasets(ensembl)     # function to see which datasets are present in ensembl
-ensembl <- verissimo::runCache(useDataset, "hsapiens_gene_ensembl",mart=ensembl,
-                               cache.prefix = 'ensembl')   # from ensembl using homosapien gene data
+ensembl <- verissimo::run.cache(useDataset, "hsapiens_gene_ensembl",mart=ensembl,
+                               cache.prefix = 'ensembl',
+                               base.dir = '../../network.cox-cache')   # from ensembl using homosapien gene data
 
 # listFilters(ensembl)  # check which filters are available
 # listAttributes(ensembl) # check attributes are available to select.More information on ensembl data base

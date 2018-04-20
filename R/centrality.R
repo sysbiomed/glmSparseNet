@@ -27,10 +27,85 @@ setMethod('cov.worker', signature('matrix'), function(xdata, ix.i, method = 'pea
     cov(xdata.i, xdata[,ix.j], method = method)
   })
   result[is.na(result)] <- 0
-  # out.result <- Matrix::Matrix(0, ncol = n.col, nrow = 1)
-  # out.result[1,(ix.i+1):n.col] <- result
   return(result)
 })
+
+#' Calculate correlation of large matrix
+#'
+#' @param xdata calculate correlation matrix on each column
+#' @param n.cores number of cores to be used
+#' @param build.matrix boolean parameter to return the matrix in the end
+#'
+#' @return a mtarix if
+#'
+#' @export
+#' @examples
+#' n.col <- 6
+#' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
+#' cor.parallel(xdata)
+setGeneric('cov.parallel', function(xdata, method = 'pearson',
+                                    base.dir = network.cox::base.dir(), build.matrix = T, n.cores = parallel:::detectCores(),
+                                    force.recalc = FALSE,
+                                    show.message  = FALSE) {
+  stop('first argument must be a matrix')
+})
+
+setMethod('cov.parallel', signature('matrix'), function(xdata, method = 'pearson',
+                                                        base.dir      = network.cox::base.dir(),
+                                                        build.matrix  = T,
+                                                        n.cores       = parallel:::detectCores(),
+                                                        force.recalc  = FALSE,
+                                                        show.message  = FALSE) {
+  xdata.sha256 <- verissimo::digest.cache(xdata)
+  cov.aux <- function(xdata, method) {
+    dir.create(base.dir, showWarnings = FALSE)
+    result <- parallel::mclapply( as.numeric(1:(ncol(xdata)-1)), function(ix.i) {
+      tryCatch({
+        result <- verissimo::run.cache(cov.worker, xdata, ix.i, method = method,
+                                      #
+                                      base.dir     = base.dir,
+                                      cache.digest = list(xdata.sha256),
+                                      cache.prefix = 'covariance',
+                                      show.message = show.message,
+                                      force.recalc = force.recalc)
+      },
+      error = function(error.str) {
+        flog.error('This error has occured %s', error.str)
+      })
+      if (build.matrix) {
+        return(result)
+      } else {
+        return(TRUE)
+      }
+    #}
+    }, mc.cores = n.cores, mc.silent = F)
+    return(result)
+  }
+  result <- verissimo::run.cache(cov.aux, xdata, method,
+                                 #
+                                 cache.prefix = 'cov.aux',
+                                 cache.digest = list(xdata.sha256),
+                                 base.dir = base.dir,
+                                 force.recalc = force.recalc,
+                                 show.message = show.message)
+  if (build.matrix) {
+    return(unlist(result))
+  } else {
+    return(NULL)
+  }
+})
+
+
+
+
+
+
+
+
+
+
+
+
 
 #' Parallel calculation of correlation
 #'
@@ -80,35 +155,40 @@ setMethod('cor.parallel', signature('matrix'), function(xdata, method = 'pearson
                                                         n.cores       = parallel:::detectCores(),
                                                         force.recalc  = FALSE,
                                                         show.message  = FALSE) {
-  dir.create(base.dir, showWarnings = FALSE)
-  xdata.sha256 = verissimo::digest.cache(xdata)
-  result <- parallel::mclapply( 1:(ncol(xdata)-1), function(ix.i) {
-
-    tryCatch({
-      result <- verissimo::runCache(cor.worker, xdata, ix.i, method = method,
-                                    #
-                                    base.dir     = base.dir,
-                                    cache.digest = list(xdata.sha256),
-                                    cache.prefix = 'correlation',
-                                    show.message = show.message,
-                                    force.recalc = force.recalc)
-    },
-    error = function(error.str) {
-      flog.error('This error has occured %s', error.str)
-    })
-    if (build.matrix) {
-      return(result)
-    } else {
-      return(TRUE)
-    }
-  }, mc.cores = n.cores, mc.silent = F)
-
+  xdata.sha256 <- verissimo::digest.cache(xdata)
+  cor.aux <- function(xdata, method) {
+    dir.create(base.dir, showWarnings = FALSE)
+    result <- parallel::mclapply( as.numeric(1:(ncol(xdata)-1)), function(ix.i) {
+      tryCatch({
+        result <- verissimo::run.cache(cor.worker, xdata, ix.i, method = method,
+                                       #
+                                       base.dir     = base.dir,
+                                       cache.digest = list(xdata.sha256),
+                                       cache.prefix = 'correlation',
+                                       show.message = show.message,
+                                       force.recalc = force.recalc)
+      },
+      error = function(error.str) {
+        flog.error('This error has occured %s', error.str)
+      })
+      if (build.matrix) {
+        return(result)
+      } else {
+        return(TRUE)
+      }
+      #}
+    }, mc.cores = n.cores, mc.silent = F)
+    return(result)
+  }
+  result <- verissimo::run.cache(cor.aux, xdata, method,
+                                 #
+                                 cache.prefix = 'cor.aux',
+                                 cache.digest = list(xdata.sha256),
+                                 base.dir     = base.dir,
+                                 force.recalc = force.recalc,
+                                 show.message = show.message)
   if (build.matrix) {
-    output <- Matrix::Matrix(0, ncol = ncol(xdata), nrow = ncol(xdata), sparse = TRUE)
-    for(ix in 1:(ncol(xdata)-1)) {
-      output[ix, (ix + 1):ncol(xdata)] <- result[[ix]]
-    }
-    return(output)
+    return(unlist(result))
   } else {
     return(NULL)
   }
@@ -133,13 +213,13 @@ setMethod('cor.parallel', signature('matrix'), function(xdata, method = 'pearson
 #' degree.weighted(xdata, cutoff = .5)
 #' degree.weighted(xdata, cutoff = .5, consider.unweighted = T)
 #' degree.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
-setGeneric('degree.weighted', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
+setGeneric('degree.cor.weighted', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
                                        base.dir = network.cox::base.dir(), n.cores = parallel:::detectCores(),
                                        show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
   stop('first argument must be a matrix')
 })
 
-setMethod('degree.weighted', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
+setMethod('degree.cor.weighted', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
                                                            base.dir = network.cox::base.dir(), n.cores = parallel:::detectCores(),
                                                            show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
   if (force.recalc.correlation) {
@@ -154,14 +234,14 @@ setMethod('degree.weighted', signature('matrix'), function(xdata, method = 'pear
     for (ix.outer in seq(1, ncol(xdata) - 1, added.sum)) {
       max.ix <- min(ix.outer + added.sum - 1, ncol(xdata) - 1)
       res.1000 <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
-        line <- verissimo::runCache(cor.worker, xdata, ix.i, method = method,
+        line <- verissimo::run.cache(cor.worker, xdata, ix.i, method = method,
                                     base.dir     = base.dir,
                                     cache.digest = list(xdata.sha256),
                                     cache.prefix = 'correlation',
                                     show.message = F,
                                     force.recalc = force.recalc.correlation)
         if (any(!is.numeric(line))) {
-          line <- verissimo::runCache(cor.worker, xdata, ix.i, method = method,
+          line <- verissimo::run.cache(cor.worker, xdata, ix.i, method = method,
                                       base.dir     = base.dir,
                                       cache.digest = list(xdata.sha256),
                                       cache.prefix = 'correlation',
@@ -186,10 +266,10 @@ setMethod('degree.weighted', signature('matrix'), function(xdata, method = 'pear
   #
   dir.create(base.dir, showWarnings = FALSE)
   xdata.sha256 = verissimo::digest.cache(xdata)
-  val <- verissimo::runCache(weigthed.aux, xdata, cutoff, consider.unweighted, method, base.dir,
+  val <- verissimo::run.cache(weigthed.aux, xdata, cutoff, consider.unweighted, method, base.dir,
                              base.dir     = base.dir,
                              cache.digest = list(xdata.sha256),
-                             cache.prefix = 'degree',
+                             cache.prefix = 'degree.cor',
                              show.message = show.message,
                              force.recalc = force.recalc.degree)
   return(val)
@@ -214,13 +294,13 @@ setMethod('degree.weighted', signature('matrix'), function(xdata, method = 'pear
 #' degree(xdata)
 #' degree(xdata, cutoff = .5)
 #' degree(xdata, cutoff = .5, consider.unweighted = T)
-setGeneric('degree', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
+setGeneric('degree.cor', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
                               base.dir = network.cox::base.dir(), n.cores = parallel:::detectCores(),
                               force.recalc = FALSE) {
   stop('first argument must be a matrix')
 })
 
-setMethod('degree', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
+setMethod('degree.cor', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
                                                   base.dir = network.cox::base.dir(), n.cores = parallel:::detectCores(),
                                                   force.recalc = FALSE) {
   degree.weighted(xdata, base.dir = base.dir, cutoff = cutoff, consider.unweighted = T, n.cores = n.cores)
@@ -234,95 +314,6 @@ setMethod('degree', signature('matrix'), function(xdata, method = 'pearson', cut
 
 
 
-
-
-
-
-
-
-
-
-
-#' Calculate degree of correlation matrix
-#'
-#' @param xdata calculate correlation matrix on each column
-#' @param method correlation method to be used
-#' @param cutoff positive value that determines a cutoff value
-#' @param consider.unweighted consider all edges as 1 if they are greater than 0
-#' @param base.dir where to store the cache of the results
-#' @param n.cores number of cores to be used
-#' @param force.recalc force recalculation, instead of going to cache
-#'
-#' @return a vector of the degrees
-#'
-#' @examples
-#' n.col <- 6
-#' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degree.weighted(xdata)
-#' degree.weighted(xdata, cutoff = .5)
-#' degree.weighted(xdata, cutoff = .5, consider.unweighted = T)
-#' degree.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
-setGeneric('degree.bad', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                       base.dir = network.cox::base.dir(), n.cores = parallel:::detectCores(),
-                                       show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
-  stop('first argument must be a matrix')
-})
-
-setMethod('degree.bad', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                                           base.dir = network.cox::base.dir(), n.cores = parallel:::detectCores(),
-                                                           show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
-  if (force.recalc.correlation) {
-    force.recalc.degree <- T
-  }
-  #
-  # auxiliary function to be able to call with cache
-  #
-  weigthed.aux <- function(xdata, cutoff, consider.unweighted, method, base.dir) {
-    degree <- array(0, ncol(xdata))
-    added.sum <- 1000
-    for (ix.outer in seq(1, ncol(xdata) - 1, added.sum)) {
-      max.ix <- min(ix.outer + added.sum - 1, ncol(xdata) - 1)
-      res.1000 <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
-        line <- verissimo::runCache(cor.worker, xdata, ix.i, method = method,
-                                    base.dir     = base.dir,
-                                    cache.digest = list(xdata.sha256),
-                                    cache.prefix = 'correlation',
-                                    show.message = F,
-                                    force.recalc = force.recalc.correlation)
-        if (any(!is.numeric(line))) {
-          line <- verissimo::runCache(cor.worker, xdata, ix.i, method = method,
-                                      base.dir     = base.dir,
-                                      cache.digest = list(xdata.sha256),
-                                      cache.prefix = 'correlation',
-                                      show.message = F,
-                                      force.recalc = T)
-        }
-        #
-        line[is.na(line)]   <- 0 # failsafe in case there was a failure in cor (i.e. sd = 0)
-        line                <- abs(line)
-        line[line < cutoff] <- 0
-        if (consider.unweighted) { line[line != 0] <- 1 }
-        line <- c(rep(0, ix.i - 1), sum(line), rep(0, length(line)))
-        return(line)
-      }, mc.cores = n.cores, mc.allow.recursive = FALSE)
-      #
-      res.1000 <- matrix(unlist(res.1000), ncol = ncol(xdata), byrow = TRUE)
-      degree   <- degree + colSums(res.1000)
-    }
-    names(degree) <- colnames(xdata)
-    return(degree)
-  }
-  #
-  dir.create(base.dir, showWarnings = FALSE)
-  xdata.sha256 = verissimo::digest.cache(xdata)
-  val <- verissimo::runCache(weigthed.aux, xdata, cutoff, consider.unweighted, method, base.dir,
-                             base.dir     = base.dir,
-                             cache.digest = list(xdata.sha256),
-                             cache.prefix = 'degree',
-                             show.message = show.message,
-                             force.recalc = force.recalc.degree)
-  return(val)
-})
 
 
 
@@ -363,24 +354,24 @@ setMethod('degree.cov.weighted', signature('matrix'), function(xdata, method = '
   #
   # auxiliary function to be able to call with cache
   #
-  weigthed.aux <- function(xdata, cutoff, consider.unweighted, method, base.dir) {
+  weigthed.aux <- function(xdata, cutoff, consider.unweighted, method) {
     degree <- array(0, ncol(xdata))
     added.sum <- 1000
     for (ix.outer in seq(1, ncol(xdata) - 1, added.sum)) {
       max.ix <- min(ix.outer + added.sum - 1, ncol(xdata) - 1)
       res.1000 <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
-        line <- verissimo::runCache(cov.worker, xdata, ix.i, method = method,
+        line <- verissimo::run.cache(cov.worker, xdata, ix.i, method = method,
                                     base.dir     = base.dir,
                                     cache.digest = list(xdata.sha256),
                                     cache.prefix = 'covariance',
-                                    show.message = F,
+                                    show.message = T,
                                     force.recalc = force.recalc.covariance)
         if (any(!is.numeric(line))) {
-          line <- verissimo::runCache(cov.worker, xdata, ix.i, method = method,
+          line <- verissimo::run.cache(cov.worker, xdata, ix.i, method = method,
                                       base.dir     = base.dir,
                                       cache.digest = list(xdata.sha256),
                                       cache.prefix = 'covariance',
-                                      show.message = F,
+                                      show.message = T,
                                       force.recalc = T)
         }
         #
@@ -400,11 +391,12 @@ setMethod('degree.cov.weighted', signature('matrix'), function(xdata, method = '
   }
   #
   dir.create(base.dir, showWarnings = FALSE)
-  xdata.sha256 = verissimo::digest.cache(xdata)
-  val <- verissimo::runCache(weigthed.aux, xdata, cutoff, consider.unweighted, method, base.dir,
+  xdata.sha256 <- verissimo::digest.cache(xdata)
+
+  val <- verissimo::run.cache(weigthed.aux, xdata, cutoff, consider.unweighted, method,
                              base.dir     = base.dir,
                              cache.digest = list(xdata.sha256),
-                             cache.prefix = 'degree',
+                             cache.prefix = 'degree.cov',
                              show.message = show.message,
                              force.recalc = force.recalc.degree)
   return(val)
