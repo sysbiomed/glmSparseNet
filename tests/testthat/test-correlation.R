@@ -1,35 +1,37 @@
-context("Correlation function")
+context("Covariance function")
 
 set.seed(1985)
 xdata <- matrix(rnorm(30000), nrow = 500)
 
-test_that("spearman correlation is the same", {
-  expect_lt(sum(Matrix::norm(cor.parallel(xdata[,1:10],
-                                          method = 'spearman',
-                                          n.cores = 2,
-                                          build.matrix = T,
-                                          base.dir = tempdir(), force.recalc = TRUE) - Matrix::triu(cor(xdata[,1:10], method = 'spearman'), k = 1), type = "1")),
-            5e-16)
+test_that("Spearman correlation is the same", {
+  my.method <- 'spearman'
+  cor.non.diag <- cor(xdata, method = my.method)
+  diag(cor.non.diag) <- 0
+  test.cov <- cor.parallel(xdata, method = my.method, n.cores = 2, build.output = 'matrix',
+                           #
+                           base.dir = tempdir(), force.recalc = TRUE)
+
+  expect_lt(sum(Matrix::norm(test.cov - cor.non.diag, type = "1")), 5e-16)
   #
-  expect_lt(sum(Matrix::norm(cor.parallel(xdata[,1:10],
-                                          method = 'spearman',
-                                          n.cores = 2,
-                                          build.matrix = T,
-                                          base.dir = tempdir()) - Matrix::triu(cor(xdata[,1:10], method = 'spearman'), k = 1), type = "1")),
-            5e-16)
+  test.cov <- cor.parallel(xdata, method = my.method, n.cores = 2, build.output = 'matrix',
+                           #
+                           base.dir = tempdir(), force.recalc = FALSE)
+  expect_lt(sum(Matrix::norm(test.cov - cor.non.diag, type = "1")), 5e-16)
 })
 
 test_that("Pearson correlation is the same", {
-  expect_lt(sum(Matrix::norm(cor.parallel(xdata[,1:10],
-                                  method = 'pearson',
-                                  n.cores = 2,
-                                  build.matrix = T,
-                                  base.dir = tempdir()) - Matrix::triu(cor(xdata[,1:10], method = 'pearson'), k = 1), type = "1")),
-            5e-16)
-  expect_lt(sum(Matrix::norm(cor.parallel(xdata[,1:10],
-                                          method = 'pearson',
-                                          n.cores = 2,
-                                          build.matrix = T,
-                                          base.dir = tempdir(), force.recalc = TRUE) - Matrix::triu(cor(xdata[,1:10], method = 'pearson'), k = 1), type = "1")),
-            5e-16)
+  my.method <- 'pearson'
+  cor.non.diag <- cor(xdata, method = my.method)
+  diag(cor.non.diag) <- 0
+  #
+  test.cov <- cor.parallel(xdata, method = my.method, n.cores = 2, build.output = 'matrix',
+                           #
+                           base.dir = tempdir(), force.recalc = TRUE)
+
+  expect_lt(sum(Matrix::norm(test.cov - cor.non.diag, type = "1")), 5e-16)
+  #
+  test.cov <- cor.parallel(xdata, method = my.method, n.cores = 2, build.output = 'matrix',
+                           #
+                           base.dir = tempdir(), force.recalc = FALSE)
+  expect_lt(sum(Matrix::norm(test.cov - cor.non.diag, type = "1")), 5e-16)
 })

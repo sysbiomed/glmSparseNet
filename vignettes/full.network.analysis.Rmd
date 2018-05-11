@@ -51,8 +51,6 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, tidy = TRUE)
 library(futile.logger)
 library(parallel)
 library(glmnet)
-library(verissimo)
-library(digest)
 library(ggplot2)
 library(reshape2)
 library(survival)
@@ -61,12 +59,23 @@ library(Vennerable)
 library(limma)
 library(tidyverse)
 library(forcats)
-library(sparsebn)
-library(sparsebnUtils)
+
+devtools::install_github('averissimo/loose.rock')
+library(loose.rock)
+#
 devtools::load_all()
+#
+.Last.value <- loose.rock::base.dir(path = '/ssd_home/averissimo/work/rpackages/network.cox-cache')
+.Last.value <- loose.rock::show.message(TRUE)
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
 .Last.value <- flog.appender(appender.tee('logger.txt'))
 theme_set(theme_minimal())
+#
+# sparsebn
+installed.ccdr <- devtools::install_github('averissimo/ccdrAlgorithm')
+if (installed.ccdr) { devtools::install_github('averissimo/sparsebn', force = T) }
+library(sparsebn)
+library(sparsebnUtils)
 ```
 
 # Parameters
@@ -100,22 +109,36 @@ package.name <- paste0(params$project, '.data')
 data("fpkm.per.tissue", package = package.name)
 flog.info('Loading data from %s package', package.name)
 flog.info('Types of tissue:\n * %s', paste(sprintf('%s (%d)', names(fpkm.per.tissue), sapply(fpkm.per.tissue, ncol)), collapse = '\n * '))
+rm(fpkm.per.tissue)
 ```
 
 ```{r}
-my.data <- verissimo::run.cache(prepare.tcga.survival.data, 'brca', 'primary.solid.tumor', 'keep_first',
+my.data <- loose.rock::run.cache(prepare.tcga.survival.data, 'brca', 'primary.solid.tumor', 'keep_first',
                                 #
-                                base.dir = '../../network.cox-cache',
-                                cache.prefix = 'tcga-data',
-                                show.message = T)
+                                cache.prefix = 'tcga-data')
 #
 xdata     <- my.data$xdata.raw
 ydata     <- my.data$ydata
 #
-xdata.digest.cache <- my.data$xdata.raw.digest
+# keep only coding protein
+if (params$degree.type == 'sparsebn') {
+  coding <- run.cache(coding.genes, cache.prefix = 'coding.genes')
+  xdata <- xdata[,colnames(xdata) %in% coding$ensembl_gene_id]
+  xdata.digest.cache <- digest.cache(xdata)
+} else {
+  # keep full dataset
+  xdata.digest.cache <- my.data$xdata.raw.digest 
+}
+#
 ydata.digest.cache <- my.data$ydata.digest
 #
 rm(my.data)
+```
+
+```{r}
+flog.info('Number of:')
+flog.info('  *    variables: %d', ncol(xdata))
+flog.info('  * observations: %d', nrow(xdata))
 ```
 
 ## Build network
@@ -130,20 +153,18 @@ if (params$degree.type == 'covariance') {
   ))
 } else if (params$degree.type == 'correlation') {
   my.network <- abs(cor.parallel(xdata, method = 'pearson', 
-    base.dir = '../../network.cox-cache',
     build.matrix = T,
     n.cores = params$mc.cores,
     show.message = F
   ))
 } else if (params$degree.type == 'sparsebn') {
   lambdas <- sparsebnUtils::generate.lambdas(nrow(xdata), lambdas.length = 50)
-  sparse.xdata <- verissimo::run.cache(sparsebnData, xdata, levels = NULL, ivn = NULL, type = 'continuous', 
-                                       cache.prefix = 'sparsebn.data',
-                                       base.dir     = '../../network.cox-cache')
+  sparse.xdata <- loose.rock::run.cache(sparsebnData, xdata, levels = NULL, ivn = NULL, type = 'continuous', 
+                                       cache.prefix = 'sparsebn.data')
   #
-  dag <- verissimo::run.cache(sparsebn::estimate.dag, sparse.xdata, lambdas = lambdas, upperbound = ncol(xdata) * 2,
-                              cache.prefix = 'dag',
-                              base.dir     = '../../network.cox-cache')
+  dag <- loose.rock::run.cache(sparsebn::estimate.dag, sparse.xdata, lambdas = lambdas, upperbound = ncol(xdata) * 2,
+                              cache.prefix = 'dag')
+  my.dag <- select(dag, lambda = lambdas[length(lambdas)])
 } else {
   stop('Error on degree type')
 }
@@ -151,43 +172,39 @@ if (params$degree.type == 'covariance') {
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 # create sha256 digest to reuse and accelerate cache
-network.digest <- verissimo::digest.cache(my.network)
+network.digest <- loose.rock::digest.cache(my.network)
 ```
 
 ```{r, echo=FALSE, include=FALSE}
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
-quantile.abs <- verissimo::run.cache(quantile, my.network, probs = params$probs,
+quantile.abs <- loose.rock::run.cache(quantile, my.network, probs = params$probs,
                                      #
                                      cache.digest = list(network.digest),
-                                     base.dir = '../../network.cox-cache',
                                      cache.prefix = 'quantile')
 save(sprintf('../saves/quantile.abs-%s.RData', params$degree.type))
 #
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
-mean.abs <- verissimo::run.cache(mean, my.network,
+mean.abs <- loose.rock::run.cache(mean, my.network,
                                  #
                                  cache.digest = list(network.digest),
-                                 base.dir = '../../network.cox-cache',
                                  cache.prefix = 'quantile')
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
-max.abs <- verissimo::run.cache(max, my.network,
+max.abs <- loose.rock::run.cache(max, my.network,
                                 #
                                 cache.digest = list(network.digest),
-                                base.dir = '../../network.cox-cache',
                                 cache.prefix = 'max')
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
-min.abs <- verissimo::run.cache(min, my.network,
+min.abs <- loose.rock::run.cache(min, my.network,
                                 #
                                 cache.digest = list(network.digest),
-                                base.dir = '../../network.cox-cache',
                                 cache.prefix = 'min')
 #
 rm(my.network)
@@ -221,7 +238,6 @@ result <- mclapply(seq_along(quantile.abs), function(ix.i) {
     .Last.value <- gc(reset = TRUE, verbose = FALSE)
     weighted <- degree.cov.weighted(xdata, method = params$degree.correlation, cutoff = ix,
                                     consider.unweighted = FALSE,
-                                    base.dir = '../../network.cox-cache',
                                     n.cores = 1,
                                     show.message = FALSE)
     #
@@ -229,7 +245,6 @@ result <- mclapply(seq_along(quantile.abs), function(ix.i) {
     .Last.value <- gc(reset = TRUE, verbose = FALSE)
     weighted.non <- degree.cov.weighted(xdata, method = params$degree.correlation, cutoff = ix,
                                         consider.unweighted = TRUE,
-                                        base.dir = '../../network.cox-cache',
                                         n.cores = 1,
                                         show.message = FALSE)
   } else if (params$degree.type == 'correlation') {
@@ -237,7 +252,6 @@ result <- mclapply(seq_along(quantile.abs), function(ix.i) {
     .Last.value <- gc(reset = TRUE, verbose = FALSE)
     weighted <- degree.cor.weighted(xdata, method = params$degree.correlation, cutoff = ix,
                                     consider.unweighted = FALSE,
-                                    base.dir = '../../network.cox-cache',
                                     n.cores = params$mc.cores,
                                     show.message = FALSE)
     #
@@ -245,7 +259,14 @@ result <- mclapply(seq_along(quantile.abs), function(ix.i) {
     .Last.value <- gc(reset = TRUE, verbose = FALSE)
     weighted.non <- degree.cor.weighted(xdata, method = params$degree.correlation, cutoff = ix,
                                         consider.unweighted = TRUE,
-                                        base.dir = '../../network.cox-cache',
+                                        n.cores = params$mc.cores,
+                                        show.message = FALSE)
+  } else if (params$degree.type == 'sparsebn') {
+    .Last.value <- gc(reset = TRUE, verbose = FALSE)
+    .Last.value <- gc(reset = TRUE, verbose = FALSE)
+    
+    weighted.non <- degree.cor.weighted(xdata, method = params$degree.correlation, cutoff = ix,
+                                        consider.unweighted = TRUE,
                                         n.cores = params$mc.cores,
                                         show.message = FALSE)
   }  
@@ -253,7 +274,7 @@ result <- mclapply(seq_along(quantile.abs), function(ix.i) {
   #
 
   plot.w <- ggplot(melt(weighted)) +
-      geom_freqpoly(aes(value, color = verissimo::my.colors(1)), bins = 200) +
+      geom_freqpoly(aes(value, color = loose.rock::my.colors(1)), bins = 200) +
       theme_minimal() + theme(legend.position = 'none') + 
       theme(legend.position = 'none') +
       #scale_x_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 55000)) +
@@ -265,7 +286,7 @@ result <- mclapply(seq_along(quantile.abs), function(ix.i) {
   
   #
   plot.u <- ggplot(melt(weighted.non)) +
-      geom_freqpoly(aes(value, color = verissimo::my.colors(1)), bins = 200) +
+      geom_freqpoly(aes(value, color = loose.rock::my.colors(1)), bins = 200) +
       theme_minimal() + theme(legend.position = 'none') + 
       theme(legend.position = 'none') +
       #scale_x_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 55000)) +
@@ -281,9 +302,14 @@ result <- mclapply(seq_along(quantile.abs), function(ix.i) {
                        edges        = sum(weighted.non),
                        max.edges    = length(weighted.non)^2)
   #
-  return(list(weighted = plot.w, unweighted = plot.u, network.info = network.info, quantile = ix.i))
+  return(list(weighted = plot.w, unweighted = plot.u, network.info = network.info, quantile = names(quantile.abs)[ix.i]))
 }, mc.cores = 1, mc.allow.recursive = FALSE, mc.cleanup = TRUE, mc.preschedule = FALSE)
 ```
+
+```{r}
+qplot(degree.dag, bins = 500) + scale_y_continuous(trans= 'log10')
+```
+
 
 - shows plots
 

@@ -1,13 +1,3 @@
-#' Tmp directory to store results
-#'
-#' @return a path to a temporary directory
-#'
-#' @examples
-#' base.dir()
-base.dir <- function() {
-  gsub('[a-zA-Z0-9]+$', 'network-cox', tempdir())
-}
-
 
 #' Parallel calculation of correlation
 #'
@@ -34,7 +24,7 @@ setMethod('cov.worker', signature('matrix'), function(xdata, ix.i, method = 'pea
 #'
 #' @param xdata calculate correlation matrix on each column
 #' @param n.cores number of cores to be used
-#' @param build.matrix boolean parameter to return the matrix in the end
+#' @param build.output string that can be 'matrix', 'vector' or NULL and determines the output of the function
 #'
 #' @return a mtarix if
 #'
@@ -43,16 +33,15 @@ setMethod('cov.worker', signature('matrix'), function(xdata, ix.i, method = 'pea
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 #' cor.parallel(xdata)
-setGeneric('cov.parallel', function(xdata, method = 'pearson',
-                                    base.dir = network.cox::base.dir(), build.matrix = T, n.cores = parallel:::detectCores(),
+setGeneric('cov.parallel', function(xdata, method = 'pearson', base.dir = verissimo::base.dir(), build.output = 'matrix', n.cores = parallel:::detectCores(),
                                     force.recalc = FALSE,
                                     show.message  = FALSE) {
   stop('first argument must be a matrix')
 })
 
 setMethod('cov.parallel', signature('matrix'), function(xdata, method = 'pearson',
-                                                        base.dir      = network.cox::base.dir(),
-                                                        build.matrix  = T,
+                                                        base.dir      = verissimo::base.dir(),
+                                                        build.output  = 'matrix',
                                                         n.cores       = parallel:::detectCores(),
                                                         force.recalc  = FALSE,
                                                         show.message  = FALSE) {
@@ -72,7 +61,7 @@ setMethod('cov.parallel', signature('matrix'), function(xdata, method = 'pearson
       error = function(error.str) {
         flog.error('This error has occured %s', error.str)
       })
-      if (build.matrix) {
+      if (build.output == 'vector' || build.output == 'matrix') {
         return(result)
       } else {
         return(TRUE)
@@ -88,8 +77,16 @@ setMethod('cov.parallel', signature('matrix'), function(xdata, method = 'pearson
                                  base.dir = base.dir,
                                  force.recalc = force.recalc,
                                  show.message = show.message)
-  if (build.matrix) {
+  if (build.output == 'vector') {
     return(unlist(result))
+  } else if(build.output == 'matrix') {
+    sparse.data <- data.frame(i = c(), j = c(), p = c())
+    for (ix in rev(seq_along(result))) {
+      line <- result[[ix]]
+      sparse.data <- rbind(sparse.data, data.frame(i = array(ix, length(line)), j = ix + seq_along(line), p = line))
+      result[[ix]] <- NULL
+    }
+    return(Matrix::sparseMatrix(i = sparse.data$i, j = sparse.data$j, x = sparse.data$p, dims = c(ncol(xdata), ncol(xdata)), symmetric = TRUE))
   } else {
     return(NULL)
   }
@@ -134,7 +131,7 @@ setMethod('cor.worker', signature('matrix'), function(xdata, ix.i, method = 'pea
 #'
 #' @param xdata calculate correlation matrix on each column
 #' @param n.cores number of cores to be used
-#' @param build.matrix boolean parameter to return the matrix in the end
+#' @param build.output string that can be 'matrix', 'vector' or NULL and determines the output of the function
 #'
 #' @return a mtarix if
 #'
@@ -144,14 +141,14 @@ setMethod('cor.worker', signature('matrix'), function(xdata, ix.i, method = 'pea
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 #' cor.parallel(xdata)
 setGeneric('cor.parallel', function(xdata, method = 'pearson',
-                                    base.dir = network.cox::base.dir(), build.matrix = T, n.cores = parallel:::detectCores(), force.recalc = FALSE,
+                                    base.dir = verissimo::base.dir(), build.output  = 'matrix', n.cores = parallel:::detectCores(), force.recalc = FALSE,
                                     show.message  = FALSE) {
   stop('first argument must be a matrix')
 })
 
 setMethod('cor.parallel', signature('matrix'), function(xdata, method = 'pearson',
-                                                        base.dir      = network.cox::base.dir(),
-                                                        build.matrix  = T,
+                                                        base.dir      = verissimo::base.dir(),
+                                                        build.output  = 'matrix',
                                                         n.cores       = parallel:::detectCores(),
                                                         force.recalc  = FALSE,
                                                         show.message  = FALSE) {
@@ -171,7 +168,7 @@ setMethod('cor.parallel', signature('matrix'), function(xdata, method = 'pearson
       error = function(error.str) {
         flog.error('This error has occured %s', error.str)
       })
-      if (build.matrix) {
+      if (build.output == 'vector' || build.output == 'matrix') {
         return(result)
       } else {
         return(TRUE)
@@ -187,8 +184,16 @@ setMethod('cor.parallel', signature('matrix'), function(xdata, method = 'pearson
                                  base.dir     = base.dir,
                                  force.recalc = force.recalc,
                                  show.message = show.message)
-  if (build.matrix) {
+  if (build.output == 'vector') {
     return(unlist(result))
+  } else if(build.output == 'matrix') {
+    sparse.data <- data.frame(i = c(), j = c(), p = c())
+    for (ix in rev(seq_along(result))) {
+      line <- result[[ix]]
+      sparse.data <- rbind(sparse.data, data.frame(i = array(ix, length(line)), j = ix + seq_along(line), p = line))
+      result[[ix]] <- NULL
+    }
+    return(Matrix::sparseMatrix(i = sparse.data$i, j = sparse.data$j, x = sparse.data$p, dims = c(ncol(xdata), ncol(xdata)), symmetric = TRUE))
   } else {
     return(NULL)
   }
@@ -214,13 +219,13 @@ setMethod('cor.parallel', signature('matrix'), function(xdata, method = 'pearson
 #' degree.weighted(xdata, cutoff = .5, consider.unweighted = T)
 #' degree.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
 setGeneric('degree.cor.weighted', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                       base.dir = network.cox::base.dir(), n.cores = parallel:::detectCores(),
+                                       base.dir = verissimo::base.dir(), n.cores = parallel:::detectCores(),
                                        show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
   stop('first argument must be a matrix')
 })
 
 setMethod('degree.cor.weighted', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                                           base.dir = network.cox::base.dir(), n.cores = parallel:::detectCores(),
+                                                           base.dir = verissimo::base.dir(), n.cores = parallel:::detectCores(),
                                                            show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
   if (force.recalc.correlation) {
     force.recalc.degree <- T
@@ -295,13 +300,13 @@ setMethod('degree.cor.weighted', signature('matrix'), function(xdata, method = '
 #' degree(xdata, cutoff = .5)
 #' degree(xdata, cutoff = .5, consider.unweighted = T)
 setGeneric('degree.cor', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                              base.dir = network.cox::base.dir(), n.cores = parallel:::detectCores(),
+                              base.dir = verissimo::base.dir(), n.cores = parallel:::detectCores(),
                               force.recalc = FALSE) {
   stop('first argument must be a matrix')
 })
 
 setMethod('degree.cor', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                                  base.dir = network.cox::base.dir(), n.cores = parallel:::detectCores(),
+                                                  base.dir = verissimo::base.dir(), n.cores = parallel:::detectCores(),
                                                   force.recalc = FALSE) {
   degree.weighted(xdata, base.dir = base.dir, cutoff = cutoff, consider.unweighted = T, n.cores = n.cores)
 })
@@ -340,13 +345,13 @@ setMethod('degree.cor', signature('matrix'), function(xdata, method = 'pearson',
 #' degree.weighted(xdata, cutoff = .5, consider.unweighted = T)
 #' degree.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
 setGeneric('degree.cov.weighted', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                       base.dir = network.cox::base.dir(), n.cores = parallel:::detectCores(),
+                                       base.dir = verissimo::base.dir(), n.cores = parallel:::detectCores(),
                                        show.message = FALSE, force.recalc.degree = FALSE, force.recalc.covariance = FALSE) {
   stop('first argument must be a matrix')
 })
 
 setMethod('degree.cov.weighted', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                                           base.dir = network.cox::base.dir(), n.cores = parallel:::detectCores(),
+                                                           base.dir = verissimo::base.dir(), n.cores = parallel:::detectCores(),
                                                            show.message = FALSE, force.recalc.degree = FALSE, force.recalc.covariance = FALSE) {
   if (force.recalc.covariance) {
     force.recalc.degree <- T
@@ -399,5 +404,117 @@ setMethod('degree.cov.weighted', signature('matrix'), function(xdata, method = '
                              cache.prefix = 'degree.cov',
                              show.message = show.message,
                              force.recalc = force.recalc.degree)
+  return(val)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#' Calculate degree of correlation matrix
+#'
+#' @param xdata calculate correlation matrix on each column
+#' @param method correlation method to be used
+#' @param cutoff positive value that determines a cutoff value
+#' @param consider.unweighted consider all edges as 1 if they are greater than 0
+#' @param base.dir where to store the cache of the results
+#' @param n.cores number of cores to be used
+#' @param force.recalc force recalculation, instead of going to cache
+#'
+#' @return a vector of the degrees
+#'
+#' @examples
+#' n.col <- 60
+#' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
+#' degree.cor.inv.weighted(xdata, n.cores = 1)
+#' degree.cor.inv.weighted(xdata, cutoff = .5)
+#' degree.cor.inv.weighted(xdata, cutoff = .5, consider.unweighted = T)
+#' degree.cor.inv.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
+setGeneric('degree.cor.inv.weighted', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
+                                           base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
+                                           show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
+  stop('first argument must be a matrix')
+})
+
+setMethod('degree.cor.inv.weighted', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
+                                                               base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
+                                                               show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
+  if (force.recalc.correlation) {
+    force.recalc.degree <- T
+  }
+  #
+  # auxiliary function to be able to call with cache
+  #
+  weigthed.aux <- function(xdata, cutoff, consider.unweighted, method, base.dir) {
+    degree <- array(0, ncol(xdata))
+    added.sum <- 1000
+    for (ix.outer in seq(1, ncol(xdata) - 1, added.sum)) {
+      max.ix <- min(ix.outer + added.sum - 1, ncol(xdata) - 1)
+      res.1000 <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
+        line <- verissimo::run.cache(cor.worker, xdata, ix.i, method = method,
+                                     base.dir     = base.dir,
+                                     cache.digest = list(xdata.sha256),
+                                     cache.prefix = 'correlation',
+                                     show.message = F,
+                                     force.recalc = force.recalc.correlation)
+        if (any(!is.numeric(line))) {
+          line <- verissimo::run.cache(cor.worker, xdata, ix.i, method = method,
+                                       base.dir     = base.dir,
+                                       cache.digest = list(xdata.sha256),
+                                       cache.prefix = 'correlation',
+                                       show.message = F,
+                                       force.recalc = T)
+        }
+        #
+        line.old <- line
+        line[is.na(line)]   <- 0 # failsafe in case there was a failure in cor (i.e. sd = 0)
+        line                <- abs(line)
+        line[line != 0]     <- 1/line
+        line[line == 0]     <- max(line != 0) + 1
+        line[line < cutoff] <- 0
+        if (consider.unweighted) { line[line != 0] <- 1 }
+        line <- c(rep(0, ix.i - 1), sum(line), line)
+        return(line)
+      }, mc.cores = n.cores, mc.allow.recursive = FALSE)
+      #
+      res.1000 <- matrix(unlist(res.1000), ncol = ncol(xdata), byrow = TRUE)
+      print(res.1000)
+      degree   <- degree + colSums(res.1000)
+    }
+    names(degree) <- colnames(xdata)
+    return(degree)
+  }
+  #
+  dir.create(base.dir, showWarnings = FALSE)
+  xdata.sha256 = verissimo::digest.cache(xdata)
+  val <- verissimo::run.cache(weigthed.aux, xdata, cutoff, consider.unweighted, method, base.dir,
+                              base.dir     = base.dir,
+                              cache.digest = list(xdata.sha256),
+                              cache.prefix = 'degree.cor.inv',
+                              show.message = show.message,
+                              force.recalc = force.recalc.degree)
   return(val)
 })

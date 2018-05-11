@@ -16,9 +16,9 @@ output:
 params:
   project: 'brca' # skcm prad brca
   tissue: 'primary.solid.tumor' # primary.solid.tumor metastatic solid.tissue.normal
-  degree.unweighted: !r TRUE
+  degree.unweighted: !r FALSE
   degree.correlation: 'pearson'
-  degree.cutoff: !r 0.00114616
+  degree.cutoff: !r 0.7545844
   #
   degree.type: "covariance" # covariance, correlation, oldie
   #
@@ -35,7 +35,7 @@ params:
   target.vars: !r list(classic.cv = 28, degree.cv = 42, orphan.cv = 3)#list(classic.cv = 33, degree.cv = 22, orphan.cv = 25)
   #
   seed: !r 1985# 2017
-  mc.cores: !r 2
+  mc.cores: !r 14
 ---
 
 
@@ -48,7 +48,7 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, tidy = TRUE)
 library(futile.logger)
 library(parallel)
 library(glmnet)
-library(verissimo)
+library(loose.rock)
 library(digest)
 library(ggplot2)
 library(reshape2)
@@ -60,6 +60,9 @@ library(tidyverse)
 library(forcats)
 library(survival.owl)
 devtools::load_all()
+#
+.Last.value <- base.dir(path = '/ssd_home/averissimo/work/rpackages/network.cox-cache')
+.Last.value <- show.message(FALSE)
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
 .Last.value <- flog.appender(appender.tee('logger.txt'))
 theme_set(theme_minimal())
@@ -148,9 +151,8 @@ prepare.tcga.survival.data('brca', 'primary.solid.tumor', handle.duplicates = 'k
 
 
 ```{r load.data, include=FALSE}
-my.data <- verissimo::run.cache(prepare.tcga.survival.data, 'brca', 'primary.solid.tumor', 'keep_first',
+my.data <- run.cache(prepare.tcga.survival.data, 'brca', 'primary.solid.tumor', 'keep_first',
                                 #
-                                base.dir = '../../network.cox-cache',
                                 cache.prefix = 'tcga-data',
                                 show.message = T)
 #
@@ -170,6 +172,17 @@ rm(my.data)
 ```{r degree.load}
 if (params$degree.type == 'oldie') {
   load(sprintf('/home/averissimo/work/rpackages/brca.analysis/data/degree-%.6f.RData', params$degree.cutoff))
+} else if (params$degree.type == 'correlation.inv') {
+  degree <- degree.cor.inv.weighted(xdata.raw,
+    method              = params$degree.correlation,
+    consider.unweighted = params$degree.unweighted,
+    cutoff              = params$degree.cutoff,
+    #
+    show.message = T,
+    n.cores = params$mc.cores)
+
+  # save(degree, file = sprintf('../saves/degree.inv-%.5f.RData', params$degree.cutoff))
+  write.csv(degree, file = sprintf('../saves/degree.inv-%.5f.csv', params$degree.cutoff))
 } else if (params$degree.type == 'correlation') {
   degree <- degree.cor.weighted(xdata.raw, 
     method              = params$degree.correlation, 
@@ -177,8 +190,7 @@ if (params$degree.type == 'oldie') {
     cutoff              = params$degree.cutoff, 
     #
     show.message = T,
-    n.cores = params$mc.cores, 
-    base.dir = '../../network.cox-cache')
+    n.cores = params$mc.cores)
 
   save(degree, file = sprintf('../saves/degree-%.5f.RData', params$degree.cutoff))
   write.csv(degree, file = sprintf('../saves/degree-%.5f.csv', params$degree.cutoff))
@@ -189,8 +201,7 @@ if (params$degree.type == 'oldie') {
     cutoff              = params$degree.cutoff, 
     #
     n.cores = params$mc.cores, 
-    show.message = T,
-    base.dir = '../../network.cox-cache')
+    show.message = T)
   
   save(degree.covariance, file = sprintf('../saves/degree-covariance-%.5f.RData', params$degree.cutoff))
   write.csv(degree.covariance, file = sprintf('../saves/degree-covariance-%.5f.csv', params$degree.cutoff))
@@ -202,14 +213,14 @@ if (params$degree.type == 'oldie') {
 
 ```{r sets, echo=FALSE}
 set.seed(params$seed)
-ixs        <- verissimo::balanced.train.and.test(which(ydata$status), which(!ydata$status), train.perc = params$train)
+ixs        <- balanced.train.and.test(which(ydata$status), which(!ydata$status), train.perc = params$train)
 xdata.test <- xdata[ixs$test,]
 ydata.test <- ydata[ixs$test,]
 #
 xdata.train <- xdata[ixs$train,]
 ydata.train <- ydata[ixs$train,]
 
-xdata.train.digest <- verissimo::digest.cache(xdata.train)
+xdata.train.digest <- digest.cache(xdata.train)
 
 flog.info('Size of sets: (size/events)\n * Training set: % 4d/% 4d\n * Test set:     % 4d/% 4d', 
           nrow(xdata.train), 
@@ -318,7 +329,7 @@ plot.all.clinical <- function() {
   return(list(plot.list = plot.list, layout = layout, df = df))
 }
 
-all.plots <- verissimo::run.cache(plot.all.clinical, show.message = F)
+all.plots <- run.cache(plot.all.clinical, show.message = F)
 
 multiplot(plotlist = all.plots$plot.list, layout = all.plots$layout)
 knitr::kable(dplyr::arrange(dplyr::select(all.plots$df, name, p.value, desc), p.value))
@@ -339,7 +350,7 @@ if (params$subset < ncol(xdata.train)) {
   xdata.ix <- sample(xdata.ix, params$subset)
 } 
 set.seed(params$seed)
-xdata.train.digest <- verissimo::digest.cache(xdata.train[, xdata.ix])
+xdata.train.digest <- digest.cache(xdata.train[, xdata.ix])
 ```
 
 ## Preparing degree vector
@@ -412,13 +423,37 @@ names(original.penalty.factor) <- colnames(xdata.train[,xdata.ix.no.added])
 ##########################
 original.penalty.factor[is.na(original.penalty.factor)] <- 0
 norm.orig.penalty.factor <- original.penalty.factor / max(original.penalty.factor[!is.na(original.penalty.factor)])
-penalty.factor.degree <- trans.fun(1 - norm.orig.penalty.factor)
+
+#
+# DegreeCox (old and log(old))
+#
+penalty.factor.degree.log <- penalty.factor.degree <- 1 / norm.orig.penalty.factor
+
+inf.ix <- is.infinite(penalty.factor.degree)
+#
+log.penal                          <- log(penalty.factor.degree[!inf.ix]) + 1
+penalty.factor.degree.log[!inf.ix] <- log.penal
+penalty.factor.degree.log[inf.ix]  <- max(log.penal) + 1
+#
+non.log                       <- penalty.factor.degree[!inf.ix]
+penalty.factor.degree[inf.ix] <- max(non.log) + 1
+
+#
+# DegreeCox heuristic
+#
+penalty.factor.degree.new <-trans.fun(1 - norm.orig.penalty.factor)
+
+#
+# OrphanCox
+#
 penalty.factor.orphan <- trans.fun(norm.orig.penalty.factor)
 
-my.df <- data.frame(ix                    = seq_along(penalty.factor.degree), 
-                    penalty.factor.degree = penalty.factor.degree, 
-                    penalty.factor.orphan = penalty.factor.orphan,
-                    original              = original.penalty.factor)
+my.df <- data.frame(ix                        = seq_along(penalty.factor.degree), 
+                    penalty.factor.degree     = penalty.factor.degree, 
+                    penalty.factor.degree.new = penalty.factor.degree.new,
+                    penalty.factor.degree.log = penalty.factor.degree.log,
+                    penalty.factor.orphan     = penalty.factor.orphan,
+                    original                  = original.penalty.factor)
 ```
 
 ### Original degree frequency
@@ -442,18 +477,37 @@ orphan.freq.plot <- ggplot(melt(my.df[,c('ix', 'penalty.factor.orphan')], id.var
 degree.factor.freq.plot <- ggplot(melt(my.df[,c('ix', 'penalty.factor.degree')], id.vars = c('ix'))) +
   geom_freqpoly(aes(value, color = variable), alpha = 0.5, bins = 200) +
   theme_minimal() + theme(legend.position = 'none') + scale_x_continuous(trans = 'log10', breaks = c(1, 2, 5, 10, 20, 30, 40, 50)) +
-  ggtitle('DegreeCox penalty', subtitle = sprintf('Number of total variables: %d', ncol(xdata.train))) +
+  ggtitle('DegreeCox (old) penalty', subtitle = sprintf('Number of total variables: %d', ncol(xdata.train))) +
+  xlab('Penalty (log10 scale)') +  scale_y_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000,  30000)) +
+  ylab('Frequency (log10 scale)')
+
+degree.new.factor.freq.plot <- ggplot(melt(my.df[,c('ix', 'penalty.factor.degree.new')], id.vars = c('ix'))) +
+  geom_freqpoly(aes(value, color = variable), alpha = 0.5, bins = 200) +
+  theme_minimal() + theme(legend.position = 'none') + scale_x_continuous(trans = 'log10', breaks = c(1, 2, 5, 10, 20, 30, 40, 50)) +
+  ggtitle('DegreeCox (heuristic) penalty', subtitle = sprintf('Number of total variables: %d', ncol(xdata.train))) +
+  xlab('Penalty (log10 scale)') +  scale_y_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000,  30000)) +
+  ylab('Frequency (log10 scale)')
+
+degree.log.factor.freq.plot <- ggplot(melt(my.df[,c('ix', 'penalty.factor.degree.log')], id.vars = c('ix'))) +
+  geom_freqpoly(aes(value, color = variable), alpha = 0.5, bins = 200) +
+  theme_minimal() + theme(legend.position = 'none') + scale_x_continuous(trans = 'log10', breaks = c(1, 2, 5, 10, 20, 30, 40, 50)) +
+  ggtitle('DegreeCox (log) penalty', subtitle = sprintf('Number of total variables: %d', ncol(xdata.train))) +
   xlab('Penalty (log10 scale)') +  scale_y_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000,  30000)) +
   ylab('Frequency (log10 scale)')
 
 suppressWarnings({
-  multiplot(original.freq.plot, degree.factor.freq.plot, orphan.freq.plot)
+  multiplot(original.freq.plot, degree.factor.freq.plot, orphan.freq.plot, degree.log.factor.freq.plot, degree.new.factor.freq.plot)
 })
 ```
 
-```{r, echo=FALSE}
-transf.d <- melt.data.frame(my.df[,c('ix', 'original', 'penalty.factor.degree')], id.vars = c('ix'), variable_name = 'Type')
-levels(transf.d$Type) <- c('Original', 'Transformed')
+```{r, echo=FALSE, fig.height=10, warning=FALSE}
+transf.d <- melt.data.frame(my.df[,c('ix', 
+                                     'original', 
+                                     'penalty.factor.degree',
+                                     'penalty.factor.orphan', 
+                                     'penalty.factor.degree.new', 
+                                     'penalty.factor.degree.log')], id.vars = c('ix'), variable_name = 'Type')
+levels(transf.d$Type) <- c('Original', 'Degree (old)', 'Orphan', 'Degree (heuristic)', 'Degree (log(old))')
 
 
 #degree.factor.freq.plot <- 
@@ -472,7 +526,7 @@ ggplot(transf.d) +
 
 ```{r model_declaration, include=FALSE}
 my.glmnet <- function(prefix, penalty.factor, target, lambda.min.ratio = .001, show.messages = FALSE) {
-  new.model <- verissimo::run.cache(glmnet,
+  new.model <- run.cache(glmnet,
                                    xdata.train[,xdata.ix], Surv(ydata.train[,1], ydata.train[,2]), 
                                    family           ='cox', 
                                    alpha            = params$alpha, 
@@ -483,7 +537,6 @@ my.glmnet <- function(prefix, penalty.factor, target, lambda.min.ratio = .001, s
                                    #
                                    force.recalc = F,
                                    cache.prefix = prefix,
-                                   base.dir     = file.path('..', '..', 'network.cox-cache'),
                                    cache.digest = list(xdata.train.digest),
                                    show.message = show.messages)
 
@@ -508,12 +561,12 @@ my.cv.glmnet <- function(prefix, penalty.factor, nfolds = 10, lambda.min.ratio =
   #
   set.seed(params$seed)
   #
-  fold.tmp <- verissimo::balanced.cv.folds(which(ydata$status), which(!ydata$status), nfolds = nfolds)
+  fold.tmp <- balanced.cv.folds(which(ydata$status), which(!ydata$status), nfolds = nfolds)
   foldid <- array(0, nrow(xdata))
   foldid[which(ydata$status)] <- fold.tmp$output[[1]]
   foldid[which(!ydata$status)] <- fold.tmp$output[[2]]
   #
-  new.model <- verissimo::run.cache(cv.glmnet,
+  new.model <- run.cache(cv.glmnet,
                                     xdata, Surv(ydata[,1], ydata[,2]), 
                                     family           ='cox', 
                                     foldid           = foldid,
@@ -526,7 +579,6 @@ my.cv.glmnet <- function(prefix, penalty.factor, nfolds = 10, lambda.min.ratio =
                                     mc.cores         = params$mc.cores,
                                     force.recalc = F,
                                     cache.prefix = prefix,
-                                    base.dir     = file.path('..', '..', 'network.cox-cache'),
                                     cache.digest = list(xdata.train.digest),
                                     show.message = show.messages)
   new.coef <- as.vector(coef(new.model, s = 'lambda.min'))
@@ -548,7 +600,7 @@ show.cv.info <- function(my.model, name) {
 }
 
 cv.classic <- my.cv.glmnet('cv.classic', rep(1, ncol(xdata)), show.messages = FALSE,  lambda.min.ratio = .001)
-cv.degree  <- my.cv.glmnet('cv.degree', penalty.factor.degree, show.messages = FALSE, lambda.min.ratio = .001)
+cv.degree  <- my.cv.glmnet('cv.degree', penalty.factor.degree.new, show.messages = FALSE, lambda.min.ratio = .001)
 cv.orphan  <- my.cv.glmnet('cv.degree', penalty.factor.orphan, show.messages = FALSE, lambda.min.ratio = .001)
 
 flog.info('10-fold cross-validation')
@@ -586,8 +638,10 @@ for (target.name in names(params$target.vars)) {
   target <- params$target.vars[[target.name]]
   glmnet.params[[ix]] <- list(penalty = rep(1, ncol(xdata.train)), name = 'glmnet', target = target, target.name = target.name)
   glmnet.params[[ix + 1]] <- list(penalty = penalty.factor.degree, name = 'degree', target = target, target.name = target.name)
-  glmnet.params[[ix + 2]] <- list(penalty = penalty.factor.orphan, name = 'orphan', target = target, target.name = target.name)
-  ix <- ix + 3
+  glmnet.params[[ix + 2]] <- list(penalty = penalty.factor.degree.new, name = 'degree.new', target = target, target.name = target.name)
+  glmnet.params[[ix + 3]] <- list(penalty = penalty.factor.degree.log, name = 'degree.log', target = target, target.name = target.name)
+  glmnet.params[[ix + 4]] <- list(penalty = penalty.factor.orphan, name = 'orphan', target = target, target.name = target.name)
+  ix <- ix + 5
 }
 
 outer.result <- mclapply(seq_along(glmnet.params), function(ix) {
@@ -610,7 +664,7 @@ outer.result <- mclapply(seq_along(glmnet.params), function(ix) {
 
 
 for (ix in outer.result) {
-  result[[ix$name]] <- ix$result
+  result[[ix$name]]  <- ix$result
   models[[ix$name]]  <- ix$result$model
   lambdas[[ix$name]] <- ix$result$lambda
   coefs[[ix$name]]   <- ix$result$coef
@@ -652,10 +706,10 @@ for (ix.name in names(models)) {
   this.list[[ix.name]] <- list(model = models[[ix.name]], target = lambdas[[ix.name]])
 }
 
-fitted.network <- verissimo::run.cache(build.fit.df, this.list, show.message = F)
+fitted.network <- run.cache(build.fit.df, this.list, show.message = F)
 ```
 
-```{r risk, fig.height=8}
+```{r risk, fig.height=18}
 ggplot(fitted.network) +
   geom_freqpoly(aes(relative.risk, color = set), bins = 150) + theme_minimal() +
   geom_vline(aes(xintercept = mean), linetype = 'dotted', color = '#999999') +
@@ -690,8 +744,14 @@ km.name <- function(title, alpha, is.network = NULL) {
     type <- if (is.network == 'glmnet') {
       subtitle <- 'Classic Elastic Net model'
       ''
+    } else if (is.network == 'degree.log') {
+      subtitle <- 'DegreeCox: Hubs are promoted -- log'
+      'Promotes high degree with '
+    } else if (is.network == 'degree.new') {
+      subtitle <- 'DegreeCox: Hubs are promoted -- heuristic'
+      'Promotes high degree with '
     } else if (is.network == 'degree') {
-      subtitle <- 'DegreeCox: Hubs are promoted'
+      subtitle <- 'DegreeCox: Hubs are promoted -- old'
       'Promotes high degree with '
     } else if (is.network == 'orphan') {
       subtitle <- 'OrphanCox: Low connected nodes are promoted'
@@ -762,7 +822,7 @@ flog.info('C-index for train set:')
 fit.risk <- function(coef.v, xdata, ydata, model.name, show.message = FALSE) {
   # fitted.risk  <- as.vector(predict(models$glmnet, newx = xdata.train[,xdata.ix], s = lambdas$glmnet, type = 'response')) 
   fitted.risk <- exp(as.vector(xdata[,xdata.ix] %*% coef.v))
-  c.res <- verissimo::run.cache(c.index.fun, all.pairs, fitted.risk, ydata, show.message = F)
+  c.res <- run.cache(c.index.fun, all.pairs, fitted.risk, ydata, show.message = F)
   c.res <- sum(c.res) / sum(c.res != 0)
   if (show.message) flog.info(' * %s: %f', model.name, c.res)
   return(c.res)
@@ -823,8 +883,8 @@ this.name <- function(this.coef) {
     marts <- biomaRt::listMarts()
     index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
     mart <- biomaRt::useMart(marts$biomart[index])
-    mart <- verissimo::run.cache(biomaRt::useMart,marts$biomart[index], 'hsapiens_gene_ensembl', 
-                                 cache.prefix = 'biomart', base.dir = '../../network.cox-cache')
+    mart <- run.cache(biomaRt::useMart,marts$biomart[index], 'hsapiens_gene_ensembl', 
+                                 cache.prefix = 'biomart')
     results <- biomaRt::getBM(attributes = c("external_gene_name", "ensembl_gene_id"),
                      filters = "ensembl_gene_id", values = this.coef,
                      mart = mart)
@@ -861,11 +921,11 @@ for (type in unique(all.origin)) {
   for (ix.name in all.names[which(grepl(type, all.names))]) {
      label <- gsub(sprintf('\\.%s', type), '', ix.name)
      label <- gsub('glmnet', 'classic', label)
-     label <- verissimo::proper(label)
+     label <- proper(label)
      ll[[label]] <- sort(non.zero.df.out$gene.name[!is.na(non.zero.df.out[, sprintf('coef.%s', ix.name)])])
   }
   vv <- Venn(ll)
-  gridExtra::grid.arrange(grid::grid.grabExpr(plot(vv, doWeights = FALSE)), top= sprintf('Target variables: %s', verissimo::proper(type)))
+  gridExtra::grid.arrange(grid::grid.grabExpr(plot(vv, doWeights = FALSE)), top= sprintf('Target variables: %s', proper(type)))
 }
 ```
 
@@ -878,11 +938,11 @@ for (type in unique(all.model)) {
      label <- gsub(sprintf('^%s\\.', type), '', ix.name)
      label <- gsub('glmnet', 'classic', label)
      label <- gsub('cv\\.', '', label)
-     label <- verissimo::proper(label)
+     label <- proper(label)
      ll[[label]] <- sort(non.zero.df.out$gene.name[!is.na(non.zero.df.out[, sprintf('coef.%s', ix.name)])])
   }
   vv <- Venn(ll)
-  gridExtra::grid.arrange(grid::grid.grabExpr(plot(vv, doWeights = FALSE)), top= sprintf('Model: %s', verissimo::proper(type)))
+  gridExtra::grid.arrange(grid::grid.grabExpr(plot(vv, doWeights = FALSE)), top= sprintf('Model: %s', proper(type)))
 }
 ```
 
@@ -904,7 +964,7 @@ call.results <- function(seed, xdata, ydata, train.perc, subset, penalty.factor.
   
   #
   # Build training data
-  ixs <- verissimo::balanced.train.and.test(which(ydata$status), which(!ydata$status), train.perc = train.perc)
+  ixs <- balanced.train.and.test(which(ydata$status), which(!ydata$status), train.perc = train.perc)
   xdata.test <- xdata[ixs$test,]
   ydata.test <- ydata[ixs$test,]
   #
@@ -918,7 +978,7 @@ call.results <- function(seed, xdata, ydata, train.perc, subset, penalty.factor.
     xdata.ix <- sample(xdata.ix, params$subset)
   } 
   
-  xdata.train.digest <- verissimo::digest.cache(xdata.train[, xdata.ix])
+  xdata.train.digest <- digest.cache(xdata.train[, xdata.ix])
   
   #
   # MODELS
@@ -996,12 +1056,11 @@ if (params$train == 1) {
   seed.vec <- sample(1000 + (max(c(1:1e7,params$ntimes))))[1:params$ntimes]
   
   ntimes.results <- parallel::mclapply(seed.vec, function(seed) {
-    return(verissimo::run.cache(call.results,
+    return(run.cache(call.results,
                                seed, xdata, ydata, params$train, params$subset, 
                                penalty.factor.degree, penalty.factor.orphan,
                                #
                                cache.digest = list(NULL, xdata.digest.cache, ydata.digest.cache),
-                               base.dir     = file.path('..', '..', 'network.cox-cache'),
                                cache.prefix = 'big-diff'))
   }, mc.cores = params$mc.cores, mc.allow.recursive = FALSE)
   
