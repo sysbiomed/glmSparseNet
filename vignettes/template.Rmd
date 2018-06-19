@@ -15,15 +15,23 @@ params:
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 8
 )
 ```
+
+```{r, include=FALSE, eval=FALSE}
+rmarkdown::render('template.Rmd')
+```
+
 
 # Required Packages
 
 *(AV: colocar todos pacotes necessários ao Rmd aqui)*
 
 ```{r libraries}
+library(reshape2)
 library(tidyverse)
 library(glmnet)
 library(survival)
@@ -35,16 +43,14 @@ library(loose.rock)
 library(parallel)
 library(doMC)
 
-
-devtools::install_url('averissimo/brca.data')
 # Load do package
 devtools::load_all()
 
 theme_set(theme_minimal())
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
 
-loose.rock::base.dir('./runcache')
-loose.rock::show.message(FALSE)
+.Last.value <- loose.rock::base.dir('./runcache')
+.Last.value <- loose.rock::show.message(FALSE)
 ```
 
 # Load data
@@ -63,6 +69,7 @@ ydata <- my.data$ydata
 
 ```{r penalization}
 # Random penalty vector
+set.seed(params$seed)
 penalty <- abs(rnorm(ncol(xdata)))
 qplot(penalty, bins = 100)
 ```
