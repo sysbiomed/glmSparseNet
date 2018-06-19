@@ -49,7 +49,7 @@ hallmarks <- function(genes, measure = 'count', hallmarks = 'full') {
 
   call.url <- sprintf('%s&q=%s', base.url, paste(all.genes, collapse = '&q='))
 
-  lines <- loose.rock::run.cache(readr::read_lines, url(call.url), cache.digest = list(digest.cache(call.url)))
+  lines <- loose.rock::run.cache(readr::read_lines, url(call.url), cache.digest = list(loose.rock::digest.cache(call.url)))
   item_group <- cumsum(grepl("^[A-Za-z0-9\\._,-]+\tcount", lines))
   all.items <- list()
   col.names <- c()
