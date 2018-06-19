@@ -164,29 +164,226 @@ rebuild.matrix <- function(xdata, vector.par) {
 
 
 ```{r}
-# use all data
-data("fpkm.per.tissue", package = 'brca.data')
-xdata <- cbind(fpkm.per.tissue$primary.solid.tumor, 
-               fpkm.per.tissue$metastatic, 
-               fpkm.per.tissue$solid.tissue.normal)
-# remove sd = 0
-xdata <- xdata[apply(xdata, 1, sd) != 0,]
-xdata <- xdata[1:20,1:10]
-dim(xdata)
-alternateCor(xdata, 14)
-aa <- corCustom.new(2, t(xdata))
-ab <- abs(aa)
-summary(aa)
-summary(ab)
-sum(ab[ab > 0.5])
-sum(ab)
 
-vector.par <- alternateCor(xdata, 14)
-rebuild.matrix(xdata, vector.par)
+
+#
+#
+#
+genVectorPar <- function(xdata, n.cores = 14) {
+  if (n.cores < 3) {
+    error('ERROR: n.cores must be equal or greater than 3')
+  }
+  # n.cores <- 3
+  vector.calcs <- nrow(xdata) - 1:nrow(xdata)
+  sum(vector.calcs) == choose(nrow(xdata), 2)
+  target     <- floor(choose(nrow(xdata), 2) / n.cores)
+  vector.ix  <- seq(1,nrow(xdata), floor(nrow(xdata) / n.cores))
+  vector.adj <- array(0, length(vector.ix))
+
+  # find best partition of data so that each one has the
+  #  same approximate number of operations
+  for (ix.aux in seq(vector.ix)) {
+    # first index should alway be 1
+    if (ix.aux == 1) {
+      flog.info('         target:% 9.d -- diff to target', target)
+      flog.info('---------------------------------------------')
+      ix.prev <- vector.ix[ix.aux]
+      next
+      # going to last, don't calculate
+    } else if (ix.aux == length(vector.ix)) {
+      new.ix <- vector.ix[ix.aux]
+    } else {
+      ix <- vector.ix[ix.aux] + cumsum(vector.adj[1:ix.aux])[ix.aux]
+      new.ix.list <- c()
+      new.ix.val  <- c()
+      ix.2.list   <- c()
+      for (ix.2 in -6000:6000){
+        new.ix <- ix + ix.2
+        if (new.ix <= 0 || new.ix >= nrow(xdata) || new.ix <= ix.prev)
+          next
+        new.ix.list <- c(new.ix.list, new.ix)
+        new.ix.val  <- c(new.ix.val, target - sum(vector.calcs[ix.prev:new.ix]))
+        ix.2.list   <- c(ix.2.list, ix.2)
+      }
+      min.ix <- sort(abs(new.ix.val), index.return = T)$ix[1]
+      new.ix <- new.ix.list[min.ix]
+      ix.2   <- ix.2.list[min.ix]
+      if (ix.2 != 0) {
+        vector.adj[ix.aux] <- ix.2
+      }
+    }
+    flog.info('Sum %5.d-%5.d: %9.d -- % 10d', ix.prev, new.ix, sum(vector.calcs[ix.prev:new.ix]), target - sum(vector.calcs[ix.prev:new.ix]))
+    ix.prev <- new.ix + 1
+  }
+
+
+  vector.par <- vector.ix + vector.adj
+  vector.par[length(vector.par)] <- nrow(xdata)
+  vector.par <- vector.par[!vector.par > nrow(xdata)]
+  return(vector.par)
+}
+
+#
+#
+#
+alternateCor <- function(xdata, n.cores = 14) {
+
+  output.file <- 'co-expression-matrix.RData'
+
+  #
+  # Get the matrix from cache if exists!
+  if (file.exists(output.file)) {
+    flog.info('Loading co-expression matrix (it could take a while!')
+    load(output.file)
+    return(resultm)
+  }
+  # else do everything :s
+
+  xdata.rows <- nrow(xdata)
+  vector.par <- genVectorPar(xdata, n.cores)
+
+  #
+  flog.layout(layout.simple.parallel)
+  flog.appender(appender.tee('logger.txt'))
+  #
+  corCustom <- function(ix.i) {
+    xdata.i <- xdata[ix.i,]
+    result <- sapply((ix.i + 1):xdata.rows, function(ix.j){
+      cor(xdata.i, xdata[ix.j,], method = 'pearson')
+    })
+    flog.info('Finished %d',  ix.i)
+    return(result)
+  }
+
+  #
+  # create cache dir, if it does not exist
+  cache.name <- 'co-expression-matrix'
+  if (!dir.exists(cache.name))
+    dir.create(cache.name)
+
+  # do it!!
+  for (ix in 1:(length(vector.par)-1)) {
+    ix.start <- vector.par[ix]
+    ix.stop <- vector.par[ix+1]
+    if(ix.start >= ix.stop + 1) {
+      ix.stop <- ix.start
+    } else {
+      ix.stop <- ix.stop -1
+    }
+    temp.result <- mclapply( ix.start:ix.stop, corCustom, mc.cores = n.cores + 2, mc.silent = T)
+    #
+    save('temp.result', file = file.path(cache.name, paste0('mcapply_', ix,'.RData')))
+    flog.info('#############################')
+    flog.info('#                           #')
+    flog.info('#                           #')
+    flog.info('#                           #')
+    flog.info('#    Saving %4d             #', ix)
+    flog.info('#                           #')
+    flog.info('#                           #')
+    flog.info('#                           #')
+    flog.info('#############################')
+    rm(temp.result)
+    gc(reset = T)
+    gc(reset = T)
+    gc(reset = T)
+    gc(reset = T)
+  }
+
+  #
+  #
+  #
+  # Build Matrix from data!
+  #
+
+  # pre-allocate matrix (It's huge!)
+  resultm <- matrix(0, nrow = xdata.rows, ncol = xdata.rows)
+  # this step also needs a lot of space in memory
+  .Last.value <- sapply(1:(length(vector.par)-1), function(ix){
+    count.problems <- 0
+    load(file.path(cache.name, paste0('mcapply_', ix,'.RData')))
+    for (ix.partition in seq(temp.result)) {
+      if (is.vector(temp.result[[ix.partition]])) {
+        ix.i <- xdata.rows - length(temp.result[[ix.partition]])
+        ix.j <- ix.i + seq(temp.result[[ix.partition]])
+        row <- temp.result[[ix.partition]]
+        resultm[ix.i, ix.j] <<- row
+      } else {
+        count.problems <- count.problems + 1
+        flog.info('problem in ix: %d, ix.partition: %d', ix, ix.partition)
+      }
+    }
+    flog.info('ix: %d!!', ix)
+    rm(temp.result)
+    gc(reset = T)
+    count.problems
+  })
+  flog.info('Saving matrix to %s (it could take a while!! Go get a coffee', output.file)
+  save(resultm, file = output.file)
+}
+
 ```
 
 ```{r}
-load('co-expression-matrix/mcapply_1.RData')
-sum(abs(temp.result[[100]]))
+# use all data
+data("fpkm.per.tissue", package = 'brca.data')
+xdata <- cbind(fpkm.per.tissue$primary.solid.tumor)
+# remove sd = 0
+xdata <- xdata[apply(xdata, 1, sd) != 0,]
+```
+
+
+```{r}
+vector.par <- genVectorPar(xdata, n.cores = 14)
+alternateCor(xdata, n.cores = 14)
+```
+
+
+```{r}
+# load('co-expression-matrix.RData')
+# resultm <- abs(resultm)
+
+
+cutoff.v <- seq(0.05,1,.05)
+cutoff.v <- 0.05
+cache.name <- 'co-expression-matrix'
+
+xdata.rows <- nrow(xdata)
+vector.par <- genVectorPar(xdata, n.cores = 14)
+
+sapply( cutoff.v, function(cutoff) {
+  # pre-allocate matrix (It's huge!)
+  resultm <- matrix(0, nrow = xdata.rows, ncol = xdata.rows)
+  # this step also needs a lot of space in memory
+  sapply(1:(length(vector.par)-1), function(ix){
+    count.problems <- 0
+    load(file.path(cache.name, paste0('mcapply_', ix,'.RData')))
+    for (ix.partition in seq(temp.result)) {
+      if (is.vector(temp.result[[ix.partition]])) {
+        ix.i <- xdata.rows - length(temp.result[[ix.partition]])
+        ix.j <- ix.i + seq(temp.result[[ix.partition]])
+        row <- temp.result[[ix.partition]]
+        row[abs(row) < cutoff] <- 0 # reset below 35
+        resultm[ix.i, ix.j] <- row
+      } else {
+        count.problems <- count.problems + 1
+        flog.info('problem in ix: %d, ix.partition: %d', ix, ix.partition)
+      }
+    }
+    flog.info('ix: %d!!', ix)
+    rm(temp.result)
+    gc(reset = T)
+    count.problems
+  })
+  output.file <- paste0('co-expression-matrix-', cutoff, '.RData')
+  save(resultm, file = output.file)
+  rm(resultm)
+  gc(reset = T)
+  gc()
+})
+```
+
+```{r}
+degree <- 1 / (colSums(resultm) + rowSums(resultm))
+degree
 ```
 

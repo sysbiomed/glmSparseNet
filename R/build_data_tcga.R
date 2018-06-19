@@ -15,7 +15,8 @@
 #'
 #' @examples
 #' prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first')
-prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.solid.tumor', handle.duplicates = 'keep_first') {
+prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.solid.tumor', handle.duplicates = 'keep_first',
+                                       coding.genes = FALSE) {
 
   package.name <- paste0(project, '.data')
 
@@ -36,9 +37,17 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
   # remove genes that don't have any variability
   sd.xdata  <- sapply(seq(ncol(xdata.raw)), function(ix) { sd(xdata.raw[,ix]) })
   #
-  flog.info('Non-expressed genes to be removed (from %d total genes) : %d', ncol(xdata.raw), sum(sd.xdata == 0))
-  flog.info('  Remaining genes : %d', ncol(xdata.raw) - sum(sd.xdata == 0))
+  futile.logger::flog.info('Non-expressed genes to be removed (from %d total genes) : %d', ncol(xdata.raw), sum(sd.xdata == 0))
+  futile.logger::flog.info('  Remaining genes : %d', ncol(xdata.raw) - sum(sd.xdata == 0))
   xdata.raw <- xdata.raw[,sd.xdata != 0]
+
+  if (coding.genes) {
+    futile.logger::flog.info('Using only coding genes:')
+    coding <- loose.rock::coding.genes()
+    xdata.raw <- xdata.raw[,colnames(xdata.raw) %in% coding$ensembl_gene_id]
+    futile.logger::flog.info('  * total coding genes: %d', length(coding$ensembl_gene_id))
+    futile.logger::flog.info('  * coding genes in data: %d (new size of xdata)', ncol(xdata.raw))
+  }
 
   if (handle.duplicates == 'keep_first') {
     xdata <- xdata.raw[!duplicated(strtrim(rownames(xdata.raw), 12)),]
@@ -65,7 +74,7 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
   # removing patients with:
   #  * negative follow-up
   #  * missing follow-up time
-  flog.info('Number of patients removed with: \n * followup time < 0:   %d\n * followup time is.na: %d',
+  futile.logger::flog.info('Number of patients removed with: \n * followup time < 0:   %d\n * followup time is.na: %d',
             sum(!is.na(ydata$time) & ydata$time <= 0), sum(is.na(ydata$time)))
   ydata        <- ydata[!is.na(ydata$time) & ydata$time > 0,]
 

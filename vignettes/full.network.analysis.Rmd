@@ -59,6 +59,7 @@ library(Vennerable)
 library(limma)
 library(tidyverse)
 library(forcats)
+library(brca.data)
 
 devtools::install_github('averissimo/loose.rock')
 library(loose.rock)
@@ -141,6 +142,26 @@ flog.info('  *    variables: %d', ncol(xdata))
 flog.info('  * observations: %d', nrow(xdata))
 ```
 
+```{r, eval=FALSE}
+ix.dag <- sapply(names(my.dag$edges), function(ix) { return(length(my.dag$edges[[ix]]) != 0) })
+
+edges <- sapply(seq_along(my.dag$edges), function(ix) {
+  el <- my.dag$edges[[ix]]
+  return(as.vector(t(cbind(array(ix, length(el)), el))))
+})
+
+edges.vec <- unlist(edges)
+
+igraph::plot.igraph(edges.vec)
+
+edgeList.short <- my.dag$edges[1:10]
+class(edgeList.short) <- class(my.dag$edges)
+
+
+sparsebn::plotDAG(my.dag$edges)
+```
+
+
 ## Build network
 
 ```{r build.network, echo=FALSE}
@@ -164,7 +185,10 @@ if (params$degree.type == 'covariance') {
   #
   dag <- loose.rock::run.cache(sparsebn::estimate.dag, sparse.xdata, lambdas = lambdas, upperbound = ncol(xdata) * 2,
                               cache.prefix = 'dag')
+  dag.params <- run.cache(sparsebnUtils::estimate.parameters, dag, data = sparse.xdata, verbose = T, cache.prefix = 'dag.params')
   my.dag <- select(dag, lambda = lambdas[length(lambdas)])
+  my.network <- abs(dag.params[[50]]$coefs@x)
+  my.network.full <- abs(dag.params[[50]]$coefs)
 } else {
   stop('Error on degree type')
 }
@@ -179,11 +203,12 @@ network.digest <- loose.rock::digest.cache(my.network)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
-quantile.abs <- loose.rock::run.cache(quantile, my.network, probs = params$probs,
+quantile.abs <- loose.rock::run.cache(quantile, my.network, probs = sort(params$probs),
                                      #
                                      cache.digest = list(network.digest),
                                      cache.prefix = 'quantile')
-save(sprintf('../saves/quantile.abs-%s.RData', params$degree.type))
+result <- quantile.abs
+save(result, file = sprintf('../saves/quantile.abs-%s.RData', params$degree.type))
 #
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
 .Last.value <- gc(reset = TRUE, verbose = FALSE)
@@ -207,7 +232,6 @@ min.abs <- loose.rock::run.cache(min, my.network,
                                 cache.digest = list(network.digest),
                                 cache.prefix = 'min')
 #
-rm(my.network)
 ```
 
 ## Statistical description
@@ -230,7 +254,8 @@ data.frame(quantile.abs)
 
 ```{r plots.gen, echo=FALSE, include=FALSE}
 #
-result <- mclapply(seq_along(quantile.abs), function(ix.i) {
+my.seq <- seq_along(quantile.abs)
+result <- mclapply(my.seq, function(ix.i) {
   ix <- quantile.abs[ix.i]
   #
   if (params$degree.type == 'covariance') {
@@ -265,10 +290,19 @@ result <- mclapply(seq_along(quantile.abs), function(ix.i) {
     .Last.value <- gc(reset = TRUE, verbose = FALSE)
     .Last.value <- gc(reset = TRUE, verbose = FALSE)
     
-    weighted.non <- degree.cor.weighted(xdata, method = params$degree.correlation, cutoff = ix,
+    weighted <- degree.sparsebn.weighted(xdata, cutoff = ix,
+                                    consider.unweighted = FALSE,
+                                    show.message = FALSE)
+    
+    .Last.value <- gc(reset = TRUE, verbose = FALSE)
+    .Last.value <- gc(reset = TRUE, verbose = FALSE)
+    weighted.non <- degree.sparsebn.weighted(xdata, cutoff = ix,
                                         consider.unweighted = TRUE,
-                                        n.cores = params$mc.cores,
                                         show.message = FALSE)
+    
+    my.graph <- run.cache(sparsebnUtils::to_igraph, my.dag)
+    components.w <- igraph::count_components(my.graph$edges, mode = 'weak')
+    components.s <- igraph::count_components(my.graph$edges, mode = 'strong')
   }  
   #
   #
@@ -280,7 +314,7 @@ result <- mclapply(seq_along(quantile.abs), function(ix.i) {
       #scale_x_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 55000)) +
       ggtitle('Weighted Degree distribution ', 
               subtitle = sprintf('cutoff: %g (quantile %s)', ix, names(ix))) +
-      #scale_y_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 30000)) +
+      scale_y_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 30000)) +
       ylab('Frequency (log10 scale)') +
       xlab('Degree')
   
@@ -292,35 +326,38 @@ result <- mclapply(seq_along(quantile.abs), function(ix.i) {
       #scale_x_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 55000)) +
       ggtitle('Un-Weighted Degree distribution ', 
               subtitle = sprintf('cutoff: %g (quantile %s)', ix, names(quantile.abs)[ix.i])) +
-      #scale_y_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 30000)) +
+      scale_y_continuous(trans = 'log10', breaks = c(1, 10, 100, 1000, 10000, 30000)) +
       ylab('Frequency (log10 scale)') +
       xlab('Degree')
   #
   network.info <- list(nodes        = length(weighted.non), 
                        disconnected = sum(weighted.non == 0), 
-                       connected    = sum(weighted.non != 0), 
+                       connected    = sum(weighted.non != 0),
                        edges        = sum(weighted.non),
-                       max.edges    = length(weighted.non)^2)
+                       max.edges    = length(weighted.non)^2,
+                       components.weak = components.w,
+                       components.strong = components.s)
   #
   return(list(weighted = plot.w, unweighted = plot.u, network.info = network.info, quantile = names(quantile.abs)[ix.i]))
 }, mc.cores = 1, mc.allow.recursive = FALSE, mc.cleanup = TRUE, mc.preschedule = FALSE)
 ```
 
-```{r}
-qplot(degree.dag, bins = 500) + scale_y_continuous(trans= 'log10')
-```
-
-
 - shows plots
 
 ```{r plot.show, echo=FALSE}
 for (ix in seq_along(result)) {
-  flog.info('Network info for %f quantile:', result[[ix]]$quantile)
+  flog.info('Network info for %s quantile:', result[[ix]]$quantile)
   flog.info('  * nodes: %d', result[[ix]]$network.info$nodes)
   flog.info('    * disconnected: %d', result[[ix]]$network.info$disconnected)
   flog.info('    *    connected: %d', result[[ix]]$network.info$connected)
   flog.info('  * edges: %g', result[[ix]]$network.info$edges)
   flog.info('    * out of possible: %g', result[[ix]]$network.info$max.edges)
+  
+  if (params$degree.type == 'sparsebn') {
+    flog.info('Graph components:')
+    flog.info('  *   weak: %d', result[[ix]]$network.info$components.weak)
+    flog.info('  * strong: %d', result[[ix]]$network.info$components.strong)
+  }
   #
   multiplot(plotlist = list(result[[ix]]$weighted, result[[ix]]$unweighted), ncol = 2)
 }
