@@ -1,6 +1,6 @@
 ---
-title: "Example for Logistic Regularization"
-author: "Vignette Author"
+title: "Example for Logistic Regularization -- Eunice"
+author: "Vignette Author eunice"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
