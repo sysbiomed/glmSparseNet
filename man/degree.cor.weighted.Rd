@@ -5,7 +5,7 @@
 \title{Calculate degree of correlation matrix}
 \usage{
 degree.cor.weighted(xdata, method = "pearson", cutoff = 0,
-  consider.unweighted = FALSE, base.dir = network.cox::base.dir(),
+  consider.unweighted = FALSE, base.dir = loose.rock::base.dir(),
   n.cores = parallel:::detectCores(), show.message = FALSE,
   force.recalc.degree = FALSE, force.recalc.correlation = FALSE)
 }
