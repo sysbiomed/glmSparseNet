@@ -1,3 +1,12 @@
+#' Retrieve gene names from biomaRt
+#'
+#' @param ensembl.genes character vector with gene names in ensembl_id format
+#'
+#' @return a dataframe with external gene names and ensembl_id
+#' @export
+#'
+#' @examples
+#' gene.names(c('ENSG00000114978','ENSG00000166211', 'ENSG00000183688'))
 gene.names <- function(ensembl.genes) {
   tryCatch({
     marts <- biomaRt::listMarts()
@@ -15,6 +24,23 @@ gene.names <- function(ensembl.genes) {
   return(data.frame(ensembl_gene_id = ensembl.genes, external_gene_name = ensembl.genes, stringsAsFactors = FALSE))
 }
 
+#' Retrieve hallmarks of cancer count for genes
+#'
+#' @param genes gene names
+#' @param measure see below
+#' @param hallmarks  see below
+#'
+#' @return data.frame with choosen measure and hallmarks.
+#' It also returns a vector with genes that do not have any
+#' hallmarks
+#'
+#' See http://chat.lionproject.net/api for more details on the
+#' measure and hallmarks parameters
+#'
+#' @export
+#'
+#' @examples
+#' hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
 hallmarks <- function(genes, measure = 'count', hallmarks = 'full') {
   base.url <- sprintf('http://chat.lionproject.net/chartdata?measure=%s&hallmarks=%s', measure, hallmarks)
   # base.url <- 'http://chat.lionproject.net/?measure=npmi&chart_type=doughnut&hallmarks=full'

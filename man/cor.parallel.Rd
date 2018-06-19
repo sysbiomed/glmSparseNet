@@ -4,14 +4,14 @@
 \alias{cor.parallel}
 \title{Calculate correlation of large matrix}
 \usage{
-cor.parallel(xdata, method = "pearson", base.dir = network.cox::base.dir(),
-  build.matrix = T, n.cores = parallel:::detectCores(),
+cor.parallel(xdata, method = "pearson", base.dir = loose.rock::base.dir(),
+  build.output = "matrix", n.cores = parallel:::detectCores(),
   force.recalc = FALSE, show.message = FALSE)
 }
 \arguments{
 \item{xdata}{calculate correlation matrix on each column}
 
-\item{build.matrix}{boolean parameter to return the matrix in the end}
+\item{build.output}{string that can be 'matrix', 'vector' or NULL and determines the output of the function}
 
 \item{n.cores}{number of cores to be used}
 }

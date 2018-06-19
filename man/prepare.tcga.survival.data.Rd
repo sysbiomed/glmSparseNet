@@ -5,7 +5,8 @@
 \title{Prepare FPKM data from TCGA project (specific tissue)}
 \usage{
 prepare.tcga.survival.data(project = "brca",
-  tissue.type = "primary.solid.tumor", handle.duplicates = "keep_first")
+  tissue.type = "primary.solid.tumor", handle.duplicates = "keep_first",
+  coding.genes = FALSE)
 }
 \arguments{
 \item{tissue.type}{}

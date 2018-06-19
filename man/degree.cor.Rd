@@ -5,7 +5,7 @@
 \title{Title}
 \usage{
 degree.cor(xdata, method = "pearson", cutoff = 0,
-  consider.unweighted = FALSE, base.dir = network.cox::base.dir(),
+  consider.unweighted = FALSE, base.dir = loose.rock::base.dir(),
   n.cores = parallel:::detectCores(), force.recalc = FALSE)
 }
 \arguments{

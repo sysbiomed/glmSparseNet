@@ -6,3 +6,12 @@ inst/doc
 logger.txt
 *.Rproj
 /vignettes/*.html
+*.RData
+*.csv
+*.html
+*_files
+*.txt
+*.pdf
+runcache
+run-cache
+*.tar.bz2
