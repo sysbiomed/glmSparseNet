@@ -10,7 +10,7 @@ vignette: >
 params:
   seed: !r 29221
   some_string: "some string"
----
+--- 
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
