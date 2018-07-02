@@ -214,10 +214,10 @@ setMethod('cor.parallel', signature('matrix'), function(xdata, method = 'pearson
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degree.weighted(xdata)
-#' degree.weighted(xdata, cutoff = .5)
-#' degree.weighted(xdata, cutoff = .5, consider.unweighted = T)
-#' degree.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
+#' degree.cor.weighted(xdata)
+#' degree.cor.weighted(xdata, cutoff = .5)
+#' degree.cor.weighted(xdata, cutoff = .5, consider.unweighted = T)
+#' degree.cor.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
 setGeneric('degree.cor.weighted', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
                                        base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
                                        show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
@@ -369,14 +369,14 @@ setMethod('degree.cov.weighted', signature('matrix'), function(xdata, method = '
                                     base.dir     = base.dir,
                                     cache.digest = list(xdata.sha256),
                                     cache.prefix = 'covariance',
-                                    show.message = T,
+                                    show.message = F,
                                     force.recalc = force.recalc.covariance)
         if (any(!is.numeric(line))) {
           line <- loose.rock::run.cache(cov.worker, xdata, ix.i, method = method,
                                       base.dir     = base.dir,
                                       cache.digest = list(xdata.sha256),
                                       cache.prefix = 'covariance',
-                                      show.message = T,
+                                      show.message = F,
                                       force.recalc = T)
         }
         #

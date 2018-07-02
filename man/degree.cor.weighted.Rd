@@ -33,8 +33,8 @@ Calculate degree of correlation matrix
 \examples{
 n.col <- 6
 xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-degree.weighted(xdata)
-degree.weighted(xdata, cutoff = .5)
-degree.weighted(xdata, cutoff = .5, consider.unweighted = T)
-degree.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
+degree.cor.weighted(xdata)
+degree.cor.weighted(xdata, cutoff = .5)
+degree.cor.weighted(xdata, cutoff = .5, consider.unweighted = T)
+degree.cor.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
 }

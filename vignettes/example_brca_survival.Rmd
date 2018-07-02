@@ -1,5 +1,5 @@
 ---
-title: "Example for Logistic regularization -- Breast Invasive Carcinoma"
+title: "Example for Survival Data -- Breast"
 author: "Vignette Author"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -9,8 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 params:
   seed: !r 29221
-  some_string: "some string"
----
+--- 
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
@@ -22,23 +21,22 @@ knitr::opts_chunk$set(
 ```
 
 ```{r, include=FALSE, eval=FALSE}
-rmarkdown::render('template_Marta.Rmd')
+rmarkdown::render('example_brca_survival.Rmd')
+rmarkdown::render('example_prad_survival.Rmd')
+rmarkdown::render('example_skcm_survival.Rmd')
+rmarkdown::render('example_brca_binomial.Rmd')
 ```
 
 
 # Required Packages
 
 ```{r libraries}
-
 library(reshape2)
 library(tidyverse)
 library(glmnet)
 library(survival)
 library(futile.logger)
 library(loose.rock)
-library(brca.data)
-
-#rmarkdown::render('template.Rmd')
 
 library(parallel)
 library(doMC)
@@ -55,41 +53,24 @@ theme_set(theme_minimal())
 
 # Load data
 
-Classification of Breast Invasive Carcinoma (BRCA) data from the Cancer Genome Atlas  (TCGA) ([TCGA](https://cancergenome.nih.gov/)).
-
 ```{r data}
-data('fpkm.per.tissue', 'fpkm.per.tissue.barcode', 'clinical', package = 'brca.data')
-
-# RNA-Seq data
-# tumor tissue
-xdata_tumor <- fpkm.per.tissue$primary.solid.tumor
-xdata_tumor <- xdata_tumor[,-which(duplicated(getParticipantCode(colnames(fpkm.per.tissue$primary.solid.tumor))))] # removing duplicated samples
-# normal tissue
-xdata_normal <- fpkm.per.tissue$solid.tissue.normal
-xdata <- rbind(t(xdata_tumor),t(xdata_normal))
-
-# response vector ('1', tumor; '0', normal)
-ydata <- c(rep(1,dim(xdata_tumor)[2]),rep(0,dim(xdata_normal)[2]))
-
-```
-
-# Build network penalization
-
-```{r penalization}
-# Random penalty vector
+# exemplo simples
+my.data <- prepare.tcga.survival.data(project           = 'brca', 
+                                      tissue.type       = 'primary.solid.tumor', 
+                                      handle.duplicates = 'keep_first', 
+                                      coding.genes      = TRUE)
 set.seed(params$seed)
-penalty <- abs(rnorm(ncol(xdata)))
-qplot(penalty, bins = 100)
+xdata <- my.data$xdata[,sample(seq(ncol(my.data$xdata)), 300)]
+ydata <- my.data$ydata
 ```
 
 # Fit models
 
 ```{r fit}
-registerDoMC(cores=10)
-fitted <- run.cache(cv.glmnet, 
-                    xdata, ydata, 
-                    family = 'binomial', 
-                    penalty.factor = penalty, parallel = TRUE,
+fitted <- run.cache(network.cv.glmnet, 
+                    xdata, Surv(ydata$time, ydata$status), 
+                    network = 'correlation',
+                    family = 'cox',
                     seed = params$seed)
 ```
 
@@ -125,4 +106,9 @@ melt(all.hallmarks$hallmarks,
     xlab('External Gene Name') + ylab('')
 ```
 
+### Survival curves and Log rank test
+
+```{r, echo=FALSE}
+draw.kaplan(as.vector(coefs.v), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
+```
 

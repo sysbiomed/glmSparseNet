@@ -1,6 +1,6 @@
 ---
-title: "Example for Logistic Regularization"
-author: "Vignette Author - Susana Vinga - teste2"
+title: "Example for Survival Data -- Breast"
+author: "Vignette Author"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -9,8 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 params:
   seed: !r 29221
-  some_string: "some string"
----
+--- 
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
@@ -22,13 +21,11 @@ knitr::opts_chunk$set(
 ```
 
 ```{r, include=FALSE, eval=FALSE}
-rmarkdown::render('template.Rmd')
+rmarkdown::render('example_brca_survival.Rmd')
 ```
 
 
 # Required Packages
-
-*(AV: colocar todos pacotes necessários ao Rmd aqui)*
 
 ```{r libraries}
 library(reshape2)
@@ -37,8 +34,6 @@ library(glmnet)
 library(survival)
 library(futile.logger)
 library(loose.rock)
-
-#rmarkdown::render('template.Rmd')
 
 library(parallel)
 library(doMC)
@@ -57,31 +52,22 @@ theme_set(theme_minimal())
 
 ```{r data}
 # exemplo simples
-my.data <- prepare.tcga.survival.data(project           = 'brca', 
+my.data <- prepare.tcga.survival.data(project           = 'skcm', 
                                       tissue.type       = 'primary.solid.tumor', 
                                       handle.duplicates = 'keep_first', 
                                       coding.genes      = TRUE)
-xdata <- my.data$xdata
-ydata <- my.data$ydata
-```
-
-# Build network penalization
-
-```{r penalization}
-# Random penalty vector
 set.seed(params$seed)
-penalty <- abs(rnorm(ncol(xdata)))
-qplot(penalty, bins = 100)
+xdata <- my.data$xdata[,sample(seq(ncol(my.data$xdata)), 300)]
+ydata <- my.data$ydata
 ```
 
 # Fit models
 
 ```{r fit}
-registerDoMC(cores=10)
-fitted <- run.cache(cv.glmnet, 
+fitted <- run.cache(network.cv.glmnet, 
                     xdata, Surv(ydata$time, ydata$status), 
-                    family = 'cox', 
-                    penalty.factor = penalty, parallel = TRUE,
+                    network = 'correlation',
+                    family = 'cox',
                     seed = params$seed)
 ```
 
@@ -120,6 +106,6 @@ melt(all.hallmarks$hallmarks,
 ### Survival curves and Log rank test
 
 ```{r, echo=FALSE}
-draw.kaplan(as.vector(coefs.v), xdata, ydata, filename = 'Full dataset', legend.outside = F)
+draw.kaplan(as.vector(coefs.v), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
 ```
 

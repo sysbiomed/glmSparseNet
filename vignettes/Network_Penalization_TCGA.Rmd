@@ -36,7 +36,7 @@ params:
   target.vars: !r list(classic.cv = 28, degree.cv = 42, orphan.cv = 70)
   #
   seed: !r 1985
-  mc.cores: !r 1
+  mc.cores: !r 14
   #
   calc.params.old: !r FALSE
 ---
@@ -71,6 +71,11 @@ devtools::load_all()
 .Last.value <- flog.appender(appender.tee('logger.txt'))
 theme_set(theme_minimal())
 ```
+
+```{r, eval=FALSE, include=FALSE}
+rmarkdown::render('Network_Penalization_TCGA.Rmd')
+```
+
 
 ```{r, eval=FALSE, include=FALSE}
 run.me <- function(my.params) {
@@ -509,7 +514,7 @@ plot.all.clinical <- function() {
       my.coef        <- coef(test.me.model)
       names(my.coef) <- 'test.me'
       ydata.me       <- data.frame(time = ydata[names(test.me),1], status = ydata[names(test.me),2] * 1)
-      test.me.km     <- draw.kaplan(as.vector(my.coef), as.vector(test.me), ydata.me, filename = ix.name, legend.outside = F)
+      test.me.km     <- draw.kaplan(as.vector(my.coef), as.vector(test.me), ydata.me, plot.title = ix.name, legend.outside = F)
       # build list to multiplot
       #  but skip if not significant
       if (p.value > 0.05 && test.me.km$pvalue > 0.05) { next }
@@ -801,9 +806,9 @@ plot(vv, doWeights = FALSE)
 #
 km.cv <- list()
 
-km.cv[['cv.classic']] <- draw.kaplan(list(CV.Classic = cv.classic$coef), xdata[,xdata.ix], ydata, filename = 'CV.Classic', legend.outside = F)
-km.cv[['cv.degree']] <- draw.kaplan(list(CV.Degree = cv.degree$coef), xdata[,xdata.ix], ydata, filename = 'CV.Degree', legend.outside = F)
-km.cv[['cv.orphan']] <- draw.kaplan(list(CV.Orphan = cv.orphan$coef), xdata[,xdata.ix], ydata, filename = 'CV.Orphan', legend.outside = F)
+km.cv[['cv.classic']] <- draw.kaplan(list(CV.Classic = cv.classic$coef), xdata[,xdata.ix], ydata, plot.title = 'CV.Classic', legend.outside = F)
+km.cv[['cv.degree']] <- draw.kaplan(list(CV.Degree = cv.degree$coef), xdata[,xdata.ix], ydata, plot.title = 'CV.Degree', legend.outside = F)
+km.cv[['cv.orphan']] <- draw.kaplan(list(CV.Orphan = cv.orphan$coef), xdata[,xdata.ix], ydata, plot.title = 'CV.Orphan', legend.outside = F)
 
 for (ix in names(km.cv)) {
   print(km.cv[[ix]]$plot)
@@ -955,11 +960,11 @@ km.name <- function(title, alpha, is.network = NULL) {
 ```
 
 ```{r calc.km, include=FALSE}
-my.draw.kaplan <- function(coef.l, filename, test.set = F) { 
+my.draw.kaplan <- function(coef.l, plot.title, test.set = F) { 
   if (test.set) {
-    return(draw.kaplan(coef.l, xdata.test[,xdata.ix], ydata.test, filename = filename, legend.outside = F, ylim = c(0,1))) 
+    return(draw.kaplan(coef.l, xdata.test[,xdata.ix], ydata.test, plot.title = plot.title, legend.outside = F, ylim = c(0,1))) 
   } else {
-    draw.kaplan(coef.l, xdata.train[,xdata.ix], ydata.train, filename = filename, legend.outside = F, ylim = c(0,1))
+    draw.kaplan(coef.l, xdata.train[,xdata.ix], ydata.train, plot.title = plot.title, legend.outside = F, ylim = c(0,1))
   }
 }
 
@@ -968,8 +973,8 @@ km.train <- list()
 km.test  <- list()
 #
 for (ix.name in names(coefs)) {
-  km.train[[ix.name]] <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), filename = 'Train set')
-  km.test[[ix.name]]  <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), filename = 'Test set', test.set = T)
+  km.train[[ix.name]] <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Train set')
+  km.test[[ix.name]]  <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Test set', test.set = T)
 }
 ```
 
@@ -1393,8 +1398,8 @@ call.results <- function(seed, xdata, ydata, train.perc, subset, penalty.factor.
   km.test  <- list()
   #
   for (ix.name in names(coefs)) {
-    km.train[[ix.name]] <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), filename = 'Train set')$pvalue
-    km.test[[ix.name]]  <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), filename = 'Test set', test.set = T)$pvalue
+    km.train[[ix.name]] <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Train set')$pvalue
+    km.test[[ix.name]]  <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Test set', test.set = T)$pvalue
   }
   
   #
