@@ -15,3 +15,5 @@ logger.txt
 runcache
 run-cache
 *.tar.bz2
+vignettes/personal_Rmds
+vignettes/folders
