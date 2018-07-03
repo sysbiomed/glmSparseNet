@@ -21,7 +21,7 @@ devtools::load_all()
 ```
 
 ```{r, eval=FALSE, include=FALSE}
-rmarkdown::render('README.Rmd', output_dir = '..', output_format = 'github_document')
+rmarkdown::render('README.Rmd', output_format = 'github_document')
 ```
 
 > Elastic-Net models with additional regularization based on network centrality metrics

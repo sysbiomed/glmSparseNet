@@ -1,4 +1,4 @@
-name needed!!
+name needed
 ================
 
 > Elastic-Net models with additional regularization based on network centrality metrics
@@ -52,7 +52,7 @@ fit1 <- network.glmnet(x,y, 'correlation')
 plot(fit1)
 ```
 
-![](/ssd_home/averissimo/work/rpackages/network.cox/README_files/figure-markdown_github/unnamed-chunk-35-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
 The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot
 
@@ -62,17 +62,17 @@ predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
 
     ## [INFO] Observed vs. Predicted
     ## 
-    ##          Observed lambda_0.01 lambda_0.005
-    ##  [1,] -2.00400205 -0.04712893  -0.03922349
-    ##  [2,]  0.10314180  0.18829529   0.20926554
-    ##  [3,]  1.77987243 -0.34774687  -0.38406218
-    ##  [4,] -0.48894441 -0.46747871  -0.45652741
-    ##  [5,]  0.47248022  0.63968263   0.67575077
-    ##  [6,] -0.06879488 -0.09127668  -0.10037217
-    ##  [7,] -0.50705086 -0.02537543  -0.03761133
-    ##  [8,] -0.29653263 -0.27955039  -0.32205664
-    ##  [9,]  1.15774035 -0.32764785  -0.32774879
-    ## [10,]  0.05819614  0.08659442   0.10667689
+    ##         Observed lambda_0.01 lambda_0.005
+    ##  [1,] -0.1852567  -0.3573519   -0.3412778
+    ##  [2,]  0.3061704   0.2088865    0.2304297
+    ##  [3,] -0.3244506  -0.1130600   -0.1295346
+    ##  [4,]  0.6764276  -0.2949259   -0.3345391
+    ##  [5,] -1.1388622  -0.4007231   -0.3997077
+    ##  [6,] -0.9735509   0.3234902    0.3317818
+    ##  [7,]  0.7099490   0.2833419    0.3468878
+    ##  [8,]  0.1905984  -0.4467155   -0.4820578
+    ##  [9,] -1.7464571  -0.5601308   -0.5904652
+    ## [10,]  0.4164180   0.2005956    0.2150257
 
 It also extends the new methods to the cross validation function with `network.cv.glmnet`
 
@@ -80,7 +80,7 @@ It also extends the new methods to the cross validation function with `network.c
 plot(network.cv.glmnet(x,y, 'covariance'))
 ```
 
-![](/ssd_home/averissimo/work/rpackages/network.cox/README_files/figure-markdown_github/unnamed-chunk-38-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 ### Survival Example using RNASeq data
 
@@ -123,7 +123,7 @@ fit3 <- network.cv.glmnet(xdata, ydata, family = 'cox',
 plot(fit3)
 ```
 
-![](/ssd_home/averissimo/work/rpackages/network.cox/README_files/figure-markdown_github/unnamed-chunk-40-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
 ``` r
 fit4 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
@@ -141,7 +141,7 @@ fit4 <- network.cv.glmnet(xdata, ydata, family = 'cox',
 plot(fit4)
 ```
 
-![](/ssd_home/averissimo/work/rpackages/network.cox/README_files/figure-markdown_github/unnamed-chunk-40-2.png)
+![](README_files/figure-markdown_github/unnamed-chunk-9-2.png)
 
 ``` r
 # note that this should take some time and not converge
@@ -162,7 +162,7 @@ fit6 <- network.cv.glmnet(xdata, ydata, family = 'cox',
 plot(fit6)
 ```
 
-![](/ssd_home/averissimo/work/rpackages/network.cox/README_files/figure-markdown_github/unnamed-chunk-40-3.png)
+![](README_files/figure-markdown_github/unnamed-chunk-9-3.png)
 
 ``` r
 fit7 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
@@ -174,4 +174,4 @@ fit7 <- network.cv.glmnet(xdata, ydata, family = 'cox',
 plot(fit7)
 ```
 
-![](/ssd_home/averissimo/work/rpackages/network.cox/README_files/figure-markdown_github/unnamed-chunk-40-4.png)
+![](README_files/figure-markdown_github/unnamed-chunk-9-4.png)
