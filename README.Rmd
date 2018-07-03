@@ -87,9 +87,11 @@ plot(fit1)
 
 The given network parameter can also be a network itself, i.e. a matrix. The example below uses a randomly generated network to use in the methods.
 
-```{r}
-rand.network <- abs(matrix(rnorm(20*20),20,20))
+```{r rand.network}
+# generate random network
+rand.network       <- abs(matrix(rnorm(20*20),20,20))
 diag(rand.network) <- 0
+# actual fit
 fit4 <- network.glmnet(x,y, rand.network, network.options = network.options.default(cutoff = 0.1))
 plot(fit4)
 ```

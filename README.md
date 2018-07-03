@@ -59,7 +59,7 @@ Inspecting the penalty.factor used from correlation network
 fit1$penalty.factor
 ```
 
-    ##  [1]  8  4  4  6  8  4  5  6  4  6  8  7  6  7 11  5  3  4  6  4
+    ##  [1]  8  9  6  5  7  9 12  5  4  4  5  6  5  4  4  8  5  5  9  6
 
 Plot the results of the `glmnet` run
 
@@ -72,13 +72,15 @@ plot(fit1)
 The given network parameter can also be a network itself, i.e. a matrix. The example below uses a randomly generated network to use in the methods.
 
 ``` r
-rand.network <- abs(matrix(rnorm(20*20),20,20))
+# generate random network
+rand.network       <- abs(matrix(rnorm(20*20),20,20))
 diag(rand.network) <- 0
+# actual fit
 fit4 <- network.glmnet(x,y, rand.network, network.options = network.options.default(cutoff = 0.1))
 plot(fit4)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-3-1.png)
+![](README_files/figure-markdown_github/rand.network-1.png)
 
 The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot
 
@@ -89,16 +91,16 @@ predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
     ## [INFO] Observed vs. Predicted
     ## 
     ##          Observed lambda_0.01 lambda_0.005
-    ##  [1,] -0.04761843  0.96243091  0.997899757
-    ##  [2,]  0.77194019 -0.13294179 -0.145286546
-    ##  [3,] -0.45677683 -0.41933513 -0.414837812
-    ##  [4,] -1.63644379 -0.27913499 -0.277459135
-    ##  [5,] -2.38620007 -0.64158447 -0.684725432
-    ##  [6,]  0.44202693 -0.66736045 -0.708248123
-    ##  [7,] -0.34643316 -0.02332587 -0.005477855
-    ##  [8,]  0.11546816 -0.08166001 -0.085065963
-    ##  [9,]  0.60733691  0.89538598  0.952862375
-    ## [10,]  0.04530678 -0.32281198 -0.348489870
+    ##  [1,]  0.25351070   0.2312345   0.24969776
+    ##  [2,]  1.02359389   0.3067917   0.30581127
+    ##  [3,] -0.08339752  -0.2051816  -0.22081480
+    ##  [4,]  0.93580001   0.2285017   0.20952377
+    ##  [5,] -0.70141946  -0.2899204  -0.32055684
+    ##  [6,] -0.46453276   0.1126970   0.09427716
+    ##  [7,] -0.49870507   0.2075130   0.21208741
+    ##  [8,]  0.38469280  -0.5574119  -0.61751263
+    ##  [9,]  0.92807713   0.4473239   0.45471758
+    ## [10,]  0.50419069  -0.1910265  -0.21562817
 
 It also extends the new methods to the cross validation function with `network.cv.glmnet`
 
@@ -167,7 +169,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km)
 ```
 
     ## $pvalue
-    ## [1] 0.0009018448
+    ## [1] 1.651536e-10
     ## 
     ## $plot
 
@@ -178,8 +180,8 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km)
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      7     NA      NA      NA
-    ## High risk 39     21   1677    1105      NA
+    ## Low risk  40      2     NA      NA      NA
+    ## High risk 39     26   1105     562    2102
 
 ### Heatmap with results from Hallmarks of cancer
 
