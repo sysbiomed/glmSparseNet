@@ -9,7 +9,7 @@ logger.txt
 *.RData
 *.csv
 *.html
-*_files
+vignettes/*_files
 *.txt
 *.pdf
 runcache
