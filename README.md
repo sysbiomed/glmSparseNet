@@ -50,7 +50,7 @@ The example below, shows random datasets being generated and `network.glmnet` ne
 # Gaussian
 x <- matrix(rnorm(100*20),100,20)
 y <- rnorm(100)
-fit1 <- network.glmnet(x,y, 'correlation')
+fit1 <- network.glmnet(x,y, 'correlation', network.options = network.options.default(cutoff = 0.1))
 ```
 
 Inspecting the penalty.factor used from correlation network
@@ -59,7 +59,7 @@ Inspecting the penalty.factor used from correlation network
 fit1$penalty.factor
 ```
 
-    ##  [1] 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19
+    ##  [1]  5  7  7 10  4  2  1  5  6  5  6  3  5  7  8  3  4  3  4  7
 
 Plot the results of the `glmnet` run
 
@@ -77,17 +77,17 @@ predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
 
     ## [INFO] Observed vs. Predicted
     ## 
-    ##         Observed lambda_0.01 lambda_0.005
-    ##  [1,]  1.0483587  0.18737087  0.217795644
-    ##  [2,]  1.2516244 -0.62249673 -0.643290966
-    ##  [3,] -0.7662786 -0.12135358 -0.138014688
-    ##  [4,] -1.0110564 -0.37320680 -0.383441033
-    ##  [5,] -0.7024665 -0.65801263 -0.666043114
-    ##  [6,]  1.6890610  0.78766494  0.805749154
-    ##  [7,]  1.9270533  0.15822770  0.204123349
-    ##  [8,] -1.7508299  0.02048073 -0.003813778
-    ##  [9,] -0.5671094 -0.06959119 -0.057959306
-    ## [10,] -0.7078289 -0.01275505 -0.002229836
+    ##          Observed lambda_0.01 lambda_0.005
+    ##  [1,] -0.57812678 -0.78496019   -0.8325639
+    ##  [2,]  1.25978643  0.87015846    0.9150820
+    ##  [3,]  0.24546817 -0.33149097   -0.3655351
+    ##  [4,]  0.80505956  0.44670231    0.4934951
+    ##  [5,]  0.04444716 -0.93001373   -0.9951616
+    ##  [6,]  1.42505809  0.59004176    0.5753467
+    ##  [7,]  0.75584860  0.39320010    0.4217822
+    ##  [8,]  0.17421850 -0.09719511   -0.1079925
+    ##  [9,]  0.15537169  0.12840111    0.1190875
+    ## [10,]  0.20818134 -0.33237145   -0.3631803
 
 It also extends the new methods to the cross validation function with `network.cv.glmnet`
 
@@ -156,7 +156,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km)
 ```
 
     ## $pvalue
-    ## [1] 2.334101e-09
+    ## [1] 1.651536e-10
     ## 
     ## $plot
 
@@ -168,7 +168,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km)
     ## 
     ##            n events median 0.95LCL 0.95UCL
     ## Low risk  40      2     NA      NA      NA
-    ## High risk 39     26   1105     579    2102
+    ## High risk 39     26   1105     562    2102
 
 ### Heatmap with results from Hallmarks of cancer
 

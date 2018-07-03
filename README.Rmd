@@ -70,7 +70,7 @@ The example below, shows random datasets being generated and `network.glmnet` ne
 # Gaussian
 x <- matrix(rnorm(100*20),100,20)
 y <- rnorm(100)
-fit1 <- network.glmnet(x,y, 'correlation')
+fit1 <- network.glmnet(x,y, 'correlation', network.options = network.options.default(cutoff = 0.1))
 ```
 
 Inspecting the penalty.factor used from correlation network
