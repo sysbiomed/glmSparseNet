@@ -1,0 +1,79 @@
+---
+title: "Network-base regularization"
+output: 
+  github_document:
+    toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(futile.logger)
+library(tidyverse)
+library(reshape2)
+
+.Last.value <- flog.layout(layout.format('[~l] ~m'))
+.Last.value <- flog.appender(appender.tee('logger.txt'))
+theme_set(theme_minimal())
+
+devtools::load_all()
+```
+
+```{r, eval=FALSE, include=FALSE}
+rmarkdown::render('README.Rmd', output_dir = '..', output_format = 'github_document')
+```
+
+> Elastic-Net models with additional regularization based on network centrality metrics
+
+## Install
+
+Bioconductor is necessary for the installation of this package.
+
+```{r, eval=FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite('averissimo/network.cox', dependencies=TRUE, build_vignettes=FALSE)
+```
+
+## Overview
+
+This package extends the `glmnet` r-package with network-based regularization based on features relations. This network can be calculated from the data itself or using external networks to enrich the model.
+
+It adds two new functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization.
+
+There are 3 methods available to use data-dependant methods to generate the netork:
+
+1. Correlation matrix with cutoff;
+1. Covariance matrix with cutoff;
+1. Sparse bayesian networks using `sparsebn` package.
+
+Alternatively, the network can be passed as a adjancency matrix or an already calculate metric for each node.
+
+The example below, shows random datasets being generated and `network.glmnet` new function being called.
+
+```{r}
+library(network.cox)
+# Gaussian
+x <- matrix(rnorm(100*20),100,20)
+y <- rnorm(100)
+fit1 <- network.glmnet(x,y, 'correlation')
+plot(fit1)
+```
+
+The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot
+
+```{r}
+predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
+```
+
+```{r, echo=FALSE}
+colnames(predicted) <- c('lambda_0.01', 'lambda_0.005')
+flog.info('Observed vs. Predicted', cbind(Observed = y[1:10], predicted), capture = TRUE)
+```
+
+
+It also extends the new methods to the cross validation function with `network.cv.glmnet`
+
+```{r}
+plot(network.cv.glmnet(x,y, 'covariance'))
+```
+
