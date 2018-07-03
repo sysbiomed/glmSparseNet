@@ -1,3 +1,5 @@
+library(MultiAssayExperiment)
+
 #' Calculate cross validating GLM model with network-based regularization
 #'
 #' @param xdata input data, can be a matrix or MultiAssayExperiment
@@ -65,7 +67,7 @@ setMethod('network.cv.glmnet', signature(xdata = 'matrix'), function(xdata, ydat
 setMethod('network.cv.glmnet', signature(xdata = 'MultiAssayExperiment'), function(xdata, ydata, network,
                                                                                    experiment.name,
                                                                                    network.options = network.options.default(), ...) {
-  return(network.glmnet.private(glmnet::cv.glmnet, xdata, ydata, network, experiment.name = experiment.name , network.options, ...))
+  return(network.glmnet.private(glmnet::cv.glmnet, xdata, ydata, network, experiment.name , network.options = network.options, ...))
 })
 
 
@@ -78,7 +80,7 @@ setMethod('network.cv.glmnet', signature(xdata = 'MultiAssayExperiment'), functi
 #'
 setMethod('network.cv.glmnet', signature(xdata = 'SummarizedExperiment'), function(xdata, ydata, network,
                                                                                    network.options = network.options.default(), ...) {
-  return(network.glmnet.private(glmnet::cv.glmnet, xdata, ydata, network, network.options, ...))
+  return(network.glmnet.private(glmnet::cv.glmnet, xdata, ydata, network, network.options = network.options, ...))
 })
 
 

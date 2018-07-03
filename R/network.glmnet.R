@@ -1,3 +1,5 @@
+library(MultiAssayExperiment)
+
 #' Calculate GLM model with network-based regularization
 #'
 #' @param xdata input data, can be a matrix or MultiAssayExperiment
@@ -26,6 +28,7 @@
 #'
 #' # load data
 #' xdata <- MultiAssayExperiment::miniACC
+#' # TODO aking out x indivudals missing values
 #' # build valid data with days of last follow up or to event
 #' event.ix <- which(!is.na(xdata$days_to_death))
 #' cens.ix <- which(!is.na(xdata$days_to_last_followup))
@@ -52,7 +55,7 @@ setGeneric('network.glmnet', function(xdata, ydata, network, network.options = n
 #'
 setMethod('network.glmnet', signature(xdata = 'matrix'), function(xdata, ydata, network,
                                                                   network.options = network.options.default(), ...) {
-  return(network.glmnet.private(glmnet::glmnet, xdata, ydata, penalty.factor = penalty.factor, ...))
+  return(network.glmnet.private(glmnet::glmnet, xdata, ydata, network = network, network.options = network.options, ...))
 })
 
 #' Calculate GLM model with network-based regularization

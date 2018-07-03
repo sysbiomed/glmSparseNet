@@ -1,3 +1,5 @@
+library(MultiAssayExperiment)
+
 #' Calculate GLM model with network-based regularization
 #'
 #' @param fun function to be called (glmnet or cv.glmnet)
@@ -37,7 +39,7 @@ setMethod('network.glmnet.private', signature(xdata = 'matrix'), function(fun, x
     }
     penalty.factor <- network
   } else {
-    stop('There was an error with network argumnet')
+    stop('There was an error with network argumnent')
   }
   return(fun(xdata, ydata, penalty.factor = penalty.factor, ...))
 })

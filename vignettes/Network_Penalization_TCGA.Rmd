@@ -31,17 +31,15 @@ params:
   subset: !r Inf
   train: !r .8
   # number of times that training set is tested
-  ntimes: !r 10
+  ntimes: !r 500
   # target variables that models should output
   target.vars: !r list(classic.cv = 28, degree.cv = 42, orphan.cv = 70)
   #
   seed: !r 1985
-  mc.cores: !r 14
+  mc.cores: !r 9
   #
   calc.params.old: !r FALSE
 ---
-
-
 
 ```{r setup, include=FALSE}
 # ComBat(matrix and category_id)
@@ -73,7 +71,9 @@ theme_set(theme_minimal())
 ```
 
 ```{r, eval=FALSE, include=FALSE}
-rmarkdown::render('Network_Penalization_TCGA.Rmd')
+rmarkdown::render('Network_Penalization_TCGA.Rmd', output_file = 'brca.html', params = list(project = 'brca'))
+rmarkdown::render('Network_Penalization_TCGA.Rmd', output_file = 'prad.html', params = list(project = 'prad'))
+rmarkdown::render('Network_Penalization_TCGA.Rmd', output_file = 'skcm.html', params = list(project = 'skcm', tissue = 'metastatic'))
 ```
 
 
@@ -716,20 +716,20 @@ ggplot(transf.d) +
 # Model Inference
 
 ```{r model_declaration, include=FALSE}
-my.glmnet <- function(prefix, penalty.factor, target, lambda.min.ratio = .001, show.messages = FALSE) {
+my.glmnet <- function(prefix, xdata.train, ydata.train, xdata.ix, xdata.train.digest, penalty.factor, target, lambda.min.ratio = .001, show.messages = FALSE) {
   new.model <- run.cache(glmnet,
-                                   xdata.train[,xdata.ix], Surv(ydata.train[,1], ydata.train[,2]), 
-                                   family           ='cox', 
-                                   alpha            = params$alpha, 
-                                   nlambda          = 1000,
-                                   lambda.min.ratio = lambda.min.ratio,
-                                   standardize      = F,
-                                   penalty.factor   = penalty.factor,
-                                   #
-                                   force.recalc = F,
-                                   cache.prefix = gsub('_', '.', gsub('_old', '', prefix)),
-                                   cache.digest = list(xdata.train.digest),
-                                   show.message = show.messages)
+                         xdata.train[,xdata.ix], Surv(ydata.train[,1], ydata.train[,2]), 
+                         family           ='cox', 
+                         alpha            = params$alpha, 
+                         nlambda          = 1000,
+                         lambda.min.ratio = lambda.min.ratio,
+                         standardize      = F,
+                         penalty.factor   = penalty.factor,
+                         #
+                         force.recalc = F,
+                         cache.prefix = gsub('_', '.', gsub('_old', '', prefix)),
+                         cache.digest = list(xdata.train.digest),
+                         show.message = show.messages)
 
 if (any(new.model$df == target)) {
   var.ix <- which(new.model$df == target)
@@ -845,12 +845,12 @@ outer.result <- mclapply(seq_along(glmnet.params), function(ix) {
   ix.cache <- sprintf('%s_models', el$name)
   #
   suppressWarnings(
-  result  <- my.glmnet(ix.cache, el$penalty, el$target, show.messages = F)
+  result  <- my.glmnet(ix.cache, xdata.train, ydata.train, xdata.ix, xdata.train.digest, el$penalty, el$target, show.messages = F)
   )
   
   if (sum(result$coef != 0) < (target - 5)) {
     suppressWarnings(
-      result <- my.glmnet(ix.cache, el$penalty, el$target, lambda.min.ratio = .00001, show.messages = F)
+      result <- my.glmnet(ix.cache, xdata.train, ydata.train, xdata.ix, xdata.train.digest, el$penalty, el$target, lambda.min.ratio = .00001, show.messages = F)
     )
   }
   #
@@ -993,14 +993,14 @@ multiplot(plotlist = my.km, ncol = 2, layout = matrix(seq_along(my.km), ncol = 2
 ## C-Index
 
 ```{r c_index_declaration, include=FALSE}
-c.index.fun <- function(all.pairs, fitted.risk, ydata) {
+c.index.fun <- function(all.pairs, fitted.risk, ydata, n.cores = params$mc.cores) {
   unlist(mclapply(seq(ncol(all.pairs)), function(ix) {
     ix.1 <- all.pairs[1,ix]
     ix.2 <- all.pairs[2,ix]
     return(my.c.index.cmp(fitted.risk[ix.1], fitted.risk[ix.2], 
                    ydata[ix.1,1], ydata[ix.2,1],
                    ydata[ix.1,2], ydata[ix.2,2]))
-  }, mc.cores = params$mc.cores))
+  }, mc.cores = n.cores))
 }
 ```
 
@@ -1016,10 +1016,10 @@ flog.info('C-index for train set:')
 # Train
 #
 
-fit.risk <- function(coef.v, xdata, ydata, model.name, show.message = FALSE) {
+fit.risk <- function(coef.v, xdata, ydata, model.name, show.message = FALSE, n.cores = params$mc.cores) {
   # fitted.risk  <- as.vector(predict(models$glmnet, newx = xdata.train[,xdata.ix], s = lambdas$glmnet, type = 'response')) 
   fitted.risk <- exp(as.vector(xdata[,xdata.ix] %*% coef.v))
-  c.res <- run.cache(c.index.fun, all.pairs, fitted.risk, ydata, show.message = F)
+  c.res <- run.cache(c.index.fun, all.pairs, fitted.risk, ydata, n.cores = n.cores, show.message = F)
   c.res <- sum(c.res) / sum(c.res != 0)
   if (show.message) flog.info(' * %s: %f', model.name, c.res)
   return(c.res)
@@ -1299,16 +1299,18 @@ print(
 
 # `r params$ntimes` Runs
 
-```{r call.results.decl, echo=FALSE, eval=FALSE}
+```{r call.results.decl, echo=FALSE, eval=TRUE}
 # train.perc <- params$train
 # subset <- params$subset
 # seed <- 1985
 call.results <- function(seed, xdata, ydata, train.perc, subset, penalty.factor.degree.new, penalty.factor.degree.old, penalty.factor.orphan) {
+  #flog.info('seed: %d', seed)
   set.seed(seed)
   
   #
   # Build training data
   ixs <- balanced.train.and.test(which(ydata$status), which(!ydata$status), train.perc = train.perc)
+  #flog.info('ixs:', ixs, capture = T)
   xdata.test <- xdata[ixs$test,]
   ydata.test <- ydata[ixs$test,]
   #
@@ -1368,18 +1370,18 @@ call.results <- function(seed, xdata, ydata, train.perc, subset, penalty.factor.
     ix.cache <- sprintf('%s_models', el$name)
     #
     suppressWarnings(
-    result  <- my.glmnet(ix.cache, el$penalty, el$target, show.messages = F)
+    result  <- my.glmnet(ix.cache, xdata.train, ydata.train, xdata.ix, xdata.train.digest, el$penalty, el$target, show.messages = F)
     )
     
     if (sum(result$coef != 0) < (target - 5)) {
       suppressWarnings(
-        result <- my.glmnet(ix.cache, el$penalty, el$target, lambda.min.ratio = .00001, show.messages = F)
+        result <- my.glmnet(ix.cache, xdata.train, ydata.train, xdata.ix, xdata.train.digest, el$penalty, el$target, lambda.min.ratio = .00001, show.messages = F)
       )
     }
     #
     return(list(result = result, name = ix.name))
   #})
-  }, mc.cores = min(params$mc.cores, length(glmnet.params)), mc.allow.recursive = FALSE)
+  }, mc.cores = 1, mc.allow.recursive = FALSE)
   
   
   for (ix in outer.result) {
@@ -1416,7 +1418,7 @@ call.results <- function(seed, xdata, ydata, train.perc, subset, penalty.factor.
   c.index.test  <- list()
   
   for (ix.name in names(coefs)) {
-    c.index.train[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name,  show.message = FALSE)
+    c.index.train[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name, n.cores = 1, show.message = FALSE)
   }
   
   #
@@ -1427,22 +1429,24 @@ call.results <- function(seed, xdata, ydata, train.perc, subset, penalty.factor.
   all.pairs <- combn(nrow(xdata.test), 2)
 
   for (ix.name in names(coefs)) {
-    c.index.test[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name,  show.message = FALSE)
+    c.index.test[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name, n.cores = 1, show.message = FALSE)
   }
   
   return(list(metrics = list(km.train      = km.train, 
                              km.test       = km.test,
                              c.index.train = c.index.train, 
                              c.index.test  = c.index.test),
-              coefs = coefs))
+              coefs = coefs,
+              ixs   = ixs))
 }
 ```
 
 
-```{r calc_ntimes, echo=FALSE, eval=FALSE}
+```{r calc_ntimes, echo=FALSE, eval=TRUE}
 if (params$train == 1) {
   flog.info("Train and test sets are the same, won't calculate %d times with random seeds", params$ntimes)
 } else {
+  rm(xdata.train, xdata.test, ydata.train, ydata.test)
   set.seed(params$seed)
   seed.vec <- sample(1000 + (max(c(1:1e7,params$ntimes))))[1:params$ntimes]
   
@@ -1482,10 +1486,12 @@ if (params$train == 1) {
 ## C-Index distribution
 
 ```{r c.index.iter, echo=FALSE, fig.height=20}
-ggplot(filter(big.df, metric %in% c('C-Index (Train set)', 'C-Index (Test set)'))) +
-    geom_freqpoly(aes(values, color = model), alpha = .75, bins = 100) + 
-    facet_wrap(model ~ metric, ncol = 2) +
-    theme_minimal() + theme(legend.position = 'top')
+if (nrow(big.df) > 0) {
+  ggplot(filter(big.df, metric %in% c('C-Index (Train set)', 'C-Index (Test set)'))) +
+      geom_freqpoly(aes(values, color = model), alpha = .75, bins = 100) + 
+      facet_wrap(model ~ metric, ncol = 2) +
+      theme_minimal() + theme(legend.position = 'top')  
+}
 ```
 
 ## Log-rank test on Kaplan-Meier models
@@ -1493,17 +1499,19 @@ ggplot(filter(big.df, metric %in% c('C-Index (Train set)', 'C-Index (Test set)')
 Separated by high and low risk groups
 
 ```{r pvalue.itre, echo=FALSE, fig.height=20}
-ggplot(filter(big.df, metric %in% c('Log-rank (Test set)', 'Log-rank (Train set)'))) +
-  geom_freqpoly(aes(values, color = model), alpha = .75, bins = 300) + 
-  facet_wrap(model ~ metric, ncol = 2) +
-  ggtitle('Distribution of Log-Rank up until 0.05') +
-  theme_minimal() + theme(legend.position = 'top') + coord_cartesian(xlim = c(0, 0.1))
-
-ggplot(filter(big.df, metric %in% c('Log-rank (Test set)', 'Log-rank (Train set)'))) +
-  geom_freqpoly(aes(values, color = model), alpha = .75, bins = 100) + 
-  facet_wrap(model ~ metric, ncol = 2) +
-  ggtitle('Full distribution Log-rank') +
-  theme_minimal() + theme(legend.position = 'top')
+if (nrow(big.df) > 0) {
+  ggplot(filter(big.df, metric %in% c('Log-rank (Test set)', 'Log-rank (Train set)'))) +
+    geom_freqpoly(aes(values, color = model), alpha = .75, bins = 300) + 
+    facet_wrap(model ~ metric, ncol = 2) +
+    ggtitle('Distribution of Log-Rank up until 0.05') +
+    theme_minimal() + theme(legend.position = 'top') + coord_cartesian(xlim = c(0, 0.1))
+  
+  ggplot(filter(big.df, metric %in% c('Log-rank (Test set)', 'Log-rank (Train set)'))) +
+    geom_freqpoly(aes(values, color = model), alpha = .75, bins = 300) + 
+    facet_wrap(model ~ metric, ncol = 2) +
+    ggtitle('Full distribution Log-rank') +
+    theme_minimal() + theme(legend.position = 'top')
+}
 ```
 
 

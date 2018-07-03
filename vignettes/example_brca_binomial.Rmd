@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r, include=FALSE, eval=FALSE}
-rmarkdown::render('template_Marta.Rmd')
+rmarkdown::render('example_brca_binomial.Rmd')
 ```
 
 
@@ -38,10 +38,10 @@ library(futile.logger)
 library(loose.rock)
 library(brca.data)
 
-#rmarkdown::render('template.Rmd')
-
 library(parallel)
 library(doMC)
+
+library(pROC)
 
 # Load do package
 devtools::load_all()
@@ -69,10 +69,10 @@ xdata_tumor <- xdata_tumor[,-which(duplicated(getParticipantCode(colnames(fpkm.p
 set.seed(params$seed)
 xdata_normal <- fpkm.per.tissue$solid.tissue.normal
 xdata <- rbind(t(xdata_tumor),t(xdata_normal))
-xdata <- xdata[, sample(seq(ncol(xdata)), 300)]
+
+xdata <- xdata[, sample(which(apply(xdata, 2, sd) != 0), 300)]
 # response vector ('1', tumor; '0', normal)
 ydata <- c(rep(1,dim(xdata_tumor)[2]),rep(0,dim(xdata_normal)[2]))
-
 ```
 
 
@@ -80,9 +80,9 @@ ydata <- c(rep(1,dim(xdata_tumor)[2]),rep(0,dim(xdata_normal)[2]))
 
 ```{r fit}
 fitted <- run.cache(network.cv.glmnet, 
-                    xdata, Surv(ydata$time, ydata$status), 
+                    xdata, ydata, 
                     network = 'correlation',
-                    family = 'cox',
+                    family = 'binomial',
                     seed = params$seed)
 ```
 
@@ -94,7 +94,7 @@ plot(fitted)
 
 ## Using lambda.min taken from cross validation
 
-```{r, echo=FALSE}
+```{r top_coefs, echo=FALSE}
 top.coefs <- coef(fitted, s = 'lambda.min')
 coefs.v <- as.vector(top.coefs)
 names(coefs.v) <- rownames(top.coefs)
@@ -103,7 +103,7 @@ flog.info('Non-zero coefficients:', coefs.v[coefs.v != 0], capture = T)
 
 ### Hallmarks of Cancer
 
-```{r, echo=FALSE}
+```{r hallmarks, echo=FALSE}
 names.df <- gene.names(names(coefs.v[coefs.v != 0]))
 all.hallmarks <- hallmarks(names.df$external_gene_name)
 
@@ -118,9 +118,27 @@ melt(all.hallmarks$hallmarks,
     xlab('External Gene Name') + ylab('')
 ```
 
-### Survival curves and Log rank test
+### Accuracy
 
-```{r, echo=FALSE}
-draw.kaplan(as.vector(coefs.v), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
+```{r accuracy, echo=FALSE}
+resp <- glmnet::predict.cv.glmnet(fitted, s = 'lambda.min', newx = xdata, type = 'response')
+flog.info('Misclassified (%d)', sum(abs(ydata - resp) > 0.5))
+flog.info('  * False positive: %d', sum(ydata - resp > 0.5))
+flog.info('  * False negative: %d', sum(ydata - resp < -0.5))
+```
+
+```{r predict, echo=FALSE}
+qplot(resp, bins = 100)
+qplot(resp, ydata, color = abs(resp - ydata) < 0.5) + theme(legend.position = 'none')
+```
+
+```{r roc, echo=FALSE}
+roc_obj <- roc(ydata, as.vector(resp))
+
+data.frame(TPR = roc_obj$sensitivities, FPR = 1 - roc_obj$specificities) %>%
+  ggplot() +geom_line(aes(FPR,TPR), color = 2, size = 1, alpha = 0.7)+
+      labs(title= sprintf("ROC curve (AUC = %f)", auc(roc_obj)), 
+           x = "False Positive Rate (1-Specificity)", 
+           y = "True Positive Rate (Sensitivity)")
 ```
 

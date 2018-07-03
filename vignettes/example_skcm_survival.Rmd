@@ -53,11 +53,11 @@ theme_set(theme_minimal())
 ```{r data}
 # exemplo simples
 my.data <- prepare.tcga.survival.data(project           = 'skcm', 
-                                      tissue.type       = 'primary.solid.tumor', 
+                                      tissue.type       = 'metastatic', 
                                       handle.duplicates = 'keep_first', 
                                       coding.genes      = TRUE)
 set.seed(params$seed)
-xdata <- my.data$xdata[,sample(seq(ncol(my.data$xdata)), 300)]
+xdata <- my.data$xdata[,sample(which(apply(my.data$xdata, 2, sd) != 0), 1300)]
 ydata <- my.data$ydata
 ```
 

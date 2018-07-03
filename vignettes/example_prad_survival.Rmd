@@ -8,7 +8,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 params:
-  seed: !r 29221
+  seed: !r 2924
 --- 
 
 ```{r setup, include = FALSE}
@@ -57,7 +57,7 @@ my.data <- prepare.tcga.survival.data(project           = 'prad',
                                       handle.duplicates = 'keep_first', 
                                       coding.genes      = TRUE)
 set.seed(params$seed)
-xdata <- my.data$xdata[,sample(seq(ncol(my.data$xdata)), 300)]
+xdata <- my.data$xdata[,sample(which(apply(my.data$xdata, 2, sd) != 0), 2500)]
 ydata <- my.data$ydata
 ```
 
