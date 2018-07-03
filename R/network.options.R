@@ -1,3 +1,24 @@
+#' Filter MultiAssayExperiment colData for specific experiment
+#'
+#'
+#'
+#' @param multi.assay
+#' @param experiment.name
+#'
+#' @return
+#' @export
+#'
+#' @examples
+filter.by.experiment <- function(multi.assay, experiment.name) {
+  # Get all valid individuals from experiment (lookup the mapping)
+  valid.ydata.id <- xdata@sampleMap[multi.assay@sampleMap$assay == experiment.name, 'primary']
+
+  # filter the MultiAssayExperiment keeping only individuals with data in specific experiment
+  suppressMessages(new.multi.assay <- multi.assay[,rownames(multi.assay@colData) %in% valid.ydata.id])
+
+  return(new.multi.assay)
+}
+
 #' Setup network options
 #'
 #' Setup network options, such as using weighted or unweighted degree,
@@ -17,6 +38,8 @@
 network.options.default <- function(method     = 'pearson',
                                     unweighted = TRUE,
                                     cutoff     = 0,
+
+
                                     centrality = 'degree',
                                     min.degree = 0,
                                     n.cores    = 1) {

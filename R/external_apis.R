@@ -41,7 +41,7 @@ gene.names <- function(ensembl.genes) {
 #'
 #' @examples
 #' hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
-hallmarks <- function(genes, measure = 'count', hallmarks = 'full') {
+hallmarks <- function(genes, measure = 'count', hallmarks = 'full', show.message = FALSE) {
   base.url <- sprintf('http://chat.lionproject.net/chartdata?measure=%s&hallmarks=%s', measure, hallmarks)
   # base.url <- 'http://chat.lionproject.net/?measure=npmi&chart_type=doughnut&hallmarks=full'
 
@@ -49,7 +49,8 @@ hallmarks <- function(genes, measure = 'count', hallmarks = 'full') {
 
   call.url <- sprintf('%s&q=%s', base.url, paste(all.genes, collapse = '&q='))
 
-  lines <- loose.rock::run.cache(readr::read_lines, url(call.url), cache.digest = list(loose.rock::digest.cache(call.url)))
+  lines <- loose.rock::run.cache(readr::read_lines, url(call.url), cache.digest = list(loose.rock::digest.cache(call.url)),
+                                 show.message = show.message)
   item_group <- cumsum(grepl("^[A-Za-z0-9\\._,-]+\tcount", lines))
   all.items <- list()
   col.names <- c()
@@ -93,5 +94,7 @@ hallmarks <- function(genes, measure = 'count', hallmarks = 'full') {
   df.scaled <- df # use counts
 
   df.no.hallmarks <- data.frame(gene.name = sort(rownames(df.scaled)[na.ix]), stringsAsFactors = FALSE)$gene.name
+
+  df.scaled <- cbind(gene.name = rownames(df.scaled), df.scaled)
   return(list(hallmarks = df.scaled, no.hallmakrs = df.no.hallmarks))
 }

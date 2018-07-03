@@ -66,11 +66,8 @@ setMethod('network.glmnet.private', signature(xdata = 'MultiAssayExperiment'), f
     stop('Experiment name must be passed, see documentation.')
   }
 
-  # Get all valid individuals from experiment (lookup the mapping)
-  valid.ydata.id <- xdata@sampleMap[xdata@sampleMap$assay == experiment.name, 'primary']
-
   # filter the MultiAssayExperiment keeping only individuals with data in specific experiment
-  suppressMessages(xdata <- xdata[,rownames(xdata@colData) %in% valid.ydata.id])
+  xdata <- filter.by.experiment(xdata, experiment.name)
 
   # stop if output xdata has no rows (should not happen)
   if( nrow(xdata@colData) == 0) {
@@ -81,10 +78,10 @@ setMethod('network.glmnet.private', signature(xdata = 'MultiAssayExperiment'), f
   #  this is done to avoid missorted objects
   if (is.matrix(ydata) || is.data.frame(ydata) || inherits(ydata, 'DataFrame')) {
     if (!is.null(rownames(ydata))) {
-      ydata <- as.matrix(ydata[valid.ydata.id,])
+      ydata <- as.matrix(ydata[rownames(xdata@colData),])
     }
   } else if (is.array(ydata) && !is.null(names(ydata))) {
-    ydata <- ydata[valid.ydata.id]
+    ydata <- ydata[rownames(xdata@colData)]
   }
   return(network.glmnet.private(fun, xdata[[experiment.name]], ydata, network, network.options, ...))
 })

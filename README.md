@@ -1,13 +1,16 @@
-name needed
+name needed!!
 ================
-
-> Elastic-Net models with additional regularization based on network centrality metrics
 
 -   [Install](#install)
 -   [Citation](#citation)
 -   [Overview](#overview)
     -   [Example for gaussian models](#example-for-gaussian-models)
     -   [Survival Example using RNASeq data](#survival-example-using-rnaseq-data)
+-   [Visualization tools](#visualization-tools)
+    -   [Survival curves with `draw.kaplan`](#survival-curves-with-draw.kaplan)
+    -   [Heatmap with results from Hallmarks of cancer](#heatmap-with-results-from-hallmarks-of-cancer)
+
+> Elastic-Net models with additional regularization based on network centrality metrics
 
 Install
 -------
@@ -17,6 +20,7 @@ Bioconductor is necessary for the installation of this package.
 ``` r
 source("https://bioconductor.org/biocLite.R")
 biocLite('averissimo/network.cox', dependencies=TRUE, build_vignettes=FALSE)
+library(network.cox)
 ```
 
 Citation
@@ -34,8 +38,7 @@ It adds two new main functions called `network.glmnet` and `network.cv.glmnet` t
 There are 3 methods available to use data-dependant methods to generate the netork:
 
 1.  Correlation matrix with cutoff;
-2.  Covariance matrix with cutoff;
-3.  Sparse bayesian networks using `sparsebn` package.
+2.  Covariance matrix with cutoff; <!-- 1. Sparse bayesian networks using `sparsebn` package. -->
 
 Alternatively, the network can be passed as a adjancency matrix or an already calculate metric for each node.
 
@@ -44,15 +47,27 @@ Alternatively, the network can be passed as a adjancency matrix or an already ca
 The example below, shows random datasets being generated and `network.glmnet` new function being called.
 
 ``` r
-library(network.cox)
 # Gaussian
 x <- matrix(rnorm(100*20),100,20)
 y <- rnorm(100)
 fit1 <- network.glmnet(x,y, 'correlation')
+```
+
+Inspecting the penalty.factor used from correlation network
+
+``` r
+fit1$penalty.factor
+```
+
+    ##  [1] 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19 19
+
+Plot the results of the `glmnet` run
+
+``` r
 plot(fit1)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-4-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-2-1.png)
 
 The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot
 
@@ -63,16 +78,16 @@ predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
     ## [INFO] Observed vs. Predicted
     ## 
     ##         Observed lambda_0.01 lambda_0.005
-    ##  [1,] -0.1852567  -0.3573519   -0.3412778
-    ##  [2,]  0.3061704   0.2088865    0.2304297
-    ##  [3,] -0.3244506  -0.1130600   -0.1295346
-    ##  [4,]  0.6764276  -0.2949259   -0.3345391
-    ##  [5,] -1.1388622  -0.4007231   -0.3997077
-    ##  [6,] -0.9735509   0.3234902    0.3317818
-    ##  [7,]  0.7099490   0.2833419    0.3468878
-    ##  [8,]  0.1905984  -0.4467155   -0.4820578
-    ##  [9,] -1.7464571  -0.5601308   -0.5904652
-    ## [10,]  0.4164180   0.2005956    0.2150257
+    ##  [1,]  1.0483587  0.18737087  0.217795644
+    ##  [2,]  1.2516244 -0.62249673 -0.643290966
+    ##  [3,] -0.7662786 -0.12135358 -0.138014688
+    ##  [4,] -1.0110564 -0.37320680 -0.383441033
+    ##  [5,] -0.7024665 -0.65801263 -0.666043114
+    ##  [6,]  1.6890610  0.78766494  0.805749154
+    ##  [7,]  1.9270533  0.15822770  0.204123349
+    ##  [8,] -1.7508299  0.02048073 -0.003813778
+    ##  [9,] -0.5671094 -0.06959119 -0.057959306
+    ## [10,] -0.7078289 -0.01275505 -0.002229836
 
 It also extends the new methods to the cross validation function with `network.cv.glmnet`
 
@@ -80,7 +95,7 @@ It also extends the new methods to the cross validation function with `network.c
 plot(network.cv.glmnet(x,y, 'covariance'))
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](README_files/figure-markdown_github/plot_cv-1.png)
 
 ### Survival Example using RNASeq data
 
@@ -111,67 +126,62 @@ ydata <- data.frame(time      = surv_event_time[valid.ix],
                     row.names = xdata$patientID[valid.ix])
 ```
 
-Fitting the survival model using a correlation network with cutoff at 0.1, 0.4 and 0.6
+Fitting the survival model using a correlation network with cutoff at 0.6
 
 ``` r
 # build response object for glmnet
-#  we are using 
 fit3 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
-                          network = 'correlation', 
-                          experiment.name = 'RNASeq2GeneNorm', 
-                          network.options = network.options.default(cutoff = .1))
-plot(fit3)
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
-
-``` r
-fit4 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
-                          network = 'correlation', 
-                          experiment.name = 'RNASeq2GeneNorm', 
-                          network.options = network.options.default(cutoff = .4))
-```
-
-    ## Warning in network.glmnet.private(fun, t(assay(xdata)), ydata, network, :
-    ## The penalty.factor calculated from network (or given) has some 0
-    ## values, this might lead to convergence problems. Try using min.degree in
-    ## network.options to tweak a minimum value.
-
-``` r
-plot(fit4)
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-9-2.png)
-
-``` r
-# note that this should take some time and not converge
-#
-# A min.degree option is required for this to converge as many features have penalty = 0
-#  that does not induce any regularization to it, which given the right dataset,
-#  might not allow for convergence of lambda values
-#
-# fit5 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
-#                          network = 'correlation', 
-#                          experiment.name = 'RNASeq2GeneNorm', 
-#                          network.options = network.options.default(cutoff = .6))
-
-fit6 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
-                          network = 'correlation', 
-                          experiment.name = 'RNASeq2GeneNorm', 
-                          network.options = network.options.default(cutoff = .6, min.degree = 0.2))
-plot(fit6)
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-9-3.png)
-
-``` r
-fit7 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
                           network = 'correlation', 
                           experiment.name = 'RNASeq2GeneNorm', 
                           alpha = .7,
                           nlambda = 1000,
                           network.options = network.options.default(cutoff = .6, min.degree = 0.2))
-plot(fit7)
+plot(fit3)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-9-4.png)
+![](README_files/figure-markdown_github/fit.surv-1.png)
+
+Visualization tools
+-------------------
+
+### Survival curves with `draw.kaplan`
+
+This generates Kaplan-Meier survival model based on the coefficients of a Cox model. It separates two groups based on relative risk and display both the curves and results of Log-rank test.
+
+``` r
+xdata.reduced <- filter.by.experiment(xdata, 'RNASeq2GeneNorm')
+ydata.km <- ydata[rownames(xdata.reduced@colData),]
+best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
+draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km)
+```
+
+    ## $pvalue
+    ## [1] 2.334101e-09
+    ## 
+    ## $plot
+
+![](README_files/figure-markdown_github/draw.kaplan-1.png)
+
+    ## 
+    ## $km
+    ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
+    ## 
+    ##            n events median 0.95LCL 0.95UCL
+    ## Low risk  40      2     NA      NA      NA
+    ## High risk 39     26   1105     579    2102
+
+### Heatmap with results from Hallmarks of cancer
+
+Search the non-zero coefficients in the results and query for known hallmarks of cancer.
+
+``` r
+fit3.hallmarks <- hallmarks(names(best.model.coef)[best.model.coef > 0])
+
+melt(fit3.hallmarks$hallmarks, id.vars = 'gene.name') %>%
+  filter(value > 0) %>%
+  ggplot() + 
+    geom_raster(aes(gene.name, variable, fill=value)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+![](README_files/figure-markdown_github/hallmarks-1.png)

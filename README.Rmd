@@ -1,12 +1,20 @@
 ---
-title: "<name needed>"
+title: "name needed!!"
 output: 
+  rmarkdown::html_vignette:
+    toc: TRUE
   github_document:
     toc: TRUE
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.width = 6,
+                      fig.height = 8)
 
 library(futile.logger)
 library(tidyverse)
@@ -20,8 +28,8 @@ theme_set(theme_minimal())
 devtools::load_all()
 ```
 
-```{r, eval=FALSE, include=FALSE}
-rmarkdown::render('README.Rmd', output_format = 'github_document')
+```{r generate_md, eval=FALSE, include=FALSE}
+rmarkdown::render('README.Rmd', output_format = 'all')
 ```
 
 > Elastic-Net models with additional regularization based on network centrality metrics
@@ -30,9 +38,10 @@ rmarkdown::render('README.Rmd', output_format = 'github_document')
 
 Bioconductor is necessary for the installation of this package.
 
-```{r, eval=FALSE}
+```{r instal, eval=FALSE}
 source("https://bioconductor.org/biocLite.R")
 biocLite('averissimo/network.cox', dependencies=TRUE, build_vignettes=FALSE)
+library(network.cox)
 ```
 
 ## Citation
@@ -49,7 +58,7 @@ There are 3 methods available to use data-dependant methods to generate the neto
 
 1. Correlation matrix with cutoff;
 1. Covariance matrix with cutoff;
-1. Sparse bayesian networks using `sparsebn` package.
+<!-- 1. Sparse bayesian networks using `sparsebn` package. -->
 
 Alternatively, the network can be passed as a adjancency matrix or an already calculate metric for each node.
 
@@ -57,22 +66,33 @@ Alternatively, the network can be passed as a adjancency matrix or an already ca
 
 The example below, shows random datasets being generated and `network.glmnet` new function being called.
 
-```{r}
-library(network.cox)
+```{r gaussian}
 # Gaussian
 x <- matrix(rnorm(100*20),100,20)
 y <- rnorm(100)
 fit1 <- network.glmnet(x,y, 'correlation')
+```
+
+Inspecting the penalty.factor used from correlation network
+
+```{r}
+fit1$penalty.factor
+```
+
+Plot the results of the `glmnet` run
+
+```{r}
 plot(fit1)
 ```
 
+
 The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot
 
-```{r}
+```{r predicted}
 predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
 ```
 
-```{r, echo=FALSE}
+```{r pred.table, echo=FALSE}
 colnames(predicted) <- c('lambda_0.01', 'lambda_0.005')
 flog.info('Observed vs. Predicted', cbind(Observed = y[1:10], predicted), capture = TRUE)
 ```
@@ -80,7 +100,7 @@ flog.info('Observed vs. Predicted', cbind(Observed = y[1:10], predicted), captur
 
 It also extends the new methods to the cross validation function with `network.cv.glmnet`
 
-```{r}
+```{r plot_cv}
 plot(network.cv.glmnet(x,y, 'covariance'))
 ```
 
@@ -90,7 +110,7 @@ We use an example data from TCGA Adrenocortical Carcinoma project with '92' pati
 
 There is some pre-processing needed to remove patients with invalid follow-up date or death date:
 
-```{r}
+```{r multi.assay}
 # load data
 xdata <- MultiAssayExperiment::miniACC
 
@@ -114,47 +134,17 @@ ydata <- data.frame(time      = surv_event_time[valid.ix],
 
 ```
 
-Fitting the survival model using a correlation network with cutoff at 0.1, 0.4 and 0.6
+Fitting the survival model using a correlation network with cutoff at 0.6
 
-```{r}
+```{r fit.surv}
 # build response object for glmnet
-#  we are using 
 fit3 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
-                          network = 'correlation', 
-                          experiment.name = 'RNASeq2GeneNorm', 
-                          network.options = network.options.default(cutoff = .1))
-plot(fit3)
-
-fit4 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
-                          network = 'correlation', 
-                          experiment.name = 'RNASeq2GeneNorm', 
-                          network.options = network.options.default(cutoff = .4))
-plot(fit4)
-
-# note that this should take some time and not converge
-#
-# A min.degree option is required for this to converge as many features have penalty = 0
-#  that does not induce any regularization to it, which given the right dataset,
-#  might not allow for convergence of lambda values
-#
-# fit5 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
-#                          network = 'correlation', 
-#                          experiment.name = 'RNASeq2GeneNorm', 
-#                          network.options = network.options.default(cutoff = .6))
-
-fit6 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
-                          network = 'correlation', 
-                          experiment.name = 'RNASeq2GeneNorm', 
-                          network.options = network.options.default(cutoff = .6, min.degree = 0.2))
-plot(fit6)
-
-fit7 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
                           network = 'correlation', 
                           experiment.name = 'RNASeq2GeneNorm', 
                           alpha = .7,
                           nlambda = 1000,
                           network.options = network.options.default(cutoff = .6, min.degree = 0.2))
-plot(fit7)
+plot(fit3)
 ```
 
 
@@ -182,5 +172,32 @@ cbind(rowSums(all.interactions[ixs,3:15]),
       all.interactions[ixs,16], 
       sort(rowSums(all.interactions[ixs,3:15]), index.return = TRUE)$ix, 
       sort(all.interactions[ixs,16], index.return = TRUE)$ix)
+```
+
+## Visualization tools
+
+### Survival curves with `draw.kaplan`
+
+This generates Kaplan-Meier survival model based on the coefficients of a Cox model. It separates two groups based on relative risk and display both the curves and results of Log-rank test.
+
+```{r draw.kaplan}
+xdata.reduced <- filter.by.experiment(xdata, 'RNASeq2GeneNorm')
+ydata.km <- ydata[rownames(xdata.reduced@colData),]
+best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
+draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km)
+```
+
+### Heatmap with results from Hallmarks of cancer
+
+Search the non-zero coefficients in the results and query for known hallmarks of cancer.
+
+```{r hallmarks}
+fit3.hallmarks <- hallmarks(names(best.model.coef)[best.model.coef > 0])
+
+melt(fit3.hallmarks$hallmarks, id.vars = 'gene.name') %>%
+  filter(value > 0) %>%
+  ggplot() + 
+    geom_raster(aes(gene.name, variable, fill=value)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
