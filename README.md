@@ -1,6 +1,8 @@
 name needed!!
 ================
 
+> Elastic-Net models with additional regularization based on network centrality metrics
+
 -   [Install](#install)
 -   [Citation](#citation)
 -   [Overview](#overview)
@@ -9,8 +11,6 @@ name needed!!
 -   [Visualization tools](#visualization-tools)
     -   [Survival curves with `draw.kaplan`](#survival-curves-with-draw.kaplan)
     -   [Heatmap with results from Hallmarks of cancer](#heatmap-with-results-from-hallmarks-of-cancer)
-
-> Elastic-Net models with additional regularization based on network centrality metrics
 
 Install
 -------
