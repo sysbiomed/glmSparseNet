@@ -68,7 +68,7 @@ setMethod('network.glmnet', signature(xdata = 'matrix'), function(xdata, ydata, 
 setMethod('network.glmnet', signature(xdata = 'MultiAssayExperiment'), function(xdata, ydata, network,
                                                                                 experiment.name = NULL,
                                                                                 network.options = network.options.default(), ...) {
-  return(network.glmnet.private(glmnet::glmnet, xdata[[experiment.name]], ydata, network, network.options, ...))
+  return(network.glmnet.private(glmnet::glmnet, xdata, ydata, network, experiment.name = experiment.name, network.options = network.options, ...))
 })
 
 
@@ -81,7 +81,7 @@ setMethod('network.glmnet', signature(xdata = 'MultiAssayExperiment'), function(
 #'
 setMethod('network.glmnet', signature(xdata = 'SummarizedExperiment'), function(xdata, ydata, network,
                                                                                 network.options = network.options.default(), ...) {
-  return(network.glmnet.private(glmnet::glmnet, t(assay(xdata)), ydata, network, network.options, ...))
+  return(network.glmnet.private(glmnet::glmnet, t(assay(xdata)), ydata, network, network.options = network.options, ...))
 })
 
 

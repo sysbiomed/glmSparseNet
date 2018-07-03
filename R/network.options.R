@@ -18,14 +18,14 @@ network.options.default <- function(method     = 'pearson',
                                     unweighted = TRUE,
                                     cutoff     = 0,
                                     centrality = 'degree',
-                                    n.cores    = 1,
-                                    assay      = NULL) {
+                                    min.degree = 0,
+                                    n.cores    = 1) {
   return(list(method = method,
               unweighted = unweighted,
               cutoff = cutoff,
               centrality = centrality,
               n.cores = n.cores,
-              assay = assay))
+              min.degree = min.degree))
 }
 
 

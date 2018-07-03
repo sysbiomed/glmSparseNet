@@ -65,9 +65,9 @@ setMethod('network.cv.glmnet', signature(xdata = 'matrix'), function(xdata, ydat
 #' @export
 #'
 setMethod('network.cv.glmnet', signature(xdata = 'MultiAssayExperiment'), function(xdata, ydata, network,
-                                                                                   experiment.name,
+                                                                                   experiment.name = NULL,
                                                                                    network.options = network.options.default(), ...) {
-  return(network.glmnet.private(glmnet::cv.glmnet, xdata, ydata, network, experiment.name , network.options = network.options, ...))
+  return(network.glmnet.private(glmnet::cv.glmnet, xdata, ydata, network, experiment.name = experiment.name , network.options = network.options, ...))
 })
 
 

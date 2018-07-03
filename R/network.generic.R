@@ -32,7 +32,7 @@ setMethod('network.glmnet.private', signature(xdata = 'matrix'), function(fun, x
   if (is.character(network)) {
     penalty.factor <- calc.penalty(xdata, network, network.options)
   } else if (is.matrix(network)) {
-    penalty.factor <- (colSums(network) + rowSums(network)) / 2
+    penalty.factor <- (colSums(network) + rowSums(network))
   } else if (is.vector(network)) {
     if (lenght(network) != ncol(xdata)) {
       stop('Network vector size does not match xdata input')
@@ -41,7 +41,16 @@ setMethod('network.glmnet.private', signature(xdata = 'matrix'), function(fun, x
   } else {
     stop('There was an error with network argumnent')
   }
-  return(fun(xdata, ydata, penalty.factor = penalty.factor, ...))
+
+  penalty.factor <- penalty.factor + network.options$min.degree
+
+  if (any(penalty.factor == 0)) {
+    warning('The penalty.factor calculated from network (or given) has some 0 values, this might lead to convergence problems. Try using min.degree in network.options to tweak a minimum value.')
+  }
+
+  obj <- fun(xdata, ydata, penalty.factor = penalty.factor, ...)
+  obj$penalty.factor = penalty.factor
+  return(obj)
 })
 
 #' Calculate GLM model with network-based regularization
@@ -54,9 +63,22 @@ setMethod('network.glmnet.private', signature(xdata = 'MultiAssayExperiment'), f
                                                                                         experiment.name = NULL,
                                                                                         network.options = network.options.default(), ...) {
   if (is.null(experiment.name)) {
-    stop('Experiment name must be passed in network.options, see documentation.')
+    stop('Experiment name must be passed, see documentation.')
   }
+
+  # Get all valid individuals from experiment (lookup the mapping)
   valid.ydata.id <- xdata@sampleMap[xdata@sampleMap$assay == experiment.name, 'primary']
+
+  # filter the MultiAssayExperiment keeping only individuals with data in specific experiment
+  suppressMessages(xdata <- xdata[,rownames(xdata@colData) %in% valid.ydata.id])
+
+  # stop if output xdata has no rows (should not happen)
+  if( nrow(xdata@colData) == 0) {
+    stop('Experiment has no observations or the MultiAssayExperiment object is corrupt.')
+  }
+
+  # if ydata has rownames then it uses it to match with valid experiences
+  #  this is done to avoid missorted objects
   if (is.matrix(ydata) || is.data.frame(ydata) || inherits(ydata, 'DataFrame')) {
     if (!is.null(rownames(ydata))) {
       ydata <- as.matrix(ydata[valid.ydata.id,])
