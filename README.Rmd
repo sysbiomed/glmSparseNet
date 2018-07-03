@@ -85,6 +85,14 @@ Plot the results of the `glmnet` run
 plot(fit1)
 ```
 
+The given network parameter can also be a network itself, i.e. a matrix. The example below uses a randomly generated network to use in the methods.
+
+```{r}
+rand.network <- abs(matrix(rnorm(20*20),20,20))
+diag(rand.network) <- 0
+fit4 <- network.glmnet(x,y, rand.network, network.options = network.options.default(cutoff = 0.1))
+plot(fit4)
+```
 
 The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot
 
@@ -96,7 +104,6 @@ predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
 colnames(predicted) <- c('lambda_0.01', 'lambda_0.005')
 flog.info('Observed vs. Predicted', cbind(Observed = y[1:10], predicted), capture = TRUE)
 ```
-
 
 It also extends the new methods to the cross validation function with `network.cv.glmnet`
 
