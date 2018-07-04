@@ -6,7 +6,7 @@ name needed!!
 -   [Install](#install)
 -   [Citation](#citation)
 -   [Overview](#overview)
-    -   [Example for gaussian models](#example-for-gaussian-models)
+    -   [Example for Gaussian models](#example-for-Gaussian-models)
     -   [Survival Example using RNASeq data](#survival-example-using-rnaseq-data)
 -   [Visualization tools](#visualization-tools)
     -   [Survival curves with `draw.kaplan`](#survival-curves-with-draw.kaplan)
@@ -16,6 +16,7 @@ Install
 -------
 
 Bioconductor is necessary for the installation of this package.
+ANDRÉ: Faltam aqui muitas dependências, para que isto corra sem problemas. Vê os mails
 
 ``` r
 source("https://bioconductor.org/biocLite.R")
@@ -35,14 +36,14 @@ This package extends the `glmnet` r-package with network-based regularization ba
 
 It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization.
 
-There are 3 methods available to use data-dependant methods to generate the netork:
+There are 3 methods available to use data-dependant methods to generate the network:
 
 1.  Correlation matrix with cutoff;
 2.  Covariance matrix with cutoff; <!-- 1. Sparse bayesian networks using `sparsebn` package. -->
 
-Alternatively, the network can be passed as a adjancency matrix or an already calculate metric for each node.
+Alternatively, the network can be passed as an adjancency matrix or an already calculated metric for each node.
 
-### Example for gaussian models
+### Example for Gaussian models
 
 The example below, shows random datasets being generated and `network.glmnet` new function being called.
 
@@ -79,7 +80,7 @@ diag(rand.network) <- 0
 fit4 <- network.glmnet(x,y, rand.network, network.options = network.options.default(cutoff = 0.1))
 ```
 
-The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot
+The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot.
 
 ``` r
 predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
@@ -99,7 +100,7 @@ predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
     ##  [9,]  0.70796882 -0.14924592  -0.21424066
     ## [10,] -1.27383760  0.07842791   0.06727353
 
-It also extends the new methods to the cross validation function with `network.cv.glmnet`
+It also extends the new methods to the cross-validation function with `network.cv.glmnet`.
 
 ``` r
 plot(network.cv.glmnet(x,y, 'covariance'))
@@ -136,7 +137,7 @@ ydata <- data.frame(time      = surv_event_time[valid.ix],
                     row.names = xdata$patientID[valid.ix])
 ```
 
-Fitting the survival model using a correlation network with cutoff at 0.6
+Fitting the survival model using a correlation network with cutoff at 0.6.
 
 ``` r
 # build response object for glmnet
