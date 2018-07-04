@@ -1,37 +1,72 @@
-context("Covariance function")
+context("Correlation matrix")
 
 set.seed(1985)
 xdata <- matrix(rnorm(30000), nrow = 500)
 
-test_that("Spearman correlation is the same", {
-  my.method <- 'spearman'
-  cor.non.diag <- cor(xdata, method = my.method)
-  diag(cor.non.diag) <- 0
-  test.cov <- cor.parallel(xdata, method = my.method, n.cores = 2, build.output = 'matrix',
-                           #
-                           base.dir = tempdir(), force.recalc = TRUE)
+# use a temporary directory that can be written
+loose.rock::base.dir(tempdir())
 
-  expect_lt(sum(Matrix::norm(test.cov - cor.non.diag, type = "1")), 5e-16)
+test_that("Default methods", {
+  mat.non.diag <- cor(xdata)
+  diag(mat.non.diag) <- 0
+  test.mat <- network.cor.parallel(xdata, n.cores = 1, build.output = 'matrix',
+                                   #
+                                   force.recalc = TRUE)
+
+  expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-16)
   #
-  test.cov <- cor.parallel(xdata, method = my.method, n.cores = 2, build.output = 'matrix',
+  test.mat <- network.cor.parallel(xdata, n.cores = 1, build.output = 'matrix',
                            #
-                           base.dir = tempdir(), force.recalc = FALSE)
-  expect_lt(sum(Matrix::norm(test.cov - cor.non.diag, type = "1")), 5e-16)
+                           force.recalc = FALSE)
+  expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-16)
 })
 
-test_that("Pearson correlation is the same", {
-  my.method <- 'pearson'
-  cor.non.diag <- cor(xdata, method = my.method)
-  diag(cor.non.diag) <- 0
-  #
-  test.cov <- cor.parallel(xdata, method = my.method, n.cores = 2, build.output = 'matrix',
-                           #
-                           base.dir = tempdir(), force.recalc = TRUE)
+test_that("Spearman correlation", {
+  my.method <- 'spearman'
+  mat.non.diag <- cor(xdata, method = my.method)
+  diag(mat.non.diag) <- 0
+  test.mat <- network.cor.parallel(xdata, method = my.method, n.cores = 1, build.output = 'matrix',
+                                   #
+                                   force.recalc = TRUE)
 
-  expect_lt(sum(Matrix::norm(test.cov - cor.non.diag, type = "1")), 5e-16)
+  expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-16)
   #
-  test.cov <- cor.parallel(xdata, method = my.method, n.cores = 2, build.output = 'matrix',
+  test.mat <- network.cor.parallel(xdata, method = my.method, n.cores = 1, build.output = 'matrix',
                            #
-                           base.dir = tempdir(), force.recalc = FALSE)
-  expect_lt(sum(Matrix::norm(test.cov - cor.non.diag, type = "1")), 5e-16)
+                           force.recalc = FALSE)
+  expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-16)
+})
+
+test_that("Pearson correlation", {
+  my.method <- 'pearson'
+  mat.non.diag <- cor(xdata, method = my.method)
+  diag(mat.non.diag) <- 0
+  #
+  test.mat <- network.cor.parallel(xdata, method = my.method, n.cores = 1, build.output = 'matrix',
+                           #
+                           force.recalc = TRUE)
+
+  expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-16)
+  #
+  test.mat <- network.cor.parallel(xdata, method = my.method, n.cores = 1, build.output = 'matrix',
+                           #
+                           force.recalc = FALSE)
+  expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-16)
+})
+
+test_that("Multiple cores", {
+  my.method <- 'pearson'
+  mat.non.diag <- cor(xdata, method = my.method)
+  diag(mat.non.diag) <- 0
+  #
+  test.mat <- network.cor.parallel(xdata, method = my.method, n.cores = 4, build.output = 'matrix',
+                           #
+                           force.recalc = TRUE)
+
+  expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-16)
+  #
+  test.mat <- network.cor.parallel(xdata, method = my.method, n.cores = 4, build.output = 'matrix',
+                           #
+                           force.recalc = FALSE)
+  expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-16)
 })

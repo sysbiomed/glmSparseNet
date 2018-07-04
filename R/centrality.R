@@ -1,169 +1,87 @@
-
-#' Parallel calculation of correlation
+#' Calculates the correlation network
 #'
-#' Calculates the correlation between a column and all which
-#'  index is above it
-#'
-#' @param xdata
-#' @param ix.i
-setGeneric('cov.worker', function(xdata, ix.i, method = 'pearson') {
-  stop('first argument must be a matrix')
-})
-setMethod('cov.worker', signature('matrix'), function(xdata, ix.i, method = 'pearson') {
-  #
-  n.col <- ncol(xdata)
-  xdata.i <- xdata[,ix.i]
-  result  <- sapply((ix.i + 1):n.col, function(ix.j){
-    cov(xdata.i, xdata[,ix.j], method = method)
-  })
-  result[is.na(result)] <- 0
-  return(result)
-})
-
-#' Calculate correlation of large matrix
-#'
-#' @param xdata calculate correlation matrix on each column
+#' @param xdata base data to calculate network
+#' @param build.output if output returns a 'matrix', 'vector' of the upper triu without the diagonal or NULL with any other argument
 #' @param n.cores number of cores to be used
-#' @param build.output string that can be 'matrix', 'vector' or NULL and determines the output of the function
+#' @param force.recalc.network force recalculation, instead of going to cache
+#' @param show.message shows cache operation messages
+#' @param ... extra parameters for fun
 #'
-#' @return a mtarix if
-#'
+#' @return depends on build.output parameter
 #' @export
+#'
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 #' cor.parallel(xdata)
-setGeneric('cov.parallel', function(xdata, method = 'pearson', base.dir = loose.rock::base.dir(), build.output = 'matrix', n.cores = parallel:::detectCores(),
-                                    force.recalc = FALSE,
-                                    show.message  = FALSE) {
-  stop('first argument must be a matrix')
-})
+network.cor.parallel <- function(xdata,
+                                 build.output  = 'matrix',
+                                 n.cores       = parallel:::detectCores(),
+                                 force.recalc.network  = FALSE,
+                                 show.message  = FALSE, ...) {
+  network.generic.parallel(cor, 'correlation', xdata, build.output = build.output, n.cores = n.cores,
+                           force.recalc.network = force.recalc.network,
+                           show.message = show.message, ...)
+}
 
-setMethod('cov.parallel', signature('matrix'), function(xdata, method = 'pearson',
-                                                        base.dir      = loose.rock::base.dir(),
-                                                        build.output  = 'matrix',
-                                                        n.cores       = parallel:::detectCores(),
-                                                        force.recalc  = FALSE,
-                                                        show.message  = FALSE) {
-  xdata.sha256 <- loose.rock::digest.cache(xdata)
-  cov.aux <- function(xdata, method) {
-    dir.create(base.dir, showWarnings = FALSE)
-    result <- parallel::mclapply( as.numeric(1:(ncol(xdata)-1)), function(ix.i) {
-      tryCatch({
-        result <- loose.rock::run.cache(cov.worker, xdata, ix.i, method = method,
-                                      #
-                                      base.dir     = base.dir,
-                                      cache.digest = list(xdata.sha256),
-                                      cache.prefix = 'covariance',
-                                      show.message = show.message,
-                                      force.recalc = force.recalc)
-      },
-      error = function(error.str) {
-        flog.error('This error has occured %s', error.str)
-      })
-      if (build.output == 'vector' || build.output == 'matrix') {
-        return(result)
-      } else {
-        return(TRUE)
-      }
-    #}
-    }, mc.cores = n.cores, mc.silent = F)
-    return(result)
-  }
-  result <- loose.rock::run.cache(cov.aux, xdata, method,
-                                 #
-                                 cache.prefix = 'cov.aux',
-                                 cache.digest = list(xdata.sha256),
-                                 base.dir = base.dir,
-                                 force.recalc = force.recalc,
-                                 show.message = show.message)
-  if (build.output == 'vector') {
-    return(unlist(result))
-  } else if(build.output == 'matrix') {
-    sparse.data <- data.frame(i = c(), j = c(), p = c())
-    for (ix in rev(seq_along(result))) {
-      line <- result[[ix]]
-      sparse.data <- rbind(sparse.data, data.frame(i = array(ix, length(line)), j = ix + seq_along(line), p = line))
-      result[[ix]] <- NULL
-    }
-    return(Matrix::sparseMatrix(i = sparse.data$i, j = sparse.data$j, x = sparse.data$p, dims = c(ncol(xdata), ncol(xdata)), symmetric = TRUE))
-  } else {
-    return(NULL)
-  }
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
-#' Parallel calculation of correlation
+#' Calculates the covariance network
 #'
-#' Calculates the correlation between a column and all which
-#'  index is above it
-#'
-#' @param xdata
-#' @param ix.i
-setGeneric('cor.worker', function(xdata, ix.i, method = 'pearson') {
-  stop('first argument must be a matrix')
-})
-setMethod('cor.worker', signature('matrix'), function(xdata, ix.i, method = 'pearson') {
-  #
-  n.col <- ncol(xdata)
-  xdata.i <- xdata[,ix.i]
-  result  <- sapply((ix.i + 1):n.col, function(ix.j){
-    cor(xdata.i, xdata[,ix.j], method = method)
-  })
-  result[is.na(result)] <- 0
-  # out.result <- Matrix::Matrix(0, ncol = n.col, nrow = 1)
-  # out.result[1,(ix.i+1):n.col] <- result
-  return(result)
-})
-
-#' Calculate correlation of large matrix
-#'
-#' @param xdata calculate correlation matrix on each column
+#' @param xdata base data to calculate network
+#' @param build.output if output returns a 'matrix', 'vector' of the upper triu without the diagonal or NULL with any other argument
 #' @param n.cores number of cores to be used
-#' @param build.output string that can be 'matrix', 'vector' or NULL and determines the output of the function
+#' @param force.recalc.network force recalculation, instead of going to cache
+#' @param show.message shows cache operation messages
+#' @param ... extra parameters for fun
 #'
-#' @return a mtarix if
-#'
+#' @return depends on build.output parameter
 #' @export
+#'
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' cor.parallel(xdata)
-setGeneric('cor.parallel', function(xdata, method = 'pearson',
-                                    base.dir = loose.rock::base.dir(), build.output  = 'matrix', n.cores = parallel:::detectCores(), force.recalc = FALSE,
-                                    show.message  = FALSE) {
-  stop('first argument must be a matrix')
-})
+#' cov.parallel(xdata)
+network.cov.parallel <- function(xdata,
+                                 build.output  = 'matrix',
+                                 n.cores       = parallel:::detectCores(),
+                                 force.recalc.network  = FALSE,
+                                 show.message  = FALSE, ...) {
+  network.generic.parallel(cov, 'covariance', xdata, build.output = build.output, n.cores = n.cores,
+                           force.recalc.network = force.recalc.network,
+                           show.message = show.message, ...)
+}
 
-setMethod('cor.parallel', signature('matrix'), function(xdata, method = 'pearson',
-                                                        base.dir      = loose.rock::base.dir(),
-                                                        build.output  = 'matrix',
-                                                        n.cores       = parallel:::detectCores(),
-                                                        force.recalc  = FALSE,
-                                                        show.message  = FALSE) {
+#' Calculate the upper triu of the matrix
+#'
+#' @param fun function that will calculate the edge weight between 2 nodes
+#' @param fun.prefix used to store low-level information on network as it can become to large to be stored in memory
+#' @param xdata base data to calculate network
+#' @param build.output if output returns a 'matrix', 'vector' of the upper triu without the diagonal or NULL with any other argument
+#' @param n.cores number of cores to be used
+#' @param force.recalc.network force recalculation, instead of going to cache
+#' @param show.message shows cache operation messages
+#' @param ... extra parameters for fun
+#'
+#' @return depends on build.output parameter
+network.generic.parallel <- function(fun, fun.prefix,
+                                     xdata,
+                                     build.output  = 'matrix',
+                                     n.cores       = parallel:::detectCores(),
+                                     force.recalc.network  = FALSE,
+                                     show.message  = FALSE, ...) {
+  #
   xdata.sha256 <- loose.rock::digest.cache(xdata)
-  cor.aux <- function(xdata, method) {
-    dir.create(base.dir, showWarnings = FALSE)
+  #
+  fun.aux <- function(xdata, ...) {
     result <- parallel::mclapply( as.numeric(1:(ncol(xdata)-1)), function(ix.i) {
       tryCatch({
-        result <- loose.rock::run.cache(cor.worker, xdata, ix.i, method = method,
+        result <- loose.rock::run.cache(network.worker, fun,
+                                       xdata, ix.i,
                                        #
-                                       base.dir     = base.dir,
                                        cache.digest = list(xdata.sha256),
-                                       cache.prefix = 'correlation',
+                                       cache.prefix = fun.prefix,
                                        show.message = show.message,
-                                       force.recalc = force.recalc)
+                                       force.recalc = force.recalc.network,
+                                       ...)
       },
       error = function(error.str) {
         flog.error('This error has occured %s', error.str)
@@ -177,13 +95,13 @@ setMethod('cor.parallel', signature('matrix'), function(xdata, method = 'pearson
     }, mc.cores = n.cores, mc.silent = F)
     return(result)
   }
-  result <- loose.rock::run.cache(cor.aux, xdata, method,
+  result <- loose.rock::run.cache(fun.aux, xdata,
                                  #
-                                 cache.prefix = 'cor.aux',
+                                 cache.prefix = 'fun.aux',
                                  cache.digest = list(xdata.sha256),
-                                 base.dir     = base.dir,
-                                 force.recalc = force.recalc,
-                                 show.message = show.message)
+                                 force.recalc = force.recalc.network,
+                                 show.message = show.message,
+                                 ...)
   if (build.output == 'vector') {
     return(unlist(result))
   } else if(build.output == 'matrix') {
@@ -197,98 +115,16 @@ setMethod('cor.parallel', signature('matrix'), function(xdata, method = 'pearson
   } else {
     return(NULL)
   }
-})
+}
 
-#' Calculate degree of correlation matrix
+#' Calculate the degree of the correlation network based on xdata
 #'
 #' @param xdata calculate correlation matrix on each column
-#' @param method correlation method to be used
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
-#' @param base.dir where to store the cache of the results
 #' @param n.cores number of cores to be used
 #' @param force.recalc force recalculation, instead of going to cache
-#'
-#' @return a vector of the degrees
-#'
-#' @examples
-#' n.col <- 6
-#' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degree.cor.weighted(xdata)
-#' degree.cor.weighted(xdata, cutoff = .5)
-#' degree.cor.weighted(xdata, cutoff = .5, consider.unweighted = T)
-#' degree.cor.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
-setGeneric('degree.cor.weighted', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                       base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
-                                       show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
-  stop('first argument must be a matrix')
-})
-
-setMethod('degree.cor.weighted', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                                           base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
-                                                           show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
-  if (force.recalc.correlation) {
-    force.recalc.degree <- T
-  }
-  #
-  # auxiliary function to be able to call with cache
-  #
-  weigthed.aux <- function(xdata, cutoff, consider.unweighted, method, base.dir) {
-    degree <- array(0, ncol(xdata))
-    added.sum <- 1000
-    for (ix.outer in seq(1, ncol(xdata) - 1, added.sum)) {
-      max.ix <- min(ix.outer + added.sum - 1, ncol(xdata) - 1)
-      res.1000 <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
-        line <- loose.rock::run.cache(cor.worker, xdata, ix.i, method = method,
-                                    base.dir     = base.dir,
-                                    cache.digest = list(xdata.sha256),
-                                    cache.prefix = 'correlation',
-                                    show.message = F,
-                                    force.recalc = force.recalc.correlation)
-        if (any(!is.numeric(line))) {
-          line <- loose.rock::run.cache(cor.worker, xdata, ix.i, method = method,
-                                      base.dir     = base.dir,
-                                      cache.digest = list(xdata.sha256),
-                                      cache.prefix = 'correlation',
-                                      show.message = F,
-                                      force.recalc = T)
-        }
-        #
-        line[is.na(line)]   <- 0 # failsafe in case there was a failure in cor (i.e. sd = 0)
-        line                <- abs(line)
-        line[line < cutoff] <- 0
-        if (consider.unweighted) { line[line != 0] <- 1 }
-        line <- c(rep(0, ix.i - 1), sum(line), line)
-        return(line)
-      }, mc.cores = n.cores, mc.allow.recursive = FALSE)
-      #
-      res.1000 <- matrix(unlist(res.1000), ncol = ncol(xdata), byrow = TRUE)
-      degree   <- degree + colSums(res.1000)
-    }
-    names(degree) <- colnames(xdata)
-    return(degree)
-  }
-  #
-  dir.create(base.dir, showWarnings = FALSE)
-  xdata.sha256 = loose.rock::digest.cache(xdata)
-  val <- loose.rock::run.cache(weigthed.aux, xdata, cutoff, consider.unweighted, method, base.dir,
-                             base.dir     = base.dir,
-                             cache.digest = list(xdata.sha256),
-                             cache.prefix = 'degree.cor',
-                             show.message = show.message,
-                             force.recalc = force.recalc.degree)
-  return(val)
-})
-
-#' Title
-#'
-#' @param xdata calculate correlation matrix on each column
-#' @param method correlation method to be used
-#' @param cutoff positive value that determines a cutoff value
-#' @param consider.unweighted consider all edges as 1 if they are greater than 0
-#' @param base.dir where to store the cache of the results
-#' @param n.cores number of cores to be used
-#' @param force.recalc force recalculation, instead of going to cache
+#' @param ... extra parameters for fun
 #'
 #' @return a vector of the degrees
 #' @export
@@ -296,88 +132,132 @@ setMethod('degree.cor.weighted', signature('matrix'), function(xdata, method = '
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degree(xdata)
-#' degree(xdata, cutoff = .5)
-#' degree(xdata, cutoff = .5, consider.unweighted = T)
-setGeneric('degree.cor', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                              base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
-                              force.recalc = FALSE) {
+#' degree.cor(xdata)
+#' degree.cor(xdata, cutoff = .5)
+#' degree.cor(xdata, cutoff = .5, consider.unweighted = T)
+setGeneric('degree.cor', function(xdata, cutoff = 0, consider.unweighted = FALSE,
+                                  force.recalc.degree = FALSE, force.recalc.network = FALSE,
+                                  n.cores = parallel:::detectCores(), ...) {
   stop('first argument must be a matrix')
 })
 
-setMethod('degree.cor', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                                  base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
-                                                  force.recalc = FALSE) {
-  degree.weighted(xdata, base.dir = base.dir, cutoff = cutoff, consider.unweighted = T, n.cores = n.cores)
+setMethod('degree.cor', signature('matrix'), function(xdata, cutoff = 0, consider.unweighted = FALSE,
+                                                      force.recalc.degree = FALSE, force.recalc.network = FALSE,
+                                                      n.cores = parallel:::detectCores(), ...) {
+  return(degree.generic(cor, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
+                 force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
+                 n.cores = n.cores, ...))
+})
+
+#' Calculate the degree of the covariance network based on xdata
+#'
+#' @param xdata calculate correlation matrix on each column
+#' @param cutoff positive value that determines a cutoff value
+#' @param consider.unweighted consider all edges as 1 if they are greater than 0
+#' @param n.cores number of cores to be used
+#' @param force.recalc force recalculation, instead of going to cache
+#' @param ... extra parameters for fun
+#'
+#' @return a vector of the degrees
+#' @export
+#'
+#' @examples
+#' n.col <- 6
+#' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
+#' degree.cov(xdata)
+#' degree.cov(xdata, cutoff = .5)
+#' degree.cov(xdata, cutoff = .5, consider.unweighted = T)
+setGeneric('degree.cov', function(xdata, cutoff = 0, consider.unweighted = FALSE,
+                                  force.recalc.degree = FALSE, force.recalc.network = FALSE,
+                                  n.cores = parallel:::detectCores(), ...) {
+  stop('first argument must be a matrix')
+})
+
+setMethod('degree.cov', signature('matrix'), function(xdata, cutoff = 0, consider.unweighted = FALSE,
+                                                      force.recalc.degree = FALSE, force.recalc.network = FALSE,
+                                                      n.cores = parallel:::detectCores(), ...) {
+  return(degree.generic(cor, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
+                        force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
+                        n.cores = n.cores, ...))
 })
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-#' Calculate degree of correlation matrix
+#' Worker to calculate edge weight for each pair of ix.i node and following
 #'
+#' Note that it assumes it does not calculate for index below and equal to ix.i
+#'
+#' @param fun function to be used, can be cor, cov or any other defined function
+#' @param xdata original data to calculate the function over
+#' @param ix.i starting index, this can be used to save ony upper triu
+#' @param ... extra parameters for fun
+#'
+#' @import futile.logger
+#'
+#' @return a vector with size `ncol(xdata) - ix.i`
+#'
+#' @examples
+#' network.worker(cor, matrix(rnorm(20*10), ncol = 10), 1)
+#' network.worker(cor, matrix(rnorm(20*10), ncol = 10), 5)
+network.worker <- function(fun, xdata, ix.i, ...) {
+  #
+  n.col <- ncol(xdata)
+  xdata.i <- xdata[,ix.i]
+  result  <- sapply((ix.i + 1):n.col, function(ix.j){
+    fun(xdata.i, xdata[,ix.j], ...)
+  })
+  result[is.na(result)] <- 0
+  return(result)
+}
+
+#' Generic function to calculate degree based on data
+#'
+#' The assumption to use this function is that the network represented by a matrix is symetric and without
+#' any connection the node and itself.
+#'
+#' @param fun function that will calculate the edge weight between 2 nodes
+#' @param fun.prefix used to store low-level information on network as it can become to large to be stored in memory
 #' @param xdata calculate correlation matrix on each column
-#' @param method correlation method to be used
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
-#' @param base.dir where to store the cache of the results
 #' @param n.cores number of cores to be used
 #' @param force.recalc force recalculation, instead of going to cache
+#' @param ... extra parameters for fun
 #'
 #' @return a vector of the degrees
 #'
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degree.weighted(xdata)
-#' degree.weighted(xdata, cutoff = .5)
-#' degree.weighted(xdata, cutoff = .5, consider.unweighted = T)
-#' degree.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
-setGeneric('degree.cov.weighted', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                       base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
-                                       show.message = FALSE, force.recalc.degree = FALSE, force.recalc.covariance = FALSE) {
-  stop('first argument must be a matrix')
-})
-
-setMethod('degree.cov.weighted', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                                           base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
-                                                           show.message = FALSE, force.recalc.degree = FALSE, force.recalc.covariance = FALSE) {
-  if (force.recalc.covariance) {
-    force.recalc.degree <- T
+#' degree.generic(cor, 'cor', xdata)
+degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, consider.unweighted = FALSE,
+                           force.recalc.degree = FALSE, force.recalc.network = FALSE,
+                           n.cores = parallel:::detectCores(), ...) {
+  if (force.recalc.network) {
+    force.recalc.degree <- force.recalc.network
   }
   #
   # auxiliary function to be able to call with cache
   #
-  weigthed.aux <- function(xdata, cutoff, consider.unweighted, method) {
+  weigthed.aux <- function(xdata, cutoff, consider.unweighted, ...) {
     degree <- array(0, ncol(xdata))
     added.sum <- 1000
     for (ix.outer in seq(1, ncol(xdata) - 1, added.sum)) {
       max.ix <- min(ix.outer + added.sum - 1, ncol(xdata) - 1)
       res.1000 <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
-        line <- loose.rock::run.cache(cov.worker, xdata, ix.i, method = method,
-                                    base.dir     = base.dir,
-                                    cache.digest = list(xdata.sha256),
-                                    cache.prefix = 'covariance',
-                                    show.message = F,
-                                    force.recalc = force.recalc.covariance)
-        if (any(!is.numeric(line))) {
-          line <- loose.rock::run.cache(cov.worker, xdata, ix.i, method = method,
-                                      base.dir     = base.dir,
+        line <- loose.rock::run.cache(network.worker, fun, xdata, ix.i,
                                       cache.digest = list(xdata.sha256),
-                                      cache.prefix = 'covariance',
+                                      cache.prefix = fun.prefix,
                                       show.message = F,
-                                      force.recalc = T)
+                                      force.recalc = force.recalc.network,
+                                      ...)
+        if (any(!is.numeric(line))) {
+          line <- loose.rock::run.cache(network.worker, fun, xdata, ix.i,
+                                        cache.digest = list(xdata.sha256),
+                                        cache.prefix = fun.prefix,
+                                        show.message = F,
+                                        force.recalc = T,
+                                        ...)
         }
         #
         line[is.na(line)]   <- 0 # failsafe in case there was a failure in cov (i.e. sd = 0)
@@ -395,38 +275,21 @@ setMethod('degree.cov.weighted', signature('matrix'), function(xdata, method = '
     return(degree)
   }
   #
-  dir.create(base.dir, showWarnings = FALSE)
   xdata.sha256 <- loose.rock::digest.cache(xdata)
 
-  val <- loose.rock::run.cache(weigthed.aux, xdata, cutoff, consider.unweighted, method,
-                             base.dir     = base.dir,
+  val <- loose.rock::run.cache(weigthed.aux, xdata, cutoff, consider.unweighted,
                              cache.digest = list(xdata.sha256),
-                             cache.prefix = 'degree.cov',
-                             show.message = show.message,
-                             force.recalc = force.recalc.degree)
+                             cache.prefix = sprintf('degree.%s', fun.prefix),
+                             show.message = FALSE,
+                             force.recalc = force.recalc.degree, ...)
   return(val)
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 
 #' Calculate degree of correlation matrix
 #'
 #' @param xdata calculate correlation matrix on each column
-#' @param method correlation method to be used
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
-#' @param base.dir where to store the cache of the results
 #' @param n.cores number of cores to be used
 #' @param force.recalc force recalculation, instead of going to cache
 #'
@@ -475,103 +338,5 @@ setMethod('degree.sparsebn.weighted', signature('matrix'), function(xdata, metho
   }
 
   val <- Matrix::colSums(dag.params[[50]]$coefs) + Matrix::rowSums(dag.params[[50]]$coefs)
-  return(val)
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#' Calculate degree of correlation matrix
-#'
-#' @param xdata calculate correlation matrix on each column
-#' @param method correlation method to be used
-#' @param cutoff positive value that determines a cutoff value
-#' @param consider.unweighted consider all edges as 1 if they are greater than 0
-#' @param base.dir where to store the cache of the results
-#' @param n.cores number of cores to be used
-#' @param force.recalc force recalculation, instead of going to cache
-#'
-#' @return a vector of the degrees
-#'
-#' @examples
-#' n.col <- 60
-#' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degree.cor.inv.weighted(xdata, n.cores = 1)
-#' degree.cor.inv.weighted(xdata, cutoff = .5)
-#' degree.cor.inv.weighted(xdata, cutoff = .5, consider.unweighted = T)
-#' degree.cor.inv.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
-setGeneric('degree.cor.inv.weighted', function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                               base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
-                                               show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
-  stop('first argument must be a matrix')
-})
-
-setMethod('degree.cor.inv.weighted', signature('matrix'), function(xdata, method = 'pearson', cutoff = 0, consider.unweighted = FALSE,
-                                                                   base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
-                                                                   show.message = FALSE, force.recalc.degree = FALSE, force.recalc.correlation = FALSE) {
-  if (force.recalc.correlation) {
-    force.recalc.degree <- T
-  }
-  #
-  # auxiliary function to be able to call with cache
-  #
-  weigthed.aux <- function(xdata, cutoff, consider.unweighted, method, base.dir) {
-    degree <- array(0, ncol(xdata))
-    added.sum <- 1000
-    for (ix.outer in seq(1, ncol(xdata) - 1, added.sum)) {
-      max.ix <- min(ix.outer + added.sum - 1, ncol(xdata) - 1)
-      res.1000 <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
-        line <- loose.rock::run.cache(cor.worker, xdata, ix.i, method = method,
-                                     base.dir     = base.dir,
-                                     cache.digest = list(xdata.sha256),
-                                     cache.prefix = 'correlation',
-                                     show.message = F,
-                                     force.recalc = force.recalc.correlation)
-        if (any(!is.numeric(line))) {
-          line <- loose.rock::run.cache(cor.worker, xdata, ix.i, method = method,
-                                       base.dir     = base.dir,
-                                       cache.digest = list(xdata.sha256),
-                                       cache.prefix = 'correlation',
-                                       show.message = F,
-                                       force.recalc = T)
-        }
-        #
-        line.old <- line
-        line[is.na(line)]   <- 0 # failsafe in case there was a failure in cor (i.e. sd = 0)
-        line                <- abs(line)
-        line[line < cutoff] <- 0
-        line[line != 0]     <- 1 / line[line != 0]
-        line[line == 0]     <- max(line != 0) + 1
-        if (consider.unweighted) { line[line != 0] <- 1 }
-        line <- c(rep(0, ix.i - 1), sum(line), line)
-        return(line)
-      }, mc.cores = n.cores, mc.allow.recursive = FALSE)
-      #
-      res.1000 <- matrix(unlist(res.1000), ncol = ncol(xdata), byrow = TRUE)
-      degree   <- degree + colSums(res.1000)
-    }
-    names(degree) <- colnames(xdata)
-    return(degree)
-  }
-  #
-  dir.create(base.dir, showWarnings = FALSE)
-  xdata.sha256 = loose.rock::digest.cache(xdata)
-  val <- loose.rock::run.cache(weigthed.aux, xdata, cutoff, consider.unweighted, method, base.dir,
-                              base.dir     = base.dir,
-                              cache.digest = list(xdata.sha256),
-                              cache.prefix = 'degree.cor.inv2',
-                              show.message = show.message,
-                              force.recalc = force.recalc.degree)
   return(val)
 })

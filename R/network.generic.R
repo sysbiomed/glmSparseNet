@@ -1,5 +1,3 @@
-library(MultiAssayExperiment)
-
 #' Calculate GLM model with network-based regularization
 #'
 #' @param fun function to be called (glmnet or cv.glmnet)
@@ -10,7 +8,6 @@ library(MultiAssayExperiment)
 #' @param ... parameters that glmnet accepts
 #'
 #' @return an object just as glmnet
-#'
 #' network parameter accepts:
 #'
 #'  * string to calculate network based on data (correlation, covariance)
@@ -58,6 +55,7 @@ setMethod('network.glmnet.private', signature(xdata = 'matrix'), function(fun, x
 #' @param xdata MultiAssayExperiment.
 #'
 #' @return an object just as glmnet
+#' @import MultiAssayExperiment
 #'
 setMethod('network.glmnet.private', signature(xdata = 'MultiAssayExperiment'), function(fun, xdata, ydata, network,
                                                                                         experiment.name = NULL,
@@ -92,6 +90,7 @@ setMethod('network.glmnet.private', signature(xdata = 'MultiAssayExperiment'), f
 #' @param xdata SummarizedExperiment.
 #'
 #' @return an object just as glmnet
+#' @import SummarizedExperiment
 #'
 setMethod('network.glmnet.private', signature(xdata = 'SummarizedExperiment'), function(fun, xdata, ydata, network,
                                                                                         network.options = network.options.default(), ...) {

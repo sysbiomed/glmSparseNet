@@ -340,20 +340,6 @@ if (params$degree.type == 'oldie') {
   #
   # Load degree of network calculated summing the inverse of each weight
   #
-} else if (params$degree.type == 'correlation.inv') {
-  degree.cor.inv <- degree.cor.inv.weighted(xdata.raw,
-    method              = params$degree.correlation,
-    consider.unweighted = params$degree.unweighted,
-    cutoff              = params$degree.cutoff,
-    #
-    show.message = T,
-    n.cores = params$mc.cores)
-  degree <- degree.cor.inv
-  # save(degree, file = sprintf('../saves/degree.inv-%.5f.RData', params$degree.cutoff))
-  write.csv(degree, file = sprintf('../saves/degree.inv-%.5f.csv', params$degree.cutoff))
-  #
-  # Load degree of network calculated using correlation
-  # 
 } else if (params$degree.type == 'correlation') {
   degree.cor <- degree.cor.weighted(xdata.raw, 
     method              = params$degree.correlation, 
@@ -1005,7 +991,6 @@ c.index.fun <- function(all.pairs, fitted.risk, ydata, n.cores = params$mc.cores
 ```
 
 ```{r c.index,echo=FALSE}
-all.pairs <- combn(nrow(xdata.train), 2)
 c.index.train <- list()
 c.index.test  <- list()
 
@@ -1019,14 +1004,13 @@ flog.info('C-index for train set:')
 fit.risk <- function(coef.v, xdata, ydata, model.name, show.message = FALSE, n.cores = params$mc.cores) {
   # fitted.risk  <- as.vector(predict(models$glmnet, newx = xdata.train[,xdata.ix], s = lambdas$glmnet, type = 'response')) 
   fitted.risk <- exp(as.vector(xdata[,xdata.ix] %*% coef.v))
-  c.res <- run.cache(c.index.fun, all.pairs, fitted.risk, ydata, n.cores = n.cores, show.message = F)
-  c.res <- sum(c.res) / sum(c.res != 0)
-  if (show.message) flog.info(' * %s: %f', model.name, c.res)
-  return(c.res)
+  c.res <- run.cache(survcomp::concordance.index,fitted.risk, ydata[,'time'], ydata[,'status'], method="noether", show.message = F)
+  if (show.message) flog.info(' * %s: %f (se = %f | pvalue = %f)', model.name, c.res$c.index, c.res$se, c.res$pvalue)
+  return(c.res$c.index)
 }
 
 for (ix.name in names(coefs)) {
-c.index.train[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name,  show.message = TRUE)
+  c.index.train[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name,  show.message = TRUE)
 }
 
 flog.info('')
@@ -1035,12 +1019,10 @@ flog.info('')
 # Test
 #
 
-all.pairs <- combn(nrow(xdata.test), 2)
-
 flog.info('C-index for test set:')
 
 for (ix.name in names(coefs)) {
-c.index.test[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name,  show.message = TRUE)
+  c.index.test[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name,  show.message = TRUE)
 }
 
 ```
@@ -1392,44 +1374,22 @@ call.results <- function(seed, xdata, ydata, train.perc, subset, penalty.factor.
   }
    
   #
-  # Kaplan-Meier (p.value)
+  # Kaplan-Meier (p.value) and C-INDEX
   #
   
   #
   km.train <- list()
   km.test  <- list()
   #
-  for (ix.name in names(coefs)) {
-    km.train[[ix.name]] <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Train set')$pvalue
-    km.test[[ix.name]]  <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Test set', test.set = T)$pvalue
-  }
-  
-  #
-  # C-INDEX
-  # 
-  
-  #
-  #
-  # Train (c.index)
-  #
-  
-  all.pairs <- combn(nrow(xdata.train), 2)
   c.index.train <- list()
   c.index.test  <- list()
   
   for (ix.name in names(coefs)) {
+    km.train[[ix.name]] <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Train set')$pvalue
+    km.test[[ix.name]]  <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Test set', test.set = T)$pvalue
+    #
     c.index.train[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name, n.cores = 1, show.message = FALSE)
-  }
-  
-  #
-  #
-  # Test (c.index)
-  #
-  
-  all.pairs <- combn(nrow(xdata.test), 2)
-
-  for (ix.name in names(coefs)) {
-    c.index.test[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name, n.cores = 1, show.message = FALSE)
+    c.index.test[[ix.name]]  <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name, n.cores = 1, show.message = FALSE)
   }
   
   return(list(metrics = list(km.train      = km.train, 

@@ -2,24 +2,22 @@
 % Please edit documentation in R/centrality.R
 \name{degree.cor}
 \alias{degree.cor}
-\title{Title}
+\title{Calculate the degree of the correlation network based on xdata}
 \usage{
-degree.cor(xdata, method = "pearson", cutoff = 0,
-  consider.unweighted = FALSE, base.dir = loose.rock::base.dir(),
-  n.cores = parallel:::detectCores(), force.recalc = FALSE)
+degree.cor(xdata, cutoff = 0, consider.unweighted = FALSE,
+  force.recalc.degree = FALSE, force.recalc.network = FALSE,
+  n.cores = parallel:::detectCores(), ...)
 }
 \arguments{
 \item{xdata}{calculate correlation matrix on each column}
-
-\item{method}{correlation method to be used}
 
 \item{cutoff}{positive value that determines a cutoff value}
 
 \item{consider.unweighted}{consider all edges as 1 if they are greater than 0}
 
-\item{base.dir}{where to store the cache of the results}
-
 \item{n.cores}{number of cores to be used}
+
+\item{...}{extra parameters for fun}
 
 \item{force.recalc}{force recalculation, instead of going to cache}
 }
@@ -27,12 +25,12 @@ degree.cor(xdata, method = "pearson", cutoff = 0,
 a vector of the degrees
 }
 \description{
-Title
+Calculate the degree of the correlation network based on xdata
 }
 \examples{
 n.col <- 6
 xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-degree(xdata)
-degree(xdata, cutoff = .5)
-degree(xdata, cutoff = .5, consider.unweighted = T)
+degree.cor(xdata)
+degree.cor(xdata, cutoff = .5)
+degree.cor(xdata, cutoff = .5, consider.unweighted = T)
 }

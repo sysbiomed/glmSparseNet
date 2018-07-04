@@ -4,7 +4,8 @@
 \alias{hallmarks}
 \title{Retrieve hallmarks of cancer count for genes}
 \usage{
-hallmarks(genes, measure = "count", hallmarks = "full")
+hallmarks(genes, measure = "count", hallmarks = "full",
+  show.message = FALSE)
 }
 \arguments{
 \item{genes}{gene names}

@@ -2,13 +2,31 @@
 % Please edit documentation in R/c.index.R
 \name{my.c.index.cmp}
 \alias{my.c.index.cmp}
-\title{Title}
+\title{Concordance index comparison between a pair}
 \usage{
-my.c.index.cmp(val1.risk, val2.risk, val1.time, val2.time, val1.dead, val2.dead)
+my.c.index.cmp(risk.a, risk.b, time.a, time.b, event.a, event.b)
 }
 \arguments{
-\item{val2.dead}{}
+\item{risk.a}{risk of individual A}
+
+\item{risk.b}{risk of indiviudal B}
+
+\item{time.a}{time of event of individual A}
+
+\item{time.b}{time of event of individual B}
+
+\item{event.a}{has event occurred in individual A}
+
+\item{event.b}{has event occurred in individual B}
+}
+\value{
+the pairwise comparison
 }
 \description{
-Title
+Concordance index comparison between a pair
+}
+\examples{
+my.c.index.cmp(1, 2, 10, 30, TRUE, FALSE)
+my.c.index.cmp(1, 2, 10, 5, TRUE, FALSE)
+my.c.index.cmp(1, 2, 10, 5, TRUE, TRUE)
 }

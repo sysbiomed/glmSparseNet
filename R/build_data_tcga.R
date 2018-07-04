@@ -5,12 +5,18 @@
 #'
 #' It will:
 #'  * load data
-#'  *
+#'  * handle duplicate samples for same individal (default is to keep only first)
+#'  * remove individuals with missing vital_status or both follow-up/death time span
+#'  * remove individuals with follow-up/death time span == 0
+#'  * remove genes from RNASeqData (xdata) with standard deviation == 0
 #'
-#' @param project
-#' @param tissue.type
+#' @param project tcga project that has a package avaliable see https://github.com/averissimo/tcga.data
+#' @param tissue.type type of tissue, can be 'primary.solid.tumor', 'metastatic', etc... depending on project.
 #'
-#' @return
+#' @return a list with data ready to be used in survival analysis, the 'xdata.raw' and 'ydata.raw' elements
+#' have the full dataset for the specific tissue and the 'xdata' and 'ydata' have been cleaned by handling
+#' patients with multiple samples, removing individuals with event time <= 0, missing and genes that have
+#' standard_deviation == 0. It also returns a sha256 checksum for each of the data
 #' @export
 #'
 #' @examples
@@ -19,6 +25,10 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
                                        coding.genes = FALSE) {
 
   package.name <- paste0(project, '.data')
+
+  if (!require(package.name, character.only = T)) {
+    stop(sprintf('There is no package called \'%s\' installed, please go to https://github.com/averissimo/tcga.data/releases and install the corresponding release.'))
+  }
 
   data("fpkm.per.tissue", package = package.name)
   futile.logger::flog.info('Loading data from %s package', package.name)
@@ -75,7 +85,7 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
   #  * negative follow-up
   #  * missing follow-up time
   futile.logger::flog.info('Number of patients removed with: \n * followup time < 0:   %d\n * followup time is.na: %d',
-            sum(!is.na(ydata$time) & ydata$time <= 0), sum(is.na(ydata$time)))
+                           sum(!is.na(ydata$time) & ydata$time <= 0), sum(is.na(ydata$time)))
   ydata        <- ydata[!is.na(ydata$time) & ydata$time > 0,]
 
   # status description:

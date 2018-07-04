@@ -5,7 +5,7 @@
 \title{Setup network options}
 \usage{
 network.options.default(method = "pearson", unweighted = TRUE, cutoff = 0,
-  centrality = "degree", n.cores = 1, assay = NULL)
+  centrality = "degree", min.degree = 0, n.cores = 1)
 }
 \arguments{
 \item{method}{in case of correlation and covariance, which method to use}

@@ -12,13 +12,9 @@ degree.sparsebn.weighted(xdata, method = "sparsebn", cutoff = 0,
 \arguments{
 \item{xdata}{calculate correlation matrix on each column}
 
-\item{method}{correlation method to be used}
-
 \item{cutoff}{positive value that determines a cutoff value}
 
 \item{consider.unweighted}{consider all edges as 1 if they are greater than 0}
-
-\item{base.dir}{where to store the cache of the results}
 
 \item{n.cores}{number of cores to be used}
 

@@ -22,7 +22,6 @@ network.glmnet.private(fun, xdata, ydata, network,
 }
 \value{
 an object just as glmnet
-
 network parameter accepts:
 
  * string to calculate network based on data (correlation, covariance)

@@ -9,7 +9,15 @@ prepare.tcga.survival.data(project = "brca",
   coding.genes = FALSE)
 }
 \arguments{
-\item{tissue.type}{}
+\item{project}{tcga project that has a package avaliable see https://github.com/averissimo/tcga.data}
+
+\item{tissue.type}{type of tissue, can be 'primary.solid.tumor', 'metastatic', etc... depending on project.}
+}
+\value{
+a list with data ready to be used in survival analysis, the 'xdata.raw' and 'ydata.raw' elements
+have the full dataset for the specific tissue and the 'xdata' and 'ydata' have been cleaned by handling
+patients with multiple samples, removing individuals with event time <= 0, missing and genes that have
+standard_deviation == 0. It also returns a sha256 checksum for each of the data
 }
 \description{
 This function will load data and pre-process it to be used in
@@ -18,7 +26,10 @@ This function will load data and pre-process it to be used in
 \details{
 It will:
  * load data
- *
+ * handle duplicate samples for same individal (default is to keep only first)
+ * remove individuals with missing vital_status or both follow-up/death time span
+ * remove individuals with follow-up/death time span == 0
+ * remove genes from RNASeqData (xdata) with standard deviation == 0
 }
 \examples{
 prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first')

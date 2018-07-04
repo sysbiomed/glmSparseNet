@@ -6,7 +6,7 @@
 \title{Calculate GLM model with network-based regularization}
 \usage{
 \S4method{network.cv.glmnet}{MultiAssayExperiment}(xdata, ydata, network,
-  experiment.name, network.options = network.options.default(), ...)
+  experiment.name = NULL, network.options = network.options.default(), ...)
 }
 \arguments{
 \item{xdata}{MultiAssayExperiment.}

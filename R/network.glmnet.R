@@ -1,5 +1,3 @@
-library(MultiAssayExperiment)
-
 #' Calculate GLM model with network-based regularization
 #'
 #' @param xdata input data, can be a matrix or MultiAssayExperiment
@@ -64,6 +62,7 @@ setMethod('network.glmnet', signature(xdata = 'matrix'), function(xdata, ydata, 
 #'
 #' @return an object just as glmnet
 #' @export
+#' @import MultiAssayExperiment
 #'
 setMethod('network.glmnet', signature(xdata = 'MultiAssayExperiment'), function(xdata, ydata, network,
                                                                                 experiment.name = NULL,
@@ -78,6 +77,7 @@ setMethod('network.glmnet', signature(xdata = 'MultiAssayExperiment'), function(
 #'
 #' @return an object just as glmnet
 #' @export
+#' @import SummarizedExperiment
 #'
 setMethod('network.glmnet', signature(xdata = 'SummarizedExperiment'), function(xdata, ydata, network,
                                                                                 network.options = network.options.default(), ...) {

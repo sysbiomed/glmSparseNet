@@ -9,12 +9,19 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Suggests:
-    futile.logger,
-    skcm.data,
-    glmnet,
-    knitr,
-    rmarkdown,
-    testthat
+Depends:
+  R (>= 3.4)
+Imports:
+  futile.logger,
+  glmnet,
+  knitr,
+  rmarkdown,
+  testthat,
+  survival,
+  parallel,
+  survcomp,
+  MultiAssayExperiment
+Remotes: 
+  averissimo/loose.rock
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
