@@ -72,7 +72,7 @@ Inspecting the penalty.factor used from correlation network
 fit1$penalty.factor
 ```
 
-    ##  [1] 3 4 7 7 6 9 3 6 5 5 8 4 6 8 6 5 3 5 2 4
+    ##  [1]  6  7  4  6  6  9  9  8  7  4  9  8  7  7 10  6 10  6  5 10
 
 Plot the results of the `glmnet` run
 
@@ -101,16 +101,16 @@ predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
     ## [INFO] Observed vs. Predicted
     ## 
     ##          Observed lambda_0.01 lambda_0.005
-    ##  [1,]  0.75613328   0.4598020    0.4866612
-    ##  [2,] -1.39550128  -0.6729664   -0.7227259
-    ##  [3,]  0.56205008   0.1387207    0.1026084
-    ##  [4,]  0.02052338   0.4378136    0.4437082
-    ##  [5,]  0.38150071   0.9781270    1.0057412
-    ##  [6,] -0.14392475   0.4149382    0.4264129
-    ##  [7,]  0.28204664  -0.6482708   -0.6713316
-    ##  [8,]  1.83477637  -0.7743352   -0.8183874
-    ##  [9,]  2.88055069   1.0274528    1.0411677
-    ## [10,] -0.12348878   0.7588815    0.7891027
+    ##  [1,] -0.79610670 -0.23236582  -0.25670782
+    ##  [2,]  0.99838619 -0.64978414  -0.67417523
+    ##  [3,] -0.07713618 -0.23405531  -0.26105962
+    ##  [4,]  0.74041152 -0.08228919  -0.08464397
+    ##  [5,] -0.89538636 -0.09993358  -0.11340555
+    ##  [6,]  0.46970668  0.46206073   0.49736718
+    ##  [7,] -0.40292888  0.42690250   0.42643610
+    ##  [8,] -0.92458619  0.38918312   0.39147286
+    ##  [9,]  0.22370422  0.53663355   0.60358553
+    ## [10,] -0.20371104 -0.41152399  -0.42185510
 
 It also extends the new methods to the cross validation function with `network.cv.glmnet`
 
@@ -182,7 +182,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
 ```
 
     ## $pvalue
-    ## [1] 2.134653e-08
+    ## [1] 7.97636e-07
     ## 
     ## $plot
 
@@ -193,8 +193,8 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      3     NA      NA      NA
-    ## High risk 39     25   1105     579    2105
+    ## Low risk  40      4     NA      NA      NA
+    ## High risk 39     24   1105     579      NA
 
 ### Heatmap with results from Hallmarks of cancer
 
@@ -205,42 +205,3 @@ hallmarks(names(best.model.coef)[best.model.coef > 0])$heatmap
 ```
 
 ![](README_files/figure-markdown_github/hallmarks-1.png)
-
-Comparing against a classical GLMNET call
-
-``` r
-xdata.reduced <- filter.by.experiment(xdata, 'RNASeq2GeneNorm')
-xdata.surv <- t(assay(xdata.reduced[['RNASeq2GeneNorm']]))
-ydata.reduced <- ydata[xdata.reduced$patientID,]
-ydata.surv <- Surv(ydata.reduced$time, ydata.reduced$status)
-
-fit5 <- cv.glmnet(xdata.surv, ydata.surv, family = 'cox', alpha = .7, nlambda = 1000)
-best.model.coef.g <- coef(fit5, s = 'lambda.min')[,1] %>% .[. != 0]
-
-
-draw.kaplan(best.model.coef.g, 
-            t(assay(xdata[['RNASeq2GeneNorm']]))[, names(best.model.coef.g)], 
-            ydata.km,
-            ylim = c(0,1))
-```
-
-    ## $pvalue
-    ## [1] 3.287592e-12
-    ## 
-    ## $plot
-
-![](README_files/figure-markdown_github/glmnet.classic-1.png)
-
-    ## 
-    ## $km
-    ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
-    ## 
-    ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      2     NA      NA      NA
-    ## High risk 39     26   1105     562    1750
-
-``` r
-hallmarks(names(best.model.coef.g))$heatmap
-```
-
-![](README_files/figure-markdown_github/glmnet.classic-2.png)

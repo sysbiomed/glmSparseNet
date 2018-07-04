@@ -193,9 +193,8 @@ Search the non-zero coefficients in the results and query for known hallmarks of
 hallmarks(names(best.model.coef)[best.model.coef > 0])$heatmap
 ```
 
-Comparing against a classical GLMNET call
-
-```{r glmnet.classic}
+```{r glmnet.classic, include=FALSE, eval=FALSE}
+# Comparing against a classical GLMNET call
 xdata.reduced <- filter.by.experiment(xdata, 'RNASeq2GeneNorm')
 xdata.surv <- t(assay(xdata.reduced[['RNASeq2GeneNorm']]))
 ydata.reduced <- ydata[xdata.reduced$patientID,]
@@ -208,8 +207,8 @@ best.model.coef.g <- coef(fit5, s = 'lambda.min')[,1] %>% .[. != 0]
 draw.kaplan(best.model.coef.g, 
             t(assay(xdata[['RNASeq2GeneNorm']]))[, names(best.model.coef.g)], 
             ydata.km,
-            ylim = c(0,1))
+            ylim = c(0,1))$plot
 
-hallmarks(names(best.model.coef.g))$heatmap
+# hallmarks(names(best.model.coef.g))$heatmap
 ```
 

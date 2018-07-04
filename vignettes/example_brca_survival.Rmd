@@ -36,8 +36,7 @@ devtools::load_all()
 theme_set(theme_minimal())
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
 
-#.Last.value <- loose.rock::base.dir('cache')
-.Last.value <- base.dir(path = '/ssd_home/averissimo/work/rpackages/network.cox-cache')
+.Last.value <- loose.rock::base.dir('cache')
 .Last.value <- show.message(FALSE)
 
 .Last.value <- loose.rock::show.message(FALSE)
