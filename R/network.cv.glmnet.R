@@ -1,5 +1,11 @@
 #' Calculate cross validating GLM model with network-based regularization
 #'
+#' network parameter accepts:
+#'
+#'  * string to calculate network based on data (correlation, covariance)
+#'  * matrix representing the network
+#'  * vector with already calculated penalty weights (can also be used directly with glmnet)
+#'
 #' @param xdata input data, can be a matrix or MultiAssayExperiment
 #' @param ydata response data compatible with glmnet
 #' @param network type of network, see below
@@ -8,12 +14,6 @@
 #'
 #' @return an object just as cv.glmnet
 #' @export
-#'
-#' network parameter accepts:
-#'
-#'  * string to calculate network based on data (correlation, covariance)
-#'  * matrix representing the network
-#'  * vector with already calculated penalty weights (can also be used directly with glmnet)
 #'
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 20)

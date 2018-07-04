@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.width = 6,
-  fig.height = 8
+  fig.height = 7
 )
 ```
 
@@ -49,7 +49,10 @@ devtools::load_all()
 theme_set(theme_minimal())
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
 
-.Last.value <- loose.rock::base.dir('./runcache')
+#.Last.value <- loose.rock::base.dir('cache')
+.Last.value <- base.dir(path = '/ssd_home/averissimo/work/rpackages/network.cox-cache')
+.Last.value <- show.message(FALSE)
+
 .Last.value <- loose.rock::show.message(FALSE)
 ```
 
@@ -70,20 +73,30 @@ set.seed(params$seed)
 xdata_normal <- fpkm.per.tissue$solid.tissue.normal
 xdata <- rbind(t(xdata_tumor),t(xdata_normal))
 
-xdata <- xdata[, sample(which(apply(xdata, 2, sd) != 0), 300)]
+xdata <- xdata[, apply(xdata, 2, sd) != 0] # remove genes with sd == 0
+
 # response vector ('1', tumor; '0', normal)
 ydata <- c(rep(1,dim(xdata_tumor)[2]),rep(0,dim(xdata_normal)[2]))
 ```
 
+Using only a subset of genes previously selected to keep this example short.
+
+```{r}
+set.seed(params$seed)
+small.subset <- c('ENSG00000110448', 'ENSG00000124449', 'ENSG00000103494', 
+                  'ENSG00000172053', 'ENSG00000136758', 'ENSG00000051382', 
+                  'ENSG00000128655', 'ENSG00000100368', 'ENSG00000115884', 
+                  'ENSG00000179363', 'ENSG00000091106', 'ENSG00000178403', 
+                  'ENSG00000066422', 'ENSG00000110448', 'ENSG00000124449', 
+                  'ENSG00000230445', 'ENSG00000172053', 'ENSG00000185122', 
+                   sample(colnames(xdata), 100))
+xdata <- xdata[,small.subset]
+```
 
 # Fit models
 
-```{r fit}
-fitted <- run.cache(network.cv.glmnet, 
-                    xdata, ydata, 
-                    network = 'correlation',
-                    family = 'binomial',
-                    seed = params$seed)
+```{r fit.show}
+fitted <- network.cv.glmnet(xdata, ydata, network = 'correlation', family = 'binomial', nlambda = 1000)
 ```
 
 # Results of Cross Validation
@@ -107,15 +120,7 @@ flog.info('Non-zero coefficients:', coefs.v[coefs.v != 0], capture = T)
 names.df <- gene.names(names(coefs.v[coefs.v != 0]))
 all.hallmarks <- hallmarks(names.df$external_gene_name)
 
-all.hallmarks$hallmarks$gene.name <- rownames(all.hallmarks$hallmarks)
-
-melt(all.hallmarks$hallmarks, 
-                  id.vars = c('gene.name')) %>% filter(value > 0) %>%
-  ggplot(aes(gene.name,variable, fill=value)) + 
-    geom_raster() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
-    ggtitle('Hallmarks heatmap', subtitle = sprintf('Genes without hallmarks (%d): %s', length(all.hallmarks$no.hallmakrs), paste(all.hallmarks$no.hallmakrs, collapse = ', '))) + 
-    xlab('External Gene Name') + ylab('')
+all.hallmarks$heatmap
 ```
 
 ### Accuracy
@@ -137,7 +142,7 @@ roc_obj <- roc(ydata, as.vector(resp))
 
 data.frame(TPR = roc_obj$sensitivities, FPR = 1 - roc_obj$specificities) %>%
   ggplot() +geom_line(aes(FPR,TPR), color = 2, size = 1, alpha = 0.7)+
-      labs(title= sprintf("ROC curve (AUC = %f)", auc(roc_obj)), 
+      labs(title= sprintf("ROC curve (AUC = %f)", pROC::auc(roc_obj)), 
            x = "False Positive Rate (1-Specificity)", 
            y = "True Positive Rate (Sensitivity)")
 ```

@@ -119,8 +119,9 @@ We use an example data from TCGA Adrenocortical Carcinoma project with '92' pati
 There is some pre-processing needed to remove patients with invalid follow-up date or death date:
 
 ```{r multi.assay}
+library(MultiAssayExperiment)
 # load data
-xdata <- MultiAssayExperiment::miniACC
+xdata <- miniACC
 
 # build valid data with days of last follow up or to event
 event.ix <- which(!is.na(xdata$days_to_death))
@@ -151,35 +152,10 @@ fit3 <- network.cv.glmnet(xdata, ydata, family = 'cox',
                           experiment.name = 'RNASeq2GeneNorm', 
                           alpha = .7,
                           nlambda = 1000,
-                          network.options = network.options.default(cutoff = .6, min.degree = 0.2))
+                          network.options = network.options.default(cutoff = .6, 
+                                                                    min.degree = 0.2,
+                                                                    trans.fun = degree.heuristic))
 plot(fit3)
-```
-
-
-```{r, eval=FALSE, include=FALSE}
-library(STRINGdb)
-get_STRING_species(version="10", species_name=NULL) %>% 
-  arrange(official_name) %>%
-  filter(official_name == 'Homo sapiens')
-
-# downloading Homo sapiens
-dir.create('../tmp')
-string_db <- STRINGdb$new(version="10", species=9606, score_threshold=0, input_directory=file.path('..', 'tmp'))
-
-tp53 = string_db$mp( "tp53" )
-atm = string_db$mp( "atm" )
-
-all.interactions <- string_db$get_interactions(string_db$proteins$protein_external_id)
-dim(all.interactions)
-colnames(all.interactions)
-#
-all.interactions[1:15,]
-#
-ixs <- seq(nrow(all.interactions))
-cbind(rowSums(all.interactions[ixs,3:15]), 
-      all.interactions[ixs,16], 
-      sort(rowSums(all.interactions[ixs,3:15]), index.return = TRUE)$ix, 
-      sort(all.interactions[ixs,16], index.return = TRUE)$ix)
 ```
 
 ## Visualization tools
@@ -192,7 +168,7 @@ This generates Kaplan-Meier survival model based on the coefficients of a Cox mo
 xdata.reduced <- filter.by.experiment(xdata, 'RNASeq2GeneNorm')
 ydata.km <- ydata[rownames(xdata.reduced@colData),]
 best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
-draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km)
+draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, ylim = c(0,1))
 ```
 
 ### Heatmap with results from Hallmarks of cancer
@@ -200,12 +176,26 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km)
 Search the non-zero coefficients in the results and query for known hallmarks of cancer.
 
 ```{r hallmarks}
-fit3.hallmarks <- hallmarks(names(best.model.coef)[best.model.coef > 0])
+hallmarks(names(best.model.coef)[best.model.coef > 0])$heatmap
+```
 
-melt(fit3.hallmarks$hallmarks, id.vars = 'gene.name') %>%
-  filter(value > 0) %>%
-  ggplot() + 
-    geom_raster(aes(gene.name, variable, fill=value)) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+Comparing against a classical GLMNET call
+
+```{r glmnet.classic}
+xdata.reduced <- filter.by.experiment(xdata, 'RNASeq2GeneNorm')
+xdata.surv <- t(assay(xdata.reduced[['RNASeq2GeneNorm']]))
+ydata.reduced <- ydata[xdata.reduced$patientID,]
+ydata.surv <- Surv(ydata.reduced$time, ydata.reduced$status)
+
+fit5 <- cv.glmnet(xdata.surv, ydata.surv, family = 'cox', alpha = .7, nlambda = 1000)
+best.model.coef.g <- coef(fit5, s = 'lambda.min')[,1] %>% .[. != 0]
+
+
+draw.kaplan(best.model.coef.g, 
+            t(assay(xdata[['RNASeq2GeneNorm']]))[, names(best.model.coef.g)], 
+            ydata.km,
+            ylim = c(0,1))
+
+hallmarks(names(best.model.coef.g))$heatmap
 ```
 

@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.width = 6,
-  fig.height = 8
+  fig.height = 7
 )
 ```
 
@@ -35,40 +35,52 @@ library(survival)
 library(futile.logger)
 library(loose.rock)
 
-library(parallel)
-library(doMC)
-
 # Load do package
 devtools::load_all()
 
 theme_set(theme_minimal())
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
 
-.Last.value <- loose.rock::base.dir('./runcache')
+#.Last.value <- loose.rock::base.dir('./runcache')
+.Last.value <- base.dir(path = '/ssd_home/averissimo/work/rpackages/network.cox-cache')
+
 .Last.value <- loose.rock::show.message(FALSE)
 ```
 
 # Load data
 
-```{r data}
+```{r data.show, eval=FALSE}
 # exemplo simples
 my.data <- prepare.tcga.survival.data(project           = 'prad', 
                                       tissue.type       = 'primary.solid.tumor', 
                                       handle.duplicates = 'keep_first', 
                                       coding.genes      = TRUE)
+```
+
+```{r data, echo=FALSE}
+my.data <- run.cache(prepare.tcga.survival.data, 
+                     project           = 'prad', 
+                     tissue.type       = 'primary.solid.tumor', 
+                     handle.duplicates = 'keep_first', 
+                     coding.genes      = TRUE)
+```
+
+Using only a subset of genes previously selected to keep this example short.
+
+```{r}
 set.seed(params$seed)
-xdata <- my.data$xdata[,sample(which(apply(my.data$xdata, 2, sd) != 0), 2500)]
+small.subset <- c('ENSG00000103091', 'ENSG00000064787', 'ENSG00000119915', 
+                  'ENSG00000100744', 'ENSG00000120158', 'ENSG00000114491', 
+                  'ENSG00000204176', 'ENSG00000138399', 
+                  sample(colnames(my.data$xdata), 100))
+xdata <- my.data$xdata[,small.subset]
 ydata <- my.data$ydata
 ```
 
 # Fit models
 
-```{r fit}
-fitted <- run.cache(network.cv.glmnet, 
-                    xdata, Surv(ydata$time, ydata$status), 
-                    network = 'correlation',
-                    family = 'cox',
-                    seed = params$seed)
+```{r fit.show}
+fitted <- network.cv.glmnet(xdata, Surv(ydata$time, ydata$status), network = 'correlation', family = 'cox', nlambda = 1000)
 ```
 
 # Results of Cross Validation
@@ -92,15 +104,7 @@ flog.info('Non-zero coefficients:', coefs.v[coefs.v != 0], capture = T)
 names.df <- gene.names(names(coefs.v[coefs.v != 0]))
 all.hallmarks <- hallmarks(names.df$external_gene_name)
 
-all.hallmarks$hallmarks$gene.name <- rownames(all.hallmarks$hallmarks)
-
-melt(all.hallmarks$hallmarks, 
-                  id.vars = c('gene.name')) %>% filter(value > 0) %>%
-  ggplot(aes(gene.name,variable, fill=value)) + 
-    geom_raster() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
-    ggtitle('Hallmarks heatmap', subtitle = sprintf('Genes without hallmarks (%d): %s', length(all.hallmarks$no.hallmakrs), paste(all.hallmarks$no.hallmakrs, collapse = ', '))) + 
-    xlab('External Gene Name') + ylab('')
+all.hallmarks$heatmap
 ```
 
 ### Survival curves and Log rank test

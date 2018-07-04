@@ -1,3 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 cache
+^\/vignettes\/full.network.analysis\.Rmd
+^\/vignettes\/Network_Penalization_TCGA.Rmd\.Rmd

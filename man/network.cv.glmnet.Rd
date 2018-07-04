@@ -22,7 +22,12 @@ network.cv.glmnet(xdata, ydata, network,
 an object just as cv.glmnet
 }
 \description{
-Calculate cross validating GLM model with network-based regularization
+network parameter accepts:
+}
+\details{
+* string to calculate network based on data (correlation, covariance)
+ * matrix representing the network
+ * vector with already calculated penalty weights (can also be used directly with glmnet)
 }
 \examples{
 xdata <- matrix(rnorm(100), ncol = 20)

@@ -4,27 +4,32 @@
 \alias{hallmarks}
 \title{Retrieve hallmarks of cancer count for genes}
 \usage{
-hallmarks(genes, measure = "count", hallmarks = "full",
-  show.message = FALSE)
+hallmarks(genes, metric = "count", hierarchy = "full",
+  generate.plot = TRUE, show.message = FALSE)
 }
 \arguments{
 \item{genes}{gene names}
 
-\item{measure}{see below}
+\item{metric}{see below}
 
-\item{hallmarks}{see below}
+\item{hierarchy}{see below}
 }
 \value{
-data.frame with choosen measure and hallmarks.
+data.frame with choosen metric and hierarchy
 It also returns a vector with genes that do not have any
-hallmarks
+hallmarks.
 
 See http://chat.lionproject.net/api for more details on the
-measure and hallmarks parameters
+metric and hallmarks parameters
+
+To standardize the colors in the gradient you can use
+scale_fill_gradientn(limits=c(0,1), colours=topo.colors(3)) to
+limit between 0 and 1 for cprob and -1 and 1 for npmi
 }
 \description{
 Retrieve hallmarks of cancer count for genes
 }
 \examples{
 hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
+hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
 }

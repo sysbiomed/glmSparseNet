@@ -4,11 +4,20 @@
 \alias{filter.by.experiment}
 \title{Filter MultiAssayExperiment colData for specific experiment}
 \usage{
-filter.by.experiment(multi.assay, experiment.name)
+\method{filter}{by.experiment}(multi.assay, experiment.name)
 }
 \arguments{
-\item{experiment.name}{}
+\item{multi.assay}{MultiAssayExperiment object}
+
+\item{experiment.name}{name of experiment}
+}
+\value{
+a MultiExperimentAssay with only clinical data of that experiment
 }
 \description{
 Filter MultiAssayExperiment colData for specific experiment
+}
+\examples{
+dat <- MultiAssayExperiment::miniACC
+filter.by.experiment(dat, 'RNASeq2GeneNorm')
 }

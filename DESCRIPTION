@@ -11,15 +11,25 @@ Encoding: UTF-8
 LazyData: true
 Depends:
   R (>= 3.4)
+Suggests:
+  testthat,
+  rmarkdown,
+  knitr
 Imports:
   futile.logger,
   glmnet,
-  knitr,
-  rmarkdown,
-  testthat,
   survival,
   parallel,
   survcomp,
+  ggfortify,
+  ggplot2,
+  dplyr,
+  reshape2,
+  stats,
+  sparsebn,
+  Matrix,
+  biomaRt,
+  SummarizedExperiment,
   MultiAssayExperiment
 Remotes: 
   averissimo/loose.rock

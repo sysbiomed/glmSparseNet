@@ -111,10 +111,10 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
     rownames(xdata) <- strtrim(rownames(xdata), 12)
   }
 
-  xdata.digest <- verissimo::digest.cache(xdata)
-  xdata.raw.digest <- verissimo::digest.cache(xdata.raw)
+  xdata.digest <- loose.rock::digest.cache(xdata)
+  xdata.raw.digest <- loose.rock::digest.cache(xdata.raw)
 
-  ydata.digest <- verissimo::digest.cache(ydata)
+  ydata.digest <- loose.rock::digest.cache(ydata)
 
   return(list(xdata = xdata,
               xdata.digest = xdata.digest,

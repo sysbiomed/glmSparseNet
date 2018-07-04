@@ -2,7 +2,7 @@
 #'
 #' @param ensembl.genes character vector with gene names in ensembl_id format
 #'
-#' @return a dataframe with external gene names and ensembl_id
+#' @return a dataframe with external gene names, ensembl_id and heatmap plot
 #' @export
 #'
 #' @examples
@@ -27,35 +27,60 @@ gene.names <- function(ensembl.genes) {
 #' Retrieve hallmarks of cancer count for genes
 #'
 #' @param genes gene names
-#' @param measure see below
-#' @param hallmarks  see below
+#' @param metric see below
+#' @param hierarchy see below
 #'
-#' @return data.frame with choosen measure and hallmarks.
+#' @return data.frame with choosen metric and hierarchy
 #' It also returns a vector with genes that do not have any
-#' hallmarks
+#' hallmarks.
 #'
 #' See http://chat.lionproject.net/api for more details on the
-#' measure and hallmarks parameters
+#' metric and hallmarks parameters
+#'
+#' To standardize the colors in the gradient you can use
+#' scale_fill_gradientn(limits=c(0,1), colours=topo.colors(3)) to
+#' limit between 0 and 1 for cprob and -1 and 1 for npmi
 #'
 #' @export
 #'
 #' @examples
 #' hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
-hallmarks <- function(genes, measure = 'count', hallmarks = 'full', show.message = FALSE) {
-  base.url <- sprintf('http://chat.lionproject.net/chartdata?measure=%s&hallmarks=%s', measure, hallmarks)
-  # base.url <- 'http://chat.lionproject.net/?measure=npmi&chart_type=doughnut&hallmarks=full'
+#' hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
+hallmarks <- function(genes, metric = 'count', hierarchy = 'full', generate.plot = TRUE, show.message = FALSE) {
+  valid.measures <- c('count', 'cprob', 'pmi', 'npmi')
+  if (!metric %in% valid.measures) {
+    stop(sprintf('measure argument is not valid, it must be one of the followin: %s', paste(valid.measures, collapse = ', ')))
+  }
+
 
   all.genes <- sort(unique(genes))
 
+
+  if (metric == 'cprob') {
+    temp.res <- hallmarks(all.genes, metric = 'count', hierarchy = 'full', show.message = FALSE, generate.plot = FALSE)
+    good.ix <- rowSums(temp.res$hallmarks) != 0
+    all.genes <- sort(unique(rownames(temp.res$hallmarks[good.ix,])))
+    df.no.hallmarks <- temp.res$no.hallmakrs
+    #
+    cat('There is a bug in the Hallmarks\' API that requires the function to wait around 5 additional seconds to finish. Sorry.\n  bug report: https://github.com/cambridgeltl/chat/issues/6\n')
+    Sys.sleep(5.5)
+  } else {
+    df.no.hallmarks <- NULL
+  }
+
+  base.url <- sprintf('http://chat.lionproject.net/chartdata?measure=%s&hallmarks=%s', metric, hierarchy)
+  # base.url <- 'http://chat.lionproject.net/?measure=npmi&chart_type=doughnut&hallmarks=full'
+
   call.url <- sprintf('%s&q=%s', base.url, paste(all.genes, collapse = '&q='))
 
-  lines <- loose.rock::run.cache(readr::read_lines, url(call.url), cache.digest = list(loose.rock::digest.cache(call.url)),
-                                 show.message = show.message)
-  item_group <- cumsum(grepl("^[A-Za-z0-9\\._,-]+\tcount", lines))
+  conn <- url(call.url, open = 'rt')
+  lines <- readLines(conn)
+  close.connection(conn, type = 'r') # close connection
+  item_group <- cumsum(grepl(sprintf("^[A-Za-z0-9\\._,-]+\t%s", metric), lines))
   all.items <- list()
   col.names <- c()
   clean.rows <- lapply(split(lines, item_group), function(ix) {
-    item.id <- gsub("\tcount","", ix[1])
+    item.id <- gsub(sprintf("\t%s", metric),"", ix[1])
     # prepare results
     item.val <- list()
     my.names <- c('gene.name')
@@ -93,8 +118,36 @@ hallmarks <- function(genes, measure = 'count', hallmarks = 'full', show.message
   }))
   df.scaled <- df # use counts
 
-  df.no.hallmarks <- data.frame(gene.name = sort(rownames(df.scaled)[na.ix]), stringsAsFactors = FALSE)$gene.name
+  if (is.null(df.no.hallmarks)) {
+    df.no.hallmarks <- data.frame(gene.name = sort(rownames(df.scaled)[na.ix]),
+                                  stringsAsFactors = FALSE)$gene.name
+  }
 
   df.scaled <- cbind(gene.name = rownames(df.scaled), df.scaled)
-  return(list(hallmarks = df.scaled, no.hallmakrs = df.no.hallmarks))
+
+  #
+  # Generate heatmap
+  if (generate.plot) {
+    df.scaled$gene.name <- rownames(df.scaled)
+
+    g1 <- reshape2::melt(df.scaled, id.vars = c('gene.name')) %>%
+      dplyr::filter(value > 0) %>%
+      ggplot2::ggplot(aes(gene.name,variable, fill=value)) +
+        ggplot2::geom_raster() +
+        ggplot2::theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+        ggplot2::ggtitle('Hallmarks heatmap',
+                subtitle = stringr::str_wrap(sprintf('Selected genes without hallmarks (%d): %s',
+                                            length(df.no.hallmarks),
+                                            paste(df.no.hallmarks, collapse = ', ')),
+                                    width = 50)) +
+        ggplot2::xlab('External Gene Name') + ylab('') +
+        ggplot2::scale_fill_gradientn(colours=rev(grDevices::topo.colors(2)))
+
+  } else {
+    g1 = NULL
+  }
+
+  df.scaled$gene.name <- NULL
+
+  return(list(hallmarks = df.scaled, no.hallmakrs = df.no.hallmarks, heatmap = g1))
 }
