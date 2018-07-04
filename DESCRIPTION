@@ -1,7 +1,7 @@
 Package: network.cox
 Type: Package
 Title: What the Package Does (Title Case)
-Version: 0.1.0
+Version: 0.1.1
 Author: André Veríssimo
 Maintainer: André Veríssimo <andre.verissimo@tecnico.ulisboa.pt>
 Description: More about what it does (maybe more than one line)

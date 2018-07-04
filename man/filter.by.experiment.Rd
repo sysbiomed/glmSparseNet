@@ -4,7 +4,7 @@
 \alias{filter.by.experiment}
 \title{Filter MultiAssayExperiment colData for specific experiment}
 \usage{
-\method{filter}{by.experiment}(multi.assay, experiment.name)
+filter.by.experiment(multi.assay, experiment.name)
 }
 \arguments{
 \item{multi.assay}{MultiAssayExperiment object}

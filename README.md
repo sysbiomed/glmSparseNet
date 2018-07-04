@@ -31,6 +31,19 @@ Citation
 Overview
 --------
 
+Necessary library
+
+``` r
+library(futile.logger)
+library(loose.rock)
+library(tidyverse)
+library(reshape2)
+library(MultiAssayExperiment)
+library(survival)
+library(glmnet)
+library(network.cox)
+```
+
 This package extends the `glmnet` r-package with network-based regularization based on features relations. This network can be calculated from the data itself or using external networks to enrich the model.
 
 It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization.
@@ -53,18 +66,13 @@ y <- rnorm(100)
 fit1 <- network.glmnet(x,y, 'correlation', network.options = network.options.default(cutoff = 0.1))
 ```
 
-    ## Warning in network.glmnet.private(glmnet::glmnet, xdata, ydata, network =
-    ## network, : The penalty.factor calculated from network (or given) has some
-    ## 0 values, this might lead to convergence problems. Try using min.degree in
-    ## network.options to tweak a minimum value.
-
 Inspecting the penalty.factor used from correlation network
 
 ``` r
 fit1$penalty.factor
 ```
 
-    ##  [1] 7 4 3 3 6 3 3 8 5 4 0 5 8 1 7 8 6 8 4 5
+    ##  [1] 3 4 7 7 6 9 3 6 5 5 8 4 6 8 6 5 3 5 2 4
 
 Plot the results of the `glmnet` run
 
@@ -72,7 +80,7 @@ Plot the results of the `glmnet` run
 plot(fit1)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
 The given network parameter can also be a network itself, i.e. a matrix. The example below uses a randomly generated network to use in the methods.
 
@@ -92,17 +100,17 @@ predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
 
     ## [INFO] Observed vs. Predicted
     ## 
-    ##         Observed lambda_0.01 lambda_0.005
-    ##  [1,]  1.0290553 -0.07783133  -0.07438686
-    ##  [2,] -1.2935905 -0.25547646  -0.26654704
-    ##  [3,] -0.4283933 -0.11624810  -0.13400177
-    ##  [4,]  1.3440701 -0.55536927  -0.55078230
-    ##  [5,] -0.3932876 -0.07945513  -0.07771425
-    ##  [6,] -0.6259473 -0.43542271  -0.48110083
-    ##  [7,] -0.5223951  0.48347984   0.50400569
-    ##  [8,] -0.7457589 -0.01769155  -0.04764992
-    ##  [9,]  0.7489961  0.78974969   0.79851640
-    ## [10,]  1.3392486  0.38503416   0.40870346
+    ##          Observed lambda_0.01 lambda_0.005
+    ##  [1,]  0.75613328   0.4598020    0.4866612
+    ##  [2,] -1.39550128  -0.6729664   -0.7227259
+    ##  [3,]  0.56205008   0.1387207    0.1026084
+    ##  [4,]  0.02052338   0.4378136    0.4437082
+    ##  [5,]  0.38150071   0.9781270    1.0057412
+    ##  [6,] -0.14392475   0.4149382    0.4264129
+    ##  [7,]  0.28204664  -0.6482708   -0.6713316
+    ##  [8,]  1.83477637  -0.7743352   -0.8183874
+    ##  [9,]  2.88055069   1.0274528    1.0411677
+    ## [10,] -0.12348878   0.7588815    0.7891027
 
 It also extends the new methods to the cross validation function with `network.cv.glmnet`
 
@@ -174,7 +182,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
 ```
 
     ## $pvalue
-    ## [1] 1.269799e-10
+    ## [1] 2.134653e-08
     ## 
     ## $plot
 
@@ -185,8 +193,8 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      2     NA      NA      NA
-    ## High risk 39     26   1105     562    2102
+    ## Low risk  40      3     NA      NA      NA
+    ## High risk 39     25   1105     579    2105
 
 ### Heatmap with results from Hallmarks of cancer
 
@@ -217,7 +225,7 @@ draw.kaplan(best.model.coef.g,
 ```
 
     ## $pvalue
-    ## [1] 3.562306e-11
+    ## [1] 3.287592e-12
     ## 
     ## $plot
 
@@ -228,8 +236,8 @@ draw.kaplan(best.model.coef.g,
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      3     NA      NA      NA
-    ## High risk 39     25   1105     562      NA
+    ## Low risk  40      2     NA      NA      NA
+    ## High risk 39     26   1105     562    1750
 
 ``` r
 hallmarks(names(best.model.coef.g))$heatmap

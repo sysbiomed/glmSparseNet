@@ -94,7 +94,7 @@ setMethod('network.glmnet.private', signature(xdata = 'MultiAssayExperiment'), f
 #'
 setMethod('network.glmnet.private', signature(xdata = 'SummarizedExperiment'), function(fun, xdata, ydata, network,
                                                                                         network.options = network.options.default(), ...) {
-  return(network.glmnet.private(fun, t(assay(xdata)), ydata, network, network.options, ...))
+  return(network.glmnet.private(fun, t(MultiAssayExperiment::assay(xdata)), ydata, network, network.options, ...))
 })
 
 

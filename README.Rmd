@@ -16,10 +16,10 @@ knitr::opts_chunk$set(echo = TRUE,
                       fig.width = 6,
                       fig.height = 8)
 
-library(futile.logger)
 library(tidyverse)
-library(reshape2)
+library(futile.logger)
 library(loose.rock)
+library(ggplot2)
 
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
 .Last.value <- flog.appender(appender.tee('logger.txt'))
@@ -49,6 +49,20 @@ library(network.cox)
 ...
 
 ## Overview
+
+Necessary library
+
+```{r}
+library(futile.logger)
+library(loose.rock)
+library(tidyverse)
+library(reshape2)
+library(MultiAssayExperiment)
+library(survival)
+library(glmnet)
+library(network.cox)
+```
+
 
 This package extends the `glmnet` r-package with network-based regularization based on features relations. This network can be calculated from the data itself or using external networks to enrich the model.
 
