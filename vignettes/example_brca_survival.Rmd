@@ -49,7 +49,7 @@ library(glmSparseNet)
 
 ```{r data, eval=FALSE}
 # download data package with TCGA data
-biocLite('https://github.com/averissimo/tcga.data/releases/download/2017.07.21-prad/prad.data_1.0.tar.gz')
+biocLite('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
 
 # load package
 library(brca.data)
