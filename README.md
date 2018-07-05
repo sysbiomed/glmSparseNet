@@ -1,4 +1,4 @@
-name needed!!
+glmSparseNet
 ================
 
 -   [Install](#install)
@@ -75,7 +75,7 @@ Inspecting the penalty.factor used from correlation network.
 fit1$penalty.factor
 ```
 
-    ##  [1]  5  9  7  7  6  9  4  4 11  8  8  9  7  6  6  5  3  4  5  7
+    ##  [1] 8 6 7 9 8 8 5 9 4 3 8 6 7 6 4 3 7 6 4 4
 
 Plot the results of the `glmnet` run.
 
@@ -104,16 +104,16 @@ predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
     ## [INFO] Observed vs. Predicted
     ## 
     ##         Observed lambda_0.01 lambda_0.005
-    ##  [1,] -0.7699055  0.07151423    0.1025443
-    ##  [2,] -1.8986345 -0.29507469   -0.3695670
-    ##  [3,] -1.0935415 -0.57271722   -0.6037090
-    ##  [4,]  0.7943990 -0.28068707   -0.2450609
-    ##  [5,] -0.2083067  0.27988768    0.3371429
-    ##  [6,]  0.5507648  0.11221293    0.1205156
-    ##  [7,]  0.4234700 -0.10748298   -0.1272324
-    ##  [8,] -0.2918227 -0.22535556   -0.2306527
-    ##  [9,]  0.2506933 -0.23701132   -0.2788515
-    ## [10,]  0.6677587 -0.49322623   -0.5167654
+    ##  [1,]  0.4515920  0.63136883   0.67624347
+    ##  [2,]  0.6075526 -0.10468277  -0.08421539
+    ##  [3,] -0.9660819 -0.16245387  -0.17124005
+    ##  [4,]  0.1472950  0.49585668   0.51727697
+    ##  [5,]  1.3637081  0.74271693   0.71723106
+    ##  [6,]  1.1001344  0.46825077   0.47159313
+    ##  [7,]  0.4642190 -0.26287298  -0.25697347
+    ##  [8,] -0.5646263 -0.32642920  -0.34920449
+    ##  [9,] -0.9002533 -0.13867345  -0.16703451
+    ## [10,]  1.5328196  0.03022623   0.05501400
 
 It also extends the new methods to the cross validation function with `network.cv.glmnet`.
 
@@ -185,7 +185,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
 ```
 
     ## $pvalue
-    ## [1] 1.597944e-12
+    ## [1] 3.724993e-08
     ## 
     ## $plot
 
@@ -196,8 +196,8 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      1     NA      NA      NA
-    ## High risk 39     27   1105     562    1750
+    ## Low risk  40      3     NA      NA      NA
+    ## High risk 39     25   1105     579    2105
 
 ### Heatmap with results from Hallmarks of cancer
 

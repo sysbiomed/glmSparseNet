@@ -1,5 +1,5 @@
 ---
-title: "name needed!!"
+title: "glmSparseNet"
 output: 
   rmarkdown::html_vignette:
     toc: TRUE
