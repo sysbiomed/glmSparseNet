@@ -178,7 +178,7 @@ Visualization tools
 This function generates Kaplan-Meier survival model based on the coefficients of a Cox model. It separates two groups based on relative risk and display both the curves and results of Log-rank test.
 
 ``` r
-xdata.reduced <- filter.by.experiment(xdata, 'RNASeq2GeneNorm')
+xdata.reduced <- reduce.by.experiment(xdata, 'RNASeq2GeneNorm')
 ydata.km <- ydata[rownames(xdata.reduced@colData),]
 best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
 draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, ylim = c(0,1))

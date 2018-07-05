@@ -11,11 +11,8 @@ Description: More about what it does (maybe more than one line)
 License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.4)
-Suggests: testthat,
+Depends: R (>= 3.4), 
   rmarkdown,
-  knitr,
-  survcomp
 Imports: loose.rock,
   forcats,
   sparsebnUtils,
@@ -25,14 +22,17 @@ Imports: loose.rock,
   sparsebn,
   dplyr,
   reshape2,
-  survival,
   glmnet,
   ggfortify,
   biomaRt,
-  MultiAssayExperiment,
   SummarizedExperiment,
   stats,
-  parallel
+  parallel,
+  MultiAssayExperiment
+Suggests: testthat,
+  knitr,
+  survival,
+  survcomp
 Remotes: 
   averissimo/loose.rock
 VignetteBuilder: knitr

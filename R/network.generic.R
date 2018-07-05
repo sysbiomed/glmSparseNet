@@ -65,7 +65,7 @@ setMethod('network.glmnet.private', signature(xdata = 'MultiAssayExperiment'), f
   }
 
   # filter the MultiAssayExperiment keeping only individuals with data in specific experiment
-  xdata <- filter.by.experiment(xdata, experiment.name)
+  xdata <- reduce.by.experiment(xdata, experiment.name)
 
   # stop if output xdata has no rows (should not happen)
   if( nrow(xdata@colData) == 0) {
