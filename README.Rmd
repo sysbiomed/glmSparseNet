@@ -157,7 +157,6 @@ We use an example data from TCGA Adrenocortical Carcinoma project with '92' pati
 There is some pre-processing needed to remove patients with invalid follow-up date or death date:
 
 ```{r multi.assay}
-library(MultiAssayExperiment)
 # load data
 xdata <- miniACC
 
