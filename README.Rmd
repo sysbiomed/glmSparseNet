@@ -90,7 +90,7 @@ There are 3 methods available to use data-dependant methods to generate the netw
 
 Alternatively, the network can be passed as an adjancency matrix or an already calculate metric for each node.
 
-### Survival Example using RNASeq data
+### Survival analysis using RNA-seq data
 
 TODO:
 
@@ -125,6 +125,10 @@ ydata <- data.frame(time      = surv_event_time[valid.ix],
 
 ```
 
+The function network.cv.glmnet fits the survival data...(complete)
+
+ANDRE - explica bem um exemplo, aqui é uma boa oportundade de explicares todas as opções usadas!
+
 Fitting the survival model using a correlation network with cutoff at 0.6.
 
 ```{r fit.surv}
@@ -140,11 +144,12 @@ fit3 <- network.cv.glmnet(xdata, ydata, family = 'cox',
 plot(fit3)
 ```
 
-## Visualization tools
+## Visualization and Analytical tools
+
 
 ### Survival curves with `draw.kaplan`
 
-This function generates Kaplan-Meier survival model based on the coefficients of a Cox model. It separates two groups based on relative risk and display both the curves and results of Log-rank test.
+This function generates Kaplan-Meier survival model based on the estimated coefficients of the Cox model. It creates two groups based on the relative risk and displays both survival curves (high vs. low-risk patients, as defined by the median) and the corresponding results of log-rank tests.
 
 ```{r draw.kaplan}
 xdata.reduced <- reduce.by.experiment(xdata, 'RNASeq2GeneNorm')
@@ -153,9 +158,9 @@ best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
 draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, ylim = c(0,1))
 ```
 
-### Heatmap with results from Hallmarks of cancer
+### Heatmap with results retrived from the Cancer Hallmarks Analytics Tool (CHAT)
 
-Search the non-zero coefficients in the results and query for known hallmarks of cancer.
+Search the non-zero coefficients, i.e., the selected features/genes, and query CHAT for known hallmarks of cancer. Also plots the genes not found, useful for new hypotheses generation.s
 
 ```{r hallmarks}
 hallmarks(names(best.model.coef)[best.model.coef > 0])$heatmap
