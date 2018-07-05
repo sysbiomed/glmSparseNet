@@ -48,7 +48,7 @@ theme_set(theme_minimal())
 # Load data
 
 ```{r data.show, eval=FALSE}
-# exemplo simples
+# short exemple
 my.data <- prepare.tcga.survival.data(project           = 'skcm', 
                                       tissue.type       = 'primary.solid.tumor', 
                                       handle.duplicates = 'keep_first', 
@@ -63,7 +63,7 @@ my.data <- run.cache(prepare.tcga.survival.data,
                      coding.genes      = TRUE)
 ```
 
-Using only a subset of genes previously selected to keep this example short.
+Using only a subset of genes previously selected to keep this short example.
 
 ```{r pre.processing}
 set.seed(params$seed)
