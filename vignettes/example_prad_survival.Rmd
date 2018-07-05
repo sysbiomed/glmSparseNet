@@ -48,7 +48,7 @@ theme_set(theme_minimal())
 # Load data
 
 ```{r data.show, eval=FALSE}
-# exemplo simples
+# short example
 my.data <- prepare.tcga.survival.data(project           = 'prad', 
                                       tissue.type       = 'primary.solid.tumor', 
                                       handle.duplicates = 'keep_first', 
