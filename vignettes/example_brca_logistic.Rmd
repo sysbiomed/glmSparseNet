@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r, include=FALSE, eval=FALSE}
-rmarkdown::render('example_brca_binomial.Rmd')
+rmarkdown::render('example_brca_logistic.Rmd')
 ```
 
 
