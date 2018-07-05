@@ -34,6 +34,10 @@ rmarkdown::render('README.Rmd', output_format = 'all')
 
 `glmSparseNet` is a R package that generalizes sparse regression models when the features have a graph structure (e.g. genes), by including network-based regularizers. `glmSparseNet` uses the glmnet package, by including centrality measures of the network as penality factors. The current version implements regularization based on node degree, i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution (glmDegree) or orphan genes (glmOrphan) in the solution.
 All the glmnet distribution families are supported, namely "gaussian", "poisson", "binomial", "multinomial", "cox", and "mgaussian".
+
+It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization.
+
+
 Below, we provide one example for survival analysis of  .... using transcriptomic data of....RNA-seq tumor data.???  More information and RMD files are available in the folder ...???....where more extensive and complete examples are provided for logistic regressoin and... in ....
 
 
@@ -46,8 +50,6 @@ A more detailed description of the extensions here developed will be released so
 
 This package was developed by André Veríssimo, Eunice Carrasquinha, Marta B. Lopes and Susana Vinga under the project SOUND, funded from the European Union Horizon 2020 research and innovation program under grant agreement No. 633974.
 
-
-
 ## Instalation
 
 Bioconductor is necessary for the installation of this package.
@@ -58,6 +60,7 @@ biocLite('averissimo/loose.rock')
 biocLite('network.cox', siteRepos = 'https://sels.tecnico.ulisboa.pt/r-repos/')
 ```
 
+## Running 
 
 To run the following examples, the next libraries are also needed:
 
@@ -73,10 +76,12 @@ library(loose.rock)
 library(network.cox)
 ```
 
+### Network-based penalization
+
+!!!!! explicar bem qual é o input e opcoes da package
+
 
 This package extends the `glmnet` r-package with network-based regularization based on features relations. This network can be calculated from the data itself or using external networks to enrich the model.
-
-It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization.
 
 There are 3 methods available to use data-dependant methods to generate the network:
 
@@ -85,6 +90,9 @@ There are 3 methods available to use data-dependant methods to generate the netw
 <!-- 1. Sparse bayesian networks using `sparsebn` package. -->
 
 Alternatively, the network can be passed as an adjancency matrix or an already calculate metric for each node.
+
+
+
 
 ### Example for Gaussian models
 
