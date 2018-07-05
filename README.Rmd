@@ -130,7 +130,7 @@ The given network parameter can also be a network itself, i.e. a matrix. The exa
 rand.network       <- abs(matrix(rnorm(20*20),20,20))
 diag(rand.network) <- 0
 # actual fit
-fit4 <- network.glmnet(x,y, rand.network, network.options = network.options.default(cutoff = 0.1))
+fit2 <- network.glmnet(x,y, rand.network, network.options = network.options.default(cutoff = 0.1))
 ```
 
 The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot.
@@ -224,8 +224,8 @@ xdata.surv <- t(assay(xdata.reduced[['RNASeq2GeneNorm']]))
 ydata.reduced <- ydata[xdata.reduced$patientID,]
 ydata.surv <- Surv(ydata.reduced$time, ydata.reduced$status)
 
-fit5 <- cv.glmnet(xdata.surv, ydata.surv, family = 'cox', alpha = .7, nlambda = 1000)
-best.model.coef.g <- coef(fit5, s = 'lambda.min')[,1] %>% .[. != 0]
+fit4 <- cv.glmnet(xdata.surv, ydata.surv, family = 'cox', alpha = .7, nlambda = 1000)
+best.model.coef.g <- coef(fit4, s = 'lambda.min')[,1] %>% .[. != 0]
 
 
 draw.kaplan(best.model.coef.g, 
