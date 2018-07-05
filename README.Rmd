@@ -85,7 +85,7 @@ This package extends the `glmnet` r-package with network-based regularization ba
 
 It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization.
 
-There are 3 methods available to use data-dependant methods to generate the netork:
+There are 3 methods available to use data-dependant methods to generate the network:
 
 1. Correlation matrix with cutoff;
 1. Covariance matrix with cutoff;
