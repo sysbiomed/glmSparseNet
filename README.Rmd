@@ -32,7 +32,7 @@ rmarkdown::render('README.Rmd', output_format = 'all')
 
 ## Overview
 
-glmSparseNet is a R package that generalizes sparse regression models when the features have a graph structure (e.g. genes), by including network-based regularizers. glmSparseNet uses the glmnet package, by including centrality measures of the network as penality factors. The current version implements regularization based on node degree, i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution (glmDegree) or orphan genes (glmOrphan) in the solution.
+`glmSparseNet` is a R package that generalizes sparse regression models when the features have a graph structure (e.g. genes), by including network-based regularizers. `glmSparseNet` uses the glmnet package, by including centrality measures of the network as penality factors. The current version implements regularization based on node degree, i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution (glmDegree) or orphan genes (glmOrphan) in the solution.
 All the glmnet distribution families are supported, namely "gaussian", "poisson", "binomial", "multinomial", "cox", and "mgaussian".
 Below, we provide one example for survival analysis of  .... using transcriptomic data of....RNA-seq tumor data.???  More information and RMD files are available in the folder ...???....where more extensive and complete examples are provided for logistic regressoin and... in ....
 
@@ -52,14 +52,7 @@ This package was developed by André Veríssimo, Eunice Carrasquinha, Marta B. L
 
 Bioconductor is necessary for the installation of this package.
 
-```{r instal, eval=FALSE, include=FALSE}
-# This is for when package is in github
-source("https://bioconductor.org/biocLite.R")
-biocLite('averissimo/network.cox', dependencies=TRUE, build_vignettes=FALSE)
-library(network.cox)
-```
-
-```{r, eval=FALSE}
+```{r install, eval=FALSE}
 source("https://bioconductor.org/biocLite.R")
 biocLite('averissimo/loose.rock')
 biocLite('network.cox', siteRepos = 'https://sels.tecnico.ulisboa.pt/r-repos/')
@@ -196,7 +189,7 @@ plot(fit3)
 This function generates Kaplan-Meier survival model based on the coefficients of a Cox model. It separates two groups based on relative risk and display both the curves and results of Log-rank test.
 
 ```{r draw.kaplan}
-xdata.reduced <- filter.by.experiment(xdata, 'RNASeq2GeneNorm')
+xdata.reduced <- reduce.by.experiment(xdata, 'RNASeq2GeneNorm')
 ydata.km <- ydata[rownames(xdata.reduced@colData),]
 best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
 draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, ylim = c(0,1))

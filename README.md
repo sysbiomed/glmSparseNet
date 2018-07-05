@@ -1,9 +1,9 @@
 glmSparseNet
 ================
 
--   [Install](#install)
--   [Citation](#citation)
 -   [Overview](#overview)
+-   [Citation](#citation)
+-   [Instalation](#instalation)
     -   [Example for Gaussian models](#example-for-gaussian-models)
     -   [Survival Example using RNASeq data](#survival-example-using-rnaseq-data)
 -   [Visualization tools](#visualization-tools)
@@ -12,8 +12,22 @@ glmSparseNet
 
 > Elastic-Net models with additional regularization based on network centrality metrics
 
-Install
--------
+Overview
+--------
+
+`glmSparseNet` is a R package that generalizes sparse regression models when the features have a graph structure (e.g. genes), by including network-based regularizers. `glmSparseNet` uses the glmnet package, by including centrality measures of the network as penality factors. The current version implements regularization based on node degree, i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution (glmDegree) or orphan genes (glmOrphan) in the solution. All the glmnet distribution families are supported, namely "gaussian", "poisson", "binomial", "multinomial", "cox", and "mgaussian". Below, we provide one example for survival analysis of .... using transcriptomic data of....RNA-seq tumor data.??? More information and RMD files are available in the folder ...???....where more extensive and complete examples are provided for logistic regressoin and... in ....
+
+Citation
+--------
+
+Veríssimo, A., Oliveira, A.L., Sagot, M.-F., & Vinga, S. (2016). DegreeCox – a network-based regularization method for survival analysis. BMC Bioinformatics. 17(16): 449. <https://doi.org/10.1186/s12859-016-1310-4>
+
+A more detailed description of the extensions here developed will be released soon in a manuscript (under preparation).
+
+This package was developed by André Veríssimo, Eunice Carrasquinha, Marta B. Lopes and Susana Vinga under the project SOUND, funded from the European Union Horizon 2020 research and innovation program under grant agreement No. 633974.
+
+Instalation
+-----------
 
 Bioconductor is necessary for the installation of this package.
 
@@ -23,17 +37,7 @@ biocLite('averissimo/loose.rock')
 biocLite('network.cox', siteRepos = 'https://sels.tecnico.ulisboa.pt/r-repos/')
 ```
 
-Citation
---------
-
-This package was developed by André Veríssimo, Eunice Carrasquinha, Marta B. Lopes and Susana Vinga under the project SOUND, funded from the European Union Horizon 2020 research and innovation program under grant agreement No. 633974.
-
-A more detailed description of the method here developed, will be released soon in a paper.
-
-Overview
---------
-
-Next, are the libraries needed.
+To run the following examples, the next libraries are also needed:
 
 ``` r
 library(futile.logger)
@@ -51,7 +55,7 @@ This package extends the `glmnet` r-package with network-based regularization ba
 
 It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization.
 
-There are 3 methods available to use data-dependant methods to generate the netork:
+There are 3 methods available to use data-dependant methods to generate the network:
 
 1.  Correlation matrix with cutoff;
 2.  Covariance matrix with cutoff; <!-- 1. Sparse bayesian networks using `sparsebn` package. -->
@@ -75,7 +79,7 @@ Inspecting the penalty.factor used from correlation network.
 fit1$penalty.factor
 ```
 
-    ##  [1] 8 6 7 9 8 8 5 9 4 3 8 6 7 6 4 3 7 6 4 4
+    ##  [1]  7  7  7 10  6  9  7  4  5  7 10  9  4 10  6  8  9  8  9  6
 
 Plot the results of the `glmnet` run.
 
@@ -83,7 +87,7 @@ Plot the results of the `glmnet` run.
 plot(fit1)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-4-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
 The given network parameter can also be a network itself, i.e. a matrix. The example below uses a randomly generated network to use in the methods.
 
@@ -103,17 +107,17 @@ predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
 
     ## [INFO] Observed vs. Predicted
     ## 
-    ##         Observed lambda_0.01 lambda_0.005
-    ##  [1,]  0.4515920  0.63136883   0.67624347
-    ##  [2,]  0.6075526 -0.10468277  -0.08421539
-    ##  [3,] -0.9660819 -0.16245387  -0.17124005
-    ##  [4,]  0.1472950  0.49585668   0.51727697
-    ##  [5,]  1.3637081  0.74271693   0.71723106
-    ##  [6,]  1.1001344  0.46825077   0.47159313
-    ##  [7,]  0.4642190 -0.26287298  -0.25697347
-    ##  [8,] -0.5646263 -0.32642920  -0.34920449
-    ##  [9,] -0.9002533 -0.13867345  -0.16703451
-    ## [10,]  1.5328196  0.03022623   0.05501400
+    ##          Observed lambda_0.01  lambda_0.005
+    ##  [1,]  0.67858000  0.08761547  0.0635638880
+    ##  [2,] -0.75755747  0.16869127  0.1832839433
+    ##  [3,]  2.00788696  1.01168432  1.0542659709
+    ##  [4,]  0.19269918 -0.70950177 -0.7621877304
+    ##  [5,] -1.96033781 -0.31907981 -0.3696006262
+    ##  [6,] -0.23439575 -0.05783979 -0.0959108451
+    ##  [7,]  0.14631992 -0.01170488  0.0006698397
+    ##  [8,]  0.57828558  0.45227875  0.4755353460
+    ##  [9,]  0.05002452  0.50742938  0.5367420657
+    ## [10,]  0.90164866  0.31846167  0.3385485550
 
 It also extends the new methods to the cross validation function with `network.cv.glmnet`.
 
