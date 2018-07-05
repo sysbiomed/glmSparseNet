@@ -89,60 +89,12 @@ There are 3 methods available to use data-dependant methods to generate the netw
 
 Alternatively, the network can be passed as an adjancency matrix or an already calculate metric for each node.
 
-
-
-
-### Example for Gaussian models
-
-The example below, shows random datasets being generated and `network.glmnet` new function being called.
-
-```{r gaussian}
-# Gaussian
-x <- matrix(rnorm(100*20),100,20)
-y <- rnorm(100)
-fit1 <- network.glmnet(x,y, 'correlation', network.options = network.options.default(cutoff = 0.1))
-```
-
-Inspecting the penalty.factor used from correlation network.
-
-```{r}
-fit1$penalty.factor
-```
-
-Plot the results of the `glmnet` run.
-
-```{r}
-plot(fit1)
-```
-
-The given network parameter can also be a network itself, i.e. a matrix. The example below uses a randomly generated network to use in the methods.
-
-```{r rand.network}
-# generate random network
-rand.network       <- abs(matrix(rnorm(20*20),20,20))
-diag(rand.network) <- 0
-# actual fit
-fit2 <- network.glmnet(x,y, rand.network, network.options = network.options.default(cutoff = 0.1))
-```
-
-The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot.
-
-```{r predicted}
-predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
-```
-
-```{r pred.table, echo=FALSE}
-colnames(predicted) <- c('lambda_0.01', 'lambda_0.005')
-flog.info('Observed vs. Predicted', cbind(Observed = y[1:10], predicted), capture = TRUE)
-```
-
-It also extends the new methods to the cross validation function with `network.cv.glmnet`.
-
-```{r plot_cv}
-plot(network.cv.glmnet(x,y, 'covariance'))
-```
-
 ### Survival Example using RNASeq data
+
+TODO:
+
+* integrar no exemplo de todas as funções core
+* exemplo com rede aleatória
 
 We use an example data from TCGA Adrenocortical Carcinoma project with '92' patients and a reduced RNASeq data. See `MultiAssayExperiment::miniACC` for more information and details of the data.
 
