@@ -26,12 +26,14 @@ library(network.cox)
 Citation
 --------
 
-...
+This package was developed by André Veríssimo, Eunice Carrasquinha, Marta B. Lopes and Susana Vinga under the project SOUND, funded from the European Union Horizon 2020 research and innovation program under grant agreement No. 633974.
+
+A more detailed description of the method here developed, will be released soon in a paper. 
 
 Overview
 --------
 
-Necessary library
+Next, are the libraries needed.
 
 ``` r
 library(futile.logger)
@@ -53,9 +55,9 @@ There are 3 methods available to use data-dependant methods to generate the neto
 1.  Correlation matrix with cutoff;
 2.  Covariance matrix with cutoff; <!-- 1. Sparse bayesian networks using `sparsebn` package. -->
 
-Alternatively, the network can be passed as a adjancency matrix or an already calculate metric for each node.
+Alternatively, the network can be passed as an adjancency matrix or an already calculated metric for each node.
 
-### Example for gaussian models
+### Example for Gaussian models
 
 The example below, shows random datasets being generated and `network.glmnet` new function being called.
 
@@ -66,7 +68,7 @@ y <- rnorm(100)
 fit1 <- network.glmnet(x,y, 'correlation', network.options = network.options.default(cutoff = 0.1))
 ```
 
-Inspecting the penalty.factor used from correlation network
+Inspecting the penalty.factor used from correlation network.
 
 ``` r
 fit1$penalty.factor
@@ -74,7 +76,7 @@ fit1$penalty.factor
 
     ##  [1]  6  7  4  6  6  9  9  8  7  4  9  8  7  7 10  6 10  6  5 10
 
-Plot the results of the `glmnet` run
+Plot the results of the `glmnet` run.
 
 ``` r
 plot(fit1)
@@ -112,7 +114,7 @@ predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
     ##  [9,]  0.22370422  0.53663355   0.60358553
     ## [10,] -0.20371104 -0.41152399  -0.42185510
 
-It also extends the new methods to the cross validation function with `network.cv.glmnet`
+It also extends the new methods to the cross-validation function with `network.cv.glmnet`.
 
 ``` r
 plot(network.cv.glmnet(x,y, 'covariance'))
@@ -122,7 +124,7 @@ plot(network.cv.glmnet(x,y, 'covariance'))
 
 ### Survival Example using RNASeq data
 
-We use an example data from TCGA Adrenocortical Carcinoma project with '92' patients and a reduced RNASeq data. See `MultiAssayExperiment::miniACC` for more information on the data.
+We use an example data from TCGA Adrenocortical Carcinoma project with '92' patients and a reduced RNASeq data. See `MultiAssayExperiment::miniACC` for more information and details of the data.
 
 There is some pre-processing needed to remove patients with invalid follow-up date or death date:
 
@@ -150,7 +152,7 @@ ydata <- data.frame(time      = surv_event_time[valid.ix],
                     row.names = xdata$patientID[valid.ix])
 ```
 
-Fitting the survival model using a correlation network with cutoff at 0.6
+Fitting the survival model using a correlation network with cutoff at 0.6.
 
 ``` r
 # build response object for glmnet
@@ -172,7 +174,7 @@ Visualization tools
 
 ### Survival curves with `draw.kaplan`
 
-This generates Kaplan-Meier survival model based on the coefficients of a Cox model. It separates two groups based on relative risk and display both the curves and results of Log-rank test.
+This function generates Kaplan-Meier survival model based on the coefficients of a Cox model. It separates two groups based on relative risk and display both the curves and results of Log-rank test.
 
 ``` r
 xdata.reduced <- filter.by.experiment(xdata, 'RNASeq2GeneNorm')
