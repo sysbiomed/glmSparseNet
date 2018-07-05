@@ -20,3 +20,5 @@ cache
 ^vignettes\/run-cache
 ^vignettes\/runcache
 ^vignettes\/logger.txt
+logger.txt
+saves

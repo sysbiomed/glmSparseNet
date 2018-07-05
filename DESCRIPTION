@@ -1,31 +1,27 @@
 Package: network.cox
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Network Centrality Metrics for Elastic-Net Regularized Models
 Version: 0.1.3
-Author: André Veríssimo
-Maintainer: André Veríssimo <andre.verissimo@tecnico.ulisboa.pt>
+Authors@R: c(person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre")),
+             person("Susana", "Vinga", email = "susanavinga@tecnico.ulisboa.pt", role = "aut"),
+             person("Eunice", "Carrasquinha", email = "eunice.trigueirao@tecnico.ulisboa.pt", role = "ctb"),
+             person("Marta", "Lopes", email = "marta.lopes@tecnico.ulisboa.pt", role = "ctb"))
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true
-Depends:
-  R (>= 3.4),
-  Matrix (>= 1.0-6),
-  stats,
-  parallel,
-  MultiAssayExperiment
-Suggests:
-  testthat,
+Depends: R (>= 3.4)
+Suggests: testthat,
   rmarkdown,
   knitr,
   survcomp
-Imports:
-  loose.rock,
+Imports: loose.rock,
+  forcats,
+  sparsebnUtils,
+  stringr,
   futile.logger,
   ggplot2,
-  dplyr,
-  reshape2,
   sparsebn,
   dplyr,
   reshape2,
@@ -33,7 +29,10 @@ Imports:
   glmnet,
   ggfortify,
   biomaRt,
-  SummarizedExperiment
+  MultiAssayExperiment,
+  SummarizedExperiment,
+  stats,
+  parallel
 Remotes: 
   averissimo/loose.rock
 VignetteBuilder: knitr

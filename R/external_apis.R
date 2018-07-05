@@ -12,8 +12,10 @@ gene.names <- function(ensembl.genes) {
     marts <- biomaRt::listMarts()
     index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
     mart <- biomaRt::useMart(marts$biomart[index])
-    mart <- run.cache(biomaRt::useMart,marts$biomart[index], 'hsapiens_gene_ensembl',
-                      cache.prefix = 'biomart')
+    mart <- loose.rock::run.cache(biomaRt::useMart,
+                                  marts$biomart[index],
+                                  'hsapiens_gene_ensembl',
+                                  cache.prefix = 'biomart')
     results <- biomaRt::getBM(attributes = c("external_gene_name", "ensembl_gene_id"),
                               filters = "ensembl_gene_id", values = ensembl.genes,
                               mart = mart)
@@ -132,15 +134,15 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full', generate.plot
 
     g1 <- reshape2::melt(df.scaled, id.vars = c('gene.name')) %>%
       dplyr::filter(value > 0) %>%
-      ggplot2::ggplot(aes(gene.name,variable, fill=value)) +
+      ggplot2::ggplot(ggplot2::aes(gene.name, variable, fill=value)) +
         ggplot2::geom_raster() +
-        ggplot2::theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
         ggplot2::ggtitle('Hallmarks heatmap',
                 subtitle = stringr::str_wrap(sprintf('Selected genes without hallmarks (%d): %s',
                                             length(df.no.hallmarks),
                                             paste(df.no.hallmarks, collapse = ', ')),
                                     width = 50)) +
-        ggplot2::xlab('External Gene Name') + ylab('') +
+        ggplot2::xlab('External Gene Name') + ggplot2::ylab('') +
         ggplot2::scale_fill_gradientn(colours=rev(grDevices::topo.colors(2)))
 
   } else {

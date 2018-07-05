@@ -19,8 +19,8 @@ Bioconductor is necessary for the installation of this package.
 
 ``` r
 source("https://bioconductor.org/biocLite.R")
-biocLite('averissimo/network.cox', dependencies=TRUE, build_vignettes=FALSE)
-library(network.cox)
+biocLite('averissimo/loose.rock')
+biocLite('network.cox', siteRepos = 'https://sels.tecnico.ulisboa.pt/r-repos/')
 ```
 
 Citation
@@ -28,7 +28,7 @@ Citation
 
 This package was developed by André Veríssimo, Eunice Carrasquinha, Marta B. Lopes and Susana Vinga under the project SOUND, funded from the European Union Horizon 2020 research and innovation program under grant agreement No. 633974.
 
-A more detailed description of the method here developed, will be released soon in a paper. 
+A more detailed description of the method here developed, will be released soon in a paper.
 
 Overview
 --------
@@ -37,12 +37,13 @@ Next, are the libraries needed.
 
 ``` r
 library(futile.logger)
-library(loose.rock)
-library(tidyverse)
+library(dplyr)
+library(ggplot2)
 library(reshape2)
 library(MultiAssayExperiment)
 library(survival)
 library(glmnet)
+library(loose.rock)
 library(network.cox)
 ```
 
@@ -55,7 +56,7 @@ There are 3 methods available to use data-dependant methods to generate the neto
 1.  Correlation matrix with cutoff;
 2.  Covariance matrix with cutoff; <!-- 1. Sparse bayesian networks using `sparsebn` package. -->
 
-Alternatively, the network can be passed as an adjancency matrix or an already calculated metric for each node.
+Alternatively, the network can be passed as an adjancency matrix or an already calculate metric for each node.
 
 ### Example for Gaussian models
 
@@ -74,7 +75,7 @@ Inspecting the penalty.factor used from correlation network.
 fit1$penalty.factor
 ```
 
-    ##  [1]  6  7  4  6  6  9  9  8  7  4  9  8  7  7 10  6 10  6  5 10
+    ##  [1]  5  9  7  7  6  9  4  4 11  8  8  9  7  6  6  5  3  4  5  7
 
 Plot the results of the `glmnet` run.
 
@@ -82,7 +83,7 @@ Plot the results of the `glmnet` run.
 plot(fit1)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-3-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
 The given network parameter can also be a network itself, i.e. a matrix. The example below uses a randomly generated network to use in the methods.
 
@@ -94,7 +95,7 @@ diag(rand.network) <- 0
 fit4 <- network.glmnet(x,y, rand.network, network.options = network.options.default(cutoff = 0.1))
 ```
 
-The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot
+The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot.
 
 ``` r
 predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
@@ -102,19 +103,19 @@ predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
 
     ## [INFO] Observed vs. Predicted
     ## 
-    ##          Observed lambda_0.01 lambda_0.005
-    ##  [1,] -0.79610670 -0.23236582  -0.25670782
-    ##  [2,]  0.99838619 -0.64978414  -0.67417523
-    ##  [3,] -0.07713618 -0.23405531  -0.26105962
-    ##  [4,]  0.74041152 -0.08228919  -0.08464397
-    ##  [5,] -0.89538636 -0.09993358  -0.11340555
-    ##  [6,]  0.46970668  0.46206073   0.49736718
-    ##  [7,] -0.40292888  0.42690250   0.42643610
-    ##  [8,] -0.92458619  0.38918312   0.39147286
-    ##  [9,]  0.22370422  0.53663355   0.60358553
-    ## [10,] -0.20371104 -0.41152399  -0.42185510
+    ##         Observed lambda_0.01 lambda_0.005
+    ##  [1,] -0.7699055  0.07151423    0.1025443
+    ##  [2,] -1.8986345 -0.29507469   -0.3695670
+    ##  [3,] -1.0935415 -0.57271722   -0.6037090
+    ##  [4,]  0.7943990 -0.28068707   -0.2450609
+    ##  [5,] -0.2083067  0.27988768    0.3371429
+    ##  [6,]  0.5507648  0.11221293    0.1205156
+    ##  [7,]  0.4234700 -0.10748298   -0.1272324
+    ##  [8,] -0.2918227 -0.22535556   -0.2306527
+    ##  [9,]  0.2506933 -0.23701132   -0.2788515
+    ## [10,]  0.6677587 -0.49322623   -0.5167654
 
-It also extends the new methods to the cross-validation function with `network.cv.glmnet`.
+It also extends the new methods to the cross validation function with `network.cv.glmnet`.
 
 ``` r
 plot(network.cv.glmnet(x,y, 'covariance'))
@@ -184,7 +185,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
 ```
 
     ## $pvalue
-    ## [1] 7.97636e-07
+    ## [1] 1.597944e-12
     ## 
     ## $plot
 
@@ -195,8 +196,8 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      4     NA      NA      NA
-    ## High risk 39     24   1105     579      NA
+    ## Low risk  40      1     NA      NA      NA
+    ## High risk 39     27   1105     562    1750
 
 ### Heatmap with results from Hallmarks of cancer
 

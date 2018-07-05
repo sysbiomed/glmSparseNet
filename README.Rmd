@@ -34,11 +34,19 @@ rmarkdown::render('README.Rmd', output_format = 'all')
 
 Bioconductor is necessary for the installation of this package.
 
-```{r instal, eval=FALSE}
+```{r instal, eval=FALSE, include=FALSE}
+# This is for when package is in github
 source("https://bioconductor.org/biocLite.R")
 biocLite('averissimo/network.cox', dependencies=TRUE, build_vignettes=FALSE)
 library(network.cox)
 ```
+
+```{r, eval=FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite('averissimo/loose.rock')
+biocLite('network.cox', siteRepos = 'https://sels.tecnico.ulisboa.pt/r-repos/')
+```
+
 
 ## Citation
 
@@ -53,7 +61,7 @@ Next, are the libraries needed.
 ```{r}
 library(futile.logger)
 library(dplyr)
-library(ggplot)
+library(ggplot2)
 library(reshape2)
 library(MultiAssayExperiment)
 library(survival)

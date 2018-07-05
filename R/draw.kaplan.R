@@ -25,6 +25,7 @@
 #' draw.kaplan(c(age = 1, 0), xdata, ydata)
 #' draw.kaplan(c(age = 1, 0.5), xdata, ydata)
 #' draw.kaplan(c(age = 1), c(1,0,1,0,1,0), data.frame(time = runif(6), status = rbinom(6, 1, .5)))
+#' draw.kaplan(list(aa = c(age = 1, 0.5), bb = c(age = 1, 1.5)), xdata, ydata)
 setGeneric('draw.kaplan', function(chosen.btas, xdata, ydata,
                                    probs          = c(.5, .5),
                                    plot.title       = 'SurvivalCurves',
@@ -173,10 +174,17 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
                 e <- names(chosen.btas)[ix]
                 paste0(c('Low risk - ', 'High risk - '), e)
               } else {
-                c('Low risk', 'High risk')
+                list('Low risk', 'High risk')
               }
             }))
-            prognostic.index.df$group <- factor(plyr::mapvalues(prognostic.index.df$group, from = 1:(2*length(chosen.btas)), to = new.factor.str))
+
+            new.factor.str.l <- as.list(as.character(1:(2*length(chosen.btas))))
+            names(new.factor.str.l) <- new.factor.str
+
+            prognostic.index.df$group <- prognostic.index.df$group %>%
+              list %>%
+              c(new.factor.str.l) %>%
+              do.call(forcats::fct_collapse, .)
             #
             if (length(levels(prognostic.index.df$group)) == 1) {
               stop('draw.kaplan(): There is only one group, cannot create kaplan-meir curve with low and high risk groups')
@@ -235,7 +243,7 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
             #  if more than one btas then paired curves (low and high) should have the same color
             #  otherwise, red and green!
             if (length(chosen.btas) > 1) {
-              p1 <- p1 + ggplot2::scale_colour_manual(values = c(my.colors()[c(1,2,4,3,10,6,12,9,5,7,8,11,13,14,15,16,17)]))
+              p1 <- p1 + ggplot2::scale_colour_manual(values = c(loose.rock::my.colors()[c(1,2,4,3,10,6,12,9,5,7,8,11,13,14,15,16,17)]))
               p1 <- p1 + ggplot2::theme(legend.title = ggplot2::element_blank())
               width <- 6
               height <- 4
