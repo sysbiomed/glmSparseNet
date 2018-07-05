@@ -4,7 +4,7 @@ name needed!!
 -   [Install](#install)
 -   [Citation](#citation)
 -   [Overview](#overview)
-    -   [Example for gaussian models](#example-for-gaussian-models)
+    -   [Example for Gaussian models](#example-for-gaussian-models)
     -   [Survival Example using RNASeq data](#survival-example-using-rnaseq-data)
 -   [Visualization tools](#visualization-tools)
     -   [Survival curves with `draw.kaplan`](#survival-curves-with-draw.kaplan)
