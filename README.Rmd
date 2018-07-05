@@ -77,6 +77,7 @@ library(glmSparseNet)
 ### Network-based penalization
 
 !!!!! explicar bem qual é o input e opcoes da package
+Vê aqui o que escrevi no report D4.1
 
 
 This package extends the `glmnet` r-package with network-based regularization based on features relations. This network can be calculated from the data itself or using external networks to enrich the model.
