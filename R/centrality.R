@@ -298,34 +298,33 @@ degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, cons
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degree.weighted(xdata)
-#' degree.weighted(xdata, cutoff = .5)
-#' degree.weighted(xdata, cutoff = .5, consider.unweighted = T)
-#' degree.weighted(xdata, cutoff = .5, consider.unweighted = T, force.recalc.degree = T, force.recalc.correlation = T)
-setGeneric('degree.sparsebn.weighted', function(xdata, method = 'sparsebn', cutoff = 0, consider.unweighted = FALSE,
-                                       base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
-                                       show.message = FALSE, force.recalc.degree = FALSE, force.recalc.sparsebn = FALSE) {
+#' degree.sparsebn(xdata, 50)
+setGeneric('degree.sparsebn', function(xdata, lambdas.length, cutoff = 0,
+                                                consider.unweighted = TRUE,
+                                                n.cores = parallel:::detectCores(),
+                                                show.message = FALSE, force.recalc.degree = FALSE, force.recalc.sparsebn = FALSE, ...) {
   stop('first argument must be a matrix')
 })
 
-setMethod('degree.sparsebn.weighted', signature('matrix'), function(xdata, method = 'sparsebn', cutoff = 0, consider.unweighted = FALSE,
-                                                           base.dir = loose.rock::base.dir(), n.cores = parallel:::detectCores(),
-                                                           show.message = FALSE, force.recalc.degree = FALSE, force.recalc.sparsebn = FALSE) {
-  if (force.recalc.sparsebn) {
+setMethod('degree.sparsebn', signature('matrix'), function(xdata, lambdas.length, cutoff = 0,
+                                                           consider.unweighted = FALSE,
+                                                           n.cores = parallel:::detectCores(),
+                                                           show.message = FALSE, force.recalc.degree = FALSE, force.recalc.sparsebn = FALSE, ...) {
+  if (force.recalc.network) {
     force.recalc.degree <- T
   }
 
   # generate lambdas
-  lambdas      <- sparsebnUtils::generate.lambdas(nrow(xdata), lambdas.length = 50)
+  lambdas      <- sparsebnUtils::generate.lambdas(nrow(xdata), lambdas.length = lambdas.length)
   # generate data that sparsebn understands)
   sparse.xdata <- loose.rock::run.cache(sparsebnUtils::sparsebnData, xdata, levels = NULL, ivn = NULL, type = 'continuous',
                                         cache.prefix = 'sparsebn.data')
   # estimate dag structure, upperbound was wrongfully set
-  dag <- loose.rock::run.cache(sparsebn::estimate.dag, sparse.xdata, lambdas = lambdas, upperbound = ncol(xdata) * 2,
+  dag <- loose.rock::run.cache(sparsebn::estimate.dag, sparse.xdata, lambdas = lambdas, ...,
                                cache.prefix = 'dag',
-                               force.recalc = force.recalc.sparsebn)
+                               force.recalc = force.recalc.network)
   # estimate parameters for dag
-  dag.params <- run.cache(sparsebnUtils::estimate.parameters, dag, data = sparse.xdata, verbose = T, cache.prefix = 'dag.params')
+  dag.params <- loose.rock::run.cache(sparsebnUtils::estimate.parameters, dag, data = sparse.xdata, verbose = T, cache.prefix = 'dag.params')
   # choose a dag (will use the one with most edges)
   #my.dag <- select(dag, lambda = lambdas[length(lambdas)])
   #

@@ -18,54 +18,51 @@ knitr::opts_chunk$set(
   fig.width = 6,
   fig.height = 7
 )
-```
-
-```{r, include=FALSE, eval=FALSE}
-rmarkdown::render('example_brca_survival.Rmd')
-```
-
-
-# Required Packages
-
-```{r libraries}
-library(reshape2)
-library(tidyverse)
-library(glmnet)
-library(survival)
-library(futile.logger)
-library(loose.rock)
 
 # Load do package
 devtools::load_all()
 
-theme_set(theme_minimal())
-.Last.value <- flog.layout(layout.format('[~l] ~m'))
+ggplot2::theme_set(ggplot2::theme_minimal())
+.Last.value <- futile.logger::flog.layout(futile.logger::layout.format('[~l] ~m'))
 
-.Last.value <- loose.rock::base.dir('./runcache')
+.Last.value <- loose.rock::base.dir(tempdir())
 .Last.value <- loose.rock::show.message(FALSE)
 ```
 
+# Required Packages
+
+```{r libraries}
+library(futile.logger)
+library(ggplot2)
+library(reshape2)
+library(dplyr)
+library(survival)
+library(loose.rock)
+library(glmnet)
+```
+
+```{r, eval=FALSE}
+library(glmSparseNet)
+```
+
+
 # Load data
 
-```{r data.show, eval=FALSE}
+```{r data.show}
+# download data package with TCGA data
+biocLite('https://github.com/averissimo/tcga.data/releases/download/2018.06.20-skcm/skcm.data_2018.06.20.tar.gz')
+
+# load package
+library(brca.data)
+
 # short exemple
 my.data <- prepare.tcga.survival.data(project           = 'skcm', 
                                       tissue.type       = 'primary.solid.tumor', 
                                       handle.duplicates = 'keep_first', 
                                       coding.genes      = TRUE)
-```
 
-```{r data, echo=FALSE}
-my.data <- run.cache(prepare.tcga.survival.data, 
-                     project           = 'skcm', 
-                     tissue.type       = 'primary.solid.tumor', 
-                     handle.duplicates = 'keep_first', 
-                     coding.genes      = TRUE)
-```
+# Using only a subset of genes previously selected to keep this short example.
 
-Using only a subset of genes previously selected to keep this short example.
-
-```{r pre.processing}
 set.seed(params$seed)
 small.subset <- c('ENSG00000109790', 'ENSG00000109133', 'ENSG00000023734', 
                   'ENSG00000183770', 'ENSG00000214617', 'ENSG00000185813', 
@@ -73,6 +70,18 @@ small.subset <- c('ENSG00000109790', 'ENSG00000109133', 'ENSG00000023734',
                   sample(colnames(my.data$xdata), 100))
 xdata <- my.data$xdata[,small.subset]
 ydata <- my.data$ydata
+```
+
+```{r, eval=FALSE}
+# save data in package
+sample.SKCM.survival <- list(xdata = xdata, ydata = ydata)
+devtools::use_data(sample.SKCM.survival, overwrite = TRUE)
+```
+
+```{r, include=FALSE}
+data("sample.SKCM.survival", package = 'glmSparseNet')
+xdata <- sample.SKCM.survival$xdata
+ydata <- sample.SKCM.survival$ydata
 ```
 
 # Fit models
@@ -108,6 +117,6 @@ all.hallmarks$heatmap
 ### Survival curves and Log rank test
 
 ```{r, echo=FALSE}
-draw.kaplan(as.vector(coefs.v), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
+glmSparseNet::draw.kaplan(as.vector(coefs.v), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
 ```
 

@@ -94,7 +94,7 @@ calc.penalty <- function(xdata, penalty.type, network.options = network.options.
 }
 
 
-#' Heuristic function to transformate penalty factor
+#' Heuristic function to penalize nodes with low degree
 #'
 #' @param x single value of vector
 #'
@@ -112,4 +112,24 @@ degree.heuristic <- function(x) {
   }
   x <- x / max(x)
   return(tmp.fun(x))
+}
+
+#' Heuristic function to penalize nodes with high degree
+#'
+#' @param x single value of vector
+#'
+#' @return transformed
+#' @export
+#'
+#' @examples
+#' orphan.heuristic(rnorm(1:10))
+orphan.heuristic <- function(x) {
+  tmp.fun <- function(x,
+                      a = .20 - 1,
+                      b = -1,
+                      g = -1) {
+    return(a + 10^(-b * (exp(x) + g)))
+  }
+  x <- x / max(x)
+  return(tmp.fun(1 - x))
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/network.options.R
 \name{degree.heuristic}
 \alias{degree.heuristic}
-\title{Heuristic function to transformate penalty factor}
+\title{Heuristic function to penalize nodes with low degree}
 \usage{
 degree.heuristic(x)
 }
@@ -13,7 +13,7 @@ degree.heuristic(x)
 transformed
 }
 \description{
-Heuristic function to transformate penalty factor
+Heuristic function to penalize nodes with low degree
 }
 \examples{
 degree.heuristic(rnorm(1:10))

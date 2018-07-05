@@ -63,7 +63,7 @@ Bioconductor is necessary for the installation of this package.
 ```{r install, eval=FALSE}
 source("https://bioconductor.org/biocLite.R")
 biocLite('averissimo/loose.rock')
-biocLite('network.cox', siteRepos = 'https://sels.tecnico.ulisboa.pt/r-repos/')
+biocLite('glmSparseNet', siteRepos = 'https://sels.tecnico.ulisboa.pt/r-repos/')
 ```
 
 ## Running 
@@ -79,7 +79,7 @@ library(MultiAssayExperiment)
 library(survival)
 library(glmnet)
 library(loose.rock)
-library(network.cox)
+library(glmSparseNet)
 ```
 
 ### Network-based penalization

@@ -19,68 +19,65 @@ knitr::opts_chunk$set(
   fig.width = 6,
   fig.height = 7
 )
-```
-
-```{r, include=FALSE, eval=FALSE}
-rmarkdown::render('example_brca_logistic.Rmd')
-```
-
-
-# Required Packages
-
-```{r libraries}
-
-library(reshape2)
-library(tidyverse)
-library(glmnet)
-library(survival)
-library(futile.logger)
-library(loose.rock)
-library(brca.data)
-
-library(parallel)
-library(doMC)
-
-library(pROC)
 
 # Load do package
 devtools::load_all()
 
-theme_set(theme_minimal())
-.Last.value <- flog.layout(layout.format('[~l] ~m'))
+ggplot2::theme_set(ggplot2::theme_minimal())
+.Last.value <- futile.logger::flog.layout(futile.logger::layout.format('[~l] ~m'))
 
-.Last.value <- loose.rock::base.dir('cache')
-.Last.value <- show.message(FALSE)
-
+.Last.value <- loose.rock::base.dir(tempdir())
 .Last.value <- loose.rock::show.message(FALSE)
+```
+
+# Required Packages
+
+```{r libraries}
+library(futile.logger)
+library(ggplot2)
+library(reshape2)
+library(dplyr)
+library(survival)
+library(loose.rock)
+library(glmnet)
+```
+
+```{r, eval=FALSE}
+library(glmSparseNet)
 ```
 
 # Load data
 
 Classification of Breast Invasive Carcinoma (BRCA) data from the Cancer Genome Atlas  (TCGA) ([TCGA](https://cancergenome.nih.gov/)).
 
-```{r data}
+```{r data, eval=FALSE}
+# download data package with TCGA data
+biocLite('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
+
+# load library
 library(brca.data)
+
+# load data
 data('fpkm.per.tissue', 'fpkm.per.tissue.barcode', 'clinical', package = 'brca.data')
 
+#
 # RNA-Seq data
+
 # tumor tissue
 xdata_tumor <- fpkm.per.tissue$primary.solid.tumor
 xdata_tumor <- xdata_tumor[,-which(duplicated(getParticipantCode(colnames(fpkm.per.tissue$primary.solid.tumor))))] # removing duplicated samples
+
 # normal tissue
 set.seed(params$seed)
 xdata_normal <- fpkm.per.tissue$solid.tissue.normal
-xdata <- rbind(t(xdata_tumor),t(xdata_normal))
-
-xdata <- xdata[, apply(xdata, 2, sd) != 0] # remove genes with sd == 0
+xdata        <- rbind(t(xdata_tumor),t(xdata_normal))
+xdata        <- xdata[, apply(xdata, 2, sd) != 0] # remove genes with sd == 0
 
 # response vector ('1', tumor; '0', normal)
 ydata <- c(rep(1,dim(xdata_tumor)[2]),rep(0,dim(xdata_normal)[2]))
-```
 
-Using only a subset of genes previously selected to keep this short example.
+# Using only a subset of genes previously selected to keep this example short.
 
-```{r}
 set.seed(params$seed)
 small.subset <- c('ENSG00000110448', 'ENSG00000124449', 'ENSG00000103494', 
                   'ENSG00000172053', 'ENSG00000136758', 'ENSG00000051382', 
@@ -91,6 +88,18 @@ small.subset <- c('ENSG00000110448', 'ENSG00000124449', 'ENSG00000103494',
                    sample(colnames(xdata), 100))
 xdata <- xdata[,small.subset]
 ```
+
+```{r, eval=FALSE, include=FALSE}
+sample.BRCA.logisitic <- list(xdata = xdata, ydata = ydata)
+devtools::use_data(sample.BRCA.logisitic, overwrite = TRUE)
+```
+
+```{r, include=FALSE}
+data("sampleBRCA.logistics", package = 'glmSparseNet')
+xdata <- sample.BRCA.logisitic$xdata
+ydata <- sample.BRCA.logisitic$ydata
+```
+
 
 # Fit models
 
@@ -131,13 +140,22 @@ flog.info('  * False positive: %d', sum(ydata - resp > 0.5))
 flog.info('  * False negative: %d', sum(ydata - resp < -0.5))
 ```
 
+Histogram of predicted response
+
 ```{r predict, echo=FALSE}
 qplot(resp, bins = 100)
+```
+
+Prediction vs. Observed
+
+```{r}
 qplot(resp, ydata, color = abs(resp - ydata) < 0.5) + theme(legend.position = 'none')
 ```
 
+ROC curve
+
 ```{r roc, echo=FALSE}
-roc_obj <- roc(ydata, as.vector(resp))
+roc_obj <- pROC::roc(ydata, as.vector(resp))
 
 data.frame(TPR = roc_obj$sensitivities, FPR = 1 - roc_obj$specificities) %>%
   ggplot() +geom_line(aes(FPR,TPR), color = 2, size = 1, alpha = 0.7)+

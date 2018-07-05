@@ -1,4 +1,4 @@
 library(testthat)
-library(network.cox)
+library(glmSparseNet)
 
-test_check("network.cox")
+test_check("glmSparseNet")

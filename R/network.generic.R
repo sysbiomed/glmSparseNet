@@ -29,7 +29,7 @@ setMethod('network.glmnet.private', signature(xdata = 'matrix'), function(fun, x
   if (is.character(network)) {
     penalty.factor <- calc.penalty(xdata, network, network.options)
   } else if (is.matrix(network)) {
-    penalty.factor <- (colSums(network) + rowSums(network))
+    penalty.factor <- (Matrix::colSums(network) + Matrix::rowSums(network))
   } else if (is.vector(network)) {
     if (lenght(network) != ncol(xdata)) {
       stop('Network vector size does not match xdata input')
