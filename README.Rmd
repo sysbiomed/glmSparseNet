@@ -38,7 +38,7 @@ All the glmnet distribution families are supported, namely "gaussian", "poisson"
 It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization.
 
 
-Below, we provide one example for survival analysis of  .... using transcriptomic data of....RNA-seq tumor data.???  More information and RMD files are available in the folder ...???....where more extensive and complete examples are provided for logistic regressoin and... in ....
+Below, we provide one example for survival analysis using transcriptomic data  from the TCGA Adrenocortical Carcinoma project. More information and Rmd files are available in the vignettes folder where more extensive and complete examples are provided for logistic regresson and Cox's regression for different types of cancer data.
 
 ## Citation
 
