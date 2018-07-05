@@ -43,7 +43,7 @@ Below, we provide one example for survival analysis of  .... using transcriptomi
 =======
 `glmSparseNet` is a R package that generalizes sparse regression models when the features have a graph structure (e.g. genes), by including network-based regularizers. `glmSparseNet` uses the `glmnet` package, by including centrality measures of the network as penality factors. The current version implements regularization based on node degree, i.e., the strength and/or number of its associated edges, either by promoting hubs in the solution (glmDegree) or orphan genes (glmOrphan) in the solution.
 All the `glmnet` distribution families are supported, namely "gaussian", "poisson", "binomial", "multinomial", "cox", and "mgaussian".
-Below, we provide one example for survival analysis of  .... using transcriptomic data of....RNA-seq tumor data.???  More information and Rmd files are available in the folder ...???....where more extensive and complete examples are provided for logistic regressoin and... in ....
+Below, we provide one example for survival analysis using transcriptomic data  from the TCGA Adrenocortical Carcinoma project. More information and Rmd files are available in the vignettes folder where more extensive and complete examples are provided for logistic regresson and Cox's regression for different types of cancer data.
 >>>>>>> 1c02506cf9ab54cd6839391cacc7149de8ed48d7
 
 
