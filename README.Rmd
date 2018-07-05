@@ -211,7 +211,7 @@ ydata.reduced <- ydata[xdata.reduced$patientID,]
 ydata.surv <- Surv(ydata.reduced$time, ydata.reduced$status)
 
 fit4 <- cv.glmnet(xdata.surv, ydata.surv, family = 'cox', alpha = .7, nlambda = 1000)
-best.model.coef.g <- coef(fit5, s = 'lambda.min')[,1] %>% .[. != 0]
+best.model.coef.g <- coef(fit4, s = 'lambda.min')[,1] %>% .[. != 0]
 
 
 draw.kaplan(best.model.coef.g, 
