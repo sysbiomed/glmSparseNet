@@ -1,7 +1,7 @@
 Package: network.cox
 Type: Package
 Title: What the Package Does (Title Case)
-Version: 0.1.1
+Version: 0.1.2
 Author: André Veríssimo
 Maintainer: André Veríssimo <andre.verissimo@tecnico.ulisboa.pt>
 Description: More about what it does (maybe more than one line)
@@ -10,27 +10,30 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Depends:
-  R (>= 3.4)
+  R (>= 3.4),
+  Matrix (>= 1.0-6),
+  stats,
+  parallel,
+  MultiAssayExperiment
 Suggests:
   testthat,
   rmarkdown,
-  knitr
+  knitr,
+  survcomp
 Imports:
+  loose.rock,
   futile.logger,
-  glmnet,
-  survival,
-  parallel,
-  survcomp,
-  ggfortify,
   ggplot2,
   dplyr,
   reshape2,
-  stats,
   sparsebn,
-  Matrix,
+  dplyr,
+  reshape2,
+  survival,
+  glmnet,
+  ggfortify,
   biomaRt,
-  SummarizedExperiment,
-  MultiAssayExperiment
+  SummarizedExperiment
 Remotes: 
   averissimo/loose.rock
 VignetteBuilder: knitr

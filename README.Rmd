@@ -16,16 +16,12 @@ knitr::opts_chunk$set(echo = TRUE,
                       fig.width = 6,
                       fig.height = 8)
 
-library(tidyverse)
 library(futile.logger)
-library(loose.rock)
 library(ggplot2)
 
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
 .Last.value <- flog.appender(appender.tee('logger.txt'))
 theme_set(theme_minimal())
-
-devtools::load_all()
 ```
 
 ```{r generate_md, eval=FALSE, include=FALSE}
@@ -56,12 +52,13 @@ Next, are the libraries needed.
 
 ```{r}
 library(futile.logger)
-library(loose.rock)
-library(tidyverse)
+library(dplyr)
+library(ggplot)
 library(reshape2)
 library(MultiAssayExperiment)
 library(survival)
 library(glmnet)
+library(loose.rock)
 library(network.cox)
 ```
 
