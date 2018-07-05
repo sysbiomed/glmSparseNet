@@ -48,7 +48,7 @@ library(glmSparseNet)
 
 # Load data
 
-```{r data.show}
+```{r data.show, eval=FALSE}
 # download data package with TCGA data
 biocLite('https://github.com/averissimo/tcga.data/releases/download/2018.06.20-skcm/skcm.data_2018.06.20.tar.gz')
 
