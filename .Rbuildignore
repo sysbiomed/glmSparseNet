@@ -22,5 +22,7 @@ cache
 ^vignettes\/logger.txt
 logger.txt
 saves
-vignettes/README.Rmd
-inst/images/overview.png
+vignettes/README.md
+README.Rmd
+README.md
+.travis.yml
