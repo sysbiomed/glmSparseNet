@@ -76,9 +76,8 @@ devtools::use_data(sample.PRAD.survival, overwrite = TRUE)
 ```
 
 ```{r, include=FALSE}
-data("sample.PRAD.survival", package = 'glmSparseNet')
-xdata <- sample.PRAD.survival$xdata
-ydata <- sample.PRAD.survival$ydata
+xdata <- glmSparseNet::sample.PRAD.survival$xdata
+ydata <- glmSparseNet::sample.PRAD.survival$ydata
 ```
 
 # Fit models

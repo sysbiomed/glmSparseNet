@@ -78,9 +78,8 @@ devtools::use_data(sample.BRCA.survival, overwrite = TRUE)
 ```
 
 ```{r, include=FALSE}
-data("sample.BRCA.survival", package = 'glmSparseNet')
-xdata <- sample.BRCA.survival$xdata
-ydata <- sample.BRCA.survival$ydata
+xdata <- glmSparseNet::sample.BRCA.survival$xdata
+ydata <- glmSparseNet::sample.BRCA.survival$ydata
 ```
 
 # Fit models

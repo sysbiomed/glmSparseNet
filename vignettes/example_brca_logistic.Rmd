@@ -95,9 +95,8 @@ devtools::use_data(sample.BRCA.logisitic, overwrite = TRUE)
 ```
 
 ```{r, include=FALSE}
-data("sampleBRCA.logistics", package = 'glmSparseNet')
-xdata <- sample.BRCA.logisitic$xdata
-ydata <- sample.BRCA.logisitic$ydata
+xdata <- glmSparseNet::sample.BRCA.logisitic$xdata
+ydata <- glmSparseNet::sample.BRCA.logisitic$ydata
 ```
 
 

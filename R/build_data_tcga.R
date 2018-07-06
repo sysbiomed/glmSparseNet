@@ -30,7 +30,11 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
     stop(sprintf('There is no package called \'%s\' installed, please go to https://github.com/averissimo/tcga.data/releases and install the corresponding release.'))
   }
 
-  data("fpkm.per.tissue", package = package.name)
+  # An environment is necessary to adhere to best practices of ?data
+  dat.env <- new.env()
+  data("fpkm.per.tissue", package = package.name, envir = dat.env)
+  fpkm.per.tissue <- dat.env$fpkm.per.tissue
+
   futile.logger::flog.info('Loading data from %s package', package.name)
   futile.logger::flog.info('Types of tissue:\n * %s', paste(sprintf('%s (%d)', names(fpkm.per.tissue), sapply(fpkm.per.tissue, ncol)), collapse = '\n * '))
 
