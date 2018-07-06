@@ -11,10 +11,6 @@ r_packages:
 
 bioc_required: true
 
-bioc_packages:
-  - biomaRt
-  - MultiAssayExperiments
-
 r:
 - 3.4
 - oldrel
