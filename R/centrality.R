@@ -254,7 +254,8 @@ network.worker <- function(fun, xdata, ix.i, ...) {
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degree.generic(cor, 'cor', xdata)
+#' # don't run
+#' # degree.generic(cor, 'cor', xdata)
 degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, consider.unweighted = FALSE,
                            force.recalc.degree = FALSE, force.recalc.network = FALSE,
                            n.cores = 1, ...) {
@@ -324,11 +325,14 @@ degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, cons
 #'
 #' @return a vector of the degrees
 #'
+#' @export
+#'
 #' @examples
-#' n.col <- 6
+#' data(cytometryContinuous, package = 'sparsebn')
+#'
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degree.sparsebn(xdata, 50)
-setGeneric('degree.sparsebn', function(xdata, lambdas.length, cutoff = 0,
+#' degree.sparsebn(as.matrix(cytometryContinuous$data))
+setGeneric('degree.sparsebn', function(xdata, lambdas.length = 20, cutoff = 0,
                                        consider.unweighted = TRUE,
                                        n.cores = 1,
                                        show.message = FALSE, force.recalc.degree = FALSE,
@@ -374,14 +378,14 @@ setMethod('degree.sparsebn', signature('matrix'), function(xdata, lambdas.length
   # choose a dag (will use the one with most edges)
   #my.dag <- select(dag, lambda = lambdas[length(lambdas)])
   #
-  x.vec                    <- abs(dag.params[[50]]$coefs@x)
-  dag.params[[50]]$coefs@x <- x.vec
+  x.vec                    <- abs(dag.params[[length(dag.params)]]$coefs@x)
+  dag.params[[length(dag.params)]]$coefs@x <- x.vec
   x.ix.v                   <- x.vec < cutoff
-  dag.params[[50]]$coefs@x[x.ix.v] <- 0
+  dag.params[[length(dag.params)]]$coefs@x[x.ix.v] <- 0
   if (consider.unweighted) {
-    dag.params[[50]]$coefs@x[dag.params[[50]]$coefs@x > 0] <- 1
+    dag.params[[length(dag.params)]]$coefs@x[dag.params[[length(dag.params)]]$coefs@x > 0] <- 1
   }
 
-  val <- Matrix::colSums(dag.params[[50]]$coefs) + Matrix::rowSums(dag.params[[50]]$coefs)
+  val <- Matrix::colSums(dag.params[[length(dag.params)]]$coefs) + Matrix::rowSums(dag.params[[length(dag.params)]]$coefs)
   return(val)
 })

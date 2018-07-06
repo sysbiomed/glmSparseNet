@@ -34,5 +34,5 @@ n.col <- 6
 xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 degree.cov(xdata)
 degree.cov(xdata, cutoff = .5)
-degree.cov(xdata, cutoff = .5, consider.unweighted = T)
+degree.cov(xdata, cutoff = .5, consider.unweighted = TRUE)
 }
