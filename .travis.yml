@@ -1,0 +1,34 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+language: R
+sudo: false
+cache: packages
+
+r_packages:
+  - covr
+  - devtools
+
+bioc_required: true
+
+bioc_packages:
+  - biomaRt
+  - MultiAssayExperiments
+
+r:
+- 3.4
+- oldrel
+- devel
+- release
+
+include:
+  matrix:
+  r: devel
+warnings_are_errors: false
+
+after_success:
+  - Rscript -e 'library(covr);codecov()'
+
+env: _R_CHECK_CRAN_INCOMING_=FALSE
+
+r_github_packages:
+  - sysbiomed/glmSparseNet
