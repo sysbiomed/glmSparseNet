@@ -6,8 +6,7 @@ glmSparseNet
 -   [Instalation](#instalation)
 -   [Details](#details)
     -   [Function definition](#function-definition)
--   [Example of using the package](#example-of-using-the-package)
-    -   [Survival analysis using RNA-seq data](#survival-analysis-using-rna-seq-data)
+-   [Example for survival analysis using RNA-seq data](#example-for-survival-analysis-using-rna-seq-data)
 -   [Visualization and Analytical tools](#visualization-and-analytical-tools)
     -   [Survival curves with `draw.kaplan`](#survival-curves-with-draw.kaplan)
     -   [Heatmap with results retrived from the Cancer Hallmarks Analytics Tool (CHAT)](#heatmap-with-results-retrived-from-the-cancer-hallmarks-analytics-tool-chat)
@@ -85,8 +84,12 @@ network.cv.glmnet(xdata,
                                                             trans.fun = degree.heuristic))
 ```
 
-Example of using the package
-----------------------------
+Example for survival analysis using RNA-seq data
+------------------------------------------------
+
+This example uses an adrenal cancer dataset using the correlation to calculate the network and cross-validation to find the optimal model. The network itself if filtered using a cutoff value of 0.6, i.e. all edges that have a correlation between the two features (genes) below the cutoff value are discarded.
+
+The data was retrieved from TCGA database and the Adrenocortical Carcinoma project with 92 patients and a reduced RNASeq data. See Bioconductor package `MultiAssayExperiment` for more information on the `miniACC` dataset.
 
 To run the following examples, the next libraries are also needed:
 
@@ -101,10 +104,6 @@ library(glmnet)
 library(loose.rock)
 library(glmSparseNet)
 ```
-
-### Survival analysis using RNA-seq data
-
-We use an example data from TCGA Adrenocortical Carcinoma project with '92' patients and a reduced RNASeq data. See `MultiAssayExperiment::miniACC` for more information and details of the data.
 
 There is some pre-processing needed to remove patients with invalid follow-up date or death date:
 
@@ -131,7 +130,7 @@ ydata <- data.frame(time      = surv_event_time[valid.ix],
                     row.names = xdata$patientID[valid.ix])
 ```
 
-The function network.cv.glmnet fits the survival data using 10-fold cross validation and using a cutoff value of 0.6 to reduce the size of the network.
+The function `network.cv.glmnet` fits the survival data using 10-fold cross validation and using a cutoff value of 0.6 to reduce the size of the network.
 
 ``` r
 # build response object for glmnet
