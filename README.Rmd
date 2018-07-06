@@ -55,8 +55,18 @@ Bioconductor is necessary for the installation of this package.
 
 ```{r install, eval=FALSE}
 source("https://bioconductor.org/biocLite.R")
+
 biocLite('sysbiomed/loose.rock')
 biocLite('sysbiomed/glmSparseNet')
+
+#
+# Note in case of failure:
+
+# if the commands above fail, the problem might 
+#  be of a missing package named remotes
+#  try installing it and running again commands above
+
+# biocLite('remotes')
 ```
 
 ## Details

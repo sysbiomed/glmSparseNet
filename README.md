@@ -9,14 +9,14 @@ glmSparseNet
 -   [Example for survival analysis using RNA-seq data](#example-for-survival-analysis-using-rna-seq-data)
 -   [Visualization and Analytical tools](#visualization-and-analytical-tools)
     -   [Survival curves with `draw.kaplan`](#survival-curves-with-draw.kaplan)
-    -   [Heatmap with results retrived from the Cancer Hallmarks Analytics Tool (CHAT)](#heatmap-with-results-retrived-from-the-cancer-hallmarks-analytics-tool-chat)
+    -   [Heatmap with results retrived from the Cancer Hallmarks Analytics Tool *(CHAT)*](#heatmap-with-results-retrived-from-the-cancer-hallmarks-analytics-tool-chat)
 
 > Elastic-Net models with additional regularization based on network centrality metrics
 
 Overview
 --------
 
-`glmSparseNet` is a R package that generalizes sparse regression models when the features *(e.g. genes)* have a graph structure *(e.g. protein-protein interactions)*, by including network-based regularizers. `glmSparseNet` uses the `glmnet` R-package, by including centrality measures of the network as penalty weights in the regularization. The current version implements regularization based on node degree, i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution or orphan genes in the solution. All the `glmnet` distribution families are supported, namely "gaussian", "poisson", "binomial", "multinomial", "cox", and "mgaussian".
+`glmSparseNet` is a R package that generalizes sparse regression models when the features *(e.g. genes)* have a graph structure *(e.g. protein-protein interactions)*, by including network-based regularizers. `glmSparseNet` uses the `glmnet` R-package, by including centrality measures of the network as penalty weights in the regularization. The current version implements regularization based on node degree, i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution or orphan genes in the solution. All the `glmnet` distribution families are supported, namely *"gaussian"*, *"poisson"*, *"binomial"*, *"multinomial"*, *"cox"*, and *"mgaussian"*.
 
 It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization. These functions are very flexible and allow to transform the penalty weights after the centrality metric is calculated, thus allowing to change how it affects the regularization. To facilitate users, we made available a function that will penalize low connected nodes in the network - `glmDegree` - and another that will penalize hubs - `glmOrphan`.
 
@@ -40,8 +40,18 @@ Bioconductor is necessary for the installation of this package.
 
 ``` r
 source("https://bioconductor.org/biocLite.R")
+
 biocLite('sysbiomed/loose.rock')
 biocLite('sysbiomed/glmSparseNet')
+
+#
+# Note in case of failure:
+
+# if the commands above fail, the problem might 
+#  be of a missing package named remotes
+#  try installing it and running again commands above
+
+# biocLite('remotes')
 ```
 
 Details
@@ -59,11 +69,11 @@ Alternatively, the network can be passed as an adjancency matrix or an already c
 
 ### Function definition
 
-The main functions from this packages are the `network.cv.glmnet` and \``network.glmnet` and the arguments for the functions are defined as:
+The main functions from this packages are the `network.cv.glmnet` and `network.glmnet` and the arguments for the functions are defined as:
 
 -   `xdata`: A MultiAssayExperiment object or an input matrix of dimension `Observations x Features`
 -   `ydata`: Response object that can take different forms depending on the model family that is used
--   `family`: Model type that can take: "gaussian", "poisson", "binomial", "multinomial", "cox", and "mgaussian"
+-   `family`: Model type that can take: *"gaussian"*, *"poisson"*, *"binomial"*, *"multinomial"*, *"cox"*, and *"mgaussian"*
 -   `network`: Network to use in penalization, it can take as input: "correlation", "covariance", "sparsebn", a matrix object with p.vars x p.vars representing the network, a weighted vector of penalties
 -   `experiment.name`: Optional parameter used with a "MultiAssayExperiment" object as input
 -   `network.options`: Optional parameter defining the options to process the network, such as:
@@ -87,7 +97,7 @@ network.cv.glmnet(xdata,
 Example for survival analysis using RNA-seq data
 ------------------------------------------------
 
-This example uses an adrenal cancer dataset using the correlation to calculate the network and cross-validation to find the optimal model. The network itself if filtered using a cutoff value of 0.6, i.e. all edges that have a correlation between the two features (genes) below the cutoff value are discarded.
+This example uses an adrenal cancer dataset using the correlation to calculate the network and cross-validation to find the optimal model. The network itself if filtered using a cutoff value of 0.6, i.e. all edges that have a correlation between the two features *(genes)* below the cutoff value are discarded.
 
 The data was retrieved from TCGA database and the Adrenocortical Carcinoma project with 92 patients and a reduced RNASeq data. See Bioconductor package `MultiAssayExperiment` for more information on the `miniACC` dataset.
 
@@ -152,7 +162,7 @@ Visualization and Analytical tools
 
 ### Survival curves with `draw.kaplan`
 
-This function generates Kaplan-Meier survival model based on the estimated coefficients of the Cox model. It creates two groups based on the relative risk and displays both survival curves (high vs. low-risk patients, as defined by the median) and the corresponding results of log-rank tests.
+This function generates Kaplan-Meier survival model based on the estimated coefficients of the Cox model. It creates two groups based on the relative risk and displays both survival curves *(high vs. low-risk patients, as defined by the median)* and the corresponding results of log-rank tests.
 
 ``` r
 xdata.reduced <- reduce.by.experiment(xdata, 'RNASeq2GeneNorm')
@@ -162,7 +172,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
 ```
 
     ## $pvalue
-    ## [1] 2.134653e-08
+    ## [1] 2.343203e-11
     ## 
     ## $plot
 
@@ -173,10 +183,10 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      3     NA      NA      NA
-    ## High risk 39     25   1105     579    2105
+    ## Low risk  40      2     NA      NA      NA
+    ## High risk 39     26   1105     562    2102
 
-### Heatmap with results retrived from the Cancer Hallmarks Analytics Tool (CHAT)
+### Heatmap with results retrived from the Cancer Hallmarks Analytics Tool *(CHAT)*
 
 Search the non-zero coefficients, i.e., the selected features/genes, and query CHAT for known hallmarks of cancer. Also plots the genes not found, useful for new hypotheses generation.s
 
