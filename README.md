@@ -6,21 +6,23 @@ glmSparseNet
 -   [Instalation](#instalation)
 -   [Running](#running)
     -   [Network-based penalization](#network-based-penalization)
-    -   [Survival Example using RNASeq data](#survival-example-using-rnaseq-data)
--   [Visualization tools](#visualization-tools)
+    -   [Survival analysis using RNA-seq data](#survival-analysis-using-rna-seq-data)
+-   [Visualization and Analytical tools](#visualization-and-analytical-tools)
     -   [Survival curves with `draw.kaplan`](#survival-curves-with-draw.kaplan)
-    -   [Heatmap with results from Hallmarks of cancer](#heatmap-with-results-from-hallmarks-of-cancer)
+    -   [Heatmap with results retrived from the Cancer Hallmarks Analytics Tool (CHAT)](#heatmap-with-results-retrived-from-the-cancer-hallmarks-analytics-tool-chat)
 
 > Elastic-Net models with additional regularization based on network centrality metrics
 
 Overview
 --------
 
-`glmSparseNet` is a R package that generalizes sparse regression models when the features have a graph structure (e.g. genes), by including network-based regularizers. `glmSparseNet` uses the glmnet package, by including centrality measures of the network as penality factors. The current version implements regularization based on node degree, i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution (glmDegree) or orphan genes (glmOrphan) in the solution. All the glmnet distribution families are supported, namely "gaussian", "poisson", "binomial", "multinomial", "cox", and "mgaussian".
+`glmSparseNet` is a R package that generalizes sparse regression models when the features *(e.g. genes)* have a graph structure *(e.g. protein-protein interactions)*, by including network-based regularizers. `glmSparseNet` uses the `glmnet` R-package, by including centrality measures of the network as penalty weights in the regularization. The current version implements regularization based on node degree, i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution or orphan genes in the solution. All the `glmnet` distribution families are supported, namely "gaussian", "poisson", "binomial", "multinomial", "cox", and "mgaussian".
 
-It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization.
+It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization. These functions are very flexible and allow to transform the penalty weights after the centrality metric is calculated, thus allowing to change how it affects the regularization. To facilitate users, we made available a function that will penalize low connected nodes in the network - `glmDegree` - and another that will penalize hubs - `glmOrphan`.
 
-Below, we provide one example for survival analysis of .... using transcriptomic data of....RNA-seq tumor data.??? More information and RMD files are available in the folder ...???....where more extensive and complete examples are provided for logistic regressoin and... in ....
+<img src="inst/images/overview.png" alt="Overview of the R-Package pipeline" style="width:100.0%" />
+
+Below, we provide one example for survival analysis using transcriptomic data from the TCGA Adrenocortical Carcinoma project. More information and Rmd files are available in the vignettes folder where more extensive and complete examples are provided for logistic regresson and Cox's regression for different types of cancer data.
 
 Citation
 --------
@@ -61,7 +63,7 @@ library(glmSparseNet)
 
 ### Network-based penalization
 
-!!!!! explicar bem qual é o input e opcoes da package
+!!!!! explicar bem qual é o input e opcoes da package Vê aqui o que escrevi no report D4.1
 
 This package extends the `glmnet` r-package with network-based regularization based on features relations. This network can be calculated from the data itself or using external networks to enrich the model.
 
@@ -72,7 +74,7 @@ There are 3 methods available to use data-dependant methods to generate the netw
 
 Alternatively, the network can be passed as an adjancency matrix or an already calculate metric for each node.
 
-### Survival Example using RNASeq data
+### Survival analysis using RNA-seq data
 
 TODO:
 
@@ -106,6 +108,10 @@ ydata <- data.frame(time      = surv_event_time[valid.ix],
                     row.names = xdata$patientID[valid.ix])
 ```
 
+The function network.cv.glmnet fits the survival data...(complete)
+
+ANDRE - explica bem um exemplo, aqui é uma boa oportundade de explicares todas as opções usadas!
+
 Fitting the survival model using a correlation network with cutoff at 0.6.
 
 ``` r
@@ -123,12 +129,12 @@ plot(fit3)
 
 ![](README_files/figure-markdown_github/fit.surv-1.png)
 
-Visualization tools
--------------------
+Visualization and Analytical tools
+----------------------------------
 
 ### Survival curves with `draw.kaplan`
 
-This function generates Kaplan-Meier survival model based on the coefficients of a Cox model. It separates two groups based on relative risk and display both the curves and results of Log-rank test.
+This function generates Kaplan-Meier survival model based on the estimated coefficients of the Cox model. It creates two groups based on the relative risk and displays both survival curves (high vs. low-risk patients, as defined by the median) and the corresponding results of log-rank tests.
 
 ``` r
 xdata.reduced <- reduce.by.experiment(xdata, 'RNASeq2GeneNorm')
@@ -138,7 +144,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
 ```
 
     ## $pvalue
-    ## [1] 2.334101e-09
+    ## [1] 1.269799e-10
     ## 
     ## $plot
 
@@ -150,11 +156,11 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## 
     ##            n events median 0.95LCL 0.95UCL
     ## Low risk  40      2     NA      NA      NA
-    ## High risk 39     26   1105     579    2102
+    ## High risk 39     26   1105     562    2102
 
-### Heatmap with results from Hallmarks of cancer
+### Heatmap with results retrived from the Cancer Hallmarks Analytics Tool (CHAT)
 
-Search the non-zero coefficients in the results and query for known hallmarks of cancer.
+Search the non-zero coefficients, i.e., the selected features/genes, and query CHAT for known hallmarks of cancer. Also plots the genes not found, useful for new hypotheses generation.s
 
 ``` r
 hallmarks(names(best.model.coef)[best.model.coef > 0])$heatmap
