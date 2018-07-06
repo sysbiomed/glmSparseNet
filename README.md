@@ -4,7 +4,8 @@ glmSparseNet
 -   [Overview](#overview)
 -   [Citation](#citation)
 -   [Instalation](#instalation)
-    -   [Example for Gaussian models](#example-for-gaussian-models)
+-   [Running](#running)
+    -   [Network-based penalization](#network-based-penalization)
     -   [Survival Example using RNASeq data](#survival-example-using-rnaseq-data)
 -   [Visualization tools](#visualization-tools)
     -   [Survival curves with `draw.kaplan`](#survival-curves-with-draw.kaplan)
@@ -15,7 +16,11 @@ glmSparseNet
 Overview
 --------
 
-`glmSparseNet` is a R package that generalizes sparse regression models when the features have a graph structure (e.g. genes), by including network-based regularizers. `glmSparseNet` uses the glmnet package, by including centrality measures of the network as penality factors. The current version implements regularization based on node degree, i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution (glmDegree) or orphan genes (glmOrphan) in the solution. All the glmnet distribution families are supported, namely "gaussian", "poisson", "binomial", "multinomial", "cox", and "mgaussian". Below, we provide one example for survival analysis of .... using transcriptomic data of....RNA-seq tumor data.??? More information and RMD files are available in the folder ...???....where more extensive and complete examples are provided for logistic regressoin and... in ....
+`glmSparseNet` is a R package that generalizes sparse regression models when the features have a graph structure (e.g. genes), by including network-based regularizers. `glmSparseNet` uses the glmnet package, by including centrality measures of the network as penality factors. The current version implements regularization based on node degree, i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution (glmDegree) or orphan genes (glmOrphan) in the solution. All the glmnet distribution families are supported, namely "gaussian", "poisson", "binomial", "multinomial", "cox", and "mgaussian".
+
+It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization.
+
+Below, we provide one example for survival analysis of .... using transcriptomic data of....RNA-seq tumor data.??? More information and RMD files are available in the folder ...???....where more extensive and complete examples are provided for logistic regressoin and... in ....
 
 Citation
 --------
@@ -34,8 +39,11 @@ Bioconductor is necessary for the installation of this package.
 ``` r
 source("https://bioconductor.org/biocLite.R")
 biocLite('averissimo/loose.rock')
-biocLite('network.cox', siteRepos = 'https://sels.tecnico.ulisboa.pt/r-repos/')
+biocLite('glmSparseNet', siteRepos = 'https://sels.tecnico.ulisboa.pt/r-repos/')
 ```
+
+Running
+-------
 
 To run the following examples, the next libraries are also needed:
 
@@ -48,12 +56,14 @@ library(MultiAssayExperiment)
 library(survival)
 library(glmnet)
 library(loose.rock)
-library(network.cox)
+library(glmSparseNet)
 ```
 
-This package extends the `glmnet` r-package with network-based regularization based on features relations. This network can be calculated from the data itself or using external networks to enrich the model.
+### Network-based penalization
 
-It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization.
+!!!!! explicar bem qual é o input e opcoes da package
+
+This package extends the `glmnet` r-package with network-based regularization based on features relations. This network can be calculated from the data itself or using external networks to enrich the model.
 
 There are 3 methods available to use data-dependant methods to generate the network:
 
@@ -62,79 +72,18 @@ There are 3 methods available to use data-dependant methods to generate the netw
 
 Alternatively, the network can be passed as an adjancency matrix or an already calculate metric for each node.
 
-### Example for Gaussian models
-
-The example below, shows random datasets being generated and `network.glmnet` new function being called.
-
-``` r
-# Gaussian
-x <- matrix(rnorm(100*20),100,20)
-y <- rnorm(100)
-fit1 <- network.glmnet(x,y, 'correlation', network.options = network.options.default(cutoff = 0.1))
-```
-
-Inspecting the penalty.factor used from correlation network.
-
-``` r
-fit1$penalty.factor
-```
-
-    ##  [1] 8 5 5 8 9 8 7 8 5 6 7 5 4 5 7 3 5 6 6 5
-
-Plot the results of the `glmnet` run.
-
-``` r
-plot(fit1)
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-3-1.png)
-
-The given network parameter can also be a network itself, i.e. a matrix. The example below uses a randomly generated network to use in the methods.
-
-``` r
-# generate random network
-rand.network       <- abs(matrix(rnorm(20*20),20,20))
-diag(rand.network) <- 0
-# actual fit
-fit4 <- network.glmnet(x,y, rand.network, network.options = network.options.default(cutoff = 0.1))
-```
-
-The result can be used with all functions available to glmnet objects, such as `predict`, `coef` or plot.
-
-``` r
-predicted <- predict(fit1, newx=x[1:10,],s=c(0.01,0.005))
-```
-
-    ## [INFO] Observed vs. Predicted
-    ## 
-    ##         Observed lambda_0.01 lambda_0.005
-    ##  [1,]  1.0948297 -0.05343306  -0.04083312
-    ##  [2,]  2.8350868  1.08639530   1.10984827
-    ##  [3,] -1.3686798 -0.14220666  -0.13209054
-    ##  [4,]  0.6280660  0.29120669   0.28571825
-    ##  [5,] -0.5810924 -0.23994067  -0.24796724
-    ##  [6,] -0.4585045 -0.20293158  -0.25099391
-    ##  [7,]  0.0673003  0.18940391   0.22570352
-    ##  [8,]  0.9570566  0.02563658   0.02818707
-    ##  [9,] -1.4290315 -0.83094678  -0.87250948
-    ## [10,] -0.5189504 -0.69595595  -0.73431132
-
-It also extends the new methods to the cross validation function with `network.cv.glmnet`.
-
-``` r
-plot(network.cv.glmnet(x,y, 'covariance'))
-```
-
-![](README_files/figure-markdown_github/plot_cv-1.png)
-
 ### Survival Example using RNASeq data
+
+TODO:
+
+-   integrar no exemplo de todas as funções core
+-   exemplo com rede aleatória
 
 We use an example data from TCGA Adrenocortical Carcinoma project with '92' patients and a reduced RNASeq data. See `MultiAssayExperiment::miniACC` for more information and details of the data.
 
 There is some pre-processing needed to remove patients with invalid follow-up date or death date:
 
 ``` r
-library(MultiAssayExperiment)
 # load data
 xdata <- miniACC
 
@@ -189,7 +138,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
 ```
 
     ## $pvalue
-    ## [1] 3.724993e-08
+    ## [1] 2.334101e-09
     ## 
     ## $plot
 
@@ -200,8 +149,8 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      3     NA      NA      NA
-    ## High risk 39     25   1105     579    2105
+    ## Low risk  40      2     NA      NA      NA
+    ## High risk 39     26   1105     579    2102
 
 ### Heatmap with results from Hallmarks of cancer
 

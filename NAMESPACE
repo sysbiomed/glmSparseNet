@@ -17,6 +17,4 @@ export(reduce.by.experiment)
 exportMethods(draw.kaplan)
 exportMethods(network.cv.glmnet)
 exportMethods(network.glmnet)
-import(MultiAssayExperiment)
-import(SummarizedExperiment)
-import(futile.logger)
+
