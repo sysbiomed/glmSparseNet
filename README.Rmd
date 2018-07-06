@@ -73,7 +73,7 @@ Alternatively, the network can be passed as an adjancency matrix or an already c
 
 ### Function definition
 
-The main functions from this packages are the `network.cv.glmnet` and ``network.glmnet` and the arguments for the functions are defined as:
+The main functions from this packages are the `network.cv.glmnet` and `network.glmnet` and the arguments for the functions are defined as:
 
 * `xdata`: A MultiAssayExperiment object or an input matrix of dimension `Observations x Features`
 * `ydata`: Response object that can take different forms depending on the model family that is used
