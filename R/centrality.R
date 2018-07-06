@@ -135,7 +135,7 @@ network.generic.parallel <- function(fun, fun.prefix,
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 #' degree.cor(xdata)
 #' degree.cor(xdata, cutoff = .5)
-#' degree.cor(xdata, cutoff = .5, consider.unweighted = T)
+#' degree.cor(xdata, cutoff = .5, consider.unweighted = TRUE)
 setGeneric('degree.cor', function(xdata, cutoff = 0, consider.unweighted = FALSE,
                                   force.recalc.degree = FALSE, force.recalc.network = FALSE,
                                   n.cores = 1, ...) {
