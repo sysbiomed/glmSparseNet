@@ -165,9 +165,18 @@ Visualization and Analytical tools
 This function generates Kaplan-Meier survival model based on the estimated coefficients of the Cox model. It creates two groups based on the relative risk and displays both survival curves *(high vs. low-risk patients, as defined by the median)* and the corresponding results of log-rank tests.
 
 ``` r
-xdata.reduced <- reduce.by.experiment(xdata, 'RNASeq2GeneNorm')
-ydata.km <- ydata[rownames(xdata.reduced@colData),]
+# Data to use in draw.kaplan function
+#  * it takes the input data, response and coefficients
+#  * calculates the relative risk
+#  * separates individuals based on relative risk into High/Low risk groups
+xdata.reduced   <- reduce.by.experiment(xdata, 'RNASeq2GeneNorm')
+ydata.km        <- ydata[rownames(xdata.reduced@colData),]
 best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
+```
+
+Kaplan-Meier plot
+
+``` r
 draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, ylim = c(0,1))
 ```
 
@@ -176,7 +185,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## 
     ## $plot
 
-![](README_files/figure-markdown_github/draw.kaplan-1.png)
+![](README_files/figure-markdown_github/call.kaplan-1.png)
 
     ## 
     ## $km
