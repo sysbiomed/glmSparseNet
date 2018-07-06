@@ -1,6 +1,8 @@
 glmSparseNet
 ================
 
+> Elastic-Net models with additional regularization based on network centrality metrics
+
 -   [Overview](#overview)
 -   [Citation](#citation)
 -   [Instalation](#instalation)
@@ -10,8 +12,6 @@ glmSparseNet
 -   [Visualization and Analytical tools](#visualization-and-analytical-tools)
     -   [Survival curves with `draw.kaplan`](#survival-curves-with-draw.kaplan)
     -   [Heatmap with results retrived from the Cancer Hallmarks Analytics Tool *(CHAT)*](#heatmap-with-results-retrived-from-the-cancer-hallmarks-analytics-tool-chat)
-
-> Elastic-Net models with additional regularization based on network centrality metrics
 
 Overview
 --------
