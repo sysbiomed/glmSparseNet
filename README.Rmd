@@ -183,6 +183,8 @@ fit3 <- network.cv.glmnet(xdata, ydata, family = 'cox',
 plot(fit3)
 ```
 
+*Cross validation plot, showing all 1000 lambdas tested and the error for each, vertical lines show best model and another with fewer variables selected within one standard error of the best.*
+
 ## Visualization and Analytical tools
 
 ### Survival curves with `draw.kaplan`

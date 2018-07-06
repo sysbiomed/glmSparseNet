@@ -157,6 +157,8 @@ plot(fit3)
 
 ![](README_files/figure-markdown_github/fit.surv-1.png)
 
+*Cross validation plot, showing all 1000 lambdas tested and the error for each, vertical lines show best model and another with fewer variables selected within one standard error of the best.*
+
 Visualization and Analytical tools
 ----------------------------------
 
@@ -181,7 +183,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
 ```
 
     ## $pvalue
-    ## [1] 2.343203e-11
+    ## [1] 2.134653e-08
     ## 
     ## $plot
 
@@ -192,8 +194,8 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      2     NA      NA      NA
-    ## High risk 39     26   1105     562    2102
+    ## Low risk  40      3     NA      NA      NA
+    ## High risk 39     25   1105     579    2105
 
 ### Heatmap with results retrived from the Cancer Hallmarks Analytics Tool *(CHAT)*
 
