@@ -63,7 +63,19 @@ biocLite('glmSparseNet', siteRepos = 'https://sels.tecnico.ulisboa.pt/r-repos/')
 
 To run the following examples, the next libraries are also needed:
 
-```{r}
+```{r, include=FALSE}
+library(futile.logger)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(MultiAssayExperiment)
+library(survival)
+library(glmnet)
+library(loose.rock)
+library(glmSparseNet)
+```
+
+```{r, eval=FALSE}
 library(futile.logger)
 library(dplyr)
 library(ggplot2)
