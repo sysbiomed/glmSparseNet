@@ -20,7 +20,7 @@ Overview
 
 It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization. These functions are very flexible and allow to transform the penalty weights after the centrality metric is calculated, thus allowing to change how it affects the regularization. To facilitate users, we made available a function that will penalize low connected nodes in the network - `glmDegree` - and another that will penalize hubs - `glmOrphan`.
 
-<img src="inst/images/overview.png" alt="Overview of the R-Package pipeline" style="width:100.0%" />
+<img src="inst/images/overview.png" alt="Overview of the R-Package pipeline" style="width:75.0%" />
 
 Below, we provide one example for survival analysis using transcriptomic data from the TCGA Adrenocortical Carcinoma project. More information and Rmd files are available in the vignettes folder where more extensive and complete examples are provided for logistic regresson and Cox's regression for different types of cancer data.
 
@@ -144,7 +144,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
 ```
 
     ## $pvalue
-    ## [1] 1.269799e-10
+    ## [1] 3.724993e-08
     ## 
     ## $plot
 
@@ -155,8 +155,8 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      2     NA      NA      NA
-    ## High risk 39     26   1105     562    2102
+    ## Low risk  40      3     NA      NA      NA
+    ## High risk 39     25   1105     579    2105
 
 ### Heatmap with results retrived from the Cancer Hallmarks Analytics Tool (CHAT)
 

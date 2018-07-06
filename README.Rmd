@@ -37,7 +37,7 @@ All the `glmnet` distribution families are supported, namely "gaussian", "poisso
 
 It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization. These functions are very flexible and allow to transform the penalty weights after the centrality metric is calculated, thus allowing to change how it affects the regularization. To facilitate users, we made available a function that will penalize low connected nodes in the network - `glmDegree` - and another that will penalize hubs - `glmOrphan`. 
 
-![Overview of the R-Package pipeline](inst/images/overview.png){ width=100% }
+![Overview of the R-Package pipeline](inst/images/overview.png){ width=75% }
 
 Below, we provide one example for survival analysis using transcriptomic data  from the TCGA Adrenocortical Carcinoma project. More information and Rmd files are available in the vignettes folder where more extensive and complete examples are provided for logistic regresson and Cox's regression for different types of cancer data.
 
