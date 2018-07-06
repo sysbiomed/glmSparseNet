@@ -13,8 +13,8 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,
-                      fig.width = 6,
-                      fig.height = 8)
+                      fig.width = 7,
+                      fig.height = 6)
 
 library(futile.logger)
 library(ggplot2)
@@ -55,7 +55,7 @@ Bioconductor is necessary for the installation of this package.
 
 ```{r install, eval=FALSE}
 source("https://bioconductor.org/biocLite.R")
-biocLite('averissimo/loose.rock')
+biocLite('sysbiomed/loose.rock')
 biocLite('sysbiomed/glmSparseNet')
 ```
 
@@ -190,7 +190,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
 
 Search the non-zero coefficients, i.e., the selected features/genes, and query CHAT for known hallmarks of cancer. Also plots the genes not found, useful for new hypotheses generation.s
 
-```{r hallmarks}
+```{r hallmarks, fig.height=8}
 hallmarks(names(best.model.coef)[best.model.coef > 0])$heatmap
 ```
 
