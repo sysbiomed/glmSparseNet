@@ -34,5 +34,5 @@ n.col <- 6
 xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 degree.cor(xdata)
 degree.cor(xdata, cutoff = .5)
-degree.cor(xdata, cutoff = .5, consider.unweighted = T)
+degree.cor(xdata, cutoff = .5, consider.unweighted = TRUE)
 }

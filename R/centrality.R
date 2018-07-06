@@ -180,7 +180,7 @@ setMethod('degree.cor', signature('matrix'), function(xdata, cutoff = 0, conside
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 #' degree.cov(xdata)
 #' degree.cov(xdata, cutoff = .5)
-#' degree.cov(xdata, cutoff = .5, consider.unweighted = T)
+#' degree.cov(xdata, cutoff = .5, consider.unweighted = TRUE)
 setGeneric('degree.cov', function(xdata, cutoff = 0, consider.unweighted = FALSE,
                                   force.recalc.degree = FALSE, force.recalc.network = FALSE,
                                   n.cores = 1, ...) {
