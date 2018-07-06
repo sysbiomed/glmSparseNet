@@ -5,8 +5,7 @@
 \title{Calculate the upper triu of the matrix}
 \usage{
 network.generic.parallel(fun, fun.prefix, xdata, build.output = "matrix",
-  n.cores = parallel:::detectCores(), force.recalc.network = FALSE,
-  show.message = FALSE, ...)
+  n.cores = 1, force.recalc.network = FALSE, show.message = FALSE, ...)
 }
 \arguments{
 \item{fun}{function that will calculate the edge weight between 2 nodes}

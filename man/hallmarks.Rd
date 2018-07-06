@@ -13,6 +13,10 @@ hallmarks(genes, metric = "count", hierarchy = "full",
 \item{metric}{see below}
 
 \item{hierarchy}{see below}
+
+\item{generate.plot}{flag to indicate if return object has a ggplot2 object}
+
+\item{show.message}{flag to indicate if run.cache method shows messages}
 }
 \value{
 data.frame with choosen metric and hierarchy

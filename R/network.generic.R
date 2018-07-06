@@ -21,7 +21,12 @@ setGeneric('network.glmnet.private', function(fun, xdata, ydata, network, networ
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param xdata matrix.
+#' @param fun function to be called (glmnet or cv.glmnet)
+#' @param xdata matrix
+#' @param ydata response data compatible with glmnet
+#' @param network type of network, see below
+#' @param network.options options to calculate network
+#' @param ... parameters that glmnet accepts
 #'
 #' @return an object just as glmnet
 #'
@@ -31,7 +36,7 @@ setMethod('network.glmnet.private', signature(xdata = 'matrix'), function(fun, x
   } else if (is.matrix(network)) {
     penalty.factor <- (Matrix::colSums(network) + Matrix::rowSums(network))
   } else if (is.vector(network)) {
-    if (lenght(network) != ncol(xdata)) {
+    if (length(network) != ncol(xdata)) {
       stop('Network vector size does not match xdata input')
     }
     penalty.factor <- network
@@ -52,11 +57,15 @@ setMethod('network.glmnet.private', signature(xdata = 'matrix'), function(fun, x
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param xdata MultiAssayExperiment.
+#' @param fun function to be called (glmnet or cv.glmnet)
+#' @param xdata MultiAssayExperiment
+#' @param experiment.name name of experiment to use as input in MultiAssayExperiment object
+#' @param ydata response data compatible with glmnet
+#' @param network type of network, see below
+#' @param network.options options to calculate network
+#' @param ... parameters that glmnet accepts
 #'
 #' @return an object just as glmnet
-#' @import MultiAssayExperiment
-#'
 setMethod('network.glmnet.private', signature(xdata = 'MultiAssayExperiment'), function(fun, xdata, ydata, network,
                                                                                         experiment.name = NULL,
                                                                                         network.options = network.options.default(), ...) {
@@ -87,11 +96,14 @@ setMethod('network.glmnet.private', signature(xdata = 'MultiAssayExperiment'), f
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param xdata SummarizedExperiment.
+#' @param fun function to be called (glmnet or cv.glmnet)
+#' @param xdata SummarizedExperiment
+#' @param ydata response data compatible with glmnet
+#' @param network type of network, see below
+#' @param network.options options to calculate network
+#' @param ... parameters that glmnet accepts
 #'
 #' @return an object just as glmnet
-#' @import SummarizedExperiment
-#'
 setMethod('network.glmnet.private', signature(xdata = 'SummarizedExperiment'), function(fun, xdata, ydata, network,
                                                                                         network.options = network.options.default(), ...) {
   return(network.glmnet.private(fun, t(MultiAssayExperiment::assay(xdata)), ydata, network, network.options, ...))

@@ -50,7 +50,6 @@
 #' #' @param n.cores number of cores to use
 #' #'
 #' #' @return the c-index
-#' #' @import survival
 #' #'
 #' #' @examples
 #' #' # Create the simplest tests data set

@@ -9,7 +9,15 @@
   network.options = network.options.default(), ...)
 }
 \arguments{
-\item{xdata}{SummarizedExperiment.}
+\item{xdata}{input data as a SummarizedExperiment}
+
+\item{ydata}{response data compatible with glmnet}
+
+\item{network}{type of network, see below}
+
+\item{network.options}{options to calculate network}
+
+\item{...}{parameters that cv.glmnet accepts}
 }
 \value{
 an object just as glmnet

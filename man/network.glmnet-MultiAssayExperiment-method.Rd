@@ -9,7 +9,17 @@
   experiment.name = NULL, network.options = network.options.default(), ...)
 }
 \arguments{
-\item{xdata}{MultiAssayExperiment.}
+\item{xdata}{input data as a MultiAssayExperiment}
+
+\item{ydata}{response data compatible with glmnet}
+
+\item{network}{type of network, see below}
+
+\item{experiment.name}{name of experiment to use as input in MultiAssayExperiment object}
+
+\item{network.options}{options to calculate network}
+
+\item{...}{parameters that glmnet accepts}
 }
 \value{
 an object just as glmnet

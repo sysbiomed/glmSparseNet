@@ -4,9 +4,8 @@
 \alias{network.cov.parallel}
 \title{Calculates the covariance network}
 \usage{
-network.cov.parallel(xdata, build.output = "matrix",
-  n.cores = parallel:::detectCores(), force.recalc.network = FALSE,
-  show.message = FALSE, ...)
+network.cov.parallel(xdata, build.output = "matrix", n.cores = 1,
+  force.recalc.network = FALSE, show.message = FALSE, ...)
 }
 \arguments{
 \item{xdata}{base data to calculate network}

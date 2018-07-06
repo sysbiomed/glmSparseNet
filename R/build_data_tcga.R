@@ -12,6 +12,8 @@
 #'
 #' @param project tcga project that has a package avaliable see https://github.com/averissimo/tcga.data
 #' @param tissue.type type of tissue, can be 'primary.solid.tumor', 'metastatic', etc... depending on project.
+#' @param handle.duplicates strategy to handle multiple samples for same individual, can take 'keep_first' or 'keep_all'
+#' @param coding.genes filter the genes to only include coding genes, see loose.rock::coding.genes
 #'
 #' @return a list with data ready to be used in survival analysis, the 'xdata.raw' and 'ydata.raw' elements
 #' have the full dataset for the specific tissue and the 'xdata' and 'ydata' have been cleaned by handling
@@ -26,17 +28,20 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
 
   package.name <- paste0(project, '.data')
 
-  if (!require(package.name, character.only = T)) {
+  if (!package.name %in% utils::installed.packages()) {
     stop(sprintf('There is no package called \'%s\' installed, please go to https://github.com/averissimo/tcga.data/releases and install the corresponding release.'))
   }
 
   # An environment is necessary to adhere to best practices of ?data
   dat.env <- new.env()
-  data("fpkm.per.tissue", package = package.name, envir = dat.env)
+  utils::data("fpkm.per.tissue", package = package.name, envir = dat.env)
   fpkm.per.tissue <- dat.env$fpkm.per.tissue
 
   futile.logger::flog.info('Loading data from %s package', package.name)
-  futile.logger::flog.info('Types of tissue:\n * %s', paste(sprintf('%s (%d)', names(fpkm.per.tissue), sapply(fpkm.per.tissue, ncol)), collapse = '\n * '))
+  futile.logger::flog.info('Types of tissue:\n * %s',
+                           paste(sprintf('%s (%d)',
+                                         names(fpkm.per.tissue),
+                                         sapply(fpkm.per.tissue, ncol)), collapse = '\n * '))
 
   #
   # Normalize
@@ -49,7 +54,7 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
   })
 
   # remove genes that don't have any variability
-  sd.xdata  <- sapply(seq(ncol(xdata.raw)), function(ix) { sd(xdata.raw[,ix]) })
+  sd.xdata  <- sapply(seq(ncol(xdata.raw)), function(ix) { stats::sd(xdata.raw[,ix]) })
   #
   futile.logger::flog.info('Non-expressed genes to be removed (from %d total genes) : %d', ncol(xdata.raw), sum(sd.xdata == 0))
   futile.logger::flog.info('  Remaining genes : %d', ncol(xdata.raw) - sum(sd.xdata == 0))
@@ -73,7 +78,8 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
   # YDATA
 
   # load data
-  data('clinical', package = package.name)
+  utils::data('clinical', package = package.name, envir = dat.env)
+  clinical <- dat.env$clinical
 
   # load only patients with valid bcr_patient_barcode (non NA)
   ix.clinical <- !is.na(clinical[[tissue.type]]$bcr_patient_barcode)
@@ -101,7 +107,7 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
   #  rename by appending to name
   xdata <- xdata[strtrim(rownames(xdata), 12) %in% rownames(ydata),]
   if (length(strtrim(rownames(xdata), 12)) != length(unique(strtrim(rownames(xdata), 12)))) {
-    flog.warn('There are multiple samples for the same individual.. using strategy: \'%s\'', handle.duplicates)
+    warning(sprintf('There are multiple samples for the same individual.. using strategy: \'%s\'', handle.duplicates))
     #
     new.row.names   <- strtrim(rownames(xdata), 12)
     rownames(xdata) <- sapply(seq_along(new.row.names), function(ix) {

@@ -12,6 +12,10 @@ prepare.tcga.survival.data(project = "brca",
 \item{project}{tcga project that has a package avaliable see https://github.com/averissimo/tcga.data}
 
 \item{tissue.type}{type of tissue, can be 'primary.solid.tumor', 'metastatic', etc... depending on project.}
+
+\item{handle.duplicates}{strategy to handle multiple samples for same individual, can take 'keep_first' or 'keep_all'}
+
+\item{coding.genes}{filter the genes to only include coding genes, see loose.rock::coding.genes}
 }
 \value{
 a list with data ready to be used in survival analysis, the 'xdata.raw' and 'ydata.raw' elements

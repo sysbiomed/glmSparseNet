@@ -11,15 +11,16 @@ Description: More about what it does (maybe more than one line)
 License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.4), 
-  rmarkdown
+Depends: R (>= 3.4)
 Imports: loose.rock,
   forcats,
   sparsebnUtils,
+  methods,
   stringr,
   futile.logger,
   ggplot2,
   sparsebn,
+  rlang,
   dplyr,
   reshape2,
   glmnet,
@@ -28,13 +29,16 @@ Imports: loose.rock,
   SummarizedExperiment,
   stats,
   parallel,
-  MultiAssayExperiment
+  MultiAssayExperiment,
+  Matrix
 Suggests: testthat,
   knitr,
+  rmarkdown,
   survival,
   survcomp,
   pROC,
-  devtools
+  devtools,
+  roxygen2
 Remotes: 
   averissimo/loose.rock
 VignetteBuilder: knitr

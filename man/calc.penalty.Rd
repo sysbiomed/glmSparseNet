@@ -14,15 +14,15 @@ calc.penalty(xdata, penalty.type, network.options = network.options.default())
 \item{network.options}{options to be used}
 }
 \value{
-
+vector with penalty weights
 }
 \description{
 Internal method to calculate the network using data-dependant methods
 }
 \examples{
 xdata <- matrix(rnorm(100), ncol = 20)
-calc.penalty(xdata, 'correlation')
-calc.penalty(xdata, 'correlation', network.options.default(cutoff = .6))
-calc.penalty(xdata, 'covariance')
-calc.penalty(xdata, 'covariance', network.options.default(cutoff = .6))
+glmSparseNet:::calc.penalty(xdata, 'correlation')
+glmSparseNet:::calc.penalty(xdata, 'correlation', network.options.default(cutoff = .6))
+glmSparseNet:::calc.penalty(xdata, 'covariance')
+glmSparseNet:::calc.penalty(xdata, 'covariance', network.options.default(cutoff = .6))
 }

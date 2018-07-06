@@ -34,11 +34,17 @@
 #' xdata$surv_event_time[event.ix] <- xdata$days_to_death[event.ix]
 #' xdata$surv_event_time[cens.ix] <- xdata$days_to_last_followup[cens.ix]
 #' # Keep only valid individuals
-#' valid.ix <- as.vector(!is.na(xdata$surv_event_time) & !is.na(xdata$vital_status) & xdata$surv_event_time > 0)
+#' valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
+#'                       !is.na(xdata$vital_status) &
+#'                       xdata$surv_event_time > 0)
 #' xdata.valid <- xdata[, rownames(xdata@colData)[valid.ix]]
 #' ydata.valid <- xdata.valid@colData[,c('surv_event_time', 'vital_status')]
 #' colnames(ydata.valid) <- c('time', 'status')
-#' network.glmnet(xdata.valid, ydata.valid, family = 'cox', network = 'correlation', experiment.name = 'RNASeq2GeneNorm')
+#' network.glmnet(xdata.valid,
+#'                ydata.valid,
+#'                family          = 'cox',
+#'                network         = 'correlation',
+#'                experiment.name = 'RNASeq2GeneNorm')
 setGeneric('network.glmnet', function(xdata, ydata, network, network.options = network.options.default(), ...) {
   stop('wrong arguments, see help for network.glmnet')
 })
@@ -46,11 +52,14 @@ setGeneric('network.glmnet', function(xdata, ydata, network, network.options = n
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param xdata matrix.
+#' @param xdata input data as a matrix
+#' @param ydata response data compatible with glmnet
+#' @param network type of network, see below
+#' @param network.options options to calculate network
+#' @param ... parameters that glmnet accepts
 #'
 #' @return an object just as glmnet
 #' @export
-#'
 setMethod('network.glmnet', signature(xdata = 'matrix'), function(xdata, ydata, network,
                                                                   network.options = network.options.default(), ...) {
   return(network.glmnet.private(glmnet::glmnet, xdata, ydata, network = network, network.options = network.options, ...))
@@ -58,12 +67,15 @@ setMethod('network.glmnet', signature(xdata = 'matrix'), function(xdata, ydata, 
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param xdata MultiAssayExperiment.
+#' @param xdata input data as a MultiAssayExperiment
+#' @param ydata response data compatible with glmnet
+#' @param experiment.name name of experiment to use as input in MultiAssayExperiment object
+#' @param network type of network, see below
+#' @param network.options options to calculate network
+#' @param ... parameters that glmnet accepts
 #'
 #' @return an object just as glmnet
 #' @export
-#' @import MultiAssayExperiment
-#'
 setMethod('network.glmnet', signature(xdata = 'MultiAssayExperiment'), function(xdata, ydata, network,
                                                                                 experiment.name = NULL,
                                                                                 network.options = network.options.default(), ...) {
@@ -73,15 +85,17 @@ setMethod('network.glmnet', signature(xdata = 'MultiAssayExperiment'), function(
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param xdata SummarizedExperiment.
+#' @param xdata input data as a SummarizedExperiment
+#' @param ydata response data compatible with glmnet
+#' @param network type of network, see below
+#' @param network.options options to calculate network
+#' @param ... parameters that glmnet accepts
 #'
 #' @return an object just as glmnet
 #' @export
-#' @import SummarizedExperiment
-#'
 setMethod('network.glmnet', signature(xdata = 'SummarizedExperiment'), function(xdata, ydata, network,
                                                                                 network.options = network.options.default(), ...) {
-  return(network.glmnet.private(glmnet::glmnet, t(assay(xdata)), ydata, network, network.options = network.options, ...))
+  return(network.glmnet.private(glmnet::glmnet, t(MultiAssayExperiment::assay(xdata)), ydata, network, network.options = network.options, ...))
 })
 
 

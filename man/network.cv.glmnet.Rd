@@ -47,9 +47,15 @@ xdata$surv_event_time <- array(NA, nrow(xdata@colData))
 xdata$surv_event_time[event.ix] <- xdata$days_to_death[event.ix]
 xdata$surv_event_time[cens.ix] <- xdata$days_to_last_followup[cens.ix]
 # Keep only valid individuals
-valid.ix <- as.vector(!is.na(xdata$surv_event_time) & !is.na(xdata$vital_status) & xdata$surv_event_time > 0)
+valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
+                      !is.na(xdata$vital_status) &
+                      xdata$surv_event_time > 0)
 xdata.valid <- xdata[, rownames(xdata@colData)[valid.ix]]
 ydata.valid <- xdata.valid@colData[,c('surv_event_time', 'vital_status')]
 colnames(ydata.valid) <- c('time', 'status')
-network.cv.glmnet(xdata.valid, ydata.valid, family = 'cox', network = 'correlation', experiment.name = 'RNASeq2GeneNorm')
+network.cv.glmnet(xdata.valid,
+                  ydata.valid,
+                  family          = 'cox',
+                  network         = 'correlation',
+                  experiment.name = 'RNASeq2GeneNorm')
 }

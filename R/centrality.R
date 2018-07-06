@@ -16,10 +16,10 @@
 #' cor.parallel(xdata)
 network.cor.parallel <- function(xdata,
                                  build.output  = 'matrix',
-                                 n.cores       = parallel:::detectCores(),
+                                 n.cores       = 1,
                                  force.recalc.network  = FALSE,
                                  show.message  = FALSE, ...) {
-  network.generic.parallel(cor, 'correlation', xdata, build.output = build.output, n.cores = n.cores,
+  network.generic.parallel(stats::cor, 'correlation', xdata, build.output = build.output, n.cores = n.cores,
                            force.recalc.network = force.recalc.network,
                            show.message = show.message, ...)
 }
@@ -42,10 +42,10 @@ network.cor.parallel <- function(xdata,
 #' cov.parallel(xdata)
 network.cov.parallel <- function(xdata,
                                  build.output  = 'matrix',
-                                 n.cores       = parallel:::detectCores(),
+                                 n.cores       = 1,
                                  force.recalc.network  = FALSE,
                                  show.message  = FALSE, ...) {
-  network.generic.parallel(cov, 'covariance', xdata, build.output = build.output, n.cores = n.cores,
+  network.generic.parallel(stats::cov, 'covariance', xdata, build.output = build.output, n.cores = n.cores,
                            force.recalc.network = force.recalc.network,
                            show.message = show.message, ...)
 }
@@ -65,7 +65,7 @@ network.cov.parallel <- function(xdata,
 network.generic.parallel <- function(fun, fun.prefix,
                                      xdata,
                                      build.output  = 'matrix',
-                                     n.cores       = parallel:::detectCores(),
+                                     n.cores       = 1,
                                      force.recalc.network  = FALSE,
                                      show.message  = FALSE, ...) {
   #
@@ -84,7 +84,7 @@ network.generic.parallel <- function(fun, fun.prefix,
                                        ...)
       },
       error = function(error.str) {
-        flog.error('This error has occured %s', error.str)
+        futile.logger::flog.error('This error has occured %s', error.str)
       })
       if (build.output == 'vector' || build.output == 'matrix') {
         return(result)
@@ -123,8 +123,9 @@ network.generic.parallel <- function(fun, fun.prefix,
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
 #' @param n.cores number of cores to be used
-#' @param force.recalc force recalculation, instead of going to cache
-#' @param ... extra parameters for fun
+#' @param force.recalc.degree force recalculation of penalty weights (but not the network), instead of going to cache
+#' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
+#' @param ... extra parameters for cor function
 #'
 #' @return a vector of the degrees
 #' @export
@@ -137,14 +138,26 @@ network.generic.parallel <- function(fun, fun.prefix,
 #' degree.cor(xdata, cutoff = .5, consider.unweighted = T)
 setGeneric('degree.cor', function(xdata, cutoff = 0, consider.unweighted = FALSE,
                                   force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                                  n.cores = parallel:::detectCores(), ...) {
+                                  n.cores = 1, ...) {
   stop('first argument must be a matrix')
 })
 
+#' Calculate the degree of the correlation network based on xdata
+#'
+#' @param xdata calculate correlation matrix on each column
+#' @param cutoff positive value that determines a cutoff value
+#' @param consider.unweighted consider all edges as 1 if they are greater than 0
+#' @param n.cores number of cores to be used
+#' @param force.recalc.degree force recalculation of penalty weights (but not the network), instead of going to cache
+#' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
+#' @param ... extra parameters for cor function
+#'
+#' @return a vector of the degrees
+#' @export
 setMethod('degree.cor', signature('matrix'), function(xdata, cutoff = 0, consider.unweighted = FALSE,
                                                       force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                                                      n.cores = parallel:::detectCores(), ...) {
-  return(degree.generic(cor, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
+                                                      n.cores = 1, ...) {
+  return(degree.generic(stats::cor, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
                  force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
                  n.cores = n.cores, ...))
 })
@@ -155,8 +168,9 @@ setMethod('degree.cor', signature('matrix'), function(xdata, cutoff = 0, conside
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
 #' @param n.cores number of cores to be used
-#' @param force.recalc force recalculation, instead of going to cache
-#' @param ... extra parameters for fun
+#' @param force.recalc.degree force recalculation of penalty weights (but not the network), instead of going to cache
+#' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
+#' @param ... extra parameters for cov function
 #'
 #' @return a vector of the degrees
 #' @export
@@ -169,14 +183,26 @@ setMethod('degree.cor', signature('matrix'), function(xdata, cutoff = 0, conside
 #' degree.cov(xdata, cutoff = .5, consider.unweighted = T)
 setGeneric('degree.cov', function(xdata, cutoff = 0, consider.unweighted = FALSE,
                                   force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                                  n.cores = parallel:::detectCores(), ...) {
+                                  n.cores = 1, ...) {
   stop('first argument must be a matrix')
 })
 
+#' Calculate the degree of the covariance network based on xdata
+#'
+#' @param xdata calculate correlation matrix on each column
+#' @param cutoff positive value that determines a cutoff value
+#' @param consider.unweighted consider all edges as 1 if they are greater than 0
+#' @param n.cores number of cores to be used
+#' @param force.recalc.degree force recalculation of penalty weights (but not the network), instead of going to cache
+#' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
+#' @param ... extra parameters for cov function
+#'
+#' @return a vector of the degrees
+#' @export
 setMethod('degree.cov', signature('matrix'), function(xdata, cutoff = 0, consider.unweighted = FALSE,
                                                       force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                                                      n.cores = parallel:::detectCores(), ...) {
-  return(degree.generic(cor, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
+                                                      n.cores = 1, ...) {
+  return(degree.generic(stats::cor, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
                         force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
                         n.cores = n.cores, ...))
 })
@@ -191,8 +217,6 @@ setMethod('degree.cov', signature('matrix'), function(xdata, cutoff = 0, conside
 #' @param xdata original data to calculate the function over
 #' @param ix.i starting index, this can be used to save ony upper triu
 #' @param ... extra parameters for fun
-#'
-#' @import futile.logger
 #'
 #' @return a vector with size `ncol(xdata) - ix.i`
 #'
@@ -221,7 +245,8 @@ network.worker <- function(fun, xdata, ix.i, ...) {
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
 #' @param n.cores number of cores to be used
-#' @param force.recalc force recalculation, instead of going to cache
+#' @param force.recalc.degree force recalculation of penalty weights (but not the network), instead of going to cache
+#' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
 #' @param ... extra parameters for fun
 #'
 #' @return a vector of the degrees
@@ -232,7 +257,7 @@ network.worker <- function(fun, xdata, ix.i, ...) {
 #' degree.generic(cor, 'cor', xdata)
 degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, consider.unweighted = FALSE,
                            force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                           n.cores = parallel:::detectCores(), ...) {
+                           n.cores = 1, ...) {
   if (force.recalc.network) {
     force.recalc.degree <- force.recalc.network
   }
@@ -288,10 +313,14 @@ degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, cons
 #' Calculate degree of correlation matrix
 #'
 #' @param xdata calculate correlation matrix on each column
+#' @param lambdas.length sparsebn parameter see sparsebnUtils::sparsebnData documentation
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
 #' @param n.cores number of cores to be used
-#' @param force.recalc force recalculation, instead of going to cache
+#' @param force.recalc.degree force recalculation, instead of going to cache
+#' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
+#' @param show.message shows cache operation messages
+#' @param ... extra parameters for sparsebn::estimate.dag
 #'
 #' @return a vector of the degrees
 #'
@@ -300,16 +329,33 @@ degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, cons
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 #' degree.sparsebn(xdata, 50)
 setGeneric('degree.sparsebn', function(xdata, lambdas.length, cutoff = 0,
-                                                consider.unweighted = TRUE,
-                                                n.cores = parallel:::detectCores(),
-                                                show.message = FALSE, force.recalc.degree = FALSE, force.recalc.sparsebn = FALSE, ...) {
+                                       consider.unweighted = TRUE,
+                                       n.cores = 1,
+                                       show.message = FALSE, force.recalc.degree = FALSE,
+                                       force.recalc.network = FALSE, ...) {
   stop('first argument must be a matrix')
 })
 
+#' Calculate degree of correlation matrix
+#'
+#' @param xdata calculate correlation matrix on each column
+#' @param lambdas.length sparsebn parameter see sparsebnUtils::sparsebnData documentation
+#' @param cutoff positive value that determines a cutoff value
+#' @param consider.unweighted consider all edges as 1 if they are greater than 0
+#' @param n.cores number of cores to be used
+#' @param force.recalc.degree force recalculation, instead of going to cache
+#' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
+#' @param show.message shows cache operation messages
+#' @param ... extra parameters for sparsebn::estimate.dag
+#'
+#' @return a vector of the degrees
+#'
+#' @export
 setMethod('degree.sparsebn', signature('matrix'), function(xdata, lambdas.length, cutoff = 0,
                                                            consider.unweighted = FALSE,
-                                                           n.cores = parallel:::detectCores(),
-                                                           show.message = FALSE, force.recalc.degree = FALSE, force.recalc.sparsebn = FALSE, ...) {
+                                                           n.cores = 1,
+                                                           show.message = FALSE, force.recalc.degree = FALSE,
+                                                           force.recalc.network = FALSE, ...) {
   if (force.recalc.network) {
     force.recalc.degree <- T
   }

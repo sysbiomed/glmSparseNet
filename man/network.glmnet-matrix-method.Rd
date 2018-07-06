@@ -9,7 +9,15 @@
   network.options = network.options.default(), ...)
 }
 \arguments{
-\item{xdata}{matrix.}
+\item{xdata}{input data as a matrix}
+
+\item{ydata}{response data compatible with glmnet}
+
+\item{network}{type of network, see below}
+
+\item{network.options}{options to calculate network}
+
+\item{...}{parameters that glmnet accepts}
 }
 \value{
 an object just as glmnet

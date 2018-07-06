@@ -91,12 +91,12 @@ xdata <- xdata[,small.subset]
 
 ```{r, eval=FALSE, include=FALSE}
 sample.BRCA.logisitic <- list(xdata = xdata, ydata = ydata)
-devtools::use_data(sample.BRCA.logisitic, overwrite = TRUE)
+devtools::use_data(sample.BRCA.logistic, overwrite = TRUE)
 ```
 
 ```{r, include=FALSE}
-xdata <- glmSparseNet::sample.BRCA.logisitic$xdata
-ydata <- glmSparseNet::sample.BRCA.logisitic$ydata
+xdata <- sample.BRCA.logistic$xdata
+ydata <- sample.BRCA.logistic$ydata
 ```
 
 

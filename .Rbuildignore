@@ -25,4 +25,6 @@ saves
 vignettes/README.md
 README.Rmd
 README.md
+README.html
+README_files
 .travis.yml

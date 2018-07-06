@@ -16,6 +16,7 @@
 #'
 #' A list with plot, p-value and kaplan-meier object
 #'
+#' @importFrom dplyr %>%
 #' @export
 #'
 #' @examples
@@ -181,6 +182,7 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
             new.factor.str.l <- as.list(as.character(1:(2*length(chosen.btas))))
             names(new.factor.str.l) <- new.factor.str
 
+            . <- NULL # Satisfy R CMD CHECK
             prognostic.index.df$group <- prognostic.index.df$group %>%
               list %>%
               c(new.factor.str.l) %>%

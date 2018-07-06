@@ -24,11 +24,19 @@ reduce.by.experiment <- function(multi.assay, experiment.name) {
 #' Setup network options, such as using weighted or unweighted degree,
 #'  which centrality measure to use
 #'
+#' @param trans.fun see below
+#' @param min.degree minimum value that individual penalty weight can take
 #' @param method in case of correlation and covariance, which method to use
 #' @param unweighted calculate degree using unweighted network
 #' @param cutoff cuttoff value in network edges to trim the network
 #' @param centrality centrality measure to use, currently only supports degree
 #' @param n.cores number of cores to use, default to 1
+#'
+#' The trans.fun argument takes a function definition that will apply a transformation
+#' to the penalty vector calculated from the degree. This transformation allows to
+#' change how the penalty is applied.
+#'
+#' @seealso glmOrphan glmDegree
 #'
 #' @return a list of options
 #' @export
@@ -60,14 +68,14 @@ network.options.default <- function(method     = 'pearson',
 #' @param penalty.type which method to use
 #' @param network.options options to be used
 #'
-#' @return
+#' @return vector with penalty weights
 #'
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 20)
-#' calc.penalty(xdata, 'correlation')
-#' calc.penalty(xdata, 'correlation', network.options.default(cutoff = .6))
-#' calc.penalty(xdata, 'covariance')
-#' calc.penalty(xdata, 'covariance', network.options.default(cutoff = .6))
+#' glmSparseNet:::calc.penalty(xdata, 'correlation')
+#' glmSparseNet:::calc.penalty(xdata, 'correlation', network.options.default(cutoff = .6))
+#' glmSparseNet:::calc.penalty(xdata, 'covariance')
+#' glmSparseNet:::calc.penalty(xdata, 'covariance', network.options.default(cutoff = .6))
 calc.penalty <- function(xdata, penalty.type, network.options = network.options.default()) {
   if (network.options$centrality == 'degree') {
     if (penalty.type == 'correlation') {
