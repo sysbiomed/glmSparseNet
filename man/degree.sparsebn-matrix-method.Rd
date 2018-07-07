@@ -5,7 +5,7 @@
 \alias{degree.sparsebn,matrix-method}
 \title{Calculate degree of correlation matrix}
 \usage{
-\S4method{degree.sparsebn}{matrix}(xdata, lambdas.length, cutoff = 0,
+\S4method{degree.sparsebn}{matrix}(xdata, lambdas.length = 20, cutoff = 0,
   consider.unweighted = FALSE, n.cores = 1, show.message = FALSE,
   force.recalc.degree = FALSE, force.recalc.network = FALSE, ...)
 }

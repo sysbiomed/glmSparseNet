@@ -3,6 +3,7 @@
 export(degree.cor)
 export(degree.cov)
 export(degree.heuristic)
+export(degree.sparsebn)
 export(draw.kaplan)
 export(gene.names)
 export(glmDegree)

@@ -250,12 +250,6 @@ network.worker <- function(fun, xdata, ix.i, ...) {
 #' @param ... extra parameters for fun
 #'
 #' @return a vector of the degrees
-#'
-#' @examples
-#' n.col <- 6
-#' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' # don't run
-#' # degree.generic(cor, 'cor', xdata)
 degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, consider.unweighted = FALSE,
                            force.recalc.degree = FALSE, force.recalc.network = FALSE,
                            n.cores = 1, ...) {
@@ -321,21 +315,27 @@ degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, cons
 #' @param force.recalc.degree force recalculation, instead of going to cache
 #' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
 #' @param show.message shows cache operation messages
-#' @param ... extra parameters for sparsebn::estimate.dag
+#' @param ... parameters for sparsebn::estimate.dag
 #'
 #' @return a vector of the degrees
 #'
 #' @export
 #'
 #' @examples
-#' data(cytometryContinuous, package = 'sparsebn')
-#'
-#' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degree.sparsebn(as.matrix(cytometryContinuous$data))
-setGeneric('degree.sparsebn', function(xdata, lambdas.length = 20, cutoff = 0,
+#' # generate a random matrix of observations
+#' xdata <- matrix(rnorm(1000), nrow = 20)
+#' degree.sparsebn(xdata)
+setGeneric('degree.sparsebn', function(xdata,
+                                       type   = 'continuous',
+                                       levels = NULL,
+                                       ivn    = NULL,
+                                       n      = NULL,
+                                       object = NULL,
+                                       cutoff = 0,
                                        consider.unweighted = TRUE,
                                        n.cores = 1,
-                                       show.message = FALSE, force.recalc.degree = FALSE,
+                                       show.message         = FALSE,
+                                       force.recalc.degree  = FALSE,
                                        force.recalc.network = FALSE, ...) {
   stop('first argument must be a matrix')
 })
@@ -343,7 +343,6 @@ setGeneric('degree.sparsebn', function(xdata, lambdas.length = 20, cutoff = 0,
 #' Calculate degree of correlation matrix
 #'
 #' @param xdata calculate correlation matrix on each column
-#' @param lambdas.length sparsebn parameter see sparsebnUtils::sparsebnData documentation
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
 #' @param n.cores number of cores to be used
@@ -355,37 +354,62 @@ setGeneric('degree.sparsebn', function(xdata, lambdas.length = 20, cutoff = 0,
 #' @return a vector of the degrees
 #'
 #' @export
-setMethod('degree.sparsebn', signature('matrix'), function(xdata, lambdas.length, cutoff = 0,
+setMethod('degree.sparsebn', signature('matrix'), function(xdata,
+                                                           type   = 'continuous',
+                                                           levels = NULL,
+                                                           ivn    = NULL,
+                                                           n      = NULL,
+                                                           object = NULL,
+                                                           cutoff = 0,
                                                            consider.unweighted = FALSE,
                                                            n.cores = 1,
-                                                           show.message = FALSE, force.recalc.degree = FALSE,
-                                                           force.recalc.network = FALSE, ...) {
+                                                           show.message = FALSE,
+                                                           force.recalc.degree = FALSE,
+                                                           force.recalc.network = FALSE,
+                                                           ...) {
   if (force.recalc.network) {
-    force.recalc.degree <- T
+    force.recalc.degree <- TRUE
   }
 
-  # generate lambdas
-  lambdas      <- sparsebnUtils::generate.lambdas(nrow(xdata), lambdas.length = lambdas.length)
   # generate data that sparsebn understands)
-  sparse.xdata <- loose.rock::run.cache(sparsebnUtils::sparsebnData, xdata, levels = NULL, ivn = NULL, type = 'continuous',
-                                        cache.prefix = 'sparsebn.data')
+  sparse.xdata <- loose.rock::run.cache(sparsebnUtils::sparsebnData,
+                                        xdata,
+                                        type         = type,
+                                        levels       = levels,
+                                        ivn          = ivn,
+                                        n            = n,
+                                        object       = object,
+                                        cache.prefix = 'sparsebn.data',
+                                        show.message = show.message)
+
   # estimate dag structure, upperbound was wrongfully set
-  dag <- loose.rock::run.cache(sparsebn::estimate.dag, sparse.xdata, lambdas = lambdas, ...,
+  dag <- loose.rock::run.cache(sparsebn::estimate.dag, sparse.xdata, ...,
                                cache.prefix = 'dag',
-                               force.recalc = force.recalc.network)
+                               force.recalc = force.recalc.network,
+                               show.message = show.message)
+
   # estimate parameters for dag
-  dag.params <- loose.rock::run.cache(sparsebnUtils::estimate.parameters, dag, data = sparse.xdata, verbose = T, cache.prefix = 'dag.params')
+  dag.params <- loose.rock::run.cache(sparsebnUtils::estimate.parameters,
+                                      dag,
+                                      data         = sparse.xdata,
+                                      cache.prefix = 'dag.params',
+                                      show.message = show.message)
+
   # choose a dag (will use the one with most edges)
-  #my.dag <- select(dag, lambda = lambdas[length(lambdas)])
+  choosen.params <- dag.params[[length(dag.params)]]
   #
-  x.vec                    <- abs(dag.params[[length(dag.params)]]$coefs@x)
-  dag.params[[length(dag.params)]]$coefs@x <- x.vec
-  x.ix.v                   <- x.vec < cutoff
-  dag.params[[length(dag.params)]]$coefs@x[x.ix.v] <- 0
+  if (any(is.na(choosen.params$coefs@x))) {
+    warning('Some coefficients when estimating parameters are NA, they have been converted to 0')
+    choosen.params$coefs@x[is.na(choosen.params$coefs@x)] <- 0
+  }
+  x.vec                          <- abs(choosen.params$coefs@x)
+  choosen.params$coefs@x         <- x.vec
+  x.ix.v                         <- x.vec < cutoff
+  choosen.params$coefs@x[x.ix.v] <- 0
   if (consider.unweighted) {
-    dag.params[[length(dag.params)]]$coefs@x[dag.params[[length(dag.params)]]$coefs@x > 0] <- 1
+    choosen.params$coefs@x[choosen.params$coefs@x > 0] <- 1
   }
 
-  val <- Matrix::colSums(dag.params[[length(dag.params)]]$coefs) + Matrix::rowSums(dag.params[[length(dag.params)]]$coefs)
+  val <- Matrix::colSums(choosen.params$coefs) + Matrix::rowSums(choosen.params$coefs)
   return(val)
 })

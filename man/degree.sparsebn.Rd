@@ -4,7 +4,7 @@
 \alias{degree.sparsebn}
 \title{Calculate degree of correlation matrix}
 \usage{
-degree.sparsebn(xdata, lambdas.length, cutoff = 0,
+degree.sparsebn(xdata, lambdas.length = 20, cutoff = 0,
   consider.unweighted = TRUE, n.cores = 1, show.message = FALSE,
   force.recalc.degree = FALSE, force.recalc.network = FALSE, ...)
 }
@@ -34,7 +34,6 @@ a vector of the degrees
 Calculate degree of correlation matrix
 }
 \examples{
-n.col <- 6
-xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-degree.sparsebn(xdata, 50)
+data(cytometryContinuous, package = 'sparsebn')
+degree.sparsebn(as.matrix(cytometryContinuous$data))
 }

@@ -37,5 +37,6 @@ any connection the node and itself.
 \examples{
 n.col <- 6
 xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-degree.generic(cor, 'cor', xdata)
+# don't run
+# degree.generic(cor, 'cor', xdata)
 }
