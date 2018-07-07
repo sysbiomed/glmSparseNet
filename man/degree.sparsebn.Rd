@@ -4,14 +4,13 @@
 \alias{degree.sparsebn}
 \title{Calculate degree of correlation matrix}
 \usage{
-degree.sparsebn(xdata, lambdas.length = 20, cutoff = 0,
-  consider.unweighted = TRUE, n.cores = 1, show.message = FALSE,
-  force.recalc.degree = FALSE, force.recalc.network = FALSE, ...)
+degree.sparsebn(xdata, type = "continuous", levels = NULL, ivn = NULL,
+  n = NULL, object = NULL, cutoff = 0, consider.unweighted = TRUE,
+  n.cores = 1, show.message = FALSE, force.recalc.degree = FALSE,
+  force.recalc.network = FALSE, ...)
 }
 \arguments{
 \item{xdata}{calculate correlation matrix on each column}
-
-\item{lambdas.length}{sparsebn parameter see sparsebnUtils::sparsebnData documentation}
 
 \item{cutoff}{positive value that determines a cutoff value}
 
@@ -25,7 +24,9 @@ degree.sparsebn(xdata, lambdas.length = 20, cutoff = 0,
 
 \item{force.recalc.network}{force recalculation of network and penalty weights, instead of going to cache}
 
-\item{...}{extra parameters for sparsebn::estimate.dag}
+\item{...}{parameters for sparsebn::estimate.dag}
+
+\item{lambdas.length}{sparsebn parameter see sparsebnUtils::sparsebnData documentation}
 }
 \value{
 a vector of the degrees
@@ -34,6 +35,7 @@ a vector of the degrees
 Calculate degree of correlation matrix
 }
 \examples{
-data(cytometryContinuous, package = 'sparsebn')
-degree.sparsebn(as.matrix(cytometryContinuous$data))
+# generate a random matrix of observations
+xdata <- matrix(rnorm(1000), nrow = 20)
+degree.sparsebn(xdata)
 }

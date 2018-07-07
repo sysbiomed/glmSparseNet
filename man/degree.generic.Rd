@@ -34,9 +34,3 @@ a vector of the degrees
 The assumption to use this function is that the network represented by a matrix is symetric and without
 any connection the node and itself.
 }
-\examples{
-n.col <- 6
-xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-# don't run
-# degree.generic(cor, 'cor', xdata)
-}
