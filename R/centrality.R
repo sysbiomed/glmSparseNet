@@ -13,7 +13,7 @@
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' cor.parallel(xdata)
+#' network.cor.parallel(xdata)
 network.cor.parallel <- function(xdata,
                                  build.output  = 'matrix',
                                  n.cores       = 1,
@@ -39,7 +39,7 @@ network.cor.parallel <- function(xdata,
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' cov.parallel(xdata)
+#' network.cov.parallel(xdata)
 network.cov.parallel <- function(xdata,
                                  build.output  = 'matrix',
                                  n.cores       = 1,
@@ -308,7 +308,11 @@ degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, cons
 #' Calculate degree of correlation matrix
 #'
 #' @param xdata calculate correlation matrix on each column
-#' @param lambdas.length sparsebn parameter see sparsebnUtils::sparsebnData documentation
+#' @param type either "discrete" or "continuous", see sparsebnUtils::sparsebnData
+#' @param levels (optional) list of levels for each node. see sparsebnUtils::sparsebnData
+#' @param ivn (optional) list of interventions for each observation, see sparsebnUtils::sparsebnData
+#' @param n (optional) number of rows from data matrix to print, see sparsebnUtils::sparsebnData
+#' @param object (optional) an object of type sparsebnData, see sparsebnUtils::sparsebnData
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
 #' @param n.cores number of cores to be used
@@ -343,6 +347,11 @@ setGeneric('degree.sparsebn', function(xdata,
 #' Calculate degree of correlation matrix
 #'
 #' @param xdata calculate correlation matrix on each column
+#' @param type either "discrete" or "continuous", see sparsebnUtils::sparsebnData
+#' @param levels (optional) list of levels for each node. see sparsebnUtils::sparsebnData
+#' @param ivn (optional) list of interventions for each observation, see sparsebnUtils::sparsebnData
+#' @param n (optional) number of rows from data matrix to print, see sparsebnUtils::sparsebnData
+#' @param object (optional) an object of type sparsebnData, see sparsebnUtils::sparsebnData
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
 #' @param n.cores number of cores to be used

@@ -13,6 +13,16 @@
 \arguments{
 \item{xdata}{calculate correlation matrix on each column}
 
+\item{type}{either "discrete" or "continuous", see sparsebnUtils::sparsebnData}
+
+\item{levels}{(optional) list of levels for each node. see sparsebnUtils::sparsebnData}
+
+\item{ivn}{(optional) list of interventions for each observation, see sparsebnUtils::sparsebnData}
+
+\item{n}{(optional) number of rows from data matrix to print, see sparsebnUtils::sparsebnData}
+
+\item{object}{(optional) an object of type sparsebnData, see sparsebnUtils::sparsebnData}
+
 \item{cutoff}{positive value that determines a cutoff value}
 
 \item{consider.unweighted}{consider all edges as 1 if they are greater than 0}
