@@ -219,10 +219,6 @@ setMethod('degree.cov', signature('matrix'), function(xdata, cutoff = 0, conside
 #' @param ... extra parameters for fun
 #'
 #' @return a vector with size `ncol(xdata) - ix.i`
-#'
-#' @examples
-#' network.worker(cor, matrix(rnorm(20*10), ncol = 10), 1)
-#' network.worker(cor, matrix(rnorm(20*10), ncol = 10), 5)
 network.worker <- function(fun, xdata, ix.i, ...) {
   #
   n.col <- ncol(xdata)
