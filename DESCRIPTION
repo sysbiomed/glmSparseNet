@@ -41,9 +41,6 @@ Suggests: testthat,
   prad.data,
   skcm.data
 Remotes: 
-  averissimo/loose.rock,
-  url::https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz,
-  url::https://github.com/averissimo/tcga.data/releases/download/2017.07.21-prad/prad.data_1.0.tar.gz,
-  url::https://github.com/averissimo/tcga.data/releases/download/2018.06.20-skcm/skcm.data_2018.06.20.tar.gz
+  averissimo/loose.rock
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
