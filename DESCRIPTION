@@ -36,8 +36,14 @@ Suggests: testthat,
   survcomp,
   pROC,
   devtools,
-  roxygen2
+  roxygen2,
+  brca.data,
+  prad.data,
+  skcm.data
 Remotes: 
-  averissimo/loose.rock
+  github::averissimo/loose.rock
+  url::https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz
+  url::https://github.com/averissimo/tcga.data/releases/download/2017.07.21-prad/prad.data_1.0.tar.gz
+  url::https://github.com/averissimo/tcga.data/releases/download/2018.06.20-skcm/skcm.data_2018.06.20.tar.gz
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
