@@ -36,10 +36,7 @@ Suggests: testthat,
   survcomp,
   pROC,
   devtools,
-  roxygen2,
-  brca.data,
-  prad.data,
-  skcm.data
+  roxygen2
 Remotes: 
   averissimo/loose.rock
 VignetteBuilder: knitr
