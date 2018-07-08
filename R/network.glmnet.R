@@ -60,6 +60,7 @@ setGeneric('network.glmnet', function(xdata, ydata, network, network.options = n
 #'
 #' @return an object just as glmnet
 #' @export
+#' @import Matrix
 setMethod('network.glmnet', signature(xdata = 'matrix'), function(xdata, ydata, network,
                                                                   network.options = network.options.default(), ...) {
   return(network.glmnet.private(glmnet::glmnet, xdata, ydata, network = network, network.options = network.options, ...))
@@ -76,6 +77,7 @@ setMethod('network.glmnet', signature(xdata = 'matrix'), function(xdata, ydata, 
 #'
 #' @return an object just as glmnet
 #' @export
+#' @import MultiAssayExperiment
 setMethod('network.glmnet', signature(xdata = 'MultiAssayExperiment'), function(xdata, ydata, network,
                                                                                 experiment.name = NULL,
                                                                                 network.options = network.options.default(), ...) {
@@ -93,6 +95,7 @@ setMethod('network.glmnet', signature(xdata = 'MultiAssayExperiment'), function(
 #'
 #' @return an object just as glmnet
 #' @export
+#' @import SummarizedExperiment
 setMethod('network.glmnet', signature(xdata = 'SummarizedExperiment'), function(xdata, ydata, network,
                                                                                 network.options = network.options.default(), ...) {
   return(network.glmnet.private(glmnet::glmnet, t(MultiAssayExperiment::assay(xdata)), ydata, network, network.options = network.options, ...))
