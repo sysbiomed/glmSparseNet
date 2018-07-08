@@ -7,9 +7,6 @@ r_packages:
   - devtools
   - roxygen2
 
-bioc_packages:
-  - 'https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz'
-
 bioc_required: true
 
 r:
