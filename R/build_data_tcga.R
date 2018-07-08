@@ -22,6 +22,9 @@
 #' @export
 #'
 #' @examples
+#' # # Install a data package to load cancer data
+#' # source("https://bioconductor.org/biocLite.R")
+#' # biocLite('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
 #' prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first')
 prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.solid.tumor', handle.duplicates = 'keep_first',
                                        coding.genes = FALSE) {
@@ -29,7 +32,8 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
   package.name <- paste0(project, '.data')
 
   if (!package.name %in% utils::installed.packages()) {
-    stop(sprintf('There is no package called \'%s\' installed, please go to https://github.com/averissimo/tcga.data/releases and install the corresponding release.'))
+    stop(sprintf('There is no package called \'%s\' installed, please go to https://github.com/averissimo/tcga.data/releases and install the corresponding release.',
+                 package.name))
   }
 
   # An environment is necessary to adhere to best practices of ?data
