@@ -28,9 +28,7 @@ Imports: loose.rock,
   biomaRt,
   SummarizedExperiment,
   stats,
-  parallel,
-  MultiAssayExperiment,
-  Matrix
+  parallel
 Suggests: testthat,
   knitr,
   rmarkdown,

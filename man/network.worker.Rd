@@ -21,7 +21,3 @@ a vector with size `ncol(xdata) - ix.i`
 \description{
 Note that it assumes it does not calculate for index below and equal to ix.i
 }
-\examples{
-network.worker(cor, matrix(rnorm(20*10), ncol = 10), 1)
-network.worker(cor, matrix(rnorm(20*10), ncol = 10), 5)
-}
