@@ -18,7 +18,7 @@ devtools::load_all()
 ## Required libraries
 
 ```{r, message=FALSE}
-library(tidyverse)
+library(dplyr)
 library(STRINGdb)
 library(futile.logger)
 library(parallel)
