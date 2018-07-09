@@ -10,7 +10,7 @@ gene.names(ensembl.genes)
 \item{ensembl.genes}{character vector with gene names in ensembl_id format}
 }
 \value{
-a dataframe with external gene names, ensembl_id and heatmap plot
+a dataframe with external gene names, ensembl_id
 }
 \description{
 Retrieve gene names from biomaRt

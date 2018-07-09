@@ -1,0 +1,223 @@
+---
+title: "STRING DB"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+params:
+  threshold: !r 700
+  n.cores: !r 10
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+devtools::load_all()
+```
+
+## Required libraries
+
+```{r, message=FALSE}
+library(tidyverse)
+library(STRINGdb)
+library(futile.logger)
+library(parallel)
+library(Matrix)
+library(survival)
+library(loose.rock)
+library(glmnet)
+
+.Last.value <- flog.layout(layout.format('[~l] ~m'))
+.Last.value <- flog.appender(appender.tee('logger.txt'))
+theme_set(theme_minimal())
+
+.Last.value <- loose.rock::base.dir(path = '/ssd_home/averissimo/work/rpackages/network.cox-cache')
+.Last.value <- loose.rock::show.message(FALSE)
+
+```
+
+Load this library
+
+```{r, eval=FALSE}
+library(glmSparseNet)
+```
+
+## Download Data from STRING
+
+Retrieve all interactions
+
+```{r}
+all.interactions <- string.db.homo.sapiens(score_threshold = params$threshold)
+
+#
+# remove species code
+
+all.interactions$from <- gsub('9606\\.', '', all.interactions$from)
+all.interactions$to   <- gsub('9606\\.', '', all.interactions$to)
+```
+
+
+```{r, include=FALSE}
+all.interactions <- loose.rock::run.cache(string.db.homo.sapiens, 
+                                          score_threshold = params$threshold)
+
+#
+# remove species code
+
+all.interactions$from <- gsub('9606\\.', '', all.interactions$from)
+all.interactions$to   <- gsub('9606\\.', '', all.interactions$to)
+```
+
+## Build edge list
+
+Build a `csv` file with edge list to use with external tools
+
+```{r}
+# row index
+ixs <- seq(nrow(all.interactions))
+
+#
+# filter columns by name
+
+col.ixs <- colnames(all.interactions) %>%
+  {
+   !. %in%  c('from',  'to', 'combined_score', .[grep('text', .)])
+  }
+
+#
+# filter by minimum confidence interval
+
+all.interactions.mat <- all.interactions[, col.ixs]
+all.interactions.mat[all.interactions.mat < params$threshold] <- 0
+
+#
+# Keep only rows with edges
+
+has.edges <- all.interactions.mat %>% 
+  apply(1, function(ix) { any(ix != 0) * 1 })
+
+#
+# Index refering to all rows that have edges
+
+row.ixs <- has.edges != 0
+
+string.edges <- data.frame(from             = all.interactions$from[row.ixs], 
+                           to               = all.interactions$to[row.ixs],
+                           sum.score        = rowSums(all.interactions.mat[row.ixs,]),
+                           stringsAsFactors = FALSE) %>% as.tbl %>% filter(sum.score != 0)
+
+# Write network to csv
+# write.table(string.edges[,1:2], sep = ';', file = sprintf('edge_list_threshold-%d.csv', params$threshold), row.names = FALSE)
+```
+
+## Build network matrix
+
+Build a sparse matrix object that contains the network
+
+```{r}
+#
+# Create an index for each protein
+
+all.proteins.ixs <- c(string.edges$from, string.edges$to) %>%
+  unique %>%
+  sort %>% {
+    tmp.vect <- seq_along(.)
+    names(tmp.vect) <- .
+    tmp.vect
+  }
+
+#
+# Build sparse matrix
+
+string.network <- sparseMatrix(all.proteins.ixs[string.edges$from], 
+                               all.proteins.ixs[string.edges$to], 
+                               x = rep(1, nrow(string.edges)),
+                               dims = rep(length(all.proteins.ixs), 2))
+
+colnames(string.network) <- names(all.proteins.ixs)
+rownames(string.network) <- names(all.proteins.ixs)
+
+degree.network <- string.network %>% {
+  colSums(.) + rowSums(.)
+  }
+```
+
+## Statistics
+
+### Graph information
+
+```{r, echo=FALSE, collapse=TRUE}
+flog.info('Directed graph (score_threshold = %d)', params$threshold)
+flog.info('  *       total edges: %d', sum(string.network))
+flog.info('  *    unique protein: %d', nrow(string.network))
+flog.info('  * edges per protein: %f', sum(string.network) / nrow(string.network) )
+
+```
+
+### Summary of degree
+
+```{r, echo=FALSE}
+summary(degree.network)
+```
+
+### Histogram of degree
+
+```{r, warning=FALSE}
+qplot(degree.network, bins = 100) + 
+  scale_y_continuous(trans = 'log10') + ylab('Count (log10 scale)')
+```
+
+### Mapping of proteins to genes
+
+```{r}
+ppi.map <- protein.to.ensembl.gene.names(colnames(string.network))
+ppi.map$ix <- all.proteins.ixs[ppi.map$ensembl_peptide_id]
+```
+
+
+## glmSparseNet
+
+* Build dataset that overlaps with STRING data
+
+```{r}
+xdata <- sample.BRCA.survival$xdata
+ydata <- sample.BRCA.survival$ydata
+
+#
+# Keep only genes from BRCA that are in network
+
+map.ixs <- sapply(colnames(xdata), function(ix) { which(ix == ppi.map$ensembl_gene_id) })
+
+if ((map.ixs %>% sapply(length) %>% max) > 1) {
+  stop('Error: A gene maps to multiple proteins')
+}
+
+map.ixs <- unlist(map.ixs)
+
+string.network.xdata <- ppi.map %>% { string.network[map.ixs, map.ixs] }
+xdata <- xdata[, names(map.ixs)]
+```
+
+### glmDegree
+
+```{r}
+cv.degree <- cv.glmDegree(xdata, 
+                          Surv(ydata$time, ydata$status), 
+                          family = 'cox',
+                          network = string.network.xdata, 
+                          network.options = network.options.default(min.degree = 0.2))
+
+glmSparseNet::draw.kaplan(as.vector(coef(cv.degree, s = 'lambda.min')[,1]), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
+```
+
+### glmOrphan
+
+```{r}
+cv.orphan <- cv.glmOrphan(xdata, 
+                          Surv(ydata$time, ydata$status), 
+                          family = 'cox',
+                          network = string.network.xdata, 
+                          network.options = network.options.default(min.degree = 0.2))
+
+glmSparseNet::draw.kaplan(as.vector(coef(cv.orphan, s = 'lambda.min')[,1]), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
+```

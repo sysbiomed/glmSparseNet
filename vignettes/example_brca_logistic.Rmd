@@ -1,6 +1,6 @@
 ---
 title: "Example for Logistic regularization -- Breast Invasive Carcinoma"
-author: "Vignette Author"
+author: "Marta Lopes"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >

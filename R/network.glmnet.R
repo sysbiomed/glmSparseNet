@@ -68,6 +68,22 @@ setMethod('network.glmnet', signature(xdata = 'matrix'), function(xdata, ydata, 
 
 #' Calculate GLM model with network-based regularization
 #'
+#' @param xdata input data as a Matrix
+#' @param ydata response data compatible with glmnet
+#' @param network type of network, see below
+#' @param network.options options to calculate network
+#' @param ... parameters that glmnet accepts
+#'
+#' @return an object just as glmnet
+#' @export
+#' @import Matrix
+setMethod('network.glmnet', signature(xdata = 'Matrix'), function(xdata, ydata, network,
+                                                                  network.options = network.options.default(), ...) {
+  return(network.glmnet.private(glmnet::glmnet, xdata, ydata, network = network, network.options = network.options, ...))
+})
+
+#' Calculate GLM model with network-based regularization
+#'
 #' @param xdata input data as a MultiAssayExperiment
 #' @param ydata response data compatible with glmnet
 #' @param experiment.name name of experiment to use as input in MultiAssayExperiment object

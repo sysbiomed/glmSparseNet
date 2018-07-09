@@ -2,7 +2,7 @@
 #'
 #' @param ensembl.genes character vector with gene names in ensembl_id format
 #'
-#' @return a dataframe with external gene names, ensembl_id and heatmap plot
+#' @return a dataframe with external gene names, ensembl_id
 #' @export
 #'
 #' @examples
@@ -158,4 +158,36 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full', generate.plot
   df.scaled$gene.name <- NULL
 
   return(list(hallmarks = df.scaled, no.hallmakrs = df.no.hallmarks, heatmap = g1))
+}
+
+
+#' Retrieve ensembl gene ids from proteins
+#'
+#' @param ensembl.proteins character vector with gene names in ensembl_peptide_id format
+#'
+#' @return a dataframe with external gene names, ensembl_peptide_id
+#' @export
+#'
+#' @examples
+#' protein.to.ensembl.gene.names(c('ENSP00000235382','ENSP00000233944', 'ENSP00000216911'))
+protein.to.ensembl.gene.names <- function(ensembl.proteins) {
+  tryCatch({
+    marts <- biomaRt::listMarts()
+    index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
+    mart <- biomaRt::useMart(marts$biomart[index])
+    mart <- loose.rock::run.cache(biomaRt::useMart,
+                                  marts$biomart[index],
+                                  'hsapiens_gene_ensembl',
+                                  cache.prefix = 'biomart')
+    results <- biomaRt::getBM(attributes = c("ensembl_peptide_id", "ensembl_gene_id", 'external_gene_name'),
+                              filters = "ensembl_peptide_id", values = ensembl.proteins,
+                              mart = mart)
+    return(dplyr::arrange(results, rlang::UQ(as.name('ensembl_peptide_id'))))
+  }, error = function(msg) {
+    warning(sprintf('Error when finding gene names:\n\t%s', msg))
+  })
+  return(data.frame(ensembl_peptide_id = ensembl.proteins,
+                    ensembl_gene_id = ensembl.proteins,
+                    external_gene_name = ensembl.proteins,
+                    stringsAsFactors = FALSE))
 }

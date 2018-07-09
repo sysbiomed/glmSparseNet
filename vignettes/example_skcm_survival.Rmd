@@ -1,6 +1,6 @@
 ---
 title: "Example for Survival Data -- Breast"
-author: "Vignette Author"
+author: "Eunice Carrasquinha"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >

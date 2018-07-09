@@ -22,8 +22,8 @@ glmOrphan(xdata, ydata, network, network.options = network.options.default(),
 see network.glmnet
 }
 \description{
-This function overrides the `trans.fun` options in `network.options`, replacing
-by an heuristic described in Veríssimo et al. that penalizes nodes with high degree.
+This function overrides the `trans.fun` options in `network.options` with
+an heuristic described in Veríssimo et al. that penalizes nodes with high degree.
 }
 \seealso{
 network.glmnet

@@ -33,7 +33,7 @@ setGeneric('network.glmnet.private', function(fun, xdata, ydata, network, networ
 setMethod('network.glmnet.private', signature(xdata = 'matrix'), function(fun, xdata, ydata, network, network.options = network.options.default(), ...) {
   if (is.character(network)) {
     penalty.factor <- calc.penalty(xdata, network, network.options)
-  } else if (is.matrix(network)) {
+  } else if (is.matrix(network) || inherits(network, 'Matrix')) {
     penalty.factor <- (Matrix::colSums(network) + Matrix::rowSums(network))
   } else if (is.vector(network)) {
     if (length(network) != ncol(xdata)) {
@@ -108,6 +108,3 @@ setMethod('network.glmnet.private', signature(xdata = 'SummarizedExperiment'), f
                                                                                         network.options = network.options.default(), ...) {
   return(network.glmnet.private(fun, t(MultiAssayExperiment::assay(xdata)), ydata, network, network.options, ...))
 })
-
-
-
