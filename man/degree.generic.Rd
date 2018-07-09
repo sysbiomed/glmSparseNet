@@ -5,7 +5,7 @@
 \title{Generic function to calculate degree based on data}
 \usage{
 degree.generic(fun, fun.prefix = "operator", xdata, cutoff = 0,
-  consider.unweighted = FALSE, force.recalc.degree = FALSE,
+  consider.unweighted = FALSE, chunks = 1000, force.recalc.degree = FALSE,
   force.recalc.network = FALSE, n.cores = 1, ...)
 }
 \arguments{
@@ -18,6 +18,8 @@ degree.generic(fun, fun.prefix = "operator", xdata, cutoff = 0,
 \item{cutoff}{positive value that determines a cutoff value}
 
 \item{consider.unweighted}{consider all edges as 1 if they are greater than 0}
+
+\item{chunks}{calculate function at batches of this value (default is 1000)}
 
 \item{force.recalc.degree}{force recalculation of penalty weights (but not the network), instead of going to cache}
 

@@ -75,13 +75,13 @@ network.generic.parallel <- function(fun, fun.prefix,
     result <- parallel::mclapply( as.numeric(1:(ncol(xdata)-1)), function(ix.i) {
       tryCatch({
         result <- loose.rock::run.cache(network.worker, fun,
-                                       xdata, ix.i,
-                                       #
-                                       cache.digest = list(xdata.sha256),
-                                       cache.prefix = fun.prefix,
-                                       show.message = show.message,
-                                       force.recalc = force.recalc.network,
-                                       ...)
+                                        xdata, ix.i,
+                                        #
+                                        cache.digest = list(xdata.sha256),
+                                        cache.prefix = fun.prefix,
+                                        show.message = show.message,
+                                        force.recalc = force.recalc.network,
+                                        ...)
       },
       error = function(error.str) {
         futile.logger::flog.error('This error has occured %s', error.str)
@@ -92,23 +92,23 @@ network.generic.parallel <- function(fun, fun.prefix,
         return(TRUE)
       }
       #}
-    }, mc.cores = n.cores, mc.silent = F)
+    }, mc.cores = n.cores, mc.silent = F, mc.preschedule = TRUE)
     return(result)
   }
   result <- loose.rock::run.cache(fun.aux, xdata,
-                                 #
-                                 cache.prefix = 'fun.aux',
-                                 cache.digest = list(xdata.sha256),
-                                 force.recalc = force.recalc.network,
-                                 show.message = show.message,
-                                 ...)
+                                  #
+                                  cache.prefix = 'fun.aux',
+                                  cache.digest = list(xdata.sha256),
+                                  force.recalc = force.recalc.network,
+                                  show.message = show.message,
+                                  ...)
   if (build.output == 'vector') {
     return(unlist(result))
   } else if(build.output == 'matrix') {
     sparse.data <- data.frame(i = c(), j = c(), p = c())
     for (ix in rev(seq_along(result))) {
       line <- result[[ix]]
-      sparse.data <- rbind(sparse.data, data.frame(i = array(ix, length(line)), j = ix + seq_along(line), p = line))
+      sparse.data <- rbind(sparse.data, data.frame(i = array(ix, length(line)), j = ix + seq_along(line), p = as.vector(line)))
       result[[ix]] <- NULL
     }
     return(Matrix::sparseMatrix(i = sparse.data$i, j = sparse.data$j, x = sparse.data$p, dims = c(ncol(xdata), ncol(xdata)), symmetric = TRUE))
@@ -202,7 +202,7 @@ setGeneric('degree.cov', function(xdata, cutoff = 0, consider.unweighted = FALSE
 setMethod('degree.cov', signature('matrix'), function(xdata, cutoff = 0, consider.unweighted = FALSE,
                                                       force.recalc.degree = FALSE, force.recalc.network = FALSE,
                                                       n.cores = 1, ...) {
-  return(degree.generic(stats::cor, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
+  return(degree.generic(stats::cov, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
                         force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
                         n.cores = n.cores, ...))
 })
@@ -220,12 +220,9 @@ setMethod('degree.cov', signature('matrix'), function(xdata, cutoff = 0, conside
 #'
 #' @return a vector with size `ncol(xdata) - ix.i`
 network.worker <- function(fun, xdata, ix.i, ...) {
-  #
   n.col <- ncol(xdata)
   xdata.i <- xdata[,ix.i]
-  result  <- sapply((ix.i + 1):n.col, function(ix.j){
-    fun(xdata.i, xdata[,ix.j], ...)
-  })
+  result  <- fun(xdata[,ix.i], xdata[,(ix.i+1):ncol(xdata)], ...)
   result[is.na(result)] <- 0
   return(result)
 }
@@ -240,6 +237,7 @@ network.worker <- function(fun, xdata, ix.i, ...) {
 #' @param xdata calculate correlation matrix on each column
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
+#' @param chunks calculate function at batches of this value (default is 1000)
 #' @param n.cores number of cores to be used
 #' @param force.recalc.degree force recalculation of penalty weights (but not the network), instead of going to cache
 #' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
@@ -247,45 +245,41 @@ network.worker <- function(fun, xdata, ix.i, ...) {
 #'
 #' @return a vector of the degrees
 degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, consider.unweighted = FALSE,
-                           force.recalc.degree = FALSE, force.recalc.network = FALSE,
+                           chunks = 1000, force.recalc.degree = FALSE, force.recalc.network = FALSE,
                            n.cores = 1, ...) {
+
   if (force.recalc.network) {
     force.recalc.degree <- force.recalc.network
   }
+
+  chunk.function <- function(xdata, max.ix, ix.outer, n.cores, cutoff, consider.unweighted, ...) {
+    res.chunks <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
+      line <- network.worker(fun, xdata, ix.i, ...)
+      #
+      line[is.na(line)]   <- 0 # failsafe in case there was a failure in cov (i.e. sd = 0)
+      line                <- abs(line)
+      line[line < cutoff] <- 0
+      if (consider.unweighted) { line[line != 0] <- 1 }
+      line <- c(rep(0, ix.i - 1), sum(line), line)
+      return(line)
+    }, mc.cores = n.cores, mc.allow.recursive = FALSE)
+  }
+
   #
   # auxiliary function to be able to call with cache
   #
   weigthed.aux <- function(xdata, cutoff, consider.unweighted, ...) {
     degree <- array(0, ncol(xdata))
-    added.sum <- 1000
-    for (ix.outer in seq(1, ncol(xdata) - 1, added.sum)) {
-      max.ix <- min(ix.outer + added.sum - 1, ncol(xdata) - 1)
-      res.1000 <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
-        line <- loose.rock::run.cache(network.worker, fun, xdata, ix.i,
-                                      cache.digest = list(xdata.sha256),
-                                      cache.prefix = fun.prefix,
-                                      show.message = F,
-                                      force.recalc = force.recalc.network,
-                                      ...)
-        if (any(!is.numeric(line))) {
-          line <- loose.rock::run.cache(network.worker, fun, xdata, ix.i,
-                                        cache.digest = list(xdata.sha256),
-                                        cache.prefix = fun.prefix,
-                                        show.message = F,
-                                        force.recalc = T,
-                                        ...)
-        }
-        #
-        line[is.na(line)]   <- 0 # failsafe in case there was a failure in cov (i.e. sd = 0)
-        line                <- abs(line)
-        line[line < cutoff] <- 0
-        if (consider.unweighted) { line[line != 0] <- 1 }
-        line <- c(rep(0, ix.i - 1), sum(line), line)
-        return(line)
-      }, mc.cores = n.cores, mc.allow.recursive = FALSE)
+    for (ix.outer in seq(1, ncol(xdata) - 1, chunks)) {
+      max.ix <- min(ix.outer + chunks - 1, ncol(xdata) - 1)
+      res.chunks <- loose.rock::run.cache(chunk.function, xdata, max.ix, ix.outer, n.cores, cutoff, consider.unweighted, ...,
+                                          cache.digest = list(xdata.sha256),
+                                          cache.prefix = fun.prefix,
+                                          show.message = F,
+                                          force.recalc = force.recalc.network)
       #
-      res.1000 <- matrix(unlist(res.1000), ncol = ncol(xdata), byrow = TRUE)
-      degree   <- degree + colSums(res.1000)
+      res.chunks <- matrix(unlist(res.chunks), ncol = ncol(xdata), byrow = TRUE)
+      degree   <- degree + colSums(res.chunks)
     }
     names(degree) <- colnames(xdata)
     return(degree)
