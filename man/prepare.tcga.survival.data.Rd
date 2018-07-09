@@ -39,7 +39,7 @@ It will:
 # # Install a data package to load cancer data
 # source("https://bioconductor.org/biocLite.R")
 # biocLite(paste0('https://github.com/averissimo/tcga.data/releases/download/',
-                  '2016.12.15-brca/brca.data_1.0.tar.gz'))
+#                 '2016.12.15-brca/brca.data_1.0.tar.gz'))
 # # Run
 # prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first')
 }
