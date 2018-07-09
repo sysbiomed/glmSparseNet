@@ -11,6 +11,8 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,
                       fig.width = 7,
@@ -29,6 +31,9 @@ rmarkdown::render('README.Rmd', output_format = 'all')
 ```
 
 > Elastic-Net models with additional regularization based on network centrality metrics
+
+[![Travis-CI Build Status](https://travis-ci.org/sysbiomed/glmSparseNet.svg?branch=master)](https://travis-ci.org/sysbiomed/glmSparseNet)
+[![Coverage status](https://codecov.io/gh/sysbiomed/glmSparseNet/branch/master/graph/badge.svg)](https://codecov.io/github/sysbiomed/glmSparseNet?branch=master)
 
 ## Overview
 

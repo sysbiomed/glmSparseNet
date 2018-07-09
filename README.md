@@ -1,7 +1,10 @@
 glmSparseNet
 ================
 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 > Elastic-Net models with additional regularization based on network centrality metrics
+
+[![Travis-CI Build Status](https://travis-ci.org/sysbiomed/glmSparseNet.svg?branch=master)](https://travis-ci.org/sysbiomed/glmSparseNet) [![Coverage status](https://codecov.io/gh/sysbiomed/glmSparseNet/branch/master/graph/badge.svg)](https://codecov.io/github/sysbiomed/glmSparseNet?branch=master)
 
 -   [Overview](#overview)
 -   [Citation](#citation)
@@ -183,7 +186,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
 ```
 
     ## $pvalue
-    ## [1] 2.134653e-08
+    ## [1] 2.343203e-11
     ## 
     ## $plot
 
@@ -194,8 +197,8 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      3     NA      NA      NA
-    ## High risk 39     25   1105     579    2105
+    ## Low risk  40      2     NA      NA      NA
+    ## High risk 39     26   1105     562    2102
 
 ### Heatmap with results retrived from the Cancer Hallmarks Analytics Tool *(CHAT)*
 
