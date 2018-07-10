@@ -1,21 +1,25 @@
 #' Download protein-protein interactions from STRING DB (for a specific species)
 #'
 #' @param version version of the database to use
-#' @param scrore_threshold remove
+#' @param score_threshold remove scores below threshold
+#' @param remove.text remove text mining-based scores
 #'
 #' @return a data.frame with rows representing an interaction between two proteins, and columns
 #' the count of scores above the given score_threshold
 #'
 #' @export
 string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.text = TRUE) {
+
+  . <- NULL
+
   STRINGdb::get_STRING_species(version = version, species_name=NULL) %>%
-    dplyr::arrange(official_name) %>%
+    dplyr::arrange(rlang::UQ(as.name('official_name'))) %>%
     dplyr::filter(official_name == 'homo_sapiens')
 
   # downloading Homo sapiens
-  string_db <- STRINGdb$new(version         = version,
-                            species         = 9606,
-                            score_threshold = score_threshold)
+  string_db <- STRINGdb::STRINGdb$new(version         = version,
+                                      species         = 9606,
+                                      score_threshold = score_threshold)
 
   # Load to memory the database (by calling a method)
   tp53 <- string_db$mp( "tp53" )

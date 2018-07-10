@@ -9,7 +9,7 @@
   network.options = network.options.default(), ...)
 }
 \arguments{
-\item{xdata}{input data as a matrix}
+\item{xdata}{input data as a Matrix}
 
 \item{ydata}{response data compatible with glmnet}
 

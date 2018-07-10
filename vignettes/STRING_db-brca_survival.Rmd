@@ -138,7 +138,7 @@ colnames(string.network) <- names(all.proteins.ixs)
 rownames(string.network) <- names(all.proteins.ixs)
 
 degree.network <- string.network %>% {
-  colSums(.) + rowSums(.)
+  Matrix::colSums(.) + Matrix::rowSums(.)
   }
 ```
 

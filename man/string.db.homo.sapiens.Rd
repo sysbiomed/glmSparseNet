@@ -10,7 +10,9 @@ string.db.homo.sapiens(version = "10", score_threshold = 0,
 \arguments{
 \item{version}{version of the database to use}
 
-\item{scrore_threshold}{remove}
+\item{score_threshold}{remove scores below threshold}
+
+\item{remove.text}{remove text mining-based scores}
 }
 \value{
 a data.frame with rows representing an interaction between two proteins, and columns
