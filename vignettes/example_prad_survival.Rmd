@@ -83,7 +83,7 @@ ydata <- sample.PRAD.survival$ydata
 # Fit models
 
 ```{r fit.show}
-fitted <- network.cv.glmnet(xdata, Surv(ydata$time, ydata$status), network = 'correlation', family = 'cox', nlambda = 1000)
+fitted <- cv.glmSparseNet(xdata, Surv(ydata$time, ydata$status), network = 'correlation', family = 'cox', nlambda = 1000)
 ```
 
 # Results of Cross Validation

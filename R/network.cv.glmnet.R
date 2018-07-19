@@ -17,8 +17,8 @@
 #'
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 20)
-#' network.cv.glmnet(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian')
-#' network.cv.glmnet(xdata, rnorm(nrow(xdata)), 'covariance', family = 'gaussian')
+#' cv.glmSparseNet(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian')
+#' cv.glmSparseNet(xdata, rnorm(nrow(xdata)), 'covariance', family = 'gaussian')
 #'
 #' #
 #' #
@@ -39,13 +39,13 @@
 #' xdata.valid <- xdata[, rownames(xdata@colData)[valid.ix]]
 #' ydata.valid <- xdata.valid@colData[,c('surv_event_time', 'vital_status')]
 #' colnames(ydata.valid) <- c('time', 'status')
-#' network.cv.glmnet(xdata.valid,
+#' cv.glmSparseNet(xdata.valid,
 #'                   ydata.valid,
 #'                   family          = 'cox',
 #'                   network         = 'correlation',
 #'                   experiment.name = 'RNASeq2GeneNorm')
-setGeneric('network.cv.glmnet', function(xdata, ydata, network, network.options = network.options.default(), ...) {
-  stop('wrong arguments, see help for network.cv.glmnet and cv.glmnet')
+setGeneric('cv.glmSparseNet', function(xdata, ydata, network, network.options = network.options.default(), ...) {
+  stop('wrong arguments, see help for cv.glmSparseNet and cv.glmnet')
 })
 
 
@@ -60,9 +60,9 @@ setGeneric('network.cv.glmnet', function(xdata, ydata, network, network.options 
 #' @return an object just as glmnet
 #' @export
 #'
-setMethod('network.cv.glmnet', signature(xdata = 'matrix'), function(xdata, ydata, network,
+setMethod('cv.glmSparseNet', signature(xdata = 'matrix'), function(xdata, ydata, network,
                                                                      network.options = network.options.default(), ...) {
-  return(network.glmnet.private(glmnet::cv.glmnet, xdata, ydata, network, network.options = network.options, ...))
+  return(glmSparseNet.private(glmnet::cv.glmnet, xdata, ydata, network, network.options = network.options, ...))
 })
 
 #' Calculate GLM model with network-based regularization
@@ -76,10 +76,10 @@ setMethod('network.cv.glmnet', signature(xdata = 'matrix'), function(xdata, ydat
 #'
 #' @return an object just as glmnet
 #' @export
-setMethod('network.cv.glmnet', signature(xdata = 'MultiAssayExperiment'), function(xdata, ydata, network,
+setMethod('cv.glmSparseNet', signature(xdata = 'MultiAssayExperiment'), function(xdata, ydata, network,
                                                                                    experiment.name = NULL,
                                                                                    network.options = network.options.default(), ...) {
-  return(network.glmnet.private(glmnet::cv.glmnet, xdata, ydata, network, experiment.name = experiment.name , network.options = network.options, ...))
+  return(glmSparseNet.private(glmnet::cv.glmnet, xdata, ydata, network, experiment.name = experiment.name , network.options = network.options, ...))
 })
 
 
@@ -93,9 +93,9 @@ setMethod('network.cv.glmnet', signature(xdata = 'MultiAssayExperiment'), functi
 #'
 #' @return an object just as glmnet
 #' @export
-setMethod('network.cv.glmnet', signature(xdata = 'SummarizedExperiment'), function(xdata, ydata, network,
+setMethod('cv.glmSparseNet', signature(xdata = 'SummarizedExperiment'), function(xdata, ydata, network,
                                                                                    network.options = network.options.default(), ...) {
-  return(network.glmnet.private(glmnet::cv.glmnet, xdata, ydata, network, network.options = network.options, ...))
+  return(glmSparseNet.private(glmnet::cv.glmnet, xdata, ydata, network, network.options = network.options, ...))
 })
 
 

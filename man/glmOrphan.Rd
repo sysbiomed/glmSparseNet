@@ -19,12 +19,12 @@ glmOrphan(xdata, ydata, network, network.options = network.options.default(),
 \item{...}{parameters that glmnet accepts}
 }
 \value{
-see network.glmnet
+see glmNetSparse
 }
 \description{
 This function overrides the `trans.fun` options in `network.options` with
 an heuristic described in Veríssimo et al. that penalizes nodes with high degree.
 }
 \seealso{
-network.glmnet
+glmNetSparse
 }

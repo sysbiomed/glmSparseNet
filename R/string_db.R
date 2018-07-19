@@ -19,11 +19,10 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
   # downloading Homo sapiens
   string_db <- STRINGdb::STRINGdb$new(version         = version,
                                       species         = 9606,
-                                      score_threshold = score_threshold)
+                                      score_threshold = 0)
 
   # Load to memory the database (by calling a method)
   tp53 <- string_db$mp( "tp53" )
-  atm  <- string_db$mp( "atm" )
 
   # get all interactions
   all.interactions <- as.tbl(string_db$get_interactions(string_db$proteins$protein_external_id))
@@ -32,11 +31,123 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
   if (remove.text) {
     col.ixs <- colnames(all.interactions) %>%
     {
-      !. %in% .[grep('text', .)]
+      !. %in% c('combined_score', .[grep('text', .)])
     }
   } else {
-    col.ixs <- seq(ncol(all.interactions))
+    col.ixs <- array(TRUE, ncol(all.interactions))
+  }
+  col.ixs <- col.ixs & (!colnames(all.interactions) %in% 'combined_score')
+
+  # columns without from and to
+  col.vals.ixs <- col.ixs & (!colnames(all.interactions) %in% c('from', 'to'))
+
+  # remove all entries below threshold
+  mat <- as.matrix(all.interactions[,col.vals.ixs]) / 1000
+  mat[mat < (score_threshold / 1000)] <- 0
+
+  #
+  # Calculate new combined score
+  #  https://string-db.org/help/faq/#how-are-the-scores-computed
+
+  p <- 0.041
+  combined.score <- mat %>%
+    #
+    # Removing prior per channel
+    apply( 2, function(ix) {
+      res <- (ix - p) / (1 - p)
+      res[ix == 0] <- 0
+      return(res)
+    }) %>% {
+      #
+      # Normalize Co-Occurence and Text mining scores
+      #  https://string-db.org/help/faq/#how-are-the-scores-computed
+
+      for (ix in c('cooccurence', 'textmining', 'textmining_transferred')) {
+        if (ix %in% colnames(.)) {
+          .[, ix] <- .[, ix] * (1 - .[, 'homology'])
+        }
+      }
+      .[,!colnames(.) %in% c('homology')]
+    } %>% {
+      #
+      # Combine the scores of the channels
+      #
+      # 1 - factor(1 - S_i)
+      res <- (1 - .[,1])
+      for (ix in seq(ncol(.))[-1]) {
+        res <- res * (1 - .[,ix])
+      }
+      1 - res
+    } %>% {
+      #
+      # Add prior (once)
+      . + p * (1 - .)
+    } %>% {
+      #
+      # Reconvert to integer
+      floor(. * 1000)
+    }
+
+  #
+  # Refilter combined score
+
+  all.interactions$combined_score.new <- combined.score
+  interactions <- all.interactions %>% dplyr::filter(combined_score.new >= score_threshold)
+
+  #
+  # Build sparse matrix
+
+  merged.prot <- sort(unique(c(interactions$from, interactions$to)))
+
+  interactions$from <- readr::parse_factor(interactions$from, merged.prot)
+  interactions$to   <- readr::parse_factor(interactions$to, merged.prot)
+
+  levels(interactions$from) <- levels(interactions$from) %>% { gsub('9606\\.', '', .) }
+  levels(interactions$to)   <- levels(interactions$to) %>% { gsub('9606\\.', '', .) }
+
+  i <- as.numeric(interactions$from)
+  j <- as.numeric(interactions$to)
+
+  # Create new sparse matrix with p x p dimensions (p = genes)
+  new.mat <- Matrix::sparseMatrix(i        = i,
+                                  j        = j,
+                                  x        = interactions$combined_score.new,
+                                  dims     = array(length(merged.prot), 2),
+                                  dimnames = list(levels(interactions$from),
+                                                  levels(interactions$to)))
+
+  return(list(network = new.mat, interactions = all.interactions))
+}
+
+#' Build gene network from peptide ids
+#'
+#' This can reduce the dimension of the original network, as there may not be a mapping
+#' between peptide and gene id
+#'
+#' @param protein.network matrix with colnames and rownames as ensembl peptide id (same order)
+#' @param use.external.names use external gene names instead of ensembl gene id
+#'
+#' @return a new matrix with gene ids instead of peptide ids. The size of matrix can be different as
+#' there may not be a mapping or a peptide mapping can have multiple genes.
+#' @export
+#' @seealso string.db.homo.sapiens
+build.string.gene.network <- function(protein.network, use.external.names = FALSE) {
+
+  # get mapping from ensembl protein-gene
+  gene.tbl <- protein.to.ensembl.gene.names(colnames(protein.network))
+
+  # create new matrix with columns as genes
+  new.mat <- protein.network[gene.tbl$ensembl_peptide_id, gene.tbl$ensembl_peptide_id]
+
+  # change name of rows and columns to gene (either ensembl gene id or gene name)
+  if (use.external.names) {
+    colnames(new.mat) <- gene.tbl$external_gene_name
+    rownames(new.mat) <- gene.tbl$external_gene_name
+  } else {
+    colnames(new.mat) <- gene.tbl$ensembl_gene_id
+    rownames(new.mat) <- gene.tbl$ensembl_gene_id
   }
 
-  return(all.interactions[, col.ixs])
+  # return the new matrix
+  return(new.mat)
 }

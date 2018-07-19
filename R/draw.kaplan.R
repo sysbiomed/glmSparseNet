@@ -16,7 +16,6 @@
 #'
 #' A list with plot, p-value and kaplan-meier object
 #'
-#' @importFrom dplyr %>%
 #' @export
 #'
 #' @examples

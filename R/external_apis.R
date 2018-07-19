@@ -15,7 +15,8 @@ gene.names <- function(ensembl.genes) {
     mart <- loose.rock::run.cache(biomaRt::useMart,
                                   marts$biomart[index],
                                   'hsapiens_gene_ensembl',
-                                  cache.prefix = 'biomart')
+                                  cache.prefix = 'biomart',
+                                  show.message = FALSE)
     results <- biomaRt::getBM(attributes = c("external_gene_name", "ensembl_gene_id"),
                               filters = "ensembl_gene_id", values = ensembl.genes,
                               mart = mart)
@@ -46,8 +47,6 @@ gene.names <- function(ensembl.genes) {
 #' limit between 0 and 1 for cprob and -1 and 1 for npmi
 #'
 #' @export
-#'
-#' @importFrom dplyr %>%
 #'
 #' @examples
 #' hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))

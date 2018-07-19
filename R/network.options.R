@@ -93,7 +93,7 @@ calc.penalty <- function(xdata, penalty.type, network.options = network.options.
                                    #
                                    n.cores = network.options$n.cores)
     } else {
-      stop('Unkown network type, see documentation of network.glmnet')
+      stop('Unkown network type, see documentation of glmSparseNet')
     }
   } else {
     stop(sprintf('Centrality method not recognised: %d', network.options$centrality))
@@ -110,8 +110,8 @@ calc.penalty <- function(xdata, penalty.type, network.options = network.options.
 #' @export
 #'
 #' @examples
-#' degree.heuristic(rnorm(1:10))
-degree.heuristic <- function(x) {
+#' hub.heuristic(rnorm(1:10))
+hub.heuristic <- function(x) {
   tmp.fun <- function(x,
                       a = .20 - 1,
                       b = -1,

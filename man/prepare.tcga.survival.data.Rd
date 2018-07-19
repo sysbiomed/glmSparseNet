@@ -5,8 +5,8 @@
 \title{Prepare FPKM data from TCGA project (specific tissue)}
 \usage{
 prepare.tcga.survival.data(project = "brca",
-  tissue.type = "primary.solid.tumor", handle.duplicates = "keep_first",
-  coding.genes = FALSE)
+  tissue.type = "primary.solid.tumor", input.type = "rna.seq",
+  handle.duplicates = "keep_first", coding.genes = FALSE)
 }
 \arguments{
 \item{project}{tcga project that has a package avaliable see https://github.com/averissimo/tcga.data}
@@ -42,4 +42,5 @@ It will:
 #                 '2016.12.15-brca/brca.data_1.0.tar.gz'))
 # # Run
 # prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first')
+aa <- prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first', input.type = 'dna')
 }

@@ -28,7 +28,10 @@
 #' #                 '2016.12.15-brca/brca.data_1.0.tar.gz'))
 #' # # Run
 #' # prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first')
-prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.solid.tumor', handle.duplicates = 'keep_first',
+#' aa <- prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first', input.type = 'dna')
+prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.solid.tumor',
+                                       input.type = 'rna.seq',
+                                       handle.duplicates = 'keep_first',
                                        coding.genes = FALSE) {
 
   package.name <- paste0(project, '.data')
@@ -40,27 +43,36 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
 
   # An environment is necessary to adhere to best practices of ?data
   dat.env <- new.env()
-  utils::data("fpkm.per.tissue", package = package.name, envir = dat.env)
-  fpkm.per.tissue <- dat.env$fpkm.per.tissue
 
-  futile.logger::flog.info('Loading data from %s package', package.name)
-  futile.logger::flog.info('Types of tissue:\n * %s',
-                           paste(sprintf('%s (%d)',
-                                         names(fpkm.per.tissue),
-                                         sapply(fpkm.per.tissue, ncol)), collapse = '\n * '))
+  if (input.type == 'rna.seq') {
+    utils::data("fpkm.per.tissue", package = package.name, envir = dat.env)
+    fpkm.per.tissue <- dat.env$fpkm.per.tissue
 
-  #
-  # Normalize
+    futile.logger::flog.info('Loading data from %s package', package.name)
+    futile.logger::flog.info('Types of tissue:\n * %s',
+                             paste(sprintf('%s (%d)',
+                                           names(fpkm.per.tissue),
+                                           sapply(fpkm.per.tissue, ncol)), collapse = '\n * '))
+    #
+    # Normalize
 
-  xdata.raw <- apply(fpkm.per.tissue[[tissue.type]], 1, function(row) {
-    if (max(abs(row)) == 0) {
-      return(row)
-    }
-    return(row / max(abs(row)))
-  })
+    xdata.raw <- apply(fpkm.per.tissue[[tissue.type]], 1, function(row) {
+      if (max(abs(row)) == 0) {
+        return(row)
+      }
+      return(row / max(abs(row)))
+    })
+
+    # remove genes that don't have any variability
+    sd.xdata  <- sapply(seq(ncol(xdata.raw)), function(ix) { stats::sd(xdata.raw[,ix]) })
+  } else if (input.type == 'dna') {
+    utils::data("mutation", package = package.name, envir = dat.env)
+    xdata.raw <- t(dat.env$mutation$count)
+  }
 
   # remove genes that don't have any variability
   sd.xdata  <- sapply(seq(ncol(xdata.raw)), function(ix) { stats::sd(xdata.raw[,ix]) })
+
   #
   futile.logger::flog.info('Non-expressed genes to be removed (from %d total genes) : %d', ncol(xdata.raw), sum(sd.xdata == 0))
   futile.logger::flog.info('  Remaining genes : %d', ncol(xdata.raw) - sum(sd.xdata == 0))

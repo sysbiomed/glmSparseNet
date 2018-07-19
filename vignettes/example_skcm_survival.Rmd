@@ -86,7 +86,7 @@ ydata <- sample.SKCM.survival$ydata
 # Fit models
 
 ```{r fit}
-fitted <- network.cv.glmnet(xdata, Surv(ydata$time, ydata$status), network = 'correlation', family = 'cox')
+fitted <- cv.glmSparseNet(xdata, Surv(ydata$time, ydata$status), network = 'correlation', family = 'cox')
 ```
 
 # Results of Cross Validation

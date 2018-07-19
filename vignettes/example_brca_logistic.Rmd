@@ -103,7 +103,7 @@ ydata <- sample.BRCA.logistic$ydata
 # Fit models
 
 ```{r fit.show}
-fitted <- network.cv.glmnet(xdata, ydata, network = 'correlation', family = 'binomial', nlambda = 1000)
+fitted <- cv.glmSparseNet(xdata, ydata, network = 'correlation', family = 'binomial', nlambda = 1000)
 ```
 
 # Results of Cross Validation

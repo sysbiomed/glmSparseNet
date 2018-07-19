@@ -14,8 +14,8 @@ output:
 #  %\VignetteEngine{knitr::rmarkdown}
 #  %\VignetteEncoding{UTF-8}
 params:
-  project: 'prad' # skcm prad brca
-  tissue: 'primary.solid.tumor' # primary.solid.tumor metastatic solid.tissue.normal
+  project: 'skcm' # skcm prad brca
+  tissue: 'metastatic' # primary.solid.tumor metastatic solid.tissue.normal
   coding.genes: !r TRUE
   degree.unweighted: !r TRUE
   degree.correlation: 'pearson'
@@ -31,12 +31,12 @@ params:
   subset: !r Inf
   train: !r .8
   # number of times that training set is tested
-  ntimes: !r 500
+  ntimes: !r 10
   # target variables that models should output
-  target.vars: !r list(classic.cv = 28, degree.cv = 42, orphan.cv = 70)
+  target.vars: !r list(classic.cv = 28) # list(classic.cv = 28, degree.cv = 42, orphan.cv = 70)
   #
   seed: !r 1985
-  mc.cores: !r 9
+  mc.cores: !r 12
   #
   calc.params.old: !r FALSE
 ---
@@ -284,7 +284,7 @@ prepare.tcga.survival.data(params$project, params$tissue, handle.duplicates = pa
 
 
 ```{r load.data, include=FALSE}
-my.data <- run.cache(prepare.tcga.survival.data, params$project, params$tissue, handle.duplicates = params$handle.duplicates,
+my.data <- run.cache(prepare.tcga.survival.data, params$project, params$tissue, handle.duplicates = params$handle.duplicates, input.type = 'mutation',
                                 #
                                 cache.prefix = 'tcga-data',
                                 coding.genes = params$coding.genes,
@@ -379,7 +379,7 @@ if (params$degree.type == 'oldie') {
   #
 } else if (params$degree.type == 'string') {
   my.env <- new.env()
-  load('../saves/degree-string.RData', envir = my.env)
+  load('../../network.cox-big.files/saves/degree-string.RData', envir = my.env)
   if (params$degree.unweighted) {
     degree.string <- my.env$degree_uw
   } else {
@@ -702,7 +702,7 @@ ggplot(transf.d) +
 # Model Inference
 
 ```{r model_declaration, include=FALSE}
-my.glmnet <- function(prefix, xdata.train, ydata.train, xdata.ix, xdata.train.digest, penalty.factor, target, lambda.min.ratio = .001, show.messages = FALSE) {
+my.glmnet <- function(prefix, xdata.train, ydata.train, xdata.ix, xdata.train.digest, penalty.factor, target, lambda.min.ratio = .001, show.messages = FALSE, force.recalc = FALSE) {
   new.model <- run.cache(glmnet,
                          xdata.train[,xdata.ix], Surv(ydata.train[,1], ydata.train[,2]), 
                          family           ='cox', 
@@ -712,23 +712,23 @@ my.glmnet <- function(prefix, xdata.train, ydata.train, xdata.ix, xdata.train.di
                          standardize      = F,
                          penalty.factor   = penalty.factor,
                          #
-                         force.recalc = F,
+                         force.recalc = force.recalc,
                          cache.prefix = gsub('_', '.', gsub('_old', '', prefix)),
                          cache.digest = list(xdata.train.digest),
                          show.message = show.messages)
-
-if (any(new.model$df == target)) {
-  var.ix <- which(new.model$df == target)
-} else if (any(new.model$df > params$target.vars)) {
-  new.target <- min(new.model$df[new.model$df > target])
-  var.ix <- which(new.model$df == new.target)
-} else {
-  new.target <- max(new.model$df[new.model$df < target])
-  var.ix <- which(new.model$df == new.target)
-}
+  
+  if (any(new.model$df == target)) {
+    var.ix <- which(new.model$df == target)
+  } else if (any(new.model$df > target)) {
+    new.target <- min(new.model$df[new.model$df > target])
+    var.ix <- which(new.model$df == new.target)
+  } else {
+    new.target <- max(new.model$df[new.model$df < target])
+    var.ix <- which(new.model$df == new.target)
+  }
   new.target.lambda <- new.model$lambda[var.ix[sort(var.ix, decreasing = T, index.return = T)$ix[1]]]
-  new.coef <- as.vector(coef(new.model, s = new.target.lambda))
-  names(new.coef) <- colnames(xdata.train[,xdata.ix])
+  new.coef          <- as.vector(coef(new.model, s = new.target.lambda))
+  names(new.coef)   <- colnames(xdata.train[,xdata.ix])
   return(list(model = new.model, lambda = new.target.lambda, coef = new.coef))
 }
 ```
@@ -826,12 +826,15 @@ for (target.name in names(params$target.vars)) {
 
 outer.result <- mclapply(seq_along(glmnet.params), function(ix) {
 #outer.result <- lapply(seq_along(glmnet.params), function(ix) {
+  # flog.info('ix: %d', ix)
   el       <- glmnet.params[[ix]]
   ix.name  <- sprintf('%s.%s.%d', el$name, el$target.name, el$target)
   ix.cache <- sprintf('%s_models', el$name)
+  # flog.info('ix: %s', ix.cache)
+  # flog.info('ix: %s', ix.name)
   #
   suppressWarnings(
-  result  <- my.glmnet(ix.cache, xdata.train, ydata.train, xdata.ix, xdata.train.digest, el$penalty, el$target, show.messages = F)
+  result  <- my.glmnet(ix.cache, xdata.train, ydata.train, xdata.ix, xdata.train.digest, el$penalty, el$target, show.messages = T)
   )
   
   if (sum(result$coef != 0) < (target - 5)) {
@@ -946,12 +949,9 @@ km.name <- function(title, alpha, is.network = NULL) {
 ```
 
 ```{r calc.km, include=FALSE}
-my.draw.kaplan <- function(coef.l, plot.title, test.set = F) { 
-  if (test.set) {
-    return(draw.kaplan(coef.l, xdata.test[,xdata.ix], ydata.test, plot.title = plot.title, legend.outside = F, ylim = c(0,1))) 
-  } else {
-    draw.kaplan(coef.l, xdata.train[,xdata.ix], ydata.train, plot.title = plot.title, legend.outside = F, ylim = c(0,1))
-  }
+my.draw.kaplan <- function(coef.l, plot.title, xdata, ydata, xdata.ix) { 
+  return(draw.kaplan(coef.l, xdata[,xdata.ix], ydata, 
+                     plot.title = plot.title, legend.outside = F, ylim = c(0,1)))
 }
 
 #
@@ -959,21 +959,23 @@ km.train <- list()
 km.test  <- list()
 #
 for (ix.name in names(coefs)) {
-  km.train[[ix.name]] <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Train set')
-  km.test[[ix.name]]  <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Test set', test.set = T)
+  km.train[[ix.name]] <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Train set', xdata.train, ydata.train, xdata.ix)
+  km.test[[ix.name]]  <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Test set', xdata.test, ydata.test, xdata.ix)
 }
 ```
 
-```{r plot.km, fig.height= 40, echo=FALSE, fig.width=10}
-my.km <- list()
+```{r plot.km, echo=FALSE}
+my.km.train <- list()
+my.km.test <- list()
 ix <- 1
 for (ix.name in names(coefs)) {
-  my.km[[ix]] <- km.train[[ix.name]]$plot + km.name('Train', params$alpha, ix.name)
-  my.km[[ix + 1]]  <- km.test[[ix.name]]$plot  + km.name('Test',  params$alpha, ix.name)
-  ix <- ix + 2
+  my.km.train[[ix]] <- km.train[[ix.name]]$plot + km.name('Train', params$alpha, ix.name)
+  my.km.test[[ix]]  <- km.test[[ix.name]]$plot  + km.name('Test',  params$alpha, ix.name)
+  ix <- ix + 1
 }
 
-multiplot(plotlist = my.km, ncol = 2, layout = matrix(seq_along(my.km), ncol = 2, byrow = T))
+multiplot(plotlist = my.km.test, ncol = 1, layout = matrix(seq_along(my.km.test), byrow = T))
+multiplot(plotlist = my.km.train, ncol = 1, layout = matrix(seq_along(my.km.train), byrow = T))
 ```
 
 ## C-Index
@@ -1001,11 +1003,18 @@ flog.info('C-index for train set:')
 # Train
 #
 
-fit.risk <- function(coef.v, xdata, ydata, model.name, show.message = FALSE, n.cores = params$mc.cores) {
+fit.risk <- function(coef.v, xdata, ydata, model.name, show.message = FALSE, n.cores = 1) {
   # fitted.risk  <- as.vector(predict(models$glmnet, newx = xdata.train[,xdata.ix], s = lambdas$glmnet, type = 'response')) 
   fitted.risk <- exp(as.vector(xdata[,xdata.ix] %*% coef.v))
-  c.res <- run.cache(survcomp::concordance.index,fitted.risk, ydata[,'time'], ydata[,'status'], method="noether", show.message = F)
-  if (show.message) flog.info(' * %s: %f (se = %f | pvalue = %f)', model.name, c.res$c.index, c.res$se, c.res$pvalue)
+  c.res <- run.cache(survcomp::concordance.index, fitted.risk, ydata[,'time'], ydata[,'status'] * 1, method="noether", show.message = F)
+  
+  if (is.na(c.res$c.index)) {
+    warning(sprintf('Could not calculate c-index, probably to few events -- event: %d -- censored %d\n', 
+                    sum(ydata[,'status']), sum(!ydata[,'status'])))
+    return(-1)
+  }
+  #if (show.message)
+  #  flog.info(' * %s: %f (se = %f | pvalue = %f)', model.name, c.res$c.index, c.res$se, c.res$pvalue)
   return(c.res$c.index)
 }
 
@@ -1022,7 +1031,7 @@ flog.info('')
 flog.info('C-index for test set:')
 
 for (ix.name in names(coefs)) {
-  c.index.test[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name,  show.message = TRUE)
+  c.index.test[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.test, ydata.test, ix.name,  show.message = TRUE)
 }
 
 ```
@@ -1077,28 +1086,12 @@ for (ix.name in names(coefs)){
 colnames(non.zero.df.result)[2] <- sprintf('coef.%s', first.name)
 #
 non.zero.df.out <- cbind(non.zero.df.result, degree = as.vector(original.penalty.factor[non.zero.df.result$gene.id]))
+gene.ids <- non.zero.df.out$gene.id
 ```
 
 
 ```{r non.zero, include=FALSE}
-this.name <- function(this.coef) {
-  tryCatch({
-    marts <- biomaRt::listMarts()
-    index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
-    mart <- biomaRt::useMart(marts$biomart[index])
-    mart <- run.cache(biomaRt::useMart,marts$biomart[index], 'hsapiens_gene_ensembl', 
-                                 cache.prefix = 'biomart')
-    results <- biomaRt::getBM(attributes = c("external_gene_name", "ensembl_gene_id"),
-                     filters = "ensembl_gene_id", values = this.coef,
-                     mart = mart)
-    return(arrange(results, external_gene_name))
-  }, error = function(msg) {
-    flog.warn('Error when finding gene names:\n\t%s', msg)
-  })
-  return(data.frame(ensembl_gene_id = this.coef, external_gene_name = this.coef, stringsAsFactors = FALSE))
-  
-}
-gene.names <- this.name(non.zero.df.out$gene.id)
+gene.names <- gene.names(gene.ids)
 new.t <- non.zero.df.out
 ixs <- gene.names[unlist(sapply(new.t$gene.id, function(s) { which(gene.names$ensembl_gene_id == s) })),]
 new.t$gene.id[new.t$gene.id %in% ixs$ensembl_gene_id] <- ixs$external_gene_name
@@ -1165,57 +1158,9 @@ knitr::kable(head(non.zero.df.out, n = 30))
 ## Hallmarks of Cancer links
 
 ```{r hallmarks, fig.width=10, warning=FALSE}
-base.url <- sprintf('http://chat.lionproject.net/chartdata?measure=%s&hallmarks=%s', 'count', 'full')
-# base.url <- 'http://chat.lionproject.net/?measure=npmi&chart_type=doughnut&hallmarks=full'
+my.hallmarks <- hallmarks(non.zero.df.out$gene.name)
 
-all.genes <- sort(unique(non.zero.df.out$gene.name))
-
-call.url <- sprintf('%s&q=%s', base.url, paste(all.genes, collapse = '&q='))
-
-lines <- run.cache(read_lines, url(call.url), cache.digest = list(digest.cache(call.url)))
-item_group <- cumsum(grepl("^[A-Za-z0-9\\._,-]+\tcount", lines))
-all.items <- list()
-col.names <- c()
-clean.rows <- lapply(split(lines, item_group), function(ix) { 
-    item.id <- gsub("\tcount","", ix[1])
-    # prepare results
-    item.val <- list()
-    my.names <- c('gene.name')
-    my.values <- c(item.id)
-    for (line in ix[-1]) {
-      if (line == '') {
-        next
-      }
-      my.split <- strsplit(line, '\t')[[1]]
-      # flog.info('  %s -- %s',my.split[1], my.split[2] )
-      my.names  <- c(my.names, my.split[1])
-      my.values <- c(my.values, my.split[2])
-      col.names <<- c(col.names, my.split[[1]])
-    }
-    names(my.values) <- my.names
-    all.items[[item.id]] <- my.values
-})
-
-col.names <- unique(col.names)
-df <- data.frame()
-for (ix in clean.rows) {
-  # convert to numeric
-  new.ix <- as.numeric(ix[names(ix) != 'gene.name'])
-  # set previous names
-  names(new.ix) <- names(ix)[names(ix) != 'gene.name']
-  # create temporary data frame with controlled column names
-  temp.df <- data.frame(t(new.ix[col.names]))
-  rownames(temp.df) <- ix['gene.name']
-  df <- rbind(df, temp.df)
-}
-
-df.scaled <- t(scale(t(df)))
-na.ix <- which(apply(df.scaled, 1, function(col) {
-  return(all(is.nan(col)))
-}))
-df.scaled <- df # use counts
-
-df.no.hallmarks <- data.frame(gene.name = sort(rownames(df.scaled)[na.ix]), stringsAsFactors = FALSE)
+df.no.hallmarks <- data.frame(gene.name = my.hallmarks$no.hallmakrs, stringsAsFactors = FALSE)
 
 for (ix.name in names(coefs)) {
   df.no.hallmarks[, ix.name] <- 1 - (df.no.hallmarks$gene.name %in% non.zero.df.out[!is.na(non.zero.df.out[[paste0('coef.',ix.name)]]), 'gene.name']) * 1
@@ -1226,8 +1171,8 @@ ggplot(melt(df.no.hallmarks, id.vars = 'gene.name'), aes(gene.name,variable, fil
 ```
 
 ```{r biclust, fig.height=10}
+df.scaled <- my.hallmarks$hallmarks
 df.scaled <- data.frame(gene.name = rownames(df.scaled), df.scaled, stringsAsFactors = FALSE)
-df.scaled <- df.scaled[-na.ix,]
 
 for (ix.name in names(coefs)) {
   df.scaled[, ix.name] <- (df.scaled$gene.name %in% non.zero.df.out[!is.na(non.zero.df.out[[paste0('coef.',ix.name)]]), 'gene.name']) * 1
@@ -1245,13 +1190,15 @@ for (ix.name in names(coefs)) {
     ggplot(df.melt, aes(gene.name,variable, fill=value)) + 
       geom_raster() +
       theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-      ggtitle(ix.name)
+      ggtitle(ix.name) +
+      ggplot2::xlab('External Gene Name') + ggplot2::ylab('') +
+        ggplot2::scale_fill_gradientn(colours = rev(grDevices::topo.colors(2)))
   )
-  my.mat <- df.scaled.filter[,-1]
-  tryCatch({
-  biclust(as.matrix(my.mat), method=BCBimax(), minr=2, minc=2, number=100) %>%
-    drawHeatmap(x = as.matrix(my.mat), bicResult = ., number = 1) # shown in picture below
-  }, error = function(err) { flog.error('Error: %s', err)})
+  # my.mat <- df.scaled.filter[,-1]
+  # tryCatch({
+  # biclust(as.matrix(my.mat), method=BCBimax(), minr=2, minc=2, number=100) %>%
+  #   drawHeatmap(x = as.matrix(my.mat), bicResult = ., number = 1) # shown in picture below
+  # }, error = function(err) { flog.error('Error: %s', err)})
 }
 ```
 
@@ -1385,11 +1332,11 @@ call.results <- function(seed, xdata, ydata, train.perc, subset, penalty.factor.
   c.index.test  <- list()
   
   for (ix.name in names(coefs)) {
-    km.train[[ix.name]] <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Train set')$pvalue
-    km.test[[ix.name]]  <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Test set', test.set = T)$pvalue
+    km.train[[ix.name]] <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Train set', xdata.train, ydata.train, xdata.ix)$pvalue
+    km.test[[ix.name]]  <- my.draw.kaplan(list(ix.name = coefs[[ix.name]]), plot.title = 'Test set', xdata.test, ydata.test, xdata.ix)$pvalue
     #
     c.index.train[[ix.name]] <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name, n.cores = 1, show.message = FALSE)
-    c.index.test[[ix.name]]  <- fit.risk(coefs[[ix.name]], xdata.train, ydata.train, ix.name, n.cores = 1, show.message = FALSE)
+    c.index.test[[ix.name]]  <- fit.risk(coefs[[ix.name]], xdata.test, ydata.test, ix.name, n.cores = 1, show.message = FALSE)
   }
   
   return(list(metrics = list(km.train      = km.train, 
@@ -1406,7 +1353,7 @@ call.results <- function(seed, xdata, ydata, train.perc, subset, penalty.factor.
 if (params$train == 1) {
   flog.info("Train and test sets are the same, won't calculate %d times with random seeds", params$ntimes)
 } else {
-  rm(xdata.train, xdata.test, ydata.train, ydata.test)
+  suppressWarnings(rm(xdata.train, xdata.test, ydata.train, ydata.test))
   set.seed(params$seed)
   seed.vec <- sample(1000 + (max(c(1:1e7,params$ntimes))))[1:params$ntimes]
   
@@ -1416,11 +1363,12 @@ if (params$train == 1) {
                      penalty.factor.degree.new, 
                      penalty.factor.degree.old, 
                      penalty.factor.orphan,
+                     
                      #
                      cache.digest = list(NULL, xdata.digest.cache, ydata.digest.cache),
                      cache.prefix = 'big-diff'))
   #}, mc.cores = 1, mc.allow.recursive = FALSE)
-  }, mc.cores = params$mc.cores, mc.allow.recursive = FALSE)
+  }, mc.cores = min( params$mc.cores), mc.allow.recursive = FALSE)
   
   #if (params$ntimes == 1) {
   #  ntimes.results <- list(ntimes.results)
@@ -1447,7 +1395,10 @@ if (params$train == 1) {
 
 ```{r c.index.iter, echo=FALSE, fig.height=20}
 if (nrow(big.df) > 0) {
-  ggplot(filter(big.df, metric %in% c('C-Index (Train set)', 'C-Index (Test set)'))) +
+  as.tbl(big.df) %>%
+    filter(metric %in% c('C-Index (Train set)', 'C-Index (Test set)')) %>%
+    filter(values >= 0) %>%
+    ggplot() +
       geom_freqpoly(aes(values, color = model), alpha = .75, bins = 100) + 
       facet_wrap(model ~ metric, ncol = 2) +
       theme_minimal() + theme(legend.position = 'top')  
@@ -1458,20 +1409,68 @@ if (nrow(big.df) > 0) {
 
 Separated by high and low risk groups
 
-```{r pvalue.itre, echo=FALSE, fig.height=20}
+```{r pvalue.itre, echo=FALSE}
 if (nrow(big.df) > 0) {
-  ggplot(filter(big.df, metric %in% c('Log-rank (Test set)', 'Log-rank (Train set)'))) +
-    geom_freqpoly(aes(values, color = model), alpha = .75, bins = 300) + 
-    facet_wrap(model ~ metric, ncol = 2) +
-    ggtitle('Distribution of Log-Rank up until 0.05') +
-    theme_minimal() + theme(legend.position = 'top') + coord_cartesian(xlim = c(0, 0.1))
   
-  ggplot(filter(big.df, metric %in% c('Log-rank (Test set)', 'Log-rank (Train set)'))) +
-    geom_freqpoly(aes(values, color = model), alpha = .75, bins = 300) + 
-    facet_wrap(model ~ metric, ncol = 2) +
-    ggtitle('Full distribution Log-rank') +
-    theme_minimal() + theme(legend.position = 'top')
+  big.df %>%
+    filter(model %in% c('glmnet.classic.cv.28', 'degree_new.classic.cv.28', 'orphan.classic.cv.28')) %>%
+    filter(metric %in% c('Log-rank (Test set)')) %>%
+    ggplot() +
+      geom_freqpoly(aes(values, color = model), alpha = .75, bins = 300) + 
+      facet_wrap(model ~ metric, ncol = 1) +
+      ggtitle('Distribution of Log-Rank up until 0.05') +
+      theme_minimal() + theme(legend.position = 'top') + coord_cartesian(xlim = c(0, 0.1))
+  
+  big.df %>%
+    filter(model %in% c('glmnet.classic.cv.28', 'degree_new.classic.cv.28', 'orphan.classic.cv.28')) %>%
+    filter(metric %in% c('Log-rank (Test set)')) %>%
+    ggplot() +
+      geom_freqpoly(aes(values, color = model), alpha = .75, bins = 30) + 
+      facet_wrap(model ~ metric, ncol = 1) +
+      ggtitle('Full distribution Log-rank') +
+      theme_minimal() + theme(legend.position = 'top')
 }
 ```
+
+```{r}
+consensus <- list()
+
+for (ix in ntimes.results) {
+  for (ix.2 in names(ix$coefs)) {
+    consensus[[ix.2]] <- unique(c(consensus[[ix.2]], (ix$coefs[[ix.2]] %>% { names(.[. != 0]) } )))
+  }
+}
+
+consensus.external <- lapply(consensus, gene.names)
+```
+
+```{r}
+vv <- Venn(list(GLMNET = consensus.external$glmnet.classic.cv.28$external_gene_name,
+           Degree = consensus.external$degree_new.classic.cv.28$external_gene_name,
+           Orphan = consensus.external$orphan.classic.cv.28$external_gene_name)) %>% compute.Venn
+gp <- VennThemes(vv)
+plot(vv, gp = gp)
+```
+
+```{r}
+sort(consensus.external$glmnet.classic.cv.28$external_gene_name)
+```
+
+```{r}
+sort(consensus.external$degree_new.classic.cv.28$external_gene_name)
+```
+
+```{r}
+sort(consensus.external$orphan.classic.cv.28$external_gene_name)
+```
+
+```{r}
+hall <- hallmarks(consensus.external$degree_new.classic.cv.28$external_gene_name, metric = 'cprob')
+hall$heatmap + ggtitle('') + theme(legend.position = 'bottom')
+```
+
+
+
+
 
 
