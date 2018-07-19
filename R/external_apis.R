@@ -180,8 +180,7 @@ protein.to.ensembl.gene.names <- function(ensembl.proteins) {
                                    cache.prefix = 'biomart')
     #
     results <- biomaRt::getBM(attributes = c('ensembl_peptide_id',
-                                             'ensembl_gene_id',
-                                             'external_gene_name'),
+                                             'ensembl_gene_id'),
                               filters = 'ensembl_peptide_id',
                               values  = ensembl.proteins,
                               mart    = mart)

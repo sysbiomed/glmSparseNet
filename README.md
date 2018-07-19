@@ -1,11 +1,6 @@
 glmSparseNet
 ================
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-> Elastic-Net models with additional regularization based on network centrality metrics
-
-[![Travis-CI Build Status](https://travis-ci.org/sysbiomed/glmSparseNet.svg?branch=master)](https://travis-ci.org/sysbiomed/glmSparseNet) [![Coverage status](https://codecov.io/gh/sysbiomed/glmSparseNet/branch/master/graph/badge.svg)](https://codecov.io/github/sysbiomed/glmSparseNet?branch=master)
-
 -   [Overview](#overview)
 -   [Citation](#citation)
 -   [Instalation](#instalation)
@@ -16,12 +11,17 @@ glmSparseNet
     -   [Survival curves with `draw.kaplan`](#survival-curves-with-draw.kaplan)
     -   [Heatmap with results retrived from the Cancer Hallmarks Analytics Tool *(CHAT)*](#heatmap-with-results-retrived-from-the-cancer-hallmarks-analytics-tool-chat)
 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+> Elastic-Net models with additional regularization based on network centrality metrics
+
+[![Travis-CI Build Status](https://travis-ci.org/sysbiomed/glmSparseNet.svg?branch=master)](https://travis-ci.org/sysbiomed/glmSparseNet) [![Coverage status](https://codecov.io/gh/sysbiomed/glmSparseNet/branch/master/graph/badge.svg)](https://codecov.io/github/sysbiomed/glmSparseNet?branch=master)
+
 Overview
 --------
 
 `glmSparseNet` is a R package that generalizes sparse regression models when the features *(e.g. genes)* have a graph structure *(e.g. protein-protein interactions)*, by including network-based regularizers. `glmSparseNet` uses the `glmnet` R-package, by including centrality measures of the network as penalty weights in the regularization. The current version implements regularization based on node degree, i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution or orphan genes in the solution. All the `glmnet` distribution families are supported, namely *"gaussian"*, *"poisson"*, *"binomial"*, *"multinomial"*, *"cox"*, and *"mgaussian"*.
 
-It adds two new main functions called `network.glmnet` and `network.cv.glmnet` that extend both model inference and model selection via cross-validation with network-based regularization. These functions are very flexible and allow to transform the penalty weights after the centrality metric is calculated, thus allowing to change how it affects the regularization. To facilitate users, we made available a function that will penalize low connected nodes in the network - `glmDegree` - and another that will penalize hubs - `glmOrphan`.
+It adds two new main functions called `glmSparseNet` and `cv.glmSparseNet` that extend both model inference and model selection via cross-validation with network-based regularization. These functions are very flexible and allow to transform the penalty weights after the centrality metric is calculated, thus allowing to change how it affects the regularization. To facilitate users, we made available a function that will penalize low connected nodes in the network - `glmDegree` - and another that will penalize hubs - `glmOrphan`.
 
 <span style="display:block;text-align:center">![Overview of the R-Package pipeline](inst/images/overview.png)</span>
 
@@ -72,7 +72,7 @@ Alternatively, the network can be passed as an adjancency matrix or an already c
 
 ### Function definition
 
-The main functions from this packages are the `network.cv.glmnet` and `network.glmnet` and the arguments for the functions are defined as:
+The main functions from this packages are the `glmSparseNet` and `cv.glmSparseNet` and the arguments for the functions are defined as:
 
 -   `xdata`: A MultiAssayExperiment object or an input matrix of dimension `Observations x Features`
 -   `ydata`: Response object that can take different forms depending on the model family that is used
@@ -87,14 +87,12 @@ The main functions from this packages are the `network.cv.glmnet` and `network.g
 *note:* These functions can take any additional arguments that `glmnet` or `cv.glmnet` accept (e.g. number of folds in cross validation)
 
 ``` r
-network.cv.glmnet(xdata, 
-                  ydata, 
-                  family = 'cox', 
-                  network = 'correlation', 
-                  experiment.name = 'RNASeq2GeneNorm', 
-                  network.options = network.options.default(cutoff = .6, 
-                                                            min.degree = 0.2,
-                                                            trans.fun = degree.heuristic))
+cv.glmSparseNet(xdata, 
+                ydata, 
+                family = 'cox', 
+                network = 'correlation', 
+                network.options = network.options.default(cutoff = .6, 
+                                                          min.degree = 0.2))
 ```
 
 Example for survival analysis using RNA-seq data
@@ -143,18 +141,18 @@ ydata <- data.frame(time      = surv_event_time[valid.ix],
                     row.names = xdata$patientID[valid.ix])
 ```
 
-The function `network.cv.glmnet` fits the survival data using 10-fold cross validation and using a cutoff value of 0.6 to reduce the size of the network.
+The function `cv.glmSparseNet` fits the survival data using 10-fold cross validation and using a cutoff value of 0.6 to reduce the size of the network.
 
 ``` r
 # build response object for glmnet
-fit3 <- network.cv.glmnet(xdata, ydata, family = 'cox', 
-                          network = 'correlation', 
-                          experiment.name = 'RNASeq2GeneNorm', 
-                          alpha = .7,
-                          nlambda = 1000,
-                          network.options = network.options.default(cutoff = .6, 
-                                                                    min.degree = 0.2,
-                                                                    trans.fun = degree.heuristic))
+fit3 <- cv.glmSparseNet(xdata, ydata, family = 'cox', 
+                        network = 'correlation', 
+                        experiment.name = 'RNASeq2GeneNorm', 
+                        alpha = .7,
+                        nlambda = 1000,
+                        network.options = network.options.default(cutoff = .6, 
+                                                                  min.degree = 0.2,
+                                                                  trans.fun = hub.heuristic))
 plot(fit3)
 ```
 
@@ -186,7 +184,7 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
 ```
 
     ## $pvalue
-    ## [1] 2.343203e-11
+    ## [1] 1.733575e-08
     ## 
     ## $plot
 
@@ -197,8 +195,8 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      2     NA      NA      NA
-    ## High risk 39     26   1105     562    2102
+    ## Low risk  40      3     NA      NA      NA
+    ## High risk 39     25   1105     562    2105
 
 ### Heatmap with results retrived from the Cancer Hallmarks Analytics Tool *(CHAT)*
 
