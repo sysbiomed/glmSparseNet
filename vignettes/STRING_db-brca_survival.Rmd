@@ -228,7 +228,7 @@ selected.genes[['GLMnet']] <- coef(cv.glm, s = 'lambda.min')[,1] %>% { .[. != 0]
 Venn diagram of overlapping genes.
 
 ```{r, echo=FALSE, warning=FALSE}
-vv <- Vennerable::Venn(selected.genes)
+vv <- Venn(selected.genes)
 Vstem <- compute.Venn(vv, type = 'squares')
 PlotVennGeometry(Vstem)
 ```
