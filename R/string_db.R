@@ -31,19 +31,22 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
   if (remove.text) {
     col.ixs <- colnames(all.interactions) %>%
     {
-      !. %in% c('combined_score', .[grep('text', .)])
+      !. %in% .[grep('text', .)]
     }
   } else {
     col.ixs <- array(TRUE, ncol(all.interactions))
   }
-  col.ixs <- col.ixs & (!colnames(all.interactions) %in% 'combined_score')
+
+  # remove text if flag is TRUE
+  all.interactions <- all.interactions[, col.ixs]
+
+  col.ixs <- (!colnames(all.interactions) %in% 'combined_score')
 
   # columns without from and to
   col.vals.ixs <- col.ixs & (!colnames(all.interactions) %in% c('from', 'to'))
 
   # remove all entries below threshold
   mat <- as.matrix(all.interactions[,col.vals.ixs]) / 1000
-  mat[mat < (score_threshold / 1000)] <- 0
 
   #
   # Calculate new combined score
@@ -116,7 +119,7 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
                                   dimnames = list(levels(interactions$from),
                                                   levels(interactions$to)))
 
-  return(list(network = new.mat, interactions = all.interactions))
+  return(list(network = new.mat, interactions = interactions))
 }
 
 #' Build gene network from peptide ids
@@ -138,6 +141,11 @@ build.string.gene.network <- function(protein.network, use.external.names = FALS
 
   # create new matrix with columns as genes
   new.mat <- protein.network[gene.tbl$ensembl_peptide_id, gene.tbl$ensembl_peptide_id]
+
+  message(sprintf('Proteins mapped to genes: %d out of %d in STRING protein-protein interactions (%d discarded)',
+                  nrow(new.mat),
+                  nrow(protein.network),
+                  sum(!colnames(protein.network) %in% gene.tbl$ensembl_peptide_id)))
 
   # change name of rows and columns to gene (either ensembl gene id or gene name)
   if (use.external.names) {

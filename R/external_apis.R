@@ -173,20 +173,25 @@ protein.to.ensembl.gene.names <- function(ensembl.proteins) {
   tryCatch({
     marts <- biomaRt::listMarts()
     index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
-    mart <- biomaRt::useMart(marts$biomart[index])
-    mart <- loose.rock::run.cache(biomaRt::useMart,
-                                  marts$biomart[index],
-                                  'hsapiens_gene_ensembl',
-                                  cache.prefix = 'biomart')
-    results <- biomaRt::getBM(attributes = c("ensembl_peptide_id", "ensembl_gene_id", 'external_gene_name'),
-                              filters = "ensembl_peptide_id", values = ensembl.proteins,
-                              mart = mart)
+    #
+    mart  <- loose.rock::run.cache(biomaRt::useMart,
+                                   marts$biomart[index],
+                                   'hsapiens_gene_ensembl',
+                                   cache.prefix = 'biomart')
+    #
+    results <- biomaRt::getBM(attributes = c('ensembl_peptide_id',
+                                             'ensembl_gene_id',
+                                             'external_gene_name'),
+                              filters = 'ensembl_peptide_id',
+                              values  = ensembl.proteins,
+                              mart    = mart)
+    #
     return(dplyr::arrange(results, rlang::UQ(as.name('ensembl_peptide_id'))))
   }, error = function(msg) {
     warning(sprintf('Error when finding gene names:\n\t%s', msg))
   })
   return(data.frame(ensembl_peptide_id = ensembl.proteins,
-                    ensembl_gene_id = ensembl.proteins,
+                    ensembl_gene_id    = ensembl.proteins,
                     external_gene_name = ensembl.proteins,
-                    stringsAsFactors = FALSE))
+                    stringsAsFactors   = FALSE))
 }
