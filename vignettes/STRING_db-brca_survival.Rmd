@@ -1,5 +1,6 @@
 ---
-title: "STRING DB"
+title: "Breast survival dataset using network from STRING DB"
+author: "André Veríssimo"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -15,6 +16,12 @@ knitr::opts_chunk$set(echo = TRUE, fig.height = 5, fig.width = 6)
 devtools::load_all()
 ```
 
+## Overview
+
+This vignette uses the STRING database (https://string-db.org/) of protein-protein interactions as the network-based penalizer in generalized linear models using Breast invasive carcinoma sample dataset.
+
+The degree vector is calculated manually to account for genes that are not present in the STRING database, as these will not have any interactions, i.e. edges.
+
 ## Required libraries
 
 ```{r, message=FALSE, warning=FALSE}
@@ -28,13 +35,15 @@ library(survival)
 library(loose.rock)
 library(glmnet)
 library(ggplot2)
+```
 
+```{r, include=FALSE}
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
 .Last.value <- loose.rock::show.message(FALSE)
 theme_set(ggplot2::theme_minimal())
 ```
 
-Load this library
+Load the glmSparseNet package
 
 ```{r, eval=FALSE}
 library(glmSparseNet)
@@ -42,7 +51,9 @@ library(glmSparseNet)
 
 ## Download Data from STRING
 
-Retrieve all interactions
+Retrieve all interactions from [STRING databse](https://string-db.org/). We have included a helper function that retrieves the Homo sapiens known interactions.
+
+*Note*: Text-based interactions are excluded from the network.
 
 ```{r}
 all.interactions <- string.db.homo.sapiens(score_threshold = params$threshold)
@@ -50,7 +61,7 @@ all.interactions <- string.db.homo.sapiens(score_threshold = params$threshold)
 
 ## Build network matrix
 
-Build a sparse matrix object that contains the network
+Build a sparse matrix object that contains the network.
 
 ```{r}
 string.network <- build.string.gene.network(all.interactions$network)
@@ -59,7 +70,7 @@ string.network.undirected <- string.network + Matrix::t(string.network)
 string.network.undirected <- (string.network.undirected != 0) * 1
 ```
 
-## Statistics
+## Network Statistics
 
 ### Graph information
 
@@ -82,7 +93,7 @@ string.network.binary <- (string.network.undirected != 0) * 1
 
 degree.network <- (Matrix::rowSums(string.network.binary) + Matrix::colSums(string.network.binary)) / 2
 
-summary(degree.network)
+flog.info('Summary of degree:', summary(degree.network), capture = TRUE)
 ```
 
 ### Histogram of degree *(up until 99.999% quantile)*
@@ -115,11 +126,17 @@ degree.network.all <- colnames(xdata)[!colnames(xdata) %in% names(degree.network
 } %>% c(degree.network) %>% {
   .[colnames(xdata)]
 }
+```
 
+Degree distribution for sample set of gene features *(in xdata)*.
+
+```{r, echo=FALSE}
 qplot(degree.network.all, bins = 100, fill = my.colors(3)) + theme(legend.position = 'none')
 ```
 
+
 ```{r, include=FALSE}
+# List that will store all selected genes
 selected.genes <- list()
 ```
 
@@ -134,6 +151,8 @@ cv.degree <- cv.glmDegree(xdata,
                           network = degree.network.all, 
                           network.options = network.options.default(min.degree = 0.2))
 ```
+
+Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
 
 ```{r, echo=FALSE}
 glmSparseNet::draw.kaplan(as.vector(coef(cv.degree, s = 'lambda.min')[,1]), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
@@ -155,6 +174,8 @@ cv.hub <- cv.glmHub(xdata,
                     network.options = network.options.default(min.degree = 0.2))
 ```
 
+Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
+
 ```{r, echo=FALSE}
 glmSparseNet::draw.kaplan(as.vector(coef(cv.hub, s = 'lambda.min')[,1]), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
 
@@ -174,6 +195,8 @@ cv.orphan <- cv.glmOrphan(xdata,
                           network.options = network.options.default(min.degree = 0.2))
 ```
 
+Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
+
 ```{r, echo=FALSE}
 glmSparseNet::draw.kaplan(as.vector(coef(cv.orphan, s = 'lambda.min')[,1]), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
 
@@ -191,6 +214,8 @@ cv.glm <- cv.glmnet(xdata,
                     family = 'cox')
 ```
 
+Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
+
 ```{r, echo=FALSE}
 glmSparseNet::draw.kaplan(as.vector(coef(cv.glm, s = 'lambda.min')[,1]), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
 
@@ -200,14 +225,21 @@ selected.genes[['GLMnet']] <- coef(cv.glm, s = 'lambda.min')[,1] %>% { .[. != 0]
 
 ### Selected genes
 
+Venn diagram of overlapping genes.
+
 ```{r, echo=FALSE, warning=FALSE}
 vv <- Vennerable::Venn(selected.genes)
 Vstem <- compute.Venn(vv, type = 'squares')
 PlotVennGeometry(Vstem)
+```
 
+Descriptive table showing which genes are selected in each model
+
+```{r, echo=FALSE}
 melt(selected.genes) %>% apply(2, factor) %>% as.data.frame %>% ggplot() +
   geom_point(aes(value, L1), shape = my.symbols(2), color = my.colors(3), size = 3) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0)) +
   ylab('Model') + xlab('Gene')
 ```
+
 
