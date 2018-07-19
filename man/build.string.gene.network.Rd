@@ -19,3 +19,6 @@ there may not be a mapping or a peptide mapping can have multiple genes.
 This can reduce the dimension of the original network, as there may not be a mapping
 between peptide and gene id
 }
+\seealso{
+string.db.homo.sapiens
+}

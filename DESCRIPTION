@@ -38,7 +38,8 @@ Suggests: testthat,
   survcomp,
   pROC,
   devtools,
-  roxygen2
+  roxygen2,
+  Vennerable
 Remotes: 
   averissimo/loose.rock
 VignetteBuilder: knitr
