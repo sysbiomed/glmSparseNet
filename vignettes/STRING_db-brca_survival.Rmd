@@ -6,9 +6,6 @@ vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
-params:
-  threshold: !r 700
-  n.cores: !r 10
 ---
 
 ```{r setup, include=FALSE}
@@ -57,11 +54,12 @@ Retrieve all interactions from [STRING databse](https://string-db.org/). We have
 
 ```{r, eval=FALSE}
 # Not evaluated in vignette as it kills the process
-all.interactions <- string.db.homo.sapiens(score_threshold = params$threshold)
+all.interactions.700 <- string.db.homo.sapiens(score_threshold = 700)
 ```
 
 ```{r, include=FALSE}
-data(all.interactions)
+data('all.interactions.700')
+all.interactions <- all.interactions.700
 ```
 
 ## Build network matrix
@@ -80,12 +78,12 @@ string.network.undirected <- (string.network.undirected != 0) * 1
 ### Graph information
 
 ```{r, echo=FALSE, collapse=TRUE}
-flog.info('Directed graph (score_threshold = %d)', params$threshold)
+flog.info('Directed graph (score_threshold = %d)', 700)
 flog.info('  *       total edges: %d', sum(string.network != 0))
 flog.info('  *    unique protein: %d', nrow(string.network))
 flog.info('  * edges per protein: %f', sum(string.network != 0) / nrow(string.network) )
 flog.info('')
-flog.info('Undirected graph (score_threshold = %d)', params$threshold)
+flog.info('Undirected graph (score_threshold = %d)', 700)
 flog.info('  *       total edges: %d', sum(string.network.undirected != 0) / 2)
 flog.info('  *    unique protein: %d', nrow(string.network.undirected))
 flog.info('  * edges per protein: %f', sum(string.network.undirected != 0) / 2 / nrow(string.network.undirected) )
