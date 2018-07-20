@@ -55,8 +55,13 @@ Retrieve all interactions from [STRING databse](https://string-db.org/). We have
 
 *Note*: Text-based interactions are excluded from the network.
 
-```{r}
+```{r, eval=FALSE}
+# Not evaluated in vignette as it kills the process
 all.interactions <- string.db.homo.sapiens(score_threshold = params$threshold)
+```
+
+```{r, include=FALSE}
+data(all.interactions)
 ```
 
 ## Build network matrix
