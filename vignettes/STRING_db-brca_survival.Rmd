@@ -23,15 +23,15 @@ biocLite('sysbiomed/glmSparseNet')
 
 ```{r packages, message=FALSE, warning=FALSE}
 library(dplyr)
-library(STRINGdb)
-library(futile.logger)
-library(parallel)
 library(Matrix)
-library(Vennerable)
-library(survival)
-library(loose.rock)
-library(glmnet)
 library(ggplot2)
+library(parallel)
+library(STRINGdb)
+library(reshape2)
+library(survival)
+library(Vennerable)
+library(loose.rock)
+library(futile.logger)
 #
 library(glmSparseNet)
 #
