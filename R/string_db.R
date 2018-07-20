@@ -14,7 +14,7 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
 
   STRINGdb::get_STRING_species(version = version, species_name=NULL) %>%
     dplyr::arrange(rlang::UQ(as.name('official_name'))) %>%
-    dplyr::filter(official_name == 'homo_sapiens')
+    dplyr::filter(rlang::UQ(as.name('official_name')) == 'homo_sapiens')
 
   # downloading Homo sapiens
   string_db <- STRINGdb::STRINGdb$new(version         = version,
@@ -94,7 +94,8 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
   # Refilter combined score
 
   all.interactions$combined_score.new <- combined.score
-  interactions <- all.interactions %>% dplyr::filter(combined_score.new >= score_threshold)
+  interactions <- all.interactions %>%
+    dplyr::filter(rlang::UQ(as.name('combined_score.new')) >= score_threshold)
 
   #
   # Build sparse matrix

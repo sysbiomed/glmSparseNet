@@ -23,7 +23,6 @@
 #' #
 #' #
 #' # Using MultiAssayExperiment
-#'
 #' # load data
 #' xdata <- MultiAssayExperiment::miniACC
 #' # TODO aking out x indivudals missing values
@@ -51,11 +50,7 @@ setGeneric('glmSparseNet', function(xdata, ydata, network, network.options = net
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param xdata input data as a Matrix
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that glmnet accepts
+#' @inheritParams glmSparseNet
 #'
 #' @return an object just as glmnet
 #' @export
@@ -66,12 +61,8 @@ setMethod('glmSparseNet', signature(xdata = 'matrix'), function(xdata, ydata, ne
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param xdata input data as a MultiAssayExperiment
-#' @param ydata response data compatible with glmnet
+#' @inheritParams glmSparseNet
 #' @param experiment.name name of experiment to use as input in MultiAssayExperiment object
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that glmnet accepts
 #'
 #' @return an object just as glmnet
 #' @export
@@ -84,11 +75,7 @@ setMethod('glmSparseNet', signature(xdata = 'MultiAssayExperiment'), function(xd
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param xdata input data as a SummarizedExperiment
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that glmnet accepts
+#' @inheritParams glmSparseNet
 #'
 #' @return an object just as glmnet
 #' @export

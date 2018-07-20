@@ -37,7 +37,6 @@ glmSparseNet(xdata, rnorm(nrow(xdata)), 'covariance', family = 'gaussian')
 #
 #
 # Using MultiAssayExperiment
-
 # load data
 xdata <- MultiAssayExperiment::miniACC
 # TODO aking out x indivudals missing values

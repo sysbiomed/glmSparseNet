@@ -8,6 +8,9 @@
 #' @examples
 #' gene.names(c('ENSG00000114978','ENSG00000166211', 'ENSG00000183688'))
 gene.names <- function(ensembl.genes) {
+
+  . <- NULL
+
   tryCatch({
     marts <- biomaRt::listMarts()
     index <- grep("ensembl genes",marts$version, ignore.case = TRUE)

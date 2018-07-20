@@ -12,6 +12,7 @@
 #'
 #' @param project tcga project that has a package avaliable see https://github.com/averissimo/tcga.data
 #' @param tissue.type type of tissue, can be 'primary.solid.tumor', 'metastatic', etc... depending on project.
+#' @param input.type either 'rna' for RNASeq or 'dna' for mutation data
 #' @param handle.duplicates strategy to handle multiple samples for same individual, can take 'keep_first' or 'keep_all'
 #' @param coding.genes filter the genes to only include coding genes, see loose.rock::coding.genes
 #'
@@ -30,7 +31,7 @@
 #' # prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first')
 #' # prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first', input.type = 'dna')
 prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.solid.tumor',
-                                       input.type = 'rna.seq',
+                                       input.type = 'rna',
                                        handle.duplicates = 'keep_first',
                                        coding.genes = FALSE) {
 
@@ -44,7 +45,7 @@ prepare.tcga.survival.data <- function(project = 'brca', tissue.type = 'primary.
   # An environment is necessary to adhere to best practices of ?data
   dat.env <- new.env()
 
-  if (input.type == 'rna.seq') {
+  if (input.type == 'rna') {
     utils::data("fpkm.per.tissue", package = package.name, envir = dat.env)
     fpkm.per.tissue <- dat.env$fpkm.per.tissue
 

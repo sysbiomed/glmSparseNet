@@ -10,26 +10,32 @@ Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: GPL (>=3)
 Encoding: UTF-8
-LazyData: true
+NeedsCompilation: no
+biocViews: Software, 
+  StatisticalMethod, 
+  DimensionReduction, 
+  Regression, 
+  Classification, 
+  Survival
 Depends: R (>= 3.4), Matrix, MultiAssayExperiment, glmnet
 Imports: loose.rock,
-  forcats,
-  sparsebnUtils,
-  methods,
-  stringr,
-  futile.logger,
-  ggplot2,
-  sparsebn,
-  rlang,
-  dplyr,
-  reshape2,
-  ggfortify,
-  biomaRt,
   SummarizedExperiment,
   STRINGdb,
+  biomaRt,
+  futile.logger,
+  sparsebn,
+  sparsebnUtils,
+  forcats,
+  dplyr,
+  readr,
+  ggplot2,
+  ggfortify,
+  reshape2,
   stats,
+  stringr,
+  rlang,
   parallel,
-  readr
+  methods
 Suggests: testthat,
   knitr,
   rmarkdown,

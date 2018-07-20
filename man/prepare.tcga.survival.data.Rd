@@ -5,13 +5,15 @@
 \title{Prepare FPKM data from TCGA project (specific tissue)}
 \usage{
 prepare.tcga.survival.data(project = "brca",
-  tissue.type = "primary.solid.tumor", input.type = "rna.seq",
+  tissue.type = "primary.solid.tumor", input.type = "rna",
   handle.duplicates = "keep_first", coding.genes = FALSE)
 }
 \arguments{
 \item{project}{tcga project that has a package avaliable see https://github.com/averissimo/tcga.data}
 
 \item{tissue.type}{type of tissue, can be 'primary.solid.tumor', 'metastatic', etc... depending on project.}
+
+\item{input.type}{either 'rna' for RNASeq or 'dna' for mutation data}
 
 \item{handle.duplicates}{strategy to handle multiple samples for same individual, can take 'keep_first' or 'keep_all'}
 
