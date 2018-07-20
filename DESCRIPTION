@@ -38,7 +38,8 @@ Suggests: testthat,
   pROC,
   devtools,
   roxygen2,
-  Vennerable
+  Vennerable,
+  BiocStyle
 Remotes: 
   averissimo/loose.rock,
   js229/Vennerable
