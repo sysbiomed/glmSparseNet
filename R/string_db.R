@@ -12,21 +12,26 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
 
   . <- NULL
 
+  message('Getting STRING homo sapiens species')
   STRINGdb::get_STRING_species(version = version, species_name=NULL) %>%
     dplyr::arrange(rlang::UQ(as.name('official_name'))) %>%
     dplyr::filter(official_name == 'homo_sapiens')
 
   # downloading Homo sapiens
+  message('Downloading interactions')
   string_db <- STRINGdb::STRINGdb$new(version         = version,
                                       species         = 9606,
                                       score_threshold = 0)
 
+  message('Downloading alias')
   # Load to memory the database (by calling a method)
   tp53 <- string_db$mp( "tp53" )
 
+  message('Downloading links')
   # get all interactions
-  all.interactions <- as.tbl(string_db$get_interactions(string_db$proteins$protein_external_id))
+  all.interactions <- string_db$get_interactions(string_db$proteins$protein_external_id) %>% as.tbl
 
+  message('Finding text-based index')
   # remove text.based columns
   if (remove.text) {
     col.ixs <- colnames(all.interactions) %>%
@@ -37,6 +42,7 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
     col.ixs <- array(TRUE, ncol(all.interactions))
   }
 
+  message('Removing text-based interactions')
   # remove text if flag is TRUE
   all.interactions <- all.interactions[, col.ixs]
 
@@ -45,7 +51,7 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
   # columns without from and to
   col.vals.ixs <- col.ixs & (!colnames(all.interactions) %in% c('from', 'to'))
 
-  # remove all entries below threshold
+  message('Convert to double')
   mat <- as.matrix(all.interactions[,col.vals.ixs]) / 1000
 
   #
@@ -53,6 +59,7 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
   #  https://string-db.org/help/faq/#how-are-the-scores-computed
 
   p <- 0.041
+  message('Calculate combined score')
   combined.score <- mat %>%
     #
     # Removing prior per channel
