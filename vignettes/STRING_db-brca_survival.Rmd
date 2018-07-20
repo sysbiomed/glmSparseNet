@@ -1,27 +1,27 @@
 ---
 title: "Breast survival dataset using network from STRING DB"
 author: "André Veríssimo"
-output: rmarkdown::html_vignette
+date: "`r Sys.Date()`"
+output: 
+  BiocStyle::html_document:
+    number_sections: yes
+    toc: true
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Breast survival dataset using network from STRING DB}
+  %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.height = 5, fig.width = 6)
-devtools::load_all()
+## Instalation
+
+```{r, eval=FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite('sysbiomed/glmSparseNet')
 ```
 
-## Overview
+## Loading the packages
 
-This vignette uses the STRING database (https://string-db.org/) of protein-protein interactions as the network-based penalizer in generalized linear models using Breast invasive carcinoma sample dataset.
-
-The degree vector is calculated manually to account for genes that are not present in the STRING database, as these will not have any interactions, i.e. edges.
-
-## Required libraries
-
-```{r, message=FALSE, warning=FALSE}
+```{r packages, message=FALSE, warning=FALSE}
 library(dplyr)
 library(STRINGdb)
 library(futile.logger)
@@ -32,28 +32,32 @@ library(survival)
 library(loose.rock)
 library(glmnet)
 library(ggplot2)
-```
-
-```{r, include=FALSE}
+#
+library(glmSparseNet)
+#
+# Some general options for futile.logger the debugging package
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
 .Last.value <- loose.rock::show.message(FALSE)
+# Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
 ```
 
-Load the glmSparseNet package
+## Overview
 
-```{r, eval=FALSE}
-library(glmSparseNet)
-```
+This vignette uses the STRING database (https://string-db.org/) of protein-protein interactions as the network-based penalizer in generalized linear models using Breast invasive carcinoma sample dataset.
+
+The degree vector is calculated manually to account for genes that are not present in the STRING database, as these will not have any interactions, i.e. edges.
 
 ## Download Data from STRING
 
 Retrieve all interactions from [STRING databse](https://string-db.org/). We have included a helper function that retrieves the Homo sapiens known interactions.
 
+For this vignette, we use a cached version of all interaction with `score_threshold = 700`
+
 *Note*: Text-based interactions are excluded from the network.
 
 ```{r, eval=FALSE}
-# Not evaluated in vignette as it kills the process
+# Not evaluated in vignette as it takes too long to download and process
 all.interactions.700 <- string.db.homo.sapiens(score_threshold = 700)
 ```
 

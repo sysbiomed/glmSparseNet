@@ -20,6 +20,17 @@ gene.names <- function(ensembl.genes) {
     results <- biomaRt::getBM(attributes = c("external_gene_name", "ensembl_gene_id"),
                               filters = "ensembl_gene_id", values = ensembl.genes,
                               mart = mart)
+
+    #
+    # Check if any genes does not have an external_gene_name
+    #  and add them with same ensembl_id
+
+    results <- ensembl.genes[!ensembl.genes %in% results$ensembl_gene_id] %>% {
+      data.frame(external_gene_name = .,
+                 ensembl_gene_id    = .,
+                 stringsAsFactors   = FALSE)
+    } %>% rbind(results)
+
     return(dplyr::arrange(results, rlang::UQ(as.name('external_gene_name'))))
   }, error = function(msg) {
     warning(sprintf('Error when finding gene names:\n\t%s', msg))

@@ -1,52 +1,50 @@
 ---
-title: "Example for Survival Data -- Breast"
-author: "Eunice Carrasquinha"
+title: "Example for Survival Data -- Skin Melanoma"
+author: "Eunice Carrasquinha and André Veríssimo"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  BiocStyle::html_document:
+    number_sections: yes
+    toc: true
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Example for Survival Data -- Skin Melanoma}
   %\VignetteEncoding{UTF-8}
 params:
-  seed: !r 29221
+  seed: !r 29221 # seed value to have reproducible results
 --- 
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.width = 6,
-  fig.height = 7
-)
+## Instalation
 
-# Load do package
-devtools::load_all()
-
-ggplot2::theme_set(ggplot2::theme_minimal())
-.Last.value <- futile.logger::flog.layout(futile.logger::layout.format('[~l] ~m'))
-
-.Last.value <- loose.rock::base.dir(tempdir())
-.Last.value <- loose.rock::show.message(FALSE)
+```{r, eval=FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite('glmSparseNet')
 ```
 
 # Required Packages
 
-```{r libraries}
-library(futile.logger)
-library(ggplot2)
-library(reshape2)
+```{r packages, message=FALSE, warning=FALSE}
 library(dplyr)
+library(ggplot2)
 library(survival)
+library(ggfortify)
 library(loose.rock)
-library(glmnet)
-```
-
-```{r, eval=FALSE}
+library(futile.logger)
+#
 library(glmSparseNet)
+#
+# Some general options for futile.logger the debugging package
+.Last.value <- flog.layout(layout.format('[~l] ~m'))
+.Last.value <- loose.rock::show.message(FALSE)
+# Setting ggplot2 default theme as minimal
+theme_set(ggplot2::theme_minimal())
 ```
-
 
 # Load data
+
+The data is loaded from an online curated dataset downloaded from TCGA using `TCGAbiolinks` bioconductor package and processed.
+
+To accelerate the process we use a very reduced dataset down to 107 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
 
 ```{r data.show, eval=FALSE}
 # download data package with TCGA data
@@ -72,50 +70,64 @@ xdata <- my.data$xdata[,small.subset]
 ydata <- my.data$ydata
 ```
 
-```{r, eval=FALSE}
-# save data in package
+```{r, eval=FALSE, include=FALSE}
+# Save data in package
 sample.SKCM.survival <- list(xdata = xdata, ydata = ydata)
 devtools::use_data(sample.SKCM.survival, overwrite = TRUE)
 ```
 
 ```{r, include=FALSE}
+# Load data from package
 xdata <- sample.SKCM.survival$xdata
 ydata <- sample.SKCM.survival$ydata
 ```
 
 # Fit models
 
+Fit model model penalizing by the hubs using the cross-validation function by `cv.glmHub`.
+
 ```{r fit}
-fitted <- cv.glmSparseNet(xdata, Surv(ydata$time, ydata$status), network = 'correlation', family = 'cox')
+fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status), 
+                    family  = 'cox',
+                    network = 'correlation')
 ```
 
 # Results of Cross Validation
+
+Shows the results of `100` different parameters used to find the optimal value in 10-fold cross-validation. The two vertical dotted lines represent the best model and a model with less variables selected *(genes)*, but within a standard error distance from the best.
 
 ```{r results}
 plot(fitted)
 ```
 
-## Using lambda.min taken from cross validation
+## Coefficients of selected model from Cross-Validation
 
-```{r, echo=FALSE}
-top.coefs <- coef(fitted, s = 'lambda.min')
-coefs.v <- as.vector(top.coefs)
-names(coefs.v) <- rownames(top.coefs)
-flog.info('Non-zero coefficients:', coefs.v[coefs.v != 0], capture = T)
+Taking the best model described by `lambda.min`
+
+```{r show_coefs}
+coefs.v <- coef(fitted, s = 'lambda.min')[,1] %>% { .[. != 0]}
+coefs.v %>% { 
+  data.frame(ensembl.id  = names(.), 
+             gene.name   = gene.names(names(.))$external_gene_name, 
+             coefficient = .,
+             stringsAsFactors = FALSE)
+  } %>%
+  arrange(gene.name) %>%
+  knitr::kable()
 ```
 
-### Hallmarks of Cancer
+## Hallmarks of Cancer
 
-```{r, echo=FALSE}
-names.df <- gene.names(names(coefs.v[coefs.v != 0]))
-all.hallmarks <- hallmarks(names.df$external_gene_name)
-
-all.hallmarks$heatmap
+```{r hallmarks}
+gene.names(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
 ```
 
-### Survival curves and Log rank test
+## Survival curves and Log rank test
 
-```{r, echo=FALSE}
-glmSparseNet::draw.kaplan(as.vector(coefs.v), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
+```{r}
+draw.kaplan(as.vector(coefs.v), 
+            xdata[, names(coefs.v)], 
+            ydata, 
+            plot.title = 'Full dataset', legend.outside = F)
 ```
 
