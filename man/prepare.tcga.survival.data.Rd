@@ -42,5 +42,5 @@ It will:
 #                 '2016.12.15-brca/brca.data_1.0.tar.gz'))
 # # Run
 # prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first')
-aa <- prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first', input.type = 'dna')
+# prepare.tcga.survival.data('brca', 'primary.solid.tumor', 'keep_first', input.type = 'dna')
 }
