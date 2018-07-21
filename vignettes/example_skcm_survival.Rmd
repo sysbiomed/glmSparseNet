@@ -30,6 +30,7 @@ library(survival)
 library(ggfortify)
 library(loose.rock)
 library(futile.logger)
+library(curatedTCGAData)
 #
 library(glmSparseNet)
 #

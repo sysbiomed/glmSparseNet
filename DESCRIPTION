@@ -45,7 +45,8 @@ Suggests: testthat,
   devtools,
   roxygen2,
   Vennerable,
-  BiocStyle
+  BiocStyle,
+  curatedTCGAData
 Remotes: 
   averissimo/loose.rock,
   js229/Vennerable
