@@ -91,8 +91,8 @@ devtools::use_data(sample.BRCA.logistic, overwrite = TRUE)
 ```
 
 ```{r, include=FALSE}
-xdata <- sample.BRCA.logistic$xdata
-ydata <- sample.BRCA.logistic$ydata
+xdata <- glmSparseNet::sample.BRCA.logistic$xdata
+ydata <- glmSparseNet::sample.BRCA.logistic$ydata
 ```
 
 # Fit models

@@ -46,40 +46,49 @@ The data is loaded from an online curated dataset downloaded from TCGA using `TC
 
 To accelerate the process we use a very reduced dataset down to 107 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
 
-```{r data.show, eval=FALSE}
-# download data package with TCGA data
-biocLite('https://github.com/averissimo/tcga.data/releases/download/2018.06.20-skcm/skcm.data_2018.06.20.tar.gz')
+```{r data.show}
+skcm <- curatedTCGAData(diseaseCode = "SKCM", assays = "RNASeq2GeneNorm", FALSE)
 
-# load package
-library(brca.data)
+# Get survival information
+ydata.raw <- colData(prad) %>% as.data.frame %>% 
+  # Keep only primary tumor samples
+  filter(patient.samples.sample.sample_type == 'primary tumor') %>%
+  # Keep only data relative to survival or samples
+  select(patientID, vital_status, 
+         bcr_sample_barcode = patient.samples.sample.bcr_sample_barcode,
+         days_to_death,         days_to_last_followup) %>% 
+  # Put sample_barcode in uppercase
+  mutate(bcr_sample_barcode           = toupper(bcr_sample_barcode)) %>%
+  # Find max time between all days (ignoring missings)
+  rowwise %>%
+  mutate(time = max(days_to_last_followup, days_to_death, na.rm = T)) %>%
+  # Keep only survival variables and codes
+  select(patientID, bcr_sample_barcode, status = vital_status, time) %>% 
+  # Discard individuals with survival time less or equal to 0
+  filter(time > 0) %>% as.data.frame
 
-# short exemple
-my.data <- prepare.tcga.survival.data(project           = 'skcm', 
-                                      tissue.type       = 'primary.solid.tumor', 
-                                      handle.duplicates = 'keep_first', 
-                                      coding.genes      = TRUE)
+# Set index as the patientID
+rownames(ydata.raw) <- ydata.raw$patientID
 
-# Using only a subset of genes previously selected to keep this short example.
+# Get Assay data
+xdata.raw <- t(assay(skcm[[1]]))
+
+# Get matches between survival and assay data
+common.codes <- ydata.raw$bcr_sample_barcode[ydata.raw$bcr_sample_barcode %in% strtrim(rownames(xdata.raw), 16)]
+xdata.raw    <- xdata.raw[strtrim(rownames(xdata.raw), 16) %in% common.codes, ]
+xdata.raw    <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
+
+# Order ydata the same as assay
+ydata.raw    <- ydata.raw[strtrim(rownames(xdata.raw), 12), ]
 
 set.seed(params$seed)
-small.subset <- c('ENSG00000109790', 'ENSG00000109133', 'ENSG00000023734', 
+small.subset <- c(gene.names(c('ENSG00000109790', 'ENSG00000109133', 'ENSG00000023734', 
                   'ENSG00000183770', 'ENSG00000214617', 'ENSG00000185813', 
-                  'ENSG00000183242',
-                  sample(colnames(my.data$xdata), 100))
-xdata <- my.data$xdata[,small.subset]
-ydata <- my.data$ydata
-```
+                  'ENSG00000183242')),
+                  sample(colnames(xdata.raw), 100))
 
-```{r, eval=FALSE, include=FALSE}
-# Save data in package
-sample.SKCM.survival <- list(xdata = xdata, ydata = ydata)
-devtools::use_data(sample.SKCM.survival, overwrite = TRUE)
-```
-
-```{r, include=FALSE}
-# Load data from package
-xdata <- sample.SKCM.survival$xdata
-ydata <- sample.SKCM.survival$ydata
+xdata <- xdata.raw[, small.subset]
+ydata <- ydata.raw %>% select(time, status)
 ```
 
 # Fit models

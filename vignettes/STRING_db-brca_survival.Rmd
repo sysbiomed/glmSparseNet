@@ -62,8 +62,7 @@ all.interactions.700 <- string.db.homo.sapiens(score_threshold = 700)
 ```
 
 ```{r, include=FALSE}
-data('all.interactions.700')
-all.interactions <- all.interactions.700
+all.interactions <- glmSparseNet::all.interactions.700
 ```
 
 ## Build network matrix
