@@ -30,6 +30,7 @@ library(survival)
 library(ggfortify)
 library(loose.rock)
 library(futile.logger)
+library(curatedTCGAData)
 #
 library(glmSparseNet)
 #
@@ -46,37 +47,49 @@ The data is loaded from an online curated dataset downloaded from TCGA using `TC
 
 To accelerate the process we use a very reduced dataset down to around 100 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
 
-```{r data.show, eval=FALSE}
-# download data package with TCGA data
-biocLite('https://github.com/averissimo/tcga.data/releases/download/2017.07.21-prad/prad.data_1.0.tar.gz')
+```{r data.show}
+prad <- curatedTCGAData(diseaseCode = "PRAD", assays = "RNASeq2GeneNorm", FALSE)
 
-library(prad.data)
-# short example
-my.data <- prepare.tcga.survival.data(project           = 'prad', 
-                                      tissue.type       = 'primary.solid.tumor', 
-                                      handle.duplicates = 'keep_first', 
-                                      coding.genes      = TRUE)
+# Get survival information
+ydata.raw <- colData(prad) %>% as.data.frame %>% 
+  # Keep only primary tumor samples
+  filter(patient.samples.sample.sample_type == 'primary tumor') %>%
+  # Keep only data relative to survival or samples
+  select(patientID, vital_status, 
+         bcr_sample_barcode = patient.samples.sample.bcr_sample_barcode,
+         days_to_death,         days_to_last_followup) %>% 
+  # Put sample_barcode in uppercase
+  mutate(bcr_sample_barcode           = toupper(bcr_sample_barcode)) %>%
+  # Find max time between all days (ignoring missings)
+  rowwise %>%
+  mutate(time = max(days_to_last_followup, days_to_death, na.rm = T)) %>%
+  # Keep only survival variables and codes
+  select(patientID, bcr_sample_barcode, status = vital_status, time) %>% 
+  # Discard individuals with survival time less or equal to 0
+  filter(time > 0) %>% as.data.frame
 
-# Using only a subset of genes previously selected to keep this short example.
+# Set index as the patientID
+rownames(ydata.raw) <- ydata.raw$patientID
+
+# Get Assay data
+xdata.raw <- t(assay(prad[[1]]))
+
+# Get matches between survival and assay data
+common.codes <- ydata.raw$bcr_sample_barcode[ydata.raw$bcr_sample_barcode %in% strtrim(rownames(xdata.raw), 16)]
+xdata.raw    <- xdata.raw[strtrim(rownames(xdata.raw), 16) %in% common.codes, ]
+xdata.raw    <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
+
+# Order ydata the same as assay
+ydata.raw    <- ydata.raw[strtrim(rownames(xdata.raw), 12), ]
+
 
 set.seed(params$seed)
-small.subset <- c('ENSG00000103091', 'ENSG00000064787', 'ENSG00000119915', 
-                  'ENSG00000100744', 'ENSG00000120158', 'ENSG00000114491', 
-                  'ENSG00000204176', 'ENSG00000138399', 
-                  sample(colnames(my.data$xdata), 100)) %>% unique
-xdata <- my.data$xdata[,small.subset]
-ydata <- my.data$ydata
-```
-
-```{r, include=FALSE, eval=FALSE}
-# save data in package
-sample.PRAD.survival <- list(xdata = xdata, ydata = ydata)
-devtools::use_data(sample.PRAD.survival, overwrite = TRUE)
-```
-
-```{r, include=FALSE}
-xdata <- sample.PRAD.survival$xdata
-ydata <- sample.PRAD.survival$ydata
+small.subset <- c(gene.names(c('ENSG00000103091', 'ENSG00000064787', 'ENSG00000119915', 
+                               'ENSG00000120158', 'ENSG00000114491', 'ENSG00000204176', 
+                               'ENSG00000138399'))$external_gene_name, 
+                  sample(colnames(xdata.raw), 100)) %>% unique %>% sort
+xdata <- xdata.raw[, small.subset]
+ydata <- ydata.raw %>% select(time, status)
 ```
 
 # Fit models
@@ -84,10 +97,13 @@ ydata <- sample.PRAD.survival$ydata
 Fit model model penalizing by the hubs using the cross-validation function by `cv.glmHub`.
 
 ```{r fit}
-fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status), 
+set.seed(params$seed)
+fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status),
                     family  = 'cox',
-                    network = 'correlation',
-                    nlambda = 1000)
+                    nlambda = 1000,
+                    network = 'correlation', 
+                    network.options = network.options.default(cutoff = .6, 
+                                                              min.degree = .2))
 ```
 
 # Results of Cross Validation

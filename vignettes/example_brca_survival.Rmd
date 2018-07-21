@@ -10,7 +10,7 @@ vignette: >
   %\VignetteIndexEntry{Example for Survival Data -- Breast Invasive Carcinoma}
   %\VignetteEncoding{UTF-8}
 params:
-  seed: !r 29221
+  seed: !r 1234567
 --- 
 
 ## Instalation
@@ -29,6 +29,7 @@ library(survival)
 library(ggfortify)
 library(loose.rock)
 library(futile.logger)
+library(curatedTCGAData)
 #
 library(glmSparseNet)
 #
@@ -45,40 +46,55 @@ The data is loaded from an online curated dataset downloaded from TCGA using `TC
 
 To accelerate the process we use a very reduced dataset down to 107 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
 
-```{r data, eval=FALSE}
-# download data package with TCGA data
-biocLite('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
+```{r data, warning=FALSE, message=FALSE}
+brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 
-# load package
-library(brca.data)
+# Get survival information
+ydata.raw <- colData(brca) %>% as.data.frame %>% 
+  # Keep only primary tumor samples
+  filter(patient.samples.sample.sample_type == 'primary tumor') %>%
+  # Keep only data relative to survival or samples
+  select(patientID, vital_status, 
+         bcr_sample_barcode = patient.samples.sample.bcr_sample_barcode,
+         Days.to.date.of.Death, Days.to.Date.of.Last.Contact, 
+         days_to_death,         days_to_last_followup,
+         Vital.Status) %>% 
+  # Put sample_barcode in uppercase
+  mutate(bcr_sample_barcode           = toupper(bcr_sample_barcode)) %>%
+  # Convert days to integer
+  mutate(Days.to.date.of.Death        = as.integer(Days.to.date.of.Death)) %>%
+  mutate(Days.to.Date.of.Last.Contact = as.integer(Days.to.Date.of.Last.Contact)) %>%
+  # Find max time between all days (ignoring missings)
+  rowwise %>%
+  mutate(time = max(days_to_last_followup,        Days.to.date.of.Death, 
+                    Days.to.Date.of.Last.Contact, days_to_death, na.rm = T)) %>%
+  # Keep only survival variables and codes
+  select(patientID, bcr_sample_barcode, status = vital_status, time) %>% 
+  # Discard individuals with survival time less or equal to 0
+  filter(time > 0) %>% as.data.frame
 
-my.data <- prepare.tcga.survival.data(project           = 'brca', 
-                                      tissue.type       = 'primary.solid.tumor', 
-                                      handle.duplicates = 'keep_first', 
-                                      coding.genes      = TRUE)
+# Set index as the patientID
+rownames(ydata.raw) <- ydata.raw$patientID
+
+# Get Assay data
+xdata.raw <- t(assay(brca[[1]]))
+
+# Get matches between survival and assay data
+common.codes <- ydata.raw$bcr_sample_barcode[ydata.raw$bcr_sample_barcode %in% strtrim(rownames(xdata.raw), 16)]
+xdata.raw    <- xdata.raw[strtrim(rownames(xdata.raw), 16) %in% common.codes, ]
+xdata.raw    <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
+
+# Order ydata the same as assay
+ydata.raw    <- ydata.raw[strtrim(rownames(xdata.raw), 12), ]
 
 # Using only a subset of genes previously selected to keep this short example.
-
 set.seed(params$seed)
-small.subset <- c('ENSG00000110448', 'ENSG00000124449', 'ENSG00000103494', 
-                  'ENSG00000172053', 'ENSG00000136758', 'ENSG00000051382', 
-                  'ENSG00000128655', 'ENSG00000100368', 'ENSG00000115884', 
-                  'ENSG00000133119', 'ENSG00000179363', 'ENSG00000091106', 
-                  'ENSG00000178403', 'ENSG00000066422', sample(colnames(my.data$xdata), 100)) %>%
-  unique
-xdata <- my.data$xdata[,small.subset]
-ydata <- my.data$ydata
-```
-
-```{r, eval=FALSE}
-# save data in package
-sample.BRCA.survival <- list(xdata = xdata, ydata = ydata)
-devtools::use_data(sample.BRCA.survival, overwrite = TRUE)
-```
-
-```{r, include=FALSE}
-xdata <- sample.BRCA.survival$xdata
-ydata <- sample.BRCA.survival$ydata
+small.subset <- c('CD5', 'CSF2RB', 'IRGC', 'NEUROG2', 'NLRC4', 'PDE11A',  
+                  'PTEN', 'TP53', 'BRAF',
+                  'PIK3CB', 'QARS', 'RFC3', 'RPGRIP1L', 'SDC1', 'TMEM31', 
+                  'YME1L1', 'ZBTB11', sample(colnames(xdata.raw), 100)) %>% unique
+xdata <- xdata.raw[, small.subset]
+ydata <- ydata.raw %>% select(time, status)
 ```
 
 # Fit models
@@ -86,9 +102,13 @@ ydata <- sample.BRCA.survival$ydata
 Fit model model penalizing by the hubs using the cross-validation function by `cv.glmHub`.
 
 ```{r fit}
-fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status), 
+set.seed(params$seed)
+fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status),
                     family  = 'cox',
-                    network = 'correlation')
+                    lambda.min.ratio = 0.2,
+                    nlambda = 200,
+                    network = 'correlation', 
+                    network.options = network.options.default(cutoff = .6, min.degree = .2))
 ```
 
 # Results of Cross Validation
@@ -106,8 +126,7 @@ Taking the best model described by `lambda.min`
 ```{r show_coefs}
 coefs.v <- coef(fitted, s = 'lambda.min')[,1] %>% { .[. != 0]}
 coefs.v %>% { 
-  data.frame(ensembl.id  = names(.), 
-             gene.name   = gene.names(names(.))$external_gene_name, 
+  data.frame(gene.name   = names(.),
              coefficient = .,
              stringsAsFactors = FALSE)
   } %>%
@@ -118,7 +137,7 @@ coefs.v %>% {
 ## Hallmarks of Cancer
 
 ```{r hallmarks}
-gene.names(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
+names(coefs.v) %>% { hallmarks(.)$heatmap }
 ```
 
 ## Survival curves and Log rank test
