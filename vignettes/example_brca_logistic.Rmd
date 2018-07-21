@@ -45,54 +45,49 @@ The data is loaded from an online curated dataset downloaded from TCGA using `TC
 
 To accelerate the process we use a very reduced dataset down to 107 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
 
-```{r data, eval=FALSE}
-# download data package with TCGA data
-biocLite('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
+```{r}
+brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 
-# load library
-library(brca.data)
+xdata.raw <- t(assay(brca[[1]]))
 
-# load data
-data('fpkm.per.tissue', 'fpkm.per.tissue.barcode', 'clinical', package = 'brca.data')
+# keep primary solid tumor samples (code 01)
+bcr_sample_barcode <- rownames(xdata.raw)[grepl('TCGA-[0-9A-Z]+-[0-9A-Z]+-01',
+                                     rownames(xdata.raw))]
+class.v <- array(1, length(bcr_sample_barcode))
 
-#
-# RNA-Seq data
+# keep metastatic samples (code 11)
+bcr_sample_barcode <- c(bcr_sample_barcode, 
+                        rownames(xdata.raw)[grepl('TCGA[-][0-9A-Z]+[-][0-9A-Z]+[-]11',
+                                                  rownames(xdata.raw))])
+class.v <- c(class.v, array(0, length(bcr_sample_barcode) - length(class.v)))
 
-# tumor tissue
-xdata_tumor <- fpkm.per.tissue$primary.solid.tumor
-xdata_tumor <- xdata_tumor[,-which(duplicated(getParticipantCode(colnames(fpkm.per.tissue$primary.solid.tumor))))] # removing duplicated samples
+names(class.v) <- bcr_sample_barcode
 
-# normal tissue
+# Get survival information
+ydata.raw <- colData(brca) %>% as.data.frame %>% 
+  # Keep only data relative to survival or samples
+  select(patientID)
+
+# Set index as the patientID
+rownames(ydata.raw) <- ydata.raw$patientID
+
+# Get matches between survival and assay data
+common.codes <- bcr_sample_barcode[strtrim(bcr_sample_barcode, 12) %in% ydata.raw$patientID]
+xdata.raw    <- xdata.raw[common.codes, ]
+class.v      <- class.v[common.codes]
+xdata.raw    <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
+
 set.seed(params$seed)
-xdata_normal <- fpkm.per.tissue$solid.tissue.normal
-xdata        <- rbind(t(xdata_tumor),t(xdata_normal))
-xdata        <- xdata[, apply(xdata, 2, sd) != 0] # remove genes with sd == 0
-
-# response vector ('1', tumor; '0', normal)
-ydata <- c(rep(1,dim(xdata_tumor)[2]),rep(0,dim(xdata_normal)[2]))
-
-# Using only a subset of genes previously selected to keep this example short.
-
-set.seed(params$seed)
-small.subset <- c('ENSG00000110448', 'ENSG00000124449', 'ENSG00000103494', 
+small.subset <- c(gene.names(c('ENSG00000110448', 'ENSG00000124449', 'ENSG00000103494', 
                   'ENSG00000172053', 'ENSG00000136758', 'ENSG00000051382', 
                   'ENSG00000128655', 'ENSG00000100368', 'ENSG00000115884', 
                   'ENSG00000179363', 'ENSG00000091106', 'ENSG00000178403', 
                   'ENSG00000066422', 'ENSG00000110448', 'ENSG00000124449', 
-                  'ENSG00000230445', 'ENSG00000172053', 'ENSG00000185122', 
+                  'ENSG00000230445', 'ENSG00000172053', 'ENSG00000185122'))$external_gene_name, 
                    sample(colnames(xdata), 100))
-xdata <- xdata[,small.subset]
-```
 
-```{r, eval=FALSE, include=FALSE}
-# save data in package
-sample.BRCA.logisitic <- list(xdata = xdata, ydata = ydata)
-devtools::use_data(sample.BRCA.logistic, overwrite = TRUE)
-```
-
-```{r, include=FALSE}
-xdata <- glmSparseNet::sample.BRCA.logistic$xdata
-ydata <- glmSparseNet::sample.BRCA.logistic$ydata
+xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata)]]
+ydata <- class.v
 ```
 
 # Fit models
@@ -103,7 +98,9 @@ Fit model model penalizing by the hubs using the cross-validation function by `c
 fitted <- cv.glmHub(xdata, ydata, 
                     family  = 'binomial',
                     network = 'correlation', 
-                    nlambda = 1000)
+                    nlambda = 1000,
+                    network.options = network.options.default(cutoff = .6, 
+                                                              min.degree = .2))
 ```
 
 # Results of Cross Validation

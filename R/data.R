@@ -1,11 +1,3 @@
-#' TCGA Breast cancer sample data set to use with logistic model in vignettes
-#'
-#' @name sample.BRCA.logistic
-#' @docType data
-#' @references \url{https://portal.gdc.cancer.gov/}
-#' @keywords data
-NULL
-
 #' Cache of protein-protein interactions dataset, as it takes some time to retrieve and process
 #' this will facilitate the vignette building
 #'

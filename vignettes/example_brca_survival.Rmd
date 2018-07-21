@@ -49,18 +49,19 @@ To accelerate the process we use a very reduced dataset down to 107 variables on
 ```{r data, warning=FALSE, message=FALSE}
 brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 
+xdata.raw <- t(assay(brca[[1]]))
+
+# keep only primary solid tumor (code 01)
+bcr_sample_barcode <- rownames(xdata.raw)[grepl('TCGA-[0-9A-Z]+-[0-9A-Z]+-01',
+                                     rownames(xdata.raw))]
+
 # Get survival information
 ydata.raw <- colData(brca) %>% as.data.frame %>% 
-  # Keep only primary tumor samples
-  filter(patient.samples.sample.sample_type == 'primary tumor') %>%
   # Keep only data relative to survival or samples
   select(patientID, vital_status, 
-         bcr_sample_barcode = patient.samples.sample.bcr_sample_barcode,
          Days.to.date.of.Death, Days.to.Date.of.Last.Contact, 
          days_to_death,         days_to_last_followup,
          Vital.Status) %>% 
-  # Put sample_barcode in uppercase
-  mutate(bcr_sample_barcode           = toupper(bcr_sample_barcode)) %>%
   # Convert days to integer
   mutate(Days.to.date.of.Death        = as.integer(Days.to.date.of.Death)) %>%
   mutate(Days.to.Date.of.Last.Contact = as.integer(Days.to.Date.of.Last.Contact)) %>%
@@ -69,19 +70,16 @@ ydata.raw <- colData(brca) %>% as.data.frame %>%
   mutate(time = max(days_to_last_followup,        Days.to.date.of.Death, 
                     Days.to.Date.of.Last.Contact, days_to_death, na.rm = T)) %>%
   # Keep only survival variables and codes
-  select(patientID, bcr_sample_barcode, status = vital_status, time) %>% 
+  select(patientID, status = vital_status, time) %>% 
   # Discard individuals with survival time less or equal to 0
   filter(time > 0) %>% as.data.frame
 
 # Set index as the patientID
 rownames(ydata.raw) <- ydata.raw$patientID
 
-# Get Assay data
-xdata.raw <- t(assay(brca[[1]]))
-
 # Get matches between survival and assay data
-common.codes <- ydata.raw$bcr_sample_barcode[ydata.raw$bcr_sample_barcode %in% strtrim(rownames(xdata.raw), 16)]
-xdata.raw    <- xdata.raw[strtrim(rownames(xdata.raw), 16) %in% common.codes, ]
+common.codes <- bcr_sample_barcode[strtrim(bcr_sample_barcode, 12) %in% ydata.raw$patientID]
+xdata.raw    <- xdata.raw[common.codes, ]
 xdata.raw    <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
 
 # Order ydata the same as assay
@@ -108,7 +106,8 @@ fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status),
                     lambda.min.ratio = 0.2,
                     nlambda = 200,
                     network = 'correlation', 
-                    network.options = network.options.default(cutoff = .6, min.degree = .2))
+                    network.options = network.options.default(cutoff = .6, 
+                                                              min.degree = .2))
 ```
 
 # Results of Cross Validation

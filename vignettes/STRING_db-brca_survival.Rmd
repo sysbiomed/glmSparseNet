@@ -118,12 +118,61 @@ qplot(degree.network[degree.network > quantile(degree.network, probs = .99999)],
 
 ## glmSparseNet
 
+* Dataset from curatedTCGAdata
+
+```{r}
+brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
+
+xdata.raw <- t(assay(brca[[1]]))
+
+# keep only primary solid tumor (code 01)
+bcr_sample_barcode <- rownames(xdata.raw)[grepl('TCGA-[0-9A-Z]+-[0-9A-Z]+-01',
+                                     rownames(xdata.raw))]
+
+# Get survival information
+ydata.raw <- colData(brca) %>% as.data.frame %>% 
+  # Keep only data relative to survival or samples
+  select(patientID, vital_status, 
+         Days.to.date.of.Death, Days.to.Date.of.Last.Contact, 
+         days_to_death,         days_to_last_followup,
+         Vital.Status) %>% 
+  # Convert days to integer
+  mutate(Days.to.date.of.Death        = as.integer(Days.to.date.of.Death)) %>%
+  mutate(Days.to.Date.of.Last.Contact = as.integer(Days.to.Date.of.Last.Contact)) %>%
+  # Find max time between all days (ignoring missings)
+  rowwise %>%
+  mutate(time = max(days_to_last_followup,        Days.to.date.of.Death, 
+                    Days.to.Date.of.Last.Contact, days_to_death, na.rm = T)) %>%
+  # Keep only survival variables and codes
+  select(patientID, status = vital_status, time) %>% 
+  # Discard individuals with survival time less or equal to 0
+  filter(time > 0) %>% as.data.frame
+
+# Set index as the patientID
+rownames(ydata.raw) <- ydata.raw$patientID
+
+# Get matches between survival and assay data
+common.codes <- bcr_sample_barcode[strtrim(bcr_sample_barcode, 12) %in% ydata.raw$patientID]
+xdata.raw    <- xdata.raw[common.codes, ]
+xdata.raw    <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
+
+# Order ydata the same as assay
+ydata.raw    <- ydata.raw[strtrim(rownames(xdata.raw), 12), ]
+
+# Using only a subset of genes previously selected to keep this short example.
+set.seed(params$seed)
+small.subset <- c('CD5', 'CSF2RB', 'IRGC', 'NEUROG2', 'NLRC4', 'PDE11A',  
+                  'PTEN', 'TP53', 'BRAF',
+                  'PIK3CB', 'QARS', 'RFC3', 'RPGRIP1L', 'SDC1', 'TMEM31', 
+                  'YME1L1', 'ZBTB11', sample(colnames(xdata.raw), 100)) %>% unique
+xdata <- xdata.raw[, small.subset]
+ydata <- ydata.raw %>% select(time, status)
+```
+
+
 * Build dataset that overlaps with STRING data
 
 ```{r}
-xdata <- sample.BRCA.survival$xdata
-ydata <- sample.BRCA.survival$ydata
-
 #
 # Add degree 0 to genes not in STRING network
 
