@@ -47,11 +47,11 @@ The data is loaded from an online curated dataset downloaded from TCGA using `TC
 
 To accelerate the process we use a very reduced dataset down to 107 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
 
-```{r data.show}
+```{r data.show, warning=FALSE, error=FALSE}
 skcm <- curatedTCGAData(diseaseCode = "SKCM", assays = "RNASeq2GeneNorm", FALSE)
 
 # Get survival information
-ydata.raw <- colData(prad) %>% as.data.frame %>% 
+ydata.raw <- colData(skcm) %>% as.data.frame %>% 
   # Keep only primary tumor samples
   filter(patient.samples.sample.sample_type == 'primary tumor') %>%
   # Keep only data relative to survival or samples
@@ -85,10 +85,10 @@ ydata.raw    <- ydata.raw[strtrim(rownames(xdata.raw), 12), ]
 set.seed(params$seed)
 small.subset <- c(gene.names(c('ENSG00000109790', 'ENSG00000109133', 'ENSG00000023734', 
                   'ENSG00000183770', 'ENSG00000214617', 'ENSG00000185813', 
-                  'ENSG00000183242')),
+                  'ENSG00000183242'))$external_gene_name,
                   sample(colnames(xdata.raw), 100))
 
-xdata <- xdata.raw[, small.subset]
+xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
 ydata <- ydata.raw %>% select(time, status)
 ```
 

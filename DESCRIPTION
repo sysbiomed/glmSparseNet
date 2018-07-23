@@ -10,6 +10,7 @@ Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: GPL (>=3)
 Encoding: UTF-8
+LazyData: TRUE
 NeedsCompilation: no
 biocViews: Software, 
   StatisticalMethod, 

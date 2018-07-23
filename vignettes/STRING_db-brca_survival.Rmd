@@ -10,6 +10,8 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteIndexEntry{Breast survival dataset using network from STRING DB}
   %\VignetteEncoding{UTF-8}
+params:
+  seed: !r 2018
 ---
 
 ## Instalation
@@ -63,7 +65,8 @@ all.interactions.700 <- string.db.homo.sapiens(score_threshold = 700)
 ```
 
 ```{r, include=FALSE}
-all.interactions <- glmSparseNet::all.interactions.700
+data('all.interactions.700', package = 'glmSparseNet')
+all.interactions <- all.interactions.700
 ```
 
 ## Build network matrix
@@ -121,7 +124,7 @@ qplot(degree.network[degree.network > quantile(degree.network, probs = .99999)],
 
 * Dataset from curatedTCGAdata
 
-```{r}
+```{r data.show, warning=FALSE, error=FALSE}
 brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 
 xdata.raw <- t(assay(brca[[1]]))
@@ -166,7 +169,8 @@ small.subset <- c('CD5', 'CSF2RB', 'IRGC', 'NEUROG2', 'NLRC4', 'PDE11A',
                   'PTEN', 'TP53', 'BRAF',
                   'PIK3CB', 'QARS', 'RFC3', 'RPGRIP1L', 'SDC1', 'TMEM31', 
                   'YME1L1', 'ZBTB11', sample(colnames(xdata.raw), 100)) %>% unique
-xdata <- xdata.raw[, small.subset]
+
+xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
 ydata <- ydata.raw %>% select(time, status)
 ```
 
@@ -177,7 +181,7 @@ ydata <- ydata.raw %>% select(time, status)
 #
 # Add degree 0 to genes not in STRING network
 
-degree.network.all <- colnames(xdata)[!colnames(xdata) %in% names(degree.network)] %>% {
+degree.network.all <- colnames(xdata)[!colnames(xdata) %in% gene.names(names(degree.network))$external_gene_name] %>% {
  array(0, length(.), dimnames = list(.)) 
 } %>% c(degree.network) %>% {
   .[colnames(xdata)]

@@ -91,7 +91,8 @@ small.subset <- c('CD5', 'CSF2RB', 'IRGC', 'NEUROG2', 'NLRC4', 'PDE11A',
                   'PTEN', 'TP53', 'BRAF',
                   'PIK3CB', 'QARS', 'RFC3', 'RPGRIP1L', 'SDC1', 'TMEM31', 
                   'YME1L1', 'ZBTB11', sample(colnames(xdata.raw), 100)) %>% unique
-xdata <- xdata.raw[, small.subset]
+
+xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
 ydata <- ydata.raw %>% select(time, status)
 ```
 
