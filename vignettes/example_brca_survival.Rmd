@@ -46,9 +46,15 @@ The data is loaded from an online curated dataset downloaded from TCGA using `TC
 
 To accelerate the process we use a very reduced dataset down to 107 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
 
-```{r data, warning=FALSE, message=FALSE}
+```{r, include=FALSE}
 brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
+```
 
+```{r, eval=FALSE}
+brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
+```
+
+```{r data, warning=FALSE, message=FALSE}
 xdata.raw <- t(assay(brca[[1]]))
 
 # keep only primary solid tumor (code 01)
