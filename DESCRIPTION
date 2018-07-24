@@ -45,12 +45,11 @@ Suggests: testthat,
   pROC,
   devtools,
   roxygen2,
-  Vennerable,
+  VennDiagram,
   BiocStyle,
   curatedTCGAData
 Remotes: 
-  averissimo/loose.rock,
-  js229/Vennerable
+  averissimo/loose.rock
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 BugReports: https://www.github.com/sysbiomed/glmSparseNet/issues

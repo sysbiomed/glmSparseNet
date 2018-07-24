@@ -11,7 +11,7 @@ vignette: >
   %\VignetteIndexEntry{Breast survival dataset using network from STRING DB}
   %\VignetteEncoding{UTF-8}
 params:
-  seed: !r 2018
+  seed: !r 20188102
 ---
 
 ## Instalation
@@ -27,11 +27,12 @@ biocLite('sysbiomed/glmSparseNet')
 library(dplyr)
 library(Matrix)
 library(ggplot2)
+library(forcats)
 library(parallel)
 library(STRINGdb)
 library(reshape2)
 library(survival)
-library(Vennerable)
+library(VennDiagram)
 library(loose.rock)
 library(futile.logger)
 library(curatedTCGAData)
@@ -65,8 +66,8 @@ all.interactions.700 <- string.db.homo.sapiens(score_threshold = 700)
 ```
 
 ```{r, include=FALSE}
-data('all.interactions.700', package = 'glmSparseNet')
-all.interactions <- all.interactions.700
+data('string.interactions.700.cache', package = 'glmSparseNet')
+all.interactions <- string.interactions.700.cache
 ```
 
 ## Build network matrix
@@ -74,7 +75,7 @@ all.interactions <- all.interactions.700
 Build a sparse matrix object that contains the network.
 
 ```{r}
-string.network <- build.string.gene.network(all.interactions$network)
+string.network <- build.string.network(all.interactions, use.names = 'external')
 
 string.network.undirected <- string.network + Matrix::t(string.network)
 string.network.undirected <- (string.network.undirected != 0) * 1
@@ -100,8 +101,7 @@ flog.info('  * edges per protein: %f', sum(string.network.undirected != 0) / 2 /
 
 ```{r, echo=FALSE}
 string.network.binary <- (string.network.undirected != 0) * 1
-
-degree.network <- (Matrix::rowSums(string.network.binary) + Matrix::colSums(string.network.binary)) / 2
+degree.network        <- (Matrix::rowSums(string.network.binary) + Matrix::colSums(string.network.binary)) / 2
 
 flog.info('Summary of degree:', summary(degree.network), capture = TRUE)
 ```
@@ -112,21 +112,20 @@ flog.info('Summary of degree:', summary(degree.network), capture = TRUE)
 qplot(degree.network[degree.network <= quantile(degree.network, probs = .99999)], geom = 'histogram', fill = my.colors(2), bins = 100) + theme(legend.position = 'none') + xlab('Degree (up until 99.999% quantile)')
 ```
 
-And above that quantile
-
-```{r, warning=FALSE}
-qplot(degree.network[degree.network > quantile(degree.network, probs = .99999)], geom = 'histogram', fill = my.colors(2), bins = 100) + 
-  theme(legend.position = 'none') +
-  xlab('Degree (between 99.999% and 100% quantile)')
-```
-
 ## glmSparseNet
 
 * Dataset from curatedTCGAdata
 
-```{r data.show, warning=FALSE, error=FALSE}
+```{r, include=FALSE}
 brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
+```
 
+```{r, eval=FALSE}
+brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
+```
+
+
+```{r data.show, warning=FALSE, error=FALSE}
 xdata.raw <- t(assay(brca[[1]]))
 
 # keep only primary solid tumor (code 01)
@@ -157,7 +156,7 @@ rownames(ydata.raw) <- ydata.raw$patientID
 
 # Get matches between survival and assay data
 common.codes <- bcr_sample_barcode[strtrim(bcr_sample_barcode, 12) %in% ydata.raw$patientID]
-xdata.raw    <- xdata.raw[common.codes, ]
+xdata.raw    <- xdata.raw[common.codes, colnames(xdata.raw)[colnames(xdata.raw) %in% names(degree.network[degree.network > 0])]]
 xdata.raw    <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
 
 # Order ydata the same as assay
@@ -165,11 +164,26 @@ ydata.raw    <- ydata.raw[strtrim(rownames(xdata.raw), 12), ]
 
 # Using only a subset of genes previously selected to keep this short example.
 set.seed(params$seed)
-small.subset <- c('CD5', 'CSF2RB', 'IRGC', 'NEUROG2', 'NLRC4', 'PDE11A',  
-                  'PTEN', 'TP53', 'BRAF',
-                  'PIK3CB', 'QARS', 'RFC3', 'RPGRIP1L', 'SDC1', 'TMEM31', 
-                  'YME1L1', 'ZBTB11', sample(colnames(xdata.raw), 100)) %>% unique
+small.subset <- c('AAK1', 'ADRB1', 'AK7', 'ALK', 'APOBEC3F', 'ARID1B', 
+                  'BAMBI', 'BRAF', 'BTG1', 'CACNG8', 'CASP12', 'CD5', 
+                  'CDA', 'CEP72', 'CPD', 'CSF2RB', 'CSN3', 'DCT', 'DLG3', 
+                  'DLL3', 'DPP4', 'DSG1', 'EDA2R', 'ERP27', 'EXD1', 'GABBR2', 
+                  'GADD45A', 'GBP1', 'HTR1F', 'IFNK', 'IRF2', 'IYD', 'KCNJ11', 
+                  'KRTAP5-6', 'MAFA', 'MAGEB4', 'MAP2K6', 'MCTS1', 'MMP15', 'MMP9', 
+                  'NFKBIA', 'NLRC4', 'NT5C1A', 'OPN4', 'OR13C5', 'OR13C8', 'OR2T6', 
+                  'OR4K2', 'OR52E6', 'OR5D14', 'OR5H1', 'OR6C4', 'OR7A17', 'OR8J3', 
+                  'OSBPL1A', 'PAK6', 'PDE11A', 'PELO', 'PGK1', 'PIK3CB', 'PMAIP1', 
+                  'POLR2B', 'POP1', 'PPFIA3', 'PSME1', 'PSME2', 'PTEN', 'PTGES3', 
+                  'QARS', 'RABGAP1', 'RBM3', 'RFC3', 'RGPD8', 'RPGRIP1L', 'SAV1', 
+                  'SDC1', 'SDC3', 'SEC16B', 'SFPQ', 'SFRP5', 'SIPA1L1', 'SLC2A14', 
+                  'SLC6A9', 'SPATA5L1', 'SPINT1', 'STAR', 'STXBP5', 'SUN3', 'TACC2', 
+                  'TACR1', 'TAGLN2', 'THPO', 'TNIP1', 'TP53', 'TRMT2B', 'TUBB1', 
+                  'VDAC1', 'VSIG8', 'WNT3A', 'WWOX', 'XRCC4', 'YME1L1', 'ZBTB11', 
+                  'ZSCAN21') %>% sample(size  = 50) %>% sort
 
+small.subset <- c(small.subset, sample(colnames(xdata.raw), 51)) %>% unique %>% sort
+
+#xdata <- xdata.raw
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
 ydata <- ydata.raw %>% select(time, status)
 ```
@@ -181,17 +195,21 @@ ydata <- ydata.raw %>% select(time, status)
 #
 # Add degree 0 to genes not in STRING network
 
-degree.network.all <- colnames(xdata)[!colnames(xdata) %in% gene.names(names(degree.network))$external_gene_name] %>% {
- array(0, length(.), dimnames = list(.)) 
-} %>% c(degree.network) %>% {
-  .[colnames(xdata)]
-}
+my.degree <- degree.network[small.subset]
+my.string <- string.network.binary[small.subset, small.subset]
 ```
 
 Degree distribution for sample set of gene features *(in xdata)*.
 
-```{r, echo=FALSE}
-qplot(degree.network.all, bins = 100, fill = my.colors(3)) + theme(legend.position = 'none')
+```{r, echo=FALSE, warning=FALSE}
+qplot(my.degree, bins = 100, fill = my.colors(3)) + theme(legend.position = 'none')
+```
+
+### Select balanced folds for cross-validation
+
+```{r}
+set.seed(params$seed)
+foldid <- balanced.cv.folds(!!ydata$status)$output
 ```
 
 
@@ -200,37 +218,16 @@ qplot(degree.network.all, bins = 100, fill = my.colors(3)) + theme(legend.positi
 selected.genes <- list()
 ```
 
-### glmDegree model
-
-Penalizes by the inverse of the degree `D_i* = 1 / D_i`
-
-```{r}
-cv.degree <- cv.glmDegree(xdata, 
-                          Surv(ydata$time, ydata$status), 
-                          family = 'cox',
-                          network = degree.network.all, 
-                          network.options = network.options.default(min.degree = 0.2))
-```
-
-Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
-
-```{r, echo=FALSE}
-glmSparseNet::draw.kaplan(as.vector(coef(cv.degree, s = 'lambda.min')[,1]), xdata, ydata, plot.title = 'Full dataset', legend.outside = F)
-
-selected.genes[['DegreeCox']] <- coef(cv.degree, s = 'lambda.min')[,1] %>% { .[. != 0] } %>%
-  names %>% gene.names %>% { .[['external_gene_name']]} 
-```
-
-
 ### glmHub model
 
 Penalizes using the Hub heuristics, see `hub.heuristics` function definition for more details.
 
-```{r}
+```{r, warning=FALSE, error=FALSE}
 cv.hub <- cv.glmHub(xdata, 
                     Surv(ydata$time, ydata$status), 
                     family = 'cox',
-                    network = degree.network.all, 
+                    foldid = foldid,
+                    network = my.string, 
                     network.options = network.options.default(min.degree = 0.2))
 ```
 
@@ -247,11 +244,11 @@ selected.genes[['Hub']] <- coef(cv.hub, s = 'lambda.min')[,1] %>% { .[. != 0] } 
 
 Penalizes using the Orphan heuristics, see `orphan.heuristics` function definition for more details.
 
-```{r}
+```{r, warning=FALSE, error=FALSE}
 cv.orphan <- cv.glmOrphan(xdata, 
                           Surv(ydata$time, ydata$status), 
                           family = 'cox',
-                          network = degree.network.all, 
+                          network = my.string, 
                           network.options = network.options.default(min.degree = 0.2))
 ```
 
@@ -264,14 +261,12 @@ selected.genes[['Orphan']] <- coef(cv.orphan, s = 'lambda.min')[,1] %>% { .[. !=
   names %>% gene.names %>% { .[['external_gene_name']]} 
 ```
 
-### glmnet model
+### Elastic Net model *(without network-penalization)*
 
 Uses regular glmnet model as simple baseline
 
-```{r}
-cv.glm <- cv.glmnet(xdata, 
-                    Surv(ydata$time, ydata$status), 
-                    family = 'cox')
+```{r, warning=FALSE, error=FALSE}
+cv.glm <- cv.glmnet(xdata, Surv(ydata$time, ydata$status), family = 'cox', foldid = foldid)
 ```
 
 Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
@@ -288,18 +283,33 @@ selected.genes[['GLMnet']] <- coef(cv.glm, s = 'lambda.min')[,1] %>% { .[. != 0]
 Venn diagram of overlapping genes.
 
 ```{r, echo=FALSE, warning=FALSE}
-vv <- Venn(selected.genes)
-Vstem <- compute.Venn(vv, type = 'squares')
-PlotVennGeometry(Vstem)
+venn.plot <- venn.diagram(selected.genes , 
+                          NULL, 
+                          fill           = c(my.colors(5), my.colors(3), my.colors(4)), 
+                          alpha          = c(0.3,0.3, .3), 
+                          cex            = 2, 
+                          cat.fontface   = 4, 
+                          category.names = names(selected.genes))
+grid.draw(venn.plot)
 ```
 
 Descriptive table showing which genes are selected in each model
 
-```{r, echo=FALSE}
-melt(selected.genes) %>% apply(2, factor) %>% as.data.frame %>% ggplot() +
-  geom_point(aes(value, L1), shape = my.symbols(2), color = my.colors(3), size = 3) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0)) +
-  ylab('Model') + xlab('Gene')
+We can observe, that elastic net without network-based penalization selects the best model with 40% more genes than glmOrphan and glmHub, without loosing accuracy.
+
+*note*: size of circles represent the degree that gene in network.
+
+```{r, echo=FALSE, warning=FALSE}
+melt(selected.genes) %>% 
+  mutate(Degree = my.degree[value], 
+         value  = factor(value), 
+         L1     = factor(L1)) %>%
+  mutate(value = fct_reorder(value, Degree)) %>%
+  as.data.frame %>% ggplot() +
+  geom_point(aes(value, L1, size = Degree), shape = my.symbols(3), color = my.colors(3)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0), legend.position = 'top') +
+  ylab('Model') + xlab('Gene') + 
+  scale_size_continuous(trans = 'log10')
 ```
 
 

@@ -41,6 +41,49 @@ gene.names <- function(ensembl.genes) {
   return(data.frame(ensembl_gene_id = ensembl.genes, external_gene_name = ensembl.genes, stringsAsFactors = FALSE))
 }
 
+#' Retrieve ensembl gene names from biomaRt
+#'
+#' @param gene.id character vector with gene names
+#'
+#' @return a dataframe with external gene names, ensembl_id
+#' @export
+#'
+#' @examples
+#' esembl.gene.names(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
+esembl.gene.names <- function(gene.id) {
+
+  . <- NULL
+
+  tryCatch({
+    marts <- biomaRt::listMarts()
+    index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
+    mart <- biomaRt::useMart(marts$biomart[index])
+    mart <- loose.rock::run.cache(biomaRt::useMart,
+                                  marts$biomart[index],
+                                  'hsapiens_gene_ensembl',
+                                  cache.prefix = 'biomart',
+                                  show.message = FALSE)
+    results <- biomaRt::getBM(attributes = c("external_gene_name", "ensembl_gene_id"),
+                              filters = "external_gene_name", values = gene.id,
+                              mart = mart)
+
+    #
+    # Check if any genes does not have an external_gene_name
+    #  and add them with same ensembl_id
+
+    results <- gene.id[!gene.id %in% results$external_gene_name] %>% {
+      data.frame(external_gene_name = .,
+                 ensembl_gene_id    = .,
+                 stringsAsFactors   = FALSE)
+    } %>% rbind(results)
+
+    return(dplyr::arrange(results, rlang::UQ(as.name('external_gene_name'))))
+  }, error = function(msg) {
+    warning(sprintf('Error when finding gene names:\n\t%s', msg))
+  })
+  return(data.frame(ensembl_gene_id = gene.id, external_gene_name = gene.id, stringsAsFactors = FALSE))
+}
+
 #' Retrieve hallmarks of cancer count for genes
 #'
 #' @param genes gene names

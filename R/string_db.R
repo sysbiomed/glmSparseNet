@@ -93,33 +93,11 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
   #
   # Refilter combined score
 
-  all.interactions$combined_score.new <- combined.score
+  all.interactions$combined_score <- combined.score
   interactions <- all.interactions %>%
-    dplyr::filter(rlang::UQ(as.name('combined_score.new')) >= score_threshold)
+    dplyr::filter(rlang::UQ(as.name('combined_score')) >= score_threshold)
 
-  #
-  # Build sparse matrix
-
-  merged.prot <- sort(unique(c(interactions$from, interactions$to)))
-
-  interactions$from <- readr::parse_factor(interactions$from, merged.prot)
-  interactions$to   <- readr::parse_factor(interactions$to, merged.prot)
-
-  levels(interactions$from) <- levels(interactions$from) %>% { gsub('9606\\.', '', .) }
-  levels(interactions$to)   <- levels(interactions$to) %>% { gsub('9606\\.', '', .) }
-
-  i <- as.numeric(interactions$from)
-  j <- as.numeric(interactions$to)
-
-  # Create new sparse matrix with p x p dimensions (p = genes)
-  new.mat <- Matrix::sparseMatrix(i        = i,
-                                  j        = j,
-                                  x        = interactions$combined_score.new,
-                                  dims     = array(length(merged.prot), 2),
-                                  dimnames = list(levels(interactions$from),
-                                                  levels(interactions$to)))
-
-  return(list(network = new.mat, interactions = interactions))
+  return(interactions)
 }
 
 #' Build gene network from peptide ids
@@ -128,33 +106,70 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
 #' between peptide and gene id
 #'
 #' @param protein.network matrix with colnames and rownames as ensembl peptide id (same order)
-#' @param use.external.names use external gene names instead of ensembl gene id
+#' @param use.names default is to use protein names ('protein'), other options are 'ensembl' for ensembl
+#' gene id or 'external' for external gene names
 #'
 #' @return a new matrix with gene ids instead of peptide ids. The size of matrix can be different as
 #' there may not be a mapping or a peptide mapping can have multiple genes.
 #' @export
 #' @seealso string.db.homo.sapiens
-build.string.gene.network <- function(protein.network, use.external.names = FALSE) {
+build.string.network <- function(string.tbl, use.names = 'protein') {
 
-  # get mapping from ensembl protein-gene
-  gene.tbl <- protein.to.ensembl.gene.names(colnames(protein.network))
+  # remove 9606. prefix
+  string.tbl$from <- gsub('9606\\.', '', string.tbl$from)
+  string.tbl$to   <- gsub('9606\\.', '', string.tbl$to)
 
-  # create new matrix with columns as genes
-  new.mat <- protein.network[gene.tbl$ensembl_peptide_id, gene.tbl$ensembl_peptide_id]
+  # get sorted list of proteins
+  merged.prot <- sort(unique(c(string.tbl$from, string.tbl$to)))
 
-  message(sprintf('Proteins mapped to genes: %d out of %d in STRING protein-protein interactions (%d discarded)',
-                  nrow(new.mat),
-                  nrow(protein.network),
-                  sum(!colnames(protein.network) %in% gene.tbl$ensembl_peptide_id)))
+  # if use.names is not default, then replace proteins with genes (either ensembl_id or gene_name)
+  if (use.names == 'ensembl' || use.names == 'external') {
+    prot.map <- protein.to.ensembl.gene.names(merged.prot)
+    rownames(prot.map) <- prot.map$ensembl_peptide_id
 
-  # change name of rows and columns to gene (either ensembl gene id or gene name)
-  if (use.external.names) {
-    colnames(new.mat) <- gene.tbl$external_gene_name
-    rownames(new.mat) <- gene.tbl$external_gene_name
+    # use external gene names
+    if (use.names == 'external') {
+      ext.genes           <- prot.map$ensembl_gene_id %>% unique %>% gene.names
+      rownames(ext.genes) <- ext.genes$ensembl_gene_id
+
+      prot.map$ensembl_gene_id <- ext.genes[prot.map$ensembl_gene_id, 'external_gene_name']
+    }
+
+    # keep only proteins that have mapping to gene
+    new.string <- string.tbl %>%
+      filter(from %in% prot.map$ensembl_peptide_id & to %in% prot.map$ensembl_peptide_id)
+
+    # replace protein with genes
+    new.string$from <- as.vector(prot.map[new.string$from,'ensembl_gene_id'])
+    new.string$to   <- as.vector(prot.map[new.string$to,'ensembl_gene_id'])
+
+    # discard all interaction between gene and himself
+    new.string <- new.string[new.string$from != new.string$to, ]
+
+    # update list of protein index with genes
+    merged.prot <- sort(unique(c(new.string$from, new.string$to)))
   } else {
-    colnames(new.mat) <- gene.tbl$ensembl_gene_id
-    rownames(new.mat) <- gene.tbl$ensembl_gene_id
+
+    # if default then just pass the argument as new.string
+    new.string <- string.tbl
   }
+
+  #
+  # Build sparse matrix
+
+  new.string$from <- readr::parse_factor(new.string$from, merged.prot)
+  new.string$to   <- readr::parse_factor(new.string$to, merged.prot)
+
+  i <- as.numeric(new.string$from)
+  j <- as.numeric(new.string$to)
+
+  # Create new sparse matrix with p x p dimensions (p = genes)
+  new.mat <- Matrix::sparseMatrix(i        = i,
+                                  j        = j,
+                                  x        = new.string$combined_score,
+                                  dims     = array(length(merged.prot), 2),
+                                  dimnames = list(levels(new.string$from),
+                                                  levels(new.string$to)))
 
   # return the new matrix
   return(new.mat)
