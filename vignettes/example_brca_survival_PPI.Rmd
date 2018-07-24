@@ -14,6 +14,11 @@ params:
   seed: !r 20188102
 ---
 
+```{r, include=FALSE}
+devtools::load_all()
+```
+
+
 ## Instalation
 
 ```{r, eval=FALSE}
