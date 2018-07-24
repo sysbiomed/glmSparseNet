@@ -49,7 +49,7 @@ gene.names <- function(ensembl.genes) {
 #' @export
 #'
 #' @examples
-#' esembl.gene.names(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
+#' # esembl.gene.names(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
 esembl.gene.names <- function(gene.id) {
 
   . <- NULL
@@ -107,7 +107,7 @@ esembl.gene.names <- function(gene.id) {
 #'
 #' @examples
 #' hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
-#' hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
+#' # hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
 hallmarks <- function(genes, metric = 'count', hierarchy = 'full', generate.plot = TRUE, show.message = FALSE) {
   valid.measures <- c('count', 'cprob', 'pmi', 'npmi')
   if (!metric %in% valid.measures) {
