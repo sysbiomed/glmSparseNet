@@ -105,7 +105,7 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
 #' This can reduce the dimension of the original network, as there may not be a mapping
 #' between peptide and gene id
 #'
-#' @param protein.network matrix with colnames and rownames as ensembl peptide id (same order)
+#' @param string.tbl matrix with colnames and rownames as ensembl peptide id (same order)
 #' @param use.names default is to use protein names ('protein'), other options are 'ensembl' for ensembl
 #' gene id or 'external' for external gene names
 #'
@@ -124,7 +124,7 @@ build.string.network <- function(string.tbl, use.names = 'protein') {
 
   # if use.names is not default, then replace proteins with genes (either ensembl_id or gene_name)
   if (use.names == 'ensembl' || use.names == 'external') {
-    prot.map <- protein.to.ensembl.gene.names(merged.prot)
+    prot.map           <- protein.to.ensembl.gene.names(merged.prot)
     rownames(prot.map) <- prot.map$ensembl_peptide_id
 
     # use external gene names
@@ -137,7 +137,8 @@ build.string.network <- function(string.tbl, use.names = 'protein') {
 
     # keep only proteins that have mapping to gene
     new.string <- string.tbl %>%
-      filter(from %in% prot.map$ensembl_peptide_id & to %in% prot.map$ensembl_peptide_id)
+      dplyr::filter(rlang::UQ(as.name('from')) %in% prot.map$ensembl_peptide_id &
+                      rlang::UQ(as.name('to')) %in% prot.map$ensembl_peptide_id)
 
     # replace protein with genes
     new.string$from <- as.vector(prot.map[new.string$from,'ensembl_gene_id'])

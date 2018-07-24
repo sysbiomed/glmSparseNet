@@ -66,7 +66,7 @@ all.interactions.700 <- string.db.homo.sapiens(score_threshold = 700)
 ```
 
 ```{r, include=FALSE}
-data('string.interactions.700.cache', package = 'glmSparseNet')
+data(string.interactions.700.cache, package = 'glmSparseNet')
 all.interactions <- string.interactions.700.cache
 ```
 
@@ -297,7 +297,7 @@ Descriptive table showing which genes are selected in each model
 
 We can observe, that elastic net without network-based penalization selects the best model with 40% more genes than glmOrphan and glmHub, without loosing accuracy.
 
-*note*: size of circles represent the degree that gene in network.
+*note*: size of circles represent the degree of that gene in network.
 
 ```{r, echo=FALSE, warning=FALSE}
 melt(selected.genes) %>% 

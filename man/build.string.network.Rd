@@ -7,9 +7,10 @@
 build.string.network(string.tbl, use.names = "protein")
 }
 \arguments{
-\item{protein.network}{matrix with colnames and rownames as ensembl peptide id (same order)}
+\item{string.tbl}{matrix with colnames and rownames as ensembl peptide id (same order)}
 
-\item{use.external.names}{use external gene names instead of ensembl gene id}
+\item{use.names}{default is to use protein names ('protein'), other options are 'ensembl' for ensembl
+gene id or 'external' for external gene names}
 }
 \value{
 a new matrix with gene ids instead of peptide ids. The size of matrix can be different as
