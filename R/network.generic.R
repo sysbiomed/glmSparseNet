@@ -41,7 +41,10 @@ setMethod('glmSparseNet.private', signature(xdata = 'matrix'), function(fun, xda
 
   penalty.factor <- penalty.factor + network.options$min.degree
 
-  if (any(penalty.factor == 0)) {
+  if (all(penalty.factor <= 0)) {
+    warning('The penalty.factor calculated from network (or given) has all 0 values, this might lead to convergence problems. Try changing some of the network options.')
+    # penalty.factor <- rep(1, length(penalty.factor))
+  } else if (any(penalty.factor == 0)) {
     warning('The penalty.factor calculated from network (or given) has some 0 values, this might lead to convergence problems. Try using min.degree in network.options to tweak a minimum value.')
   }
 
