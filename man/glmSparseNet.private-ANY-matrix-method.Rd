@@ -11,7 +11,7 @@
 \arguments{
 \item{fun}{function to be called (glmnet or cv.glmnet)}
 
-\item{xdata}{matrix}
+\item{xdata}{input data, can be a matrix or MultiAssayExperiment}
 
 \item{ydata}{response data compatible with glmnet}
 

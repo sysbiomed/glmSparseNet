@@ -35,5 +35,5 @@ Retrieve hallmarks of cancer count for genes
 }
 \examples{
 hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
-hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
+# hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
 }

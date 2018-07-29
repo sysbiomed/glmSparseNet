@@ -72,6 +72,8 @@ network.options.default <- function(method     = 'pearson',
 #'
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 20)
+#' glmSparseNet:::calc.penalty(xdata, 'none')
+#' glmSparseNet:::calc.penalty(xdata, 'sparsebn')
 #' glmSparseNet:::calc.penalty(xdata, 'correlation')
 #' glmSparseNet:::calc.penalty(xdata, 'correlation', network.options.default(cutoff = .6))
 #' glmSparseNet:::calc.penalty(xdata, 'covariance')
@@ -92,6 +94,14 @@ calc.penalty <- function(xdata, penalty.type, network.options = network.options.
                                    cutoff              = network.options$cutoff,
                                    #
                                    n.cores = network.options$n.cores)
+    } else if (penalty.type == 'sparsebn') {
+      penalty.factor <- degree.sparsebn(xdata,
+                                        consider.unweighted = network.options$unweighted,
+                                        cutoff              = network.options$cutoff,
+                                        #
+                                        n.cores = network.options$n.cores)
+    } else if (penalty.type == 'none') {
+      penalty.factor <- rep(1, ncol(xdata))
     } else {
       stop('Unkown network type, see documentation of glmSparseNet')
     }
@@ -112,14 +122,9 @@ calc.penalty <- function(xdata, penalty.type, network.options = network.options.
 #' @examples
 #' hub.heuristic(rnorm(1:10))
 hub.heuristic <- function(x) {
-  tmp.fun <- function(x,
-                      a = .20 - 1,
-                      b = -1,
-                      g = -1) {
-    return(a + 10^(-b * (exp(x) + g)))
-  }
+
   x <- x / max(x)
-  return(tmp.fun(x))
+  return(heuristic.scale(1 - x))
 }
 
 #' Heuristic function to penalize nodes with high degree
@@ -132,12 +137,22 @@ hub.heuristic <- function(x) {
 #' @examples
 #' orphan.heuristic(rnorm(1:10))
 orphan.heuristic <- function(x) {
-  tmp.fun <- function(x,
-                      a = .20 - 1,
-                      b = -1,
-                      g = -1) {
-    return(a + 10^(-b * (exp(x) + g)))
-  }
   x <- x / max(x)
-  return(tmp.fun(1 - x))
+  return(heuristic.scale(x))
+}
+
+#' Heuristic function to use in high dimensions
+#'
+#' @param x vector of values to scale
+#' @param sub.exp10 value to subtract to base 10 exponential, i.e. for `10^0 - sub.exp10 = 1 - sub.exp10`
+#' @param exp.mult parameter to multiply exponential, i.e. to have a negative exponential or positive
+#' @param sub.exp value to subtract for exponentional, i.e. if x = 0, `exp(0) - sub.exp = 1 - sub.exp`
+#'
+#' @return a vector of scaled values
+#' @export
+#'
+#' @examples
+#' orphan.heuristic(rnorm(1:10))
+heuristic.scale <- function(x, sub.exp10 = - 1, exp.mult = -1, sub.exp = -1) {
+  return(sub.exp10 + 10^(-exp.mult * (exp(x) + sub.exp)))
 }

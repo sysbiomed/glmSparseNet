@@ -9,7 +9,7 @@
   network.options = network.options.default(), ...)
 }
 \arguments{
-\item{xdata}{input data as a SummarizedExperiment}
+\item{xdata}{input data, can be a matrix or MultiAssayExperiment}
 
 \item{ydata}{response data compatible with glmnet}
 

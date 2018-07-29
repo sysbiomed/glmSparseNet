@@ -21,6 +21,8 @@ Internal method to calculate the network using data-dependant methods
 }
 \examples{
 xdata <- matrix(rnorm(100), ncol = 20)
+glmSparseNet:::calc.penalty(xdata, 'none')
+glmSparseNet:::calc.penalty(xdata, 'sparsebn')
 glmSparseNet:::calc.penalty(xdata, 'correlation')
 glmSparseNet:::calc.penalty(xdata, 'correlation', network.options.default(cutoff = .6))
 glmSparseNet:::calc.penalty(xdata, 'covariance')

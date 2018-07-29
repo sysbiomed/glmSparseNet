@@ -16,5 +16,5 @@ a dataframe with external gene names, ensembl_id
 Retrieve ensembl gene names from biomaRt
 }
 \examples{
-esembl.gene.names(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
+# esembl.gene.names(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
 }

@@ -21,12 +21,7 @@ setGeneric('glmSparseNet.private', function(fun, xdata, ydata, network, network.
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param fun function to be called (glmnet or cv.glmnet)
-#' @param xdata matrix
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that glmnet accepts
+#' @inheritParams glmSparseNet.private
 #'
 #' @return an object just as glmnet
 #'
@@ -57,13 +52,7 @@ setMethod('glmSparseNet.private', signature(xdata = 'matrix'), function(fun, xda
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param fun function to be called (glmnet or cv.glmnet)
-#' @param xdata MultiAssayExperiment
-#' @param experiment.name name of experiment to use as input in MultiAssayExperiment object
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that glmnet accepts
+#' @inheritParams glmSparseNet.private
 #'
 #' @return an object just as glmnet
 setMethod('glmSparseNet.private', signature(xdata = 'MultiAssayExperiment'), function(fun, xdata, ydata, network,
@@ -96,12 +85,7 @@ setMethod('glmSparseNet.private', signature(xdata = 'MultiAssayExperiment'), fun
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param fun function to be called (glmnet or cv.glmnet)
-#' @param xdata SummarizedExperiment
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that glmnet accepts
+#' @inheritParams glmSparseNet.private
 #'
 #' @return an object just as glmnet
 setMethod('glmSparseNet.private', signature(xdata = 'SummarizedExperiment'), function(fun, xdata, ydata, network,

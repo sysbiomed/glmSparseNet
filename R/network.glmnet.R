@@ -77,6 +77,7 @@ setMethod('glmSparseNet', signature(xdata = 'MultiAssayExperiment'), function(xd
 #'
 #' @inheritParams glmSparseNet
 #'
+#'
 #' @return an object just as glmnet
 #' @export
 

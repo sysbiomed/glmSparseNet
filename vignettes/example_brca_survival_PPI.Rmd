@@ -14,11 +14,6 @@ params:
   seed: !r 20188102
 ---
 
-```{r, include=FALSE}
-devtools::load_all()
-```
-
-
 ## Instalation
 
 ```{r, eval=FALSE}
@@ -71,7 +66,7 @@ all.interactions.700 <- string.db.homo.sapiens(score_threshold = 700)
 ```
 
 ```{r, include=FALSE}
-data(string.interactions.700.cache, package = 'glmSparseNet')
+data(string.interactions.700.cache)
 all.interactions <- string.interactions.700.cache
 ```
 
@@ -134,16 +129,13 @@ brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 xdata.raw <- t(assay(brca[[1]]))
 
 # keep only primary solid tumor (code 01)
-bcr_sample_barcode <- rownames(xdata.raw)[grepl('TCGA-[0-9A-Z]+-[0-9A-Z]+-01',
-                                     rownames(xdata.raw))]
+bcr_sample_barcode <- rownames(xdata.raw)[grepl('TCGA-[0-9A-Z]+-[0-9A-Z]+-01', rownames(xdata.raw))]
 
 # Get survival information
 ydata.raw <- colData(brca) %>% as.data.frame %>% 
   # Keep only data relative to survival or samples
-  select(patientID, vital_status, 
-         Days.to.date.of.Death, Days.to.Date.of.Last.Contact, 
-         days_to_death,         days_to_last_followup,
-         Vital.Status) %>% 
+  select(patientID, vital_status, Days.to.date.of.Death, Days.to.Date.of.Last.Contact, 
+         days_to_death, days_to_last_followup, Vital.Status) %>% 
   # Convert days to integer
   mutate(Days.to.date.of.Death        = as.integer(Days.to.date.of.Death)) %>%
   mutate(Days.to.Date.of.Last.Contact = as.integer(Days.to.Date.of.Last.Contact)) %>%
@@ -169,30 +161,28 @@ ydata.raw    <- ydata.raw[strtrim(rownames(xdata.raw), 12), ]
 
 # Using only a subset of genes previously selected to keep this short example.
 set.seed(params$seed)
-small.subset <- c('AAK1', 'ADRB1', 'AK7', 'ALK', 'APOBEC3F', 'ARID1B', 
-                  'BAMBI', 'BRAF', 'BTG1', 'CACNG8', 'CASP12', 'CD5', 
-                  'CDA', 'CEP72', 'CPD', 'CSF2RB', 'CSN3', 'DCT', 'DLG3', 
-                  'DLL3', 'DPP4', 'DSG1', 'EDA2R', 'ERP27', 'EXD1', 'GABBR2', 
-                  'GADD45A', 'GBP1', 'HTR1F', 'IFNK', 'IRF2', 'IYD', 'KCNJ11', 
-                  'KRTAP5-6', 'MAFA', 'MAGEB4', 'MAP2K6', 'MCTS1', 'MMP15', 'MMP9', 
-                  'NFKBIA', 'NLRC4', 'NT5C1A', 'OPN4', 'OR13C5', 'OR13C8', 'OR2T6', 
-                  'OR4K2', 'OR52E6', 'OR5D14', 'OR5H1', 'OR6C4', 'OR7A17', 'OR8J3', 
-                  'OSBPL1A', 'PAK6', 'PDE11A', 'PELO', 'PGK1', 'PIK3CB', 'PMAIP1', 
-                  'POLR2B', 'POP1', 'PPFIA3', 'PSME1', 'PSME2', 'PTEN', 'PTGES3', 
-                  'QARS', 'RABGAP1', 'RBM3', 'RFC3', 'RGPD8', 'RPGRIP1L', 'SAV1', 
-                  'SDC1', 'SDC3', 'SEC16B', 'SFPQ', 'SFRP5', 'SIPA1L1', 'SLC2A14', 
-                  'SLC6A9', 'SPATA5L1', 'SPINT1', 'STAR', 'STXBP5', 'SUN3', 'TACC2', 
-                  'TACR1', 'TAGLN2', 'THPO', 'TNIP1', 'TP53', 'TRMT2B', 'TUBB1', 
-                  'VDAC1', 'VSIG8', 'WNT3A', 'WWOX', 'XRCC4', 'YME1L1', 'ZBTB11', 
-                  'ZSCAN21') %>% sample(size  = 50) %>% sort
+small.subset <- c('AAK1', 'ADRB1', 'AK7', 'ALK', 'APOBEC3F', 'ARID1B', 'BAMBI', 'BRAF', 'BTG1', 
+                  'CACNG8', 'CASP12', 'CD5',  'CDA', 'CEP72', 'CPD', 'CSF2RB', 'CSN3', 'DCT', 
+                  'DLG3',  'DLL3', 'DPP4', 'DSG1', 'EDA2R', 'ERP27', 'EXD1', 'GABBR2',  
+                  'GADD45A', 'GBP1', 'HTR1F', 'IFNK', 'IRF2', 'IYD', 'KCNJ11',  'KRTAP5-6', 
+                  'MAFA', 'MAGEB4', 'MAP2K6', 'MCTS1', 'MMP15', 'MMP9',  'NFKBIA', 'NLRC4', 
+                  'NT5C1A', 'OPN4', 'OR13C5', 'OR13C8', 'OR2T6', 'OR4K2', 'OR52E6', 'OR5D14', 
+                  'OR5H1', 'OR6C4', 'OR7A17', 'OR8J3',  'OSBPL1A', 'PAK6', 'PDE11A', 'PELO', 
+                  'PGK1', 'PIK3CB', 'PMAIP1',  'POLR2B', 'POP1', 'PPFIA3', 'PSME1', 'PSME2', 
+                  'PTEN', 'PTGES3',  'QARS', 'RABGAP1', 'RBM3', 'RFC3', 'RGPD8', 'RPGRIP1L', 
+                  'SAV1',  'SDC1', 'SDC3', 'SEC16B', 'SFPQ', 'SFRP5', 'SIPA1L1', 'SLC2A14',  
+                  'SLC6A9', 'SPATA5L1', 'SPINT1', 'STAR', 'STXBP5', 'SUN3', 'TACC2',  'TACR1', 
+                  'TAGLN2', 'THPO', 'TNIP1', 'TP53', 'TRMT2B', 'TUBB1',  'VDAC1', 'VSIG8', 
+                  'WNT3A', 'WWOX', 'XRCC4', 'YME1L1', 'ZBTB11',  'ZSCAN21') %>% 
+  sample(size  = 50) %>% sort
 
+# make sure we have 100 genes
 small.subset <- c(small.subset, sample(colnames(xdata.raw), 51)) %>% unique %>% sort
 
 #xdata <- xdata.raw
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
 ydata <- ydata.raw %>% select(time, status)
 ```
-
 
 * Build dataset that overlaps with STRING data
 

@@ -51,11 +51,7 @@ setGeneric('cv.glmSparseNet', function(xdata, ydata, network, network.options = 
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param xdata input data as a matrix
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that cv.glmnet accepts
+#' @inheritParams cv.glmSparseNet
 #'
 #' @return an object just as glmnet
 #' @export
@@ -67,12 +63,7 @@ setMethod('cv.glmSparseNet', signature(xdata = 'matrix'), function(xdata, ydata,
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param xdata input data as a MultiAssayExperiment
-#' @param ydata response data compatible with glmnet
-#' @param experiment.name name of experiment to use as input in MultiAssayExperiment object
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that cv.glmnet accepts
+#' @inheritParams cv.glmSparseNet
 #'
 #' @return an object just as glmnet
 #' @export
@@ -85,11 +76,7 @@ setMethod('cv.glmSparseNet', signature(xdata = 'MultiAssayExperiment'), function
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @param xdata input data as a SummarizedExperiment
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that cv.glmnet accepts
+#' @inheritParams cv.glmSparseNet
 #'
 #' @return an object just as glmnet
 #' @export
