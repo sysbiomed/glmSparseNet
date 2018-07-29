@@ -104,9 +104,8 @@ ydata <- ydata.raw %>% select(time, status)
 Fit model model penalizing by the hubs using the cross-validation function by `cv.glmHub`.
 
 ```{r fit}
-fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status), 
-                    family  = 'cox',
-                    network = 'correlation')
+fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status), family  = 'cox', network = 'correlation', 
+                    network.options = network.options.default(min.degree = .2, cutoff = .6))
 ```
 
 # Results of Cross Validation
