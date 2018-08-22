@@ -18,6 +18,8 @@
 
 \item{network}{type of network, see below}
 
+\item{experiment.name}{name of experiment to use in MultiAssayExperiment object}
+
 \item{network.options}{options to calculate network}
 
 \item{...}{parameters that glmnet accepts}

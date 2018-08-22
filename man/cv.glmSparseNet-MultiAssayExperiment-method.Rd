@@ -16,6 +16,8 @@
 
 \item{network}{type of network, see below}
 
+\item{experiment.name}{Name of experiment in MultiAssayExperiment}
+
 \item{network.options}{options to calculate network}
 
 \item{...}{parameters that cv.glmnet accepts}
