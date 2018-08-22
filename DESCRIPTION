@@ -48,6 +48,6 @@ Suggests: testthat,
   BiocStyle,
   curatedTCGAData
 VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 BugReports: https://www.github.com/sysbiomed/glmSparseNet/issues
 URL: https://www.github.com/sysbiomed/glmSparseNet

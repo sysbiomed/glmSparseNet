@@ -5,9 +5,10 @@
 \alias{draw.kaplan,numeric,matrix,data.frame-method}
 \title{draw.kaplan}
 \usage{
-\S4method{draw.kaplan}{numeric,matrix,data.frame}(chosen.btas, xdata, ydata,
-  probs = c(0.5, 0.5), plot.title = "SurvivalCurves", xlim = NULL,
-  ylim = NULL, expand.yzero = FALSE, legend.outside = FALSE)
+\S4method{draw.kaplan}{numeric,matrix,data.frame}(chosen.btas, xdata,
+  ydata, probs = c(0.5, 0.5), plot.title = "SurvivalCurves",
+  xlim = NULL, ylim = NULL, expand.yzero = FALSE,
+  legend.outside = FALSE)
 }
 \arguments{
 \item{chosen.btas}{numeric.}

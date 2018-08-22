@@ -4,8 +4,8 @@
 \alias{cv.glmHub}
 \title{GLMNET cross-validation model penalizing nodes with small degree}
 \usage{
-cv.glmHub(xdata, ydata, network, network.options = network.options.default(),
-  ...)
+cv.glmHub(xdata, ydata, network,
+  network.options = network.options.default(), ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}

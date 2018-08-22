@@ -4,8 +4,8 @@
 \alias{glmDegree}
 \title{GLMNET model penalizing nodes with small degree}
 \usage{
-glmDegree(xdata, ydata, network, network.options = network.options.default(),
-  ...)
+glmDegree(xdata, ydata, network,
+  network.options = network.options.default(), ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}
