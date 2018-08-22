@@ -4,7 +4,7 @@ set.seed(1985)
 xdata <- matrix(rnorm(30000), nrow = 500)
 
 # use a temporary directory that can be written
-loose.rock::base.dir(tempdir())
+glmSparseNet::base.dir(tempdir())
 
 test_that("Default methods", {
   mat.non.diag <- cor(xdata)

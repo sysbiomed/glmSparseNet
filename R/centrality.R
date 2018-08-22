@@ -69,12 +69,12 @@ network.generic.parallel <- function(fun, fun.prefix,
                                      force.recalc.network  = FALSE,
                                      show.message  = FALSE, ...) {
   #
-  xdata.sha256 <- loose.rock::digest.cache(xdata)
+  xdata.sha256 <- glmSparseNet::digest.cache(xdata)
   #
   fun.aux <- function(xdata, ...) {
     result <- parallel::mclapply( as.numeric(1:(ncol(xdata)-1)), function(ix.i) {
       tryCatch({
-        result <- loose.rock::run.cache(network.worker, fun,
+        result <- glmSparseNet::run.cache(network.worker, fun,
                                         xdata, ix.i,
                                         #
                                         cache.digest = list(xdata.sha256),
@@ -95,7 +95,7 @@ network.generic.parallel <- function(fun, fun.prefix,
     }, mc.cores = n.cores, mc.silent = F, mc.preschedule = TRUE)
     return(result)
   }
-  result <- loose.rock::run.cache(fun.aux, xdata,
+  result <- glmSparseNet::run.cache(fun.aux, xdata,
                                   #
                                   cache.prefix = 'fun.aux',
                                   cache.digest = list(xdata.sha256),
@@ -272,7 +272,7 @@ degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, cons
     degree <- array(0, ncol(xdata))
     for (ix.outer in seq(1, ncol(xdata) - 1, chunks)) {
       max.ix <- min(ix.outer + chunks - 1, ncol(xdata) - 1)
-      res.chunks <- loose.rock::run.cache(chunk.function, xdata, max.ix, ix.outer, n.cores, cutoff, consider.unweighted, ...,
+      res.chunks <- glmSparseNet::run.cache(chunk.function, xdata, max.ix, ix.outer, n.cores, cutoff, consider.unweighted, ...,
                                           cache.digest = list(xdata.sha256),
                                           cache.prefix = fun.prefix,
                                           show.message = F,
@@ -285,9 +285,9 @@ degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, cons
     return(degree)
   }
   #
-  xdata.sha256 <- loose.rock::digest.cache(xdata)
+  xdata.sha256 <- glmSparseNet::digest.cache(xdata)
 
-  val <- loose.rock::run.cache(weigthed.aux, xdata, cutoff, consider.unweighted,
+  val <- glmSparseNet::run.cache(weigthed.aux, xdata, cutoff, consider.unweighted,
                              cache.digest = list(xdata.sha256),
                              cache.prefix = sprintf('degree.%s', fun.prefix),
                              show.message = FALSE,
@@ -371,7 +371,7 @@ setMethod('degree.sparsebn', signature('matrix'), function(xdata,
   }
 
   # generate data that sparsebn understands)
-  sparse.xdata <- loose.rock::run.cache(sparsebnUtils::sparsebnData,
+  sparse.xdata <- glmSparseNet::run.cache(sparsebnUtils::sparsebnData,
                                         xdata,
                                         type         = type,
                                         levels       = levels,
@@ -382,13 +382,13 @@ setMethod('degree.sparsebn', signature('matrix'), function(xdata,
                                         show.message = show.message)
 
   # estimate dag structure, upperbound was wrongfully set
-  dag <- loose.rock::run.cache(sparsebn::estimate.dag, sparse.xdata, ...,
+  dag <- glmSparseNet::run.cache(sparsebn::estimate.dag, sparse.xdata, ...,
                                cache.prefix = 'dag',
                                force.recalc = force.recalc.network,
                                show.message = show.message)
 
   # estimate parameters for dag
-  dag.params <- loose.rock::run.cache(sparsebnUtils::estimate.parameters,
+  dag.params <- glmSparseNet::run.cache(sparsebnUtils::estimate.parameters,
                                       dag,
                                       data         = sparse.xdata,
                                       cache.prefix = 'dag.params',
