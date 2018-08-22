@@ -35,7 +35,9 @@ Imports: SummarizedExperiment,
   stringr,
   rlang,
   parallel,
-  methods
+  methods,
+  reshape2,
+  digest
 Suggests: testthat,
   knitr,
   rmarkdown,
