@@ -140,7 +140,7 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
             # populate a data.frame with all patients (multiple rows per patients if has multiple btas)
             # already calculate high/low risk groups
 
-            for (ix in 1:(dim(prognostic.index)[2])) {
+            for (ix in seq_len(dim(prognostic.index)[2])) {
               # threshold
               #
               #
@@ -178,7 +178,7 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
               }
             }))
 
-            new.factor.str.l <- as.list(as.character(1:(2*length(chosen.btas))))
+            new.factor.str.l <- as.list(as.character(seq_len(2*length(chosen.btas))))
             names(new.factor.str.l) <- new.factor.str
 
             . <- NULL # Satisfy R CMD CHECK

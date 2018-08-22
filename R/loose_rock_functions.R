@@ -19,7 +19,7 @@
 #' TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,TRUE)
 #' set2 <- !set1
 #' balanced.train.and.test(set1, set2, train.perc = .9)
-balanced.train.and.test <- function(..., train.perc = .9, join.all = T) {
+balanced.train.and.test <- function(..., train.perc = .9, join.all = TRUE) {
   # get arguments as list
   input.list <- list(...)
   # stop execution if train.perc is not between 1 and 0 (excluding 0)
@@ -202,17 +202,9 @@ setGeneric("run.cache", function(fun,
 
 #' Run function and save cache
 #'
-#' This method saves the function that's being called
+#' @inheritParams run.cache
 #'
-#' @param base.dir directory where data is stored
-#' @param fun function call name
-#' @param ... parameters for function call
-#' @param seed when function call is random, this allows to set seed beforehand
-#' @param cache.prefix prefix for file name to be generated from parameters (...)
-#' @param cache.digest cache of the digest for one or more of the parameters
-#' @param show.message show message that data is being retrieved from cache
-#' @param force.recalc force the recalculation of the values
-#' @param add.to.hash something to add to the filename generation
+#' @return the result of fun(...)
 setMethod('run.cache',
           signature('function'),
           function(fun,
@@ -245,9 +237,9 @@ setMethod('run.cache',
               }
               digest.cache(args[[ix]])
             })
-            if (class(fun) == 'function') {
+            if (is(fun, 'function')) {
               args[['cache.fun']] <- digest.cache(toString(attributes(fun)$srcref))
-            } else if (class(fun) == 'standardGeneric') {
+            } else if (is(fun, 'standardGeneric')) {
               aaa <- methods::findMethods(fun)
               args[['cache.fun']] <- digest.cache(sapply(names(aaa), function(ix) { digest.cache(toString(attributes(aaa[[ix]])$srcref)) }))
             } else {
@@ -352,7 +344,7 @@ coding.genes <- function (verbose = TRUE)
                                    verbose    = FALSE)
 
   ccds <- utils::read.table(url("ftp://ftp.ncbi.nih.gov/pub/CCDS/current_human/CCDS.current.txt"),
-                            sep = "\t", header = T, comment.char = "|", stringsAsFactors = FALSE)
+                            sep = "\t", header = TRUE, comment.char = "|", stringsAsFactors = FALSE)
 
   ccds$ccds_status <- factor(proper(ccds$ccds_status))
 

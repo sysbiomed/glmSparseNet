@@ -29,6 +29,9 @@
 
 \item{add.to.hash}{something to add to the filename generation}
 }
+\value{
+the result of fun(...)
+}
 \description{
-This method saves the function that's being called
+Run function and save cache
 }

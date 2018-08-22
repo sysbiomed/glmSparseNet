@@ -72,7 +72,7 @@ network.generic.parallel <- function(fun, fun.prefix,
   xdata.sha256 <- glmSparseNet::digest.cache(xdata)
   #
   fun.aux <- function(xdata, ...) {
-    result <- parallel::mclapply( as.numeric(1:(ncol(xdata)-1)), function(ix.i) {
+    result <- parallel::mclapply( as.numeric(seq_len(ncol(xdata)-1)), function(ix.i) {
       tryCatch({
         result <- glmSparseNet::run.cache(network.worker, fun,
                                         xdata, ix.i,
@@ -92,7 +92,7 @@ network.generic.parallel <- function(fun, fun.prefix,
         return(TRUE)
       }
       #}
-    }, mc.cores = n.cores, mc.silent = F, mc.preschedule = TRUE)
+    }, mc.cores = n.cores, mc.silent = FALSE, mc.preschedule = TRUE)
     return(result)
   }
   result <- glmSparseNet::run.cache(fun.aux, xdata,
@@ -275,7 +275,7 @@ degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, cons
       res.chunks <- glmSparseNet::run.cache(chunk.function, xdata, max.ix, ix.outer, n.cores, cutoff, consider.unweighted, ...,
                                           cache.digest = list(xdata.sha256),
                                           cache.prefix = fun.prefix,
-                                          show.message = F,
+                                          show.message = FALSE,
                                           force.recalc = force.recalc.network)
       #
       res.chunks <- matrix(unlist(res.chunks), ncol = ncol(xdata), byrow = TRUE)
