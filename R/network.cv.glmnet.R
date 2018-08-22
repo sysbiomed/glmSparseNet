@@ -64,6 +64,8 @@ setMethod('cv.glmSparseNet', signature(xdata = 'matrix'), function(xdata, ydata,
 #' Calculate GLM model with network-based regularization
 #'
 #' @inheritParams cv.glmSparseNet
+#' @param experiment.name Name of experiment in MultiAssayExperiment
+#'
 #'
 #' @return an object just as glmnet
 #' @export

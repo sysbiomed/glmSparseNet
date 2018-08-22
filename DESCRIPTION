@@ -41,7 +41,6 @@ Imports: SummarizedExperiment,
   rlang,
   parallel,
   methods,
-  reshape2,
   digest
 Suggests: testthat,
   knitr,

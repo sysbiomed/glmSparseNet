@@ -56,6 +56,7 @@ setMethod('glmSparseNet.private', signature(xdata = 'matrix'), function(fun, xda
 #' Calculate GLM model with network-based regularization
 #'
 #' @inheritParams glmSparseNet.private
+#' @param experiment.name name of experiment to use in MultiAssayExperiment object
 #'
 #' @return an object just as glmnet
 setMethod('glmSparseNet.private', signature(xdata = 'MultiAssayExperiment'), function(fun, xdata, ydata, network,

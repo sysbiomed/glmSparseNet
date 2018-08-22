@@ -61,7 +61,7 @@ Bioconductor is necessary for the installation of this package.
 ```{r install, eval=FALSE}
 source("https://bioconductor.org/biocLite.R")
 
-biocLite('sysbiomed/loose.rock')
+# biocLite('sysbiomed/loose.rock')
 biocLite('sysbiomed/glmSparseNet')
 
 #
@@ -129,7 +129,7 @@ library(reshape2)
 library(MultiAssayExperiment)
 library(survival)
 library(glmnet)
-library(loose.rock)
+# library(loose.rock)
 library(glmSparseNet)
 ```
 
@@ -141,7 +141,7 @@ library(reshape2)
 library(MultiAssayExperiment)
 library(survival)
 library(glmnet)
-library(loose.rock)
+# library(loose.rock)
 library(glmSparseNet)
 ```
 
