@@ -5,9 +5,10 @@
 \alias{run.cache,function-method}
 \title{Run function and save cache}
 \usage{
-\S4method{run.cache}{`function`}(fun, ..., seed = NULL, base.dir = NULL,
-  cache.prefix = "generic_cache", cache.digest = list(),
-  show.message = NULL, force.recalc = FALSE, add.to.hash = NULL)
+\S4method{run.cache}{`function`}(fun, ..., seed = NULL,
+  base.dir = NULL, cache.prefix = "generic_cache",
+  cache.digest = list(), show.message = NULL, force.recalc = FALSE,
+  add.to.hash = NULL)
 }
 \arguments{
 \item{fun}{function call name}
@@ -33,4 +34,11 @@ the result of fun(...)
 }
 \description{
 Run function and save cache
+}
+\examples{
+run.cache(c, 1, 2, 3, 4)
+# next three should use the same cache
+run.cache(c, 1, 2, 3, 4)
+run.cache(c, 1, 2, 3, 4, cache.digest = list(digest.cache(1)))
+run.cache(c, a=1, 2, c=3, 4) # should get result from cache
 }

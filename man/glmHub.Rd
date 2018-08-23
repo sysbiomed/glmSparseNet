@@ -4,8 +4,8 @@
 \alias{glmHub}
 \title{GLMNET model penalizing nodes with small degree}
 \usage{
-glmHub(xdata, ydata, network, network.options = network.options.default(),
-  ...)
+glmHub(xdata, ydata, network,
+  network.options = network.options.default(), ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}

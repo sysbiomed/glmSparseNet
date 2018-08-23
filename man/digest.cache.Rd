@@ -13,8 +13,9 @@ digest.cache(val)
 a hash of the sha256
 }
 \description{
-Default digest method
+Sets a default caching algorithm to use with run.cache
 }
 \examples{
 digest.cache(c(1,2,3,4,5))
+digest.cache('some example')
 }

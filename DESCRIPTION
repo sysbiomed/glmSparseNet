@@ -15,7 +15,7 @@ Description: glmSparseNet is an R-package that generalizes sparse regression mod
              "poisson", "binomial", "multinomial", "cox", and "mgaussian".
 License: GPL (>=3)
 Encoding: UTF-8
-LazyData: TRUE
+LazyData: true
 NeedsCompilation: no
 biocViews: Software, 
   StatisticalMethod, 

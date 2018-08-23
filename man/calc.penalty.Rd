@@ -4,7 +4,8 @@
 \alias{calc.penalty}
 \title{Calculate penalty based on data}
 \usage{
-calc.penalty(xdata, penalty.type, network.options = network.options.default())
+calc.penalty(xdata, penalty.type,
+  network.options = network.options.default())
 }
 \arguments{
 \item{xdata}{input data}

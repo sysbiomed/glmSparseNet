@@ -143,6 +143,8 @@ balanced.cv.folds <- function(..., nfolds = 10) {
 
 #' Default digest method
 #'
+#' Sets a default caching algorithm to use with run.cache
+#'
 #' @param val object to calculate hash over
 #'
 #' @return a hash of the sha256
@@ -150,6 +152,7 @@ balanced.cv.folds <- function(..., nfolds = 10) {
 #'
 #' @examples
 #' digest.cache(c(1,2,3,4,5))
+#' digest.cache('some example')
 digest.cache <- function(val) {
   digest::digest(val, algo = 'sha256')
 }
@@ -203,8 +206,8 @@ setGeneric("run.cache", function(fun,
 #' Run function and save cache
 #'
 #' @inheritParams run.cache
-#'
-#' @return the result of fun(...)
+#' @inherit run.cache return examples details
+#' @export
 setMethod('run.cache',
           signature('function'),
           function(fun,
@@ -237,9 +240,9 @@ setMethod('run.cache',
               }
               digest.cache(args[[ix]])
             })
-            if (is(fun, 'function')) {
+            if (methods::is(fun, 'function')) {
               args[['cache.fun']] <- digest.cache(toString(attributes(fun)$srcref))
-            } else if (is(fun, 'standardGeneric')) {
+            } else if (methods::is(fun, 'standardGeneric')) {
               aaa <- methods::findMethods(fun)
               args[['cache.fun']] <- digest.cache(sapply(names(aaa), function(ix) { digest.cache(toString(attributes(aaa[[ix]])$srcref)) }))
             } else {
