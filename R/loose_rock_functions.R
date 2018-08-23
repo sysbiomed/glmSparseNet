@@ -277,7 +277,7 @@ setMethod('run.cache',
                 }
                 tryCatch({load(path)}, error = function(err) {
                   cat(sprintf('WARN:: %s -- file: %s.\n  -> Calculating again.\n', err, path))
-                  result <<- fun(...)
+                  result <- fun(...)
                   if (show.message) {
                     cat(sprintf('Saving in cache: %s\n', path))
                   }

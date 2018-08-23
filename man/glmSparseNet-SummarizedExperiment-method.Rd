@@ -25,3 +25,8 @@ an object just as glmnet
 \description{
 Calculate GLM model with network-based regularization
 }
+\details{
+* string to calculate network based on data (correlation, covariance)
+ * matrix representing the network
+ * vector with already calculated penalty weights (can also be used directly with glmnet)
+}

@@ -4,7 +4,7 @@
 \alias{balanced.train.and.test}
 \title{Get a balanced test and train dataset}
 \usage{
-balanced.train.and.test(..., train.perc = 0.9, join.all = T)
+balanced.train.and.test(..., train.perc = 0.9, join.all = TRUE)
 }
 \arguments{
 \item{...}{vectors of index (could be numeric or logical)}

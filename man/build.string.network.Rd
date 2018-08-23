@@ -22,4 +22,7 @@ between peptide and gene id
 }
 \seealso{
 string.db.homo.sapiens
+data('string.interactions.700.cache', package = 'glmSparseNet')
+sample.interactions <- string.interactions.700.cache
+build.string.network(sample.interactions)
 }

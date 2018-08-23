@@ -6,13 +6,13 @@ r_packages:
   - covr
   - devtools
   - roxygen2
+  - BiocManager
 
 bioc_required: true
 
 bioc_check: true
 
 r:
-  - 3.4
   - bioc-release
   - bioc-devel
 

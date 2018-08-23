@@ -6,8 +6,7 @@
 \title{Calculate GLM model with network-based regularization}
 \usage{
 \S4method{cv.glmSparseNet}{MultiAssayExperiment}(xdata, ydata, network,
-  experiment.name = NULL, network.options = network.options.default(),
-  ...)
+  experiment.name = NULL, network.options = network.options.default(), ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}
@@ -23,7 +22,7 @@
 \item{...}{parameters that cv.glmnet accepts}
 }
 \value{
-an object just as glmnet
+an object just as cv.glmnet
 }
 \description{
 Calculate GLM model with network-based regularization

@@ -5,8 +5,8 @@
 \alias{glmSparseNet.private,ANY,SummarizedExperiment-method}
 \title{Calculate GLM model with network-based regularization}
 \usage{
-\S4method{glmSparseNet.private}{ANY,SummarizedExperiment}(fun, xdata,
-  ydata, network, network.options = network.options.default(), ...)
+\S4method{glmSparseNet.private}{ANY,SummarizedExperiment}(fun, xdata, ydata,
+  network, network.options = network.options.default(), ...)
 }
 \arguments{
 \item{fun}{function to be called (glmnet or cv.glmnet)}

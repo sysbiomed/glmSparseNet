@@ -5,10 +5,9 @@
 \alias{run.cache,function-method}
 \title{Run function and save cache}
 \usage{
-\S4method{run.cache}{`function`}(fun, ..., seed = NULL,
-  base.dir = NULL, cache.prefix = "generic_cache",
-  cache.digest = list(), show.message = NULL, force.recalc = FALSE,
-  add.to.hash = NULL)
+\S4method{run.cache}{`function`}(fun, ..., seed = NULL, base.dir = NULL,
+  cache.prefix = "generic_cache", cache.digest = list(),
+  show.message = NULL, force.recalc = FALSE, add.to.hash = NULL)
 }
 \arguments{
 \item{fun}{function call name}

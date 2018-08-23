@@ -6,8 +6,7 @@
 \title{Calculate GLM model with network-based regularization}
 \usage{
 \S4method{glmSparseNet}{MultiAssayExperiment}(xdata, ydata, network,
-  experiment.name = NULL, network.options = network.options.default(),
-  ...)
+  experiment.name = NULL, network.options = network.options.default(), ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}
@@ -27,4 +26,9 @@ an object just as glmnet
 }
 \description{
 Calculate GLM model with network-based regularization
+}
+\details{
+* string to calculate network based on data (correlation, covariance)
+ * matrix representing the network
+ * vector with already calculated penalty weights (can also be used directly with glmnet)
 }

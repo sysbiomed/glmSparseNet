@@ -4,8 +4,8 @@
 \alias{glmOrphan}
 \title{GLMNET model penalizing nodes with high degree}
 \usage{
-glmOrphan(xdata, ydata, network,
-  network.options = network.options.default(), ...)
+glmOrphan(xdata, ydata, network, network.options = network.options.default(),
+  ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}

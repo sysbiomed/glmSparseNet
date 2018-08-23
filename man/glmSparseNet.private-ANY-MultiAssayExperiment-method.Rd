@@ -5,8 +5,8 @@
 \alias{glmSparseNet.private,ANY,MultiAssayExperiment-method}
 \title{Calculate GLM model with network-based regularization}
 \usage{
-\S4method{glmSparseNet.private}{ANY,MultiAssayExperiment}(fun, xdata,
-  ydata, network, experiment.name = NULL,
+\S4method{glmSparseNet.private}{ANY,MultiAssayExperiment}(fun, xdata, ydata,
+  network, experiment.name = NULL,
   network.options = network.options.default(), ...)
 }
 \arguments{

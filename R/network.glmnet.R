@@ -51,8 +51,7 @@ setGeneric('glmSparseNet', function(xdata, ydata, network, network.options = net
 #' Calculate GLM model with network-based regularization
 #'
 #' @inheritParams glmSparseNet
-#'
-#' @return an object just as glmnet
+#' @inherit glmSparseNet return details examples
 #' @export
 setMethod('glmSparseNet', signature(xdata = 'matrix'), function(xdata, ydata, network,
                                                                   network.options = network.options.default(), ...) {
@@ -64,7 +63,7 @@ setMethod('glmSparseNet', signature(xdata = 'matrix'), function(xdata, ydata, ne
 #' @inheritParams glmSparseNet
 #' @param experiment.name name of experiment to use as input in MultiAssayExperiment object
 #'
-#' @return an object just as glmnet
+#' @inherit glmSparseNet return details examples
 #' @export
 setMethod('glmSparseNet', signature(xdata = 'MultiAssayExperiment'), function(xdata, ydata, network,
                                                                                 experiment.name = NULL,
@@ -77,10 +76,8 @@ setMethod('glmSparseNet', signature(xdata = 'MultiAssayExperiment'), function(xd
 #'
 #' @inheritParams glmSparseNet
 #'
-#'
-#' @return an object just as glmnet
+#' @inherit glmSparseNet return details
 #' @export
-
 setMethod('glmSparseNet', signature(xdata = 'SummarizedExperiment'), function(xdata, ydata, network,
                                                                                 network.options = network.options.default(), ...) {
   return(glmSparseNet.private(glmnet::glmnet, t(MultiAssayExperiment::assay(xdata)), ydata, network, network.options = network.options, ...))

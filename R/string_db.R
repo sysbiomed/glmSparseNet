@@ -113,6 +113,9 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
 #' there may not be a mapping or a peptide mapping can have multiple genes.
 #' @export
 #' @seealso string.db.homo.sapiens
+#' data('string.interactions.700.cache', package = 'glmSparseNet')
+#' sample.interactions <- string.interactions.700.cache
+#' build.string.network(sample.interactions)
 build.string.network <- function(string.tbl, use.names = 'protein') {
 
   # remove 9606. prefix

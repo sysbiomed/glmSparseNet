@@ -20,7 +20,7 @@
 \item{...}{parameters that cv.glmnet accepts}
 }
 \value{
-an object just as glmnet
+an object just as cv.glmnet
 }
 \description{
 Calculate GLM model with network-based regularization
