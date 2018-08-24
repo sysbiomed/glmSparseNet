@@ -42,5 +42,5 @@ ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
 draw.kaplan(c(age = 1, 0), xdata, ydata)
 draw.kaplan(c(age = 1, 0.5), xdata, ydata)
 draw.kaplan(c(age = 1), c(1,0,1,0,1,0), data.frame(time = runif(6), status = rbinom(6, 1, .5)))
-draw.kaplan(list(aa = c(age = 1, 0.5), bb = c(age = 1, 1.5)), xdata, ydata)
+draw.kaplan(list(aa = c(age = 1, 0.5), bb = c(age = 0, 1.5)), xdata, ydata)
 }

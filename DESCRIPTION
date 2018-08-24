@@ -22,8 +22,10 @@ biocViews: Software,
   DimensionReduction, 
   Regression, 
   Classification, 
-  Survival
-Depends: R (>= 3.4), Matrix, MultiAssayExperiment, glmnet
+  Survival,
+  Network, 
+  GraphAndNetwork
+Depends: R (>= 3.5), Matrix, MultiAssayExperiment, glmnet
 Imports: SummarizedExperiment,
   STRINGdb,
   biomaRt,

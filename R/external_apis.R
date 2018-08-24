@@ -49,8 +49,8 @@ gene.names <- function(ensembl.genes) {
 #' @export
 #'
 #' @examples
-#' # esembl.gene.names(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
-esembl.gene.names <- function(gene.id) {
+#' ensembl.gene.names(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
+ensembl.gene.names <- function(gene.id) {
 
   . <- NULL
 

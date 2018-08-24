@@ -254,7 +254,7 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
               width <- 6
               height <- 4
             }
-            if (legend.outside == T)
+            if (legend.outside == TRUE)
               p1 <- p1 + ggplot2::theme(legend.key.size = ggplot2::unit(20,"points"))
             else
               p1 <- p1 + ggplot2::theme(legend.position = c(1,1), legend.justification = c(1, 1), legend.key.size = ggplot2::unit(20,"points"))

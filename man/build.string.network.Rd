@@ -20,9 +20,11 @@ there may not be a mapping or a peptide mapping can have multiple genes.
 This can reduce the dimension of the original network, as there may not be a mapping
 between peptide and gene id
 }
-\seealso{
-string.db.homo.sapiens
+\examples{
 data('string.interactions.700.cache', package = 'glmSparseNet')
 sample.interactions <- string.interactions.700.cache
 build.string.network(sample.interactions)
+}
+\seealso{
+string.db.homo.sapiens
 }

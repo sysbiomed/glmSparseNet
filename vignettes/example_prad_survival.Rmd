@@ -70,7 +70,7 @@ ydata.raw <- colData(prad) %>% as.data.frame %>%
   mutate(bcr_sample_barcode           = toupper(bcr_sample_barcode)) %>%
   # Find max time between all days (ignoring missings)
   rowwise %>%
-  mutate(time = max(days_to_last_followup, days_to_death, na.rm = T)) %>%
+  mutate(time = max(days_to_last_followup, days_to_death, na.rm = TRUE)) %>%
   # Keep only survival variables and codes
   select(patientID, bcr_sample_barcode, status = vital_status, time) %>% 
   # Discard individuals with survival time less or equal to 0
@@ -151,6 +151,6 @@ gene.names(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
 draw.kaplan(as.vector(coefs.v), 
             xdata[, names(coefs.v)], 
             ydata, 
-            plot.title = 'Full dataset', legend.outside = F)
+            plot.title = 'Full dataset', legend.outside = FALSE)
 ```
 

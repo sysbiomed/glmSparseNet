@@ -28,4 +28,6 @@ nodes with small degree.
 }
 \seealso{
 glmNetSparse
+xdata <- matrix(rnorm(100), ncol = 20)
+glmDegree(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian')
 }

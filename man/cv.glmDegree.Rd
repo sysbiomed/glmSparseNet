@@ -26,6 +26,10 @@ This function overrides the `trans.fun` options in `network.options` with the
 inverse of a degree described in Veríssimo et al. (2015) that penalizes
 nodes with small degree.
 }
+\examples{
+xdata <- matrix(rnorm(100), ncol = 20)
+cv.glmDegree(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian')
+}
 \seealso{
 glmNetSparse
 }

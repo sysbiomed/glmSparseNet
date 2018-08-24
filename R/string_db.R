@@ -8,6 +8,10 @@
 #' the count of scores above the given score_threshold
 #'
 #' @export
+#' @examples
+#' \dontrun{
+#'     string.db.homo.sapiens(score_threshold = 800)
+#' }
 string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.text = TRUE) {
 
   . <- NULL
@@ -113,6 +117,7 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
 #' there may not be a mapping or a peptide mapping can have multiple genes.
 #' @export
 #' @seealso string.db.homo.sapiens
+#' @examples
 #' data('string.interactions.700.cache', package = 'glmSparseNet')
 #' sample.interactions <- string.interactions.700.cache
 #' build.string.network(sample.interactions)

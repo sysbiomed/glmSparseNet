@@ -13,6 +13,9 @@
 #' @export
 #'
 #' @seealso glmNetSparse
+#' @examples
+#' xdata <- matrix(rnorm(100), ncol = 20)
+#' glmOrphan(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian')
 glmOrphan <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
   network.options$trans.fun <- orphan.heuristic
   glmSparseNet(xdata, ydata, network, network.options = network.options.default(), ...)
@@ -33,6 +36,9 @@ glmOrphan <- function(xdata, ydata, network, network.options = network.options.d
 #' @export
 #'
 #' @seealso glmNetSparse
+#' @examples
+#' xdata <- matrix(rnorm(100), ncol = 20)
+#' glmHub(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian')
 glmHub <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
   network.options$trans.fun <- hub.heuristic
   glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
@@ -54,6 +60,8 @@ glmHub <- function(xdata, ydata, network, network.options = network.options.defa
 #' @export
 #'
 #' @seealso glmNetSparse
+#' xdata <- matrix(rnorm(100), ncol = 20)
+#' glmDegree(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian')
 glmDegree <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
   network.options$trans.fun <- function(x) { return(1 / x)}
   glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
@@ -74,6 +82,8 @@ glmDegree <- function(xdata, ydata, network, network.options = network.options.d
 #' @export
 #'
 #' @seealso glmNetSparse
+#' xdata <- matrix(rnorm(100), ncol = 20)
+#' cv.glmOrphan(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian')
 cv.glmOrphan <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
   network.options$trans.fun <- orphan.heuristic
   cv.glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
@@ -95,6 +105,9 @@ cv.glmOrphan <- function(xdata, ydata, network, network.options = network.option
 #' @export
 #'
 #' @seealso glmNetSparse
+#' @examples
+#' xdata <- matrix(rnorm(100), ncol = 20)
+#' cv.glmDegree(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian')
 cv.glmDegree <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
   network.options$trans.fun <- function(x) { 1 / x}
   cv.glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
@@ -115,6 +128,9 @@ cv.glmDegree <- function(xdata, ydata, network, network.options = network.option
 #' @export
 #'
 #' @seealso glmNetSparse
+#' @examples
+#' xdata <- matrix(rnorm(100), ncol = 20)
+#' cv.glmHub(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian')
 cv.glmHub <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
   network.options$trans.fun <- hub.heuristic
   cv.glmSparseNet(xdata, ydata, network, network.options = network.options, ...)

@@ -21,3 +21,8 @@ the count of scores above the given score_threshold
 \description{
 Download protein-protein interactions from STRING DB (for a specific species)
 }
+\examples{
+\dontrun{
+    string.db.homo.sapiens(score_threshold = 800)
+}
+}
