@@ -222,7 +222,7 @@ setMethod('degree.cov', signature('matrix'), function(xdata, cutoff = 0, conside
 network.worker <- function(fun, xdata, ix.i, ...) {
   n.col <- ncol(xdata)
   xdata.i <- xdata[,ix.i]
-  result  <- fun(xdata[,ix.i], xdata[,(ix.i+1):ncol(xdata)], ...)
+  result  <- fun(xdata[,ix.i], xdata[,seq(ix.i+1, ncol(xdata))], ...)
   result[is.na(result)] <- 0
   return(result)
 }
