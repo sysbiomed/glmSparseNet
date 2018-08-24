@@ -9,5 +9,5 @@
 #' @keywords data
 #' @examples
 #' head(string.interactions.700.cache)
-"string.interactions.700.cache"
+'string.interactions.700.cache'
 
