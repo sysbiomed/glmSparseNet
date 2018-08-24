@@ -25,7 +25,7 @@
 #' draw.kaplan(c(age = 1, 0), xdata, ydata)
 #' draw.kaplan(c(age = 1, 0.5), xdata, ydata)
 #' draw.kaplan(c(age = 1), c(1,0,1,0,1,0), data.frame(time = runif(6), status = rbinom(6, 1, .5)))
-#' draw.kaplan(list(aa = c(age = 1, 0.5), bb = c(age = 1, 1.5)), xdata, ydata)
+#' draw.kaplan(list(aa = c(age = 1, 0.5), bb = c(age = 0, 1.5)), xdata, ydata)
 setGeneric('draw.kaplan', function(chosen.btas, xdata, ydata,
                                    probs          = c(.5, .5),
                                    plot.title       = 'SurvivalCurves',
@@ -118,12 +118,12 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
 
             if (nrow(xdata) != nrow(ydata)) {
               stop(sprintf('Rows in xdata (%d) and ydata (%d) must be the same', nrow(xdata), nrow(ydata)))
-            } else if (!all(ncol(xdata) == sapply(chosen.btas, length))) {
-              stop(sprintf('All or some of the chosen.btas (%s) have different number of variables from xdata (%d)', paste(sapply(chosen.btas, length), collapse = ', '), ncol(xdata)))
+            } else if (!all(ncol(xdata) == vapply(chosen.btas, length, 1))) {
+              stop(sprintf('All or some of the chosen.btas (%s) have different number of variables from xdata (%d)', paste(vapply(chosen.btas, length, 1), collapse = ', '), ncol(xdata)))
             }
             #
             # creates a matrix from list of chosen.btas
-            chosen.btas.mat <- sapply(chosen.btas, function(e){as.vector(e)})
+            chosen.btas.mat <- vapply(chosen.btas, function(e){as.vector(e)}, rep(1.0, ncol(xdata)))
             # calculate prognostic indexes for each patient and btas
             prognostic.index <- tryCatch(xdata %*% chosen.btas.mat, error = function(err) {
               cat('      xdata is.matrix(.) =', is.matrix(xdata), '\n')
@@ -172,7 +172,7 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
             new.factor.str            <- as.vector(sapply(seq_along(chosen.btas), function(ix) {
               if (!is.null(names(chosen.btas)) && length(names(chosen.btas)) >= ix) {
                 e <- names(chosen.btas)[ix]
-                paste0(c('Low risk - ', 'High risk - '), e)
+                as.list(paste0(c('Low risk - ', 'High risk - '), e))
               } else {
                 list('Low risk', 'High risk')
               }
