@@ -8,6 +8,6 @@
 #' @references \url{https://string-db.org/}
 #' @keywords data
 #' @examples
-#' string.interactions.700.cache
+#' head(string.interactions.700.cache)
 "string.interactions.700.cache"
 
