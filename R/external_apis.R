@@ -144,7 +144,7 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full', generate.plot
   all.items  <- list()
   col.names  <- c()
 
-  clean.rows <- lapply(split(lines, item_group), function(ix) {
+  for (ix in split(lines, item_group)){
     item.id <- gsub(sprintf("\t%s", metric),"", ix[1])
     # prepare results
     item.val  <- list()
@@ -157,15 +157,15 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full', generate.plot
       my.split  <- strsplit(line, '\t')[[1]]
       my.names  <- c(my.names, my.split[1])
       my.values <- c(my.values, as.numeric(my.split[2]))
-      col.names <<- c(col.names, my.split[[1]])
+      col.names <- c(col.names, my.split[[1]])
     }
     names(my.values) <- my.names
     all.items[[item.id]] <- my.values
-  })
+  }
 
   col.names <- unique(col.names)
   df <- data.frame()
-  for (ix in clean.rows) {
+  for (ix in all.items) {
     # convert to numeric
     new.ix <- as.numeric(ix[names(ix) != 'gene.name'])
     # set previous names

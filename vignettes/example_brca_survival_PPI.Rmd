@@ -144,7 +144,7 @@ ydata.raw <- colData(brca) %>% as.data.frame %>%
   # Find max time between all days (ignoring missings)
   rowwise %>%
   mutate(time = max(days_to_last_followup,        Days.to.date.of.Death, 
-                    Days.to.Date.of.Last.Contact, days_to_death, na.rm = T)) %>%
+                    Days.to.Date.of.Last.Contact, days_to_death, na.rm = TRUE)) %>%
   # Keep only survival variables and codes
   select(patientID, status = vital_status, time) %>% 
   # Discard individuals with survival time less or equal to 0

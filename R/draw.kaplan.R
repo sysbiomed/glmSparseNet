@@ -169,14 +169,14 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
             # factor the group
             prognostic.index.df$group <- factor(prognostic.index.df$group)
             # rename the factor to low / high risk
-            new.factor.str            <- as.vector(sapply(seq_along(chosen.btas), function(ix) {
+            new.factor.str            <- as.vector(vapply(seq_along(chosen.btas), function(ix) {
               if (!is.null(names(chosen.btas)) && length(names(chosen.btas)) >= ix) {
                 e <- names(chosen.btas)[ix]
                 as.list(paste0(c('Low risk - ', 'High risk - '), e))
               } else {
                 list('Low risk', 'High risk')
               }
-            }))
+            }, list(1,2)))
 
             new.factor.str.l <- as.list(as.character(seq_len(2*length(chosen.btas))))
             names(new.factor.str.l) <- new.factor.str
@@ -191,16 +191,16 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
               stop('draw.kaplan(): There is only one group, cannot create kaplan-meir curve with low and high risk groups')
             }
             futile.logger::flog.debug('')
-            futile.logger::flog.debug('prognostic.index.df', prognostic.index.df, capture = T)
+            futile.logger::flog.debug('prognostic.index.df', prognostic.index.df, capture = TRUE)
             #
             # Generate the Kaplan-Meier survival object
             km        <- survival::survfit(survival::Surv(time, status) ~ group,  data = prognostic.index.df)
             futile.logger::flog.debug('')
-            futile.logger::flog.debug('kaplan-meier object', km, capture = T)
+            futile.logger::flog.debug('kaplan-meier object', km, capture = TRUE)
             # Calculate the logrank test p-value
             surv.prob <- survival::survdiff(survival::Surv(time, status) ~ group,  data = prognostic.index.df)
             futile.logger::flog.debug('')
-            futile.logger::flog.debug('surv.prob object', surv.prob, capture = T)
+            futile.logger::flog.debug('surv.prob object', surv.prob, capture = TRUE)
             p_value   <- 1 - stats::pchisq(surv.prob$chisq, df = 1)
 
             futile.logger::flog.debug('')

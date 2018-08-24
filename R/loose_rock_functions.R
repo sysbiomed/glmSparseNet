@@ -406,6 +406,8 @@ coding.genes <- function (verbose = TRUE)
 #' @param ... TODO
 #' @param simplify TODO
 #'
+#' @keywords data
+#'
 #' @seealso \code{futile.options}
 glmSparseNet.options <- futile.options::OptionsManager('glmSparseNet', default = list(base.dir = tempdir.cache(), show.message = TRUE))
 
