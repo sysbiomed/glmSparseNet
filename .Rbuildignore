@@ -9,7 +9,7 @@
 # Continuous integration
 # ------------------
 
-.travis.yml
+\.travis\.yml
 
 # ------------------
 #    Data files
@@ -28,10 +28,10 @@
 #  Project specific
 # ------------------
 
-vignettes/README.md
-README.Rmd
-README.md
-README.html
+vignettes/README\.md
+README\.Rmd
+README\.md
+README\.html
 README_files
 
 # ------------------
@@ -46,11 +46,11 @@ README_files
 # ------------------
 
 ^.*\.tar$
-^.*\.tar.bz2$
-^.*\.tar.gz$
+^.*\.tar\.bz2$
+^.*\.tar\.gz$
 
 # ------------------
 #    Logger files
 # ------------------
 
-logger.txt
+logger\.txt
