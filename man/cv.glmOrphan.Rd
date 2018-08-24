@@ -27,7 +27,8 @@ an heuristic described in Veríssimo et al. that penalizes nodes with high degre
 }
 \examples{
 xdata <- matrix(rnorm(100), ncol = 20)
-cv.glmOrphan(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian', network.options = network.options.default(min.degree = .2))
+cv.glmOrphan(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian',
+             network.options = network.options.default(min.degree = .2))
 }
 \seealso{
 glmNetSparse
