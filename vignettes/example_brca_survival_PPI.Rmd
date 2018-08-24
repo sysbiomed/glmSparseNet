@@ -36,12 +36,14 @@ library(VennDiagram)
 # library(loose.rock)
 library(futile.logger)
 library(curatedTCGAData)
-#
+
 library(glmSparseNet)
+
 #
 # Some general options for futile.logger the debugging package
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
 .Last.value <- glmSparseNet::show.message(FALSE)
+
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
 ```

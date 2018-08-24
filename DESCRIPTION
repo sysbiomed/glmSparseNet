@@ -1,7 +1,7 @@
 Package: glmSparseNet
 Type: Package
 Title: Network Centrality Metrics for Elastic-Net Regularized Models
-Version: 0.1.7
+Version: 0.1.8
 Authors@R: c(person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre")),
              person("Susana", "Vinga", email = "susanavinga@tecnico.ulisboa.pt", role = "aut"),
              person("Eunice", "Carrasquinha", email = "eunice.trigueirao@tecnico.ulisboa.pt", role = "ctb"),

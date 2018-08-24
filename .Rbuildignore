@@ -1,30 +1,56 @@
+# ------------------
+#         R
+# ------------------
+
 ^.*\.Rproj$
 ^\.Rproj\.user$
-cache
-\.RData
-^vignettes\/.*\.html
-^run-cache
-^runcache
-^tests
+
+# ------------------
+# Continuous integration
+# ------------------
+
+.travis.yml
+
+# ------------------
+#    Data files
+# ------------------
+
+^.*\.RData$
+
+# ---------------------------
+# Temporary directory
+#  (used in STRINGdb package)
+# ---------------------------
+
 ^tmp
-^xia.csv
-^hallmarks.txt
-^old
-\.tar
-\.tar.bz2
-\.tar.gz
-^vignettes\/full.network.analysis\.Rmd
-^vignettes\/Network_Penalization_TCGA\.Rmd
-^vignettes\/folders
-^vignettes\/personal_Rmds
-^vignettes\/run-cache
-^vignettes\/runcache
-^vignettes\/logger.txt
-logger.txt
-saves
+
+# ------------------
+#  Project specific
+# ------------------
+
 vignettes/README.md
 README.Rmd
 README.md
 README.html
 README_files
-.travis.yml
+
+# ------------------
+#    Local caches
+# ------------------
+
+^run-cache
+^runcache
+
+# ------------------
+#      Releases
+# ------------------
+
+^.*\.tar$
+^.*\.tar.bz2$
+^.*\.tar.gz$
+
+# ------------------
+#    Logger files
+# ------------------
+
+logger.txt
