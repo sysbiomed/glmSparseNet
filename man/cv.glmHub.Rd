@@ -27,7 +27,7 @@ an heuristic described in Veríssimo et al. that penalizes nodes with small degr
 }
 \examples{
 xdata <- matrix(rnorm(100), ncol = 20)
-cv.glmHub(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian')
+cv.glmHub(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian', network.options = network.options.default(min.degree = .2))
 }
 \seealso{
 glmNetSparse

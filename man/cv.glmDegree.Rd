@@ -28,7 +28,7 @@ nodes with small degree.
 }
 \examples{
 xdata <- matrix(rnorm(100), ncol = 20)
-cv.glmDegree(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian')
+cv.glmDegree(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian', network.options = network.options.default(min.degree = .2))
 }
 \seealso{
 glmNetSparse
