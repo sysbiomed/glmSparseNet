@@ -135,7 +135,7 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
 
             colnames(prognostic.index) <- names(chosen.btas)
             futile.logger::flog.debug('')
-            futile.logger::flog.debug('prognostic.index', prognostic.index, capture = T)
+            futile.logger::flog.debug('prognostic.index', prognostic.index, capture = TRUE)
             prognostic.index.df <- data.frame(time = c(), status = c(), group = c())
             # populate a data.frame with all patients (multiple rows per patients if has multiple btas)
             # already calculate high/low risk groups
