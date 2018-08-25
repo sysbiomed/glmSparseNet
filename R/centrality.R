@@ -248,6 +248,11 @@ degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, cons
                            chunks = 1000, force.recalc.degree = FALSE, force.recalc.network = FALSE,
                            n.cores = 1, ...) {
 
+  # fail safe until windows has parallel computing support for mclapply
+  if (.Platform$OS.type == 'windows') {
+    n.cores <- 1
+  }
+
   if (force.recalc.network) {
     force.recalc.degree <- force.recalc.network
   }
