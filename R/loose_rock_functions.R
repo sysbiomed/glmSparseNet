@@ -406,6 +406,7 @@ coding.genes <- function (verbose = TRUE)
 #' @param ... TODO
 #' @param simplify TODO
 #'
+#' @docType data
 #' @keywords data
 #'
 #' @seealso \code{futile.options}
