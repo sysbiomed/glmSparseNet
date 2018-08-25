@@ -1,5 +1,6 @@
 ---
 title: "Breast survival dataset using network from STRING DB"
+author: "André Veríssimo"
 date: "`r Sys.Date()`"
 output: 
   BiocStyle::html_document:
@@ -16,11 +17,12 @@ params:
 ## Instalation
 
 ```{r, eval=FALSE}
-source("https://bioconductor.org/biocLite.R")
-biocLite('sysbiomed/glmSparseNet')
+if (!require("BiocManager"))
+  install.packages("BiocManager")
+BiocManager::install("glmSparseNet")
 ```
 
-## Loading the packages
+## Required Packages
 
 ```{r packages, message=FALSE, warning=FALSE}
 library(dplyr)
@@ -118,6 +120,7 @@ qplot(degree.network[degree.network <= quantile(degree.network, probs = .99999)]
 * Dataset from curatedTCGAdata
 
 ```{r, include=FALSE}
+# hidden as it is quite verbose
 brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 ```
 

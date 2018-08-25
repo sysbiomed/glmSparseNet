@@ -1,5 +1,6 @@
 ---
 title: "Example for Survival Data -- Breast Invasive Carcinoma"
+author: "André Veríssimo"
 date: "`r Sys.Date()`"
 output: 
   BiocStyle::html_document:
@@ -16,8 +17,9 @@ params:
 ## Instalation
 
 ```{r, eval=FALSE}
-source("https://bioconductor.org/biocLite.R")
-biocLite('glmSparseNet')
+if (!require("BiocManager"))
+  install.packages("BiocManager")
+BiocManager::install("glmSparseNet")
 ```
 
 # Required Packages
@@ -46,11 +48,11 @@ The data is loaded from an online curated dataset downloaded from TCGA using `TC
 
 To accelerate the process we use a very reduced dataset down to 107 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
 
-```{r, include=FALSE}
+```{r curated_data, include=FALSE}
 brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 ```
 
-```{r, eval=FALSE}
+```{r curated_data_non_eval, eval=FALSE}
 brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 ```
 

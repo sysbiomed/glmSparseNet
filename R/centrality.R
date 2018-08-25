@@ -68,6 +68,12 @@ network.generic.parallel <- function(fun, fun.prefix,
                                      n.cores       = 1,
                                      force.recalc.network  = FALSE,
                                      show.message  = FALSE, ...) {
+
+  # Windows only support 1 core
+  if (.Platform$OS.type == 'windows') {
+    n.cores <- 1
+  }
+
   #
   xdata.sha256 <- glmSparseNet::digest.cache(xdata)
   #

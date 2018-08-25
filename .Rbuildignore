@@ -58,3 +58,4 @@ logger\.txt
 
 
 vignettes/example_prad_survival\.Rmd
+vignettes/example_brca_survival\.Rmd

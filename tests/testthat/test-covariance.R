@@ -54,19 +54,19 @@ test_that("Pearson correlation", {
   expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
 })
 
-# test_that("Multiple cores", {
-#   my.method    <- 'pearson'
-#   mat.non.diag <- cov(xdata, method = my.method)
-#   diag(mat.non.diag) <- 0
-#   #
-#   test.mat <- network.cov.parallel(xdata, method = my.method, n.cores = 4, build.output = 'matrix',
-#                                    #
-#                                    force.recalc = TRUE)
-#
-#   expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
-#   #
-#   test.mat <- network.cov.parallel(xdata, method = my.method, n.cores = 4, build.output = 'matrix',
-#                                    #
-#                                    force.recalc = FALSE)
-#   expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
-# })
+test_that("Multiple cores", {
+  my.method    <- 'pearson'
+  mat.non.diag <- cov(xdata, method = my.method)
+  diag(mat.non.diag) <- 0
+  #
+  test.mat <- network.cov.parallel(xdata, method = my.method, n.cores = 4, build.output = 'matrix',
+                                   #
+                                   force.recalc = TRUE)
+
+  expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
+  #
+  test.mat <- network.cov.parallel(xdata, method = my.method, n.cores = 4, build.output = 'matrix',
+                                   #
+                                   force.recalc = FALSE)
+  expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
+})

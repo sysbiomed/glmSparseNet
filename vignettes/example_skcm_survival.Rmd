@@ -11,14 +11,15 @@ vignette: >
   %\VignetteIndexEntry{Example for Survival Data -- Skin Melanoma}
   %\VignetteEncoding{UTF-8}
 params:
-  seed: !r 29221 # seed value to have reproducible results
+  seed: !r 29221
 --- 
 
 ## Instalation
 
 ```{r, eval=FALSE}
-source("https://bioconductor.org/biocLite.R")
-biocLite('glmSparseNet')
+if (!require("BiocManager"))
+  install.packages("BiocManager")
+BiocManager::install("glmSparseNet")
 ```
 
 # Required Packages
@@ -47,11 +48,11 @@ The data is loaded from an online curated dataset downloaded from TCGA using `TC
 
 To accelerate the process we use a very reduced dataset down to 107 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
 
-```{r, include=FALSE}
+```{r curated_data, include=FALSE}
 skcm <- curatedTCGAData(diseaseCode = "SKCM", assays = "RNASeq2GeneNorm", FALSE)
 ```
 
-```{r data.show_noeval, eval=FALSE}
+```{r curated_data_non_eval, eval=FALSE}
 skcm <- curatedTCGAData(diseaseCode = "SKCM", assays = "RNASeq2GeneNorm", FALSE)
 ```
 

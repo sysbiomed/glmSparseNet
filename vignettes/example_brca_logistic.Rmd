@@ -1,5 +1,6 @@
 ---
 title: "Example for Classification Data -- Breast Invasive Carcinoma"
+author: "Marta Lopes and André Veríssimo"
 date: "`r Sys.Date()`"
 output: 
   BiocStyle::html_document:
@@ -16,8 +17,9 @@ params:
 ## Instalation
 
 ```{r, eval=FALSE}
-source("https://bioconductor.org/biocLite.R")
-biocLite('glmSparseNet')
+if (!require("BiocManager"))
+  install.packages("BiocManager")
+BiocManager::install("glmSparseNet")
 ```
 
 # Required Packages
