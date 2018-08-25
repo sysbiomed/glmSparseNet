@@ -406,7 +406,7 @@ coding.genes <- function (verbose = TRUE)
 #' @param ... TODO
 #' @param simplify TODO
 #'
-#' @docType data
+#' @return a constant that keeps options for run.cache
 #' @keywords data
 #'
 #' @seealso \code{futile.options}
