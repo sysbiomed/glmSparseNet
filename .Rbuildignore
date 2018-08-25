@@ -56,6 +56,9 @@ inst/images
 
 logger\.txt
 
+# -------------------------------------------
+# Does not build redundant survival vignettes
+# -------------------------------------------
 
 vignettes/example_prad_survival\.Rmd
 vignettes/example_brca_survival\.Rmd
