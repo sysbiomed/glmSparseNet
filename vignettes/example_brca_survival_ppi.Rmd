@@ -1,6 +1,5 @@
 ---
 title: "Breast survival dataset using network from STRING DB"
-author: "André Veríssimo"
 date: "`r Sys.Date()`"
 output: 
   BiocStyle::html_document:
