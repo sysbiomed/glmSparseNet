@@ -120,7 +120,9 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
 #' @examples
 #' data('string.interactions.700.cache', package = 'glmSparseNet')
 #' sample.interactions <- string.interactions.700.cache
-#' build.string.network(sample.interactions)
+#' network <- build.string.network(sample.interactions)
+#' # number of edges
+#' sum(network != 0)
 build.string.network <- function(string.tbl, use.names = 'protein') {
 
   # remove 9606. prefix

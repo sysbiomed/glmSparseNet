@@ -23,7 +23,9 @@ between peptide and gene id
 \examples{
 data('string.interactions.700.cache', package = 'glmSparseNet')
 sample.interactions <- string.interactions.700.cache
-build.string.network(sample.interactions)
+network <- build.string.network(sample.interactions)
+# number of edges
+sum(network != 0)
 }
 \seealso{
 string.db.homo.sapiens
