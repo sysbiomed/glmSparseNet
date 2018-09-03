@@ -4,7 +4,7 @@ set.seed(1985)
 xdata <- matrix(rnorm(30000), nrow = 500)
 
 # use a temporary directory that can be written
-glmSparseNet::base.dir(tempdir())
+loose.rock::base.dir(tempdir())
 
 test_that("Default methods", {
   mat.non.diag <- cov(xdata)
@@ -62,6 +62,9 @@ test_that("Multiple cores", {
   test.mat <- network.cov.parallel(xdata, method = my.method, n.cores = 4, build.output = 'matrix',
                                    #
                                    force.recalc = TRUE)
+
+  message(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")))
+  cat(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")))
 
   expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
   #

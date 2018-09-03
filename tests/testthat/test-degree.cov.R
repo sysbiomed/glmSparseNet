@@ -8,7 +8,7 @@ diag(cov.s) <- 0
 context('Degree - Covariance - Pearson')
 
 # use a temporary directory that can be written
-glmSparseNet::base.dir(tempdir())
+loose.rock::base.dir(tempdir())
 
 test_that('Degree with cutoff', {
   cov.p.0.05 <- cov.p

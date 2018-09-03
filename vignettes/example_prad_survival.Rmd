@@ -29,7 +29,7 @@ library(dplyr)
 library(ggplot2)
 library(survival)
 library(ggfortify)
-# library(loose.rock)
+library(loose.rock)
 library(futile.logger)
 library(curatedTCGAData)
 #
@@ -37,7 +37,7 @@ library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
-.Last.value <- glmSparseNet::show.message(FALSE)
+.Last.value <- loose.rock::show.message(FALSE)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
 ```

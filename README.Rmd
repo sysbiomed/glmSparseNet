@@ -59,19 +59,9 @@ This package was developed by André Veríssimo, Eunice Carrasquinha, Marta B. L
 Bioconductor is necessary for the installation of this package.
 
 ```{r install, eval=FALSE}
-source("https://bioconductor.org/biocLite.R")
-
-# biocLite('sysbiomed/loose.rock')
-biocLite('sysbiomed/glmSparseNet')
-
-#
-# Note in case of failure:
-
-# if the commands above fail, the problem might 
-#  be of a missing package named remotes
-#  try installing it and running again commands above
-
-# biocLite('remotes')
+if (!require("BiocManager"))
+    install.packages("BiocManager")
+BiocManager::install("glmSparseNet")
 ```
 
 ## Details
@@ -141,7 +131,7 @@ library(reshape2)
 library(MultiAssayExperiment)
 library(survival)
 library(glmnet)
-# library(loose.rock)
+library(loose.rock)
 library(glmSparseNet)
 ```
 

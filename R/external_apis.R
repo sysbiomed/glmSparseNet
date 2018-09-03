@@ -15,7 +15,7 @@ gene.names <- function(ensembl.genes) {
     marts <- biomaRt::listMarts()
     index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
     mart <- biomaRt::useMart(marts$biomart[index])
-    mart <- glmSparseNet::run.cache(biomaRt::useMart,
+    mart <- loose.rock::run.cache(biomaRt::useMart,
                                   marts$biomart[index],
                                   'hsapiens_gene_ensembl',
                                   cache.prefix = 'biomart',
@@ -58,7 +58,7 @@ ensembl.gene.names <- function(gene.id) {
     marts <- biomaRt::listMarts()
     index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
     mart <- biomaRt::useMart(marts$biomart[index])
-    mart <- glmSparseNet::run.cache(biomaRt::useMart,
+    mart <- loose.rock::run.cache(biomaRt::useMart,
                                   marts$biomart[index],
                                   'hsapiens_gene_ensembl',
                                   cache.prefix = 'biomart',
@@ -231,7 +231,7 @@ protein.to.ensembl.gene.names <- function(ensembl.proteins) {
     marts <- biomaRt::listMarts()
     index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
     #
-    mart  <- glmSparseNet::run.cache(biomaRt::useMart,
+    mart  <- loose.rock::run.cache(biomaRt::useMart,
                                    marts$biomart[index],
                                    'hsapiens_gene_ensembl',
                                    cache.prefix = 'biomart')

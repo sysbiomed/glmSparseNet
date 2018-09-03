@@ -244,7 +244,7 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
             #  if more than one btas then paired curves (low and high) should have the same color
             #  otherwise, red and green!
             if (length(chosen.btas) > 1) {
-              p1 <- p1 + ggplot2::scale_colour_manual(values = c(glmSparseNet::my.colors()[c(1,2,4,3,10,6,12,9,5,7,8,11,13,14,15,16,17)]))
+              p1 <- p1 + ggplot2::scale_colour_manual(values = c(loose.rock::my.colors()[c(1,2,4,3,10,6,12,9,5,7,8,11,13,14,15,16,17)]))
               p1 <- p1 + ggplot2::theme(legend.title = ggplot2::element_blank())
               width <- 6
               height <- 4

@@ -43,7 +43,8 @@ Imports: SummarizedExperiment,
   rlang,
   parallel,
   methods,
-  digest
+  digest,
+  loose.rock
 Suggests: testthat,
   knitr,
   rmarkdown,
