@@ -43,8 +43,7 @@
 #'                   ydata.valid,
 #'                   family          = 'cox',
 #'                   network         = 'correlation',
-#'                   experiment.name = 'RNASeq2GeneNorm',
-#'                   mc.cores = 10)
+#'                   experiment.name = 'RNASeq2GeneNorm')
 setGeneric('cv.glmSparseNet', function(xdata, ydata, network, network.options = network.options.default(), ...) {
   stop('wrong arguments, see help for cv.glmSparseNet and cv.glmnet')
 })

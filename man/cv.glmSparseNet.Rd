@@ -57,6 +57,5 @@ cv.glmSparseNet(xdata.valid,
                   ydata.valid,
                   family          = 'cox',
                   network         = 'correlation',
-                  experiment.name = 'RNASeq2GeneNorm',
-                  mc.cores = 10)
+                  experiment.name = 'RNASeq2GeneNorm')
 }
