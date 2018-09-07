@@ -6,9 +6,9 @@
 \title{separate2groups.cox}
 \usage{
 \S4method{separate2groups.cox}{list,data.frame,data.frame}(chosen.btas,
-  xdata, ydata, probs = c(0.5, 0.5), plot.title = "SurvivalCurves",
-  xlim = NULL, ylim = NULL, expand.yzero = FALSE,
-  legend.outside = FALSE)
+  xdata, ydata, probs = c(0.5, 0.5), no.plot = FALSE,
+  plot.title = "SurvivalCurves", xlim = NULL, ylim = NULL,
+  expand.yzero = FALSE, legend.outside = FALSE)
 }
 \arguments{
 \item{chosen.btas}{list of testing coefficients to calculate prognostic indexes, for example ``list(Age = some_vector)``}

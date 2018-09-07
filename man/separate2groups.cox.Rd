@@ -5,8 +5,8 @@
 \title{separate2groups.cox}
 \usage{
 separate2groups.cox(chosen.btas, xdata, ydata, probs = c(0.5, 0.5),
-  plot.title = "SurvivalCurves", xlim = NULL, ylim = NULL,
-  expand.yzero = FALSE, legend.outside = FALSE)
+  no.plot = FALSE, plot.title = "SurvivalCurves", xlim = NULL,
+  ylim = NULL, expand.yzero = FALSE, legend.outside = FALSE)
 }
 \arguments{
 \item{chosen.btas}{list of testing coefficients to calculate prognostic indexes, for example ``list(Age = some_vector)``}

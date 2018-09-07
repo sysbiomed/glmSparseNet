@@ -8,7 +8,7 @@
 #' @return object with logrank test and kaplan-meier survival plot
 #' @export
 draw.kaplan <- function(...) {
-  .Deprecated('separate2groups.cox',
+  .Defunct('separate2groups.cox',
               package='glmSparseNet',
               'The \'draw.kaplan\' function was renamed to \'separate2groups.cox\'.',
               old = as.character(sys.call(sys.parent()))[1L])
@@ -102,7 +102,7 @@ setMethod('separate2groups.cox', signature(chosen.btas = 'list',    xdata = 'num
 #' @export
 #' @inherit separate2groups.cox return examples
 setMethod('separate2groups.cox', signature(chosen.btas = 'list', xdata = 'matrix', ydata = 'data.frame'),
-          function(chosen.btas, xdata, ydata, probs, plot.title, xlim, ylim, expand.yzero, legend.outside) {
+          function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) {
 
             if (nrow(xdata) != nrow(ydata)) {
               stop(sprintf('Rows in xdata (%d) and ydata (%d) must be the same', nrow(xdata), nrow(ydata)))
