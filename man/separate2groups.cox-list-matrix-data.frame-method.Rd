@@ -19,6 +19,8 @@
 
 \item{probs}{How to separate high and low risk patients 50\%-50\% is the default, but for top and bottom 40\% -> c(.4,.6)}
 
+\item{no.plot}{Only calculate p-value and do not generate survival curve plot}
+
 \item{plot.title}{Name of file if}
 
 \item{xlim}{Optional argument to limit the x-axis view}

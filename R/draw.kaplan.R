@@ -8,7 +8,7 @@
 #' @return object with logrank test and kaplan-meier survival plot
 #' @export
 draw.kaplan <- function(...) {
-  .Defunct('separate2groups.cox',
+  .Deprecated('separate2groups.cox',
               package='glmSparseNet',
               'The \'draw.kaplan\' function was renamed to \'separate2groups.cox\'.',
               old = as.character(sys.call(sys.parent()))[1L])
@@ -23,6 +23,7 @@ draw.kaplan <- function(...) {
 #' @param xdata n x m matrix with n observations and m variables
 #' @param ydata Survival object
 #' @param probs How to separate high and low risk patients 50\%-50\% is the default, but for top and bottom 40\% -> c(.4,.6)
+#' @param no.plot Only calculate p-value and do not generate survival curve plot
 #' @param plot.title Name of file if
 #' @param xlim Optional argument to limit the x-axis view
 #' @param ylim Optional argument to limit the y-axis view
