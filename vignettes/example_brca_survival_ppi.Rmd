@@ -233,7 +233,8 @@ cv.hub <- cv.glmHub(xdata,
 Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
 
 ```{r, echo=FALSE}
-glmSparseNet::draw.kaplan(as.vector(coef(cv.hub, s = 'lambda.min')[,1]), xdata, ydata, plot.title = 'Full dataset', legend.outside = FALSE)
+glmSparseNet::separate2groups.cox(as.vector(coef(cv.hub, s = 'lambda.min')[,1]), xdata, ydata,
+                                  plot.title = 'Full dataset', legend.outside = FALSE)
 
 selected.genes[['Hub']] <- coef(cv.hub, s = 'lambda.min')[,1] %>% { .[. != 0] } %>%
   names %>% gene.names %>% { .[['external_gene_name']]} 
@@ -254,8 +255,8 @@ cv.orphan <- cv.glmOrphan(xdata,
 Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
 
 ```{r, echo=FALSE}
-glmSparseNet::draw.kaplan(as.vector(coef(cv.orphan, s = 'lambda.min')[,1]), xdata, ydata,
-                          plot.title = 'Full dataset', legend.outside = FALSE)
+glmSparseNet::separate2groups.cox(as.vector(coef(cv.orphan, s = 'lambda.min')[,1]), xdata, ydata,
+                                  plot.title = 'Full dataset', legend.outside = FALSE)
 
 selected.genes[['Orphan']] <- coef(cv.orphan, s = 'lambda.min')[,1] %>% { .[. != 0] } %>%
   names %>% gene.names %>% { .[['external_gene_name']]} 
@@ -272,8 +273,8 @@ cv.glm <- cv.glmnet(xdata, Surv(ydata$time, ydata$status), family = 'cox', foldi
 Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
 
 ```{r, echo=FALSE}
-glmSparseNet::draw.kaplan(as.vector(coef(cv.glm, s = 'lambda.min')[,1]), xdata, ydata, 
-                          plot.title = 'Full dataset', legend.outside = FALSE)
+glmSparseNet::separate2groups.cox(as.vector(coef(cv.glm, s = 'lambda.min')[,1]), xdata, ydata, 
+                                  plot.title = 'Full dataset', legend.outside = FALSE)
 
 selected.genes[['GLMnet']] <- coef(cv.glm, s = 'lambda.min')[,1] %>% { .[. != 0] } %>%
   names %>% gene.names %>% { .[['external_gene_name']]} 

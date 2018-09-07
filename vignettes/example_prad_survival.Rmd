@@ -147,9 +147,9 @@ gene.names(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
 ## Survival curves and Log rank test
 
 ```{r}
-draw.kaplan(as.vector(coefs.v), 
-            xdata[, names(coefs.v)], 
-            ydata, 
-            plot.title = 'Full dataset', legend.outside = FALSE)
+separate2groups.cox(as.vector(coefs.v), 
+                    xdata[, names(coefs.v)], 
+                    ydata, 
+                    plot.title = 'Full dataset', legend.outside = FALSE)
 ```
 

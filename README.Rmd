@@ -180,11 +180,11 @@ plot(fit3)
 
 ## Visualization and Analytical tools
 
-### Survival curves with `draw.kaplan`
+### Survival curves with `separate2groups.cox`
 
 This function generates Kaplan-Meier survival model based on the estimated coefficients of the Cox model. It creates two groups based on the relative risk and displays both survival curves *(high vs. low-risk patients, as defined by the median)* and the corresponding results of log-rank tests.
 
-```{r draw.kaplan}
+```{r separate2groups.cox}
 # Data to use in draw.kaplan function
 #  * it takes the input data, response and coefficients
 #  * calculates the relative risk
@@ -197,7 +197,7 @@ best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
 Kaplan-Meier plot
 
 ```{r call.kaplan}
-draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, ylim = c(0,1))
+separate2groups.cox(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, ylim = c(0,1))
 ```
 
 
@@ -220,10 +220,10 @@ fit4 <- cv.glmnet(xdata.surv, ydata.surv, family = 'cox', alpha = .7, nlambda = 
 best.model.coef.g <- coef(fit4, s = 'lambda.min')[,1] %>% .[. != 0]
 
 
-draw.kaplan(best.model.coef.g, 
-            t(assay(xdata[['RNASeq2GeneNorm']]))[, names(best.model.coef.g)], 
-            ydata.km,
-            ylim = c(0,1))$plot
+separate2groups.cox(best.model.coef.g, 
+                    t(assay(xdata[['RNASeq2GeneNorm']]))[, names(best.model.coef.g)], 
+                    ydata.km,
+                    ylim = c(0,1))$plot
 
 # hallmarks(names(best.model.coef.g))$heatmap
 ```

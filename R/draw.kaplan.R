@@ -1,4 +1,21 @@
-#' draw.kaplan
+#' draw.kaplan deprecation warning
+#'
+#' @seealso separate2groups.cox
+#' @aliases separate2groups.cox
+#'
+#' @inheritParams separate2groups.cox
+#'
+#' @return object with logrank test and kaplan-meier survival plot
+#' @export
+draw.kaplan <- function(...) {
+  .Deprecated('separate2groups.cox',
+              package='glmSparseNet',
+              'The \'draw.kaplan\' function was renamed to \'separate2groups.cox\'.',
+              old = as.character(sys.call(sys.parent()))[1L])
+}
+
+
+#' separate2groups.cox
 #'
 #' Mega function that draws multiple kaplan meyer survival curves (or just 1)
 #'
@@ -22,98 +39,69 @@
 #' data('ovarian', package = 'survival')
 #' xdata <- ovarian[,c('age', 'resid.ds')]
 #' ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
-#' draw.kaplan(c(age = 1, 0), xdata, ydata)
-#' draw.kaplan(c(age = 1, 0.5), xdata, ydata)
-#' draw.kaplan(c(age = 1), c(1,0,1,0,1,0), data.frame(time = runif(6), status = rbinom(6, 1, .5)))
-#' draw.kaplan(list(aa = c(age = 1, 0.5), bb = c(age = 0, 1.5)), xdata, ydata)
-setGeneric('draw.kaplan', function(chosen.btas, xdata, ydata,
+#' separate2groups.cox(c(age = 1, 0), xdata, ydata)
+#' separate2groups.cox(c(age = 1, 0.5), xdata, ydata)
+#' separate2groups.cox(c(age = 1), c(1,0,1,0,1,0), data.frame(time = runif(6), status = rbinom(6, 1, .5)))
+#' separate2groups.cox(list(aa = c(age = 1, 0.5), bb = c(age = 0, 1.5)), xdata, ydata)
+setGeneric('separate2groups.cox', function(chosen.btas, xdata, ydata,
                                    probs          = c(.5, .5),
-                                   plot.title       = 'SurvivalCurves',
+                                   no.plot        = FALSE,
+                                   plot.title     = 'SurvivalCurves',
                                    xlim           = NULL,
                                    ylim           = NULL,
                                    expand.yzero   = FALSE,
                                    legend.outside = FALSE) {
-  stop('wrong arguments, see help for draw.kaplan')
+  stop('wrong arguments, see help for separate2groups.cox')
 })
 
 
-#' draw.kaplan
+#' separate2groups.cox
 #'
-#' @inheritParams draw.kaplan
-#'
-#' @param chosen.btas numeric.
-#' @param xdata data.frame.
-#' @param ydata data.frame.
+#' @inheritParams separate2groups.cox
 #'
 #' @return object with logrank test and kaplan-meier survival plot
 #' @export
-#'
-setMethod('draw.kaplan', signature(chosen.btas = 'numeric', xdata = 'data.frame', ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, plot.title, xlim, ylim, expand.yzero, legend.outside) { draw.kaplan(list(chosen.btas), as.matrix(xdata), ydata, probs = probs, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
+#' @inherit separate2groups.cox return examples
+setMethod('separate2groups.cox', signature(chosen.btas = 'numeric', xdata = 'data.frame', ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) { separate2groups.cox(list(chosen.btas), as.matrix(xdata), ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
 
-#' draw.kaplan
+#' separate2groups.cox
 #'
-#' @inheritParams draw.kaplan
+#' @inheritParams separate2groups.cox
 #'
-#' @param chosen.btas numeric.
-#' @param xdata matrix.
-#' @param ydata data.frame.
-#'
-#' @return object with logrank test and kaplan-meier survival plot
 #' @export
-#'
-setMethod('draw.kaplan', signature(chosen.btas = 'numeric', xdata = 'matrix',     ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, plot.title, xlim, ylim, expand.yzero, legend.outside) {draw.kaplan(list(chosen.btas), xdata, ydata, probs = probs, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
+#' @inherit separate2groups.cox return examples
+setMethod('separate2groups.cox', signature(chosen.btas = 'numeric', xdata = 'matrix',     ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) {separate2groups.cox(list(chosen.btas), xdata, ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
 
-#' draw.kaplan
+#' separate2groups.cox
 #'
-#' @inheritParams draw.kaplan
+#' @inheritParams separate2groups.cox
 #'
-#' @param chosen.btas numeric.
-#' @param xdata numeric.
-#' @param ydata data.frame.
-#'
-#' @return object with logrank test and kaplan-meier survival plot
 #' @export
-#'
-setMethod('draw.kaplan', signature(chosen.btas = 'numeric', xdata = 'numeric',    ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, plot.title, xlim, ylim, expand.yzero, legend.outside) {draw.kaplan(list(chosen.btas), as.matrix(xdata), ydata, probs = probs, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
+#' @inherit separate2groups.cox return examples
+setMethod('separate2groups.cox', signature(chosen.btas = 'numeric', xdata = 'numeric',    ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) {separate2groups.cox(list(chosen.btas), as.matrix(xdata), ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
 
-#' draw.kaplan
+#' separate2groups.cox
 #'
-#' @inheritParams draw.kaplan
+#' @inheritParams separate2groups.cox
 #'
-#' @param chosen.btas list.
-#' @param xdata data.frame.
-#' @param ydata data.frame.
-#'
-#' @return object with logrank test and kaplan-meier survival plot
 #' @export
-#'
-setMethod('draw.kaplan', signature(chosen.btas = 'list',    xdata = 'data.frame', ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, plot.title, xlim, ylim, expand.yzero, legend.outside) {draw.kaplan(chosen.btas, as.matrix(xdata), ydata, probs = probs, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
+#' @inherit cv.glmSparseNet return examples
+setMethod('separate2groups.cox', signature(chosen.btas = 'list',    xdata = 'data.frame', ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) {separate2groups.cox(chosen.btas, as.matrix(xdata), ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
 
-#' draw.kaplan
+#' separate2groups.cox
 #'
-#' @inheritParams draw.kaplan
+#' @inheritParams separate2groups.cox
 #'
-#' @param chosen.btas list.
-#' @param xdata numeric.
-#' @param ydata data.frame.
-#'
-#' @return object with logrank test and kaplan-meier survival plot
 #' @export
-#'
-setMethod('draw.kaplan', signature(chosen.btas = 'list',    xdata = 'numeric',    ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, plot.title, xlim, ylim, expand.yzero, legend.outside) { draw.kaplan(chosen.btas, as.matrix(xdata), ydata, probs = probs, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
+#' @inherit separate2groups.cox return examples
+setMethod('separate2groups.cox', signature(chosen.btas = 'list',    xdata = 'numeric',    ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) { separate2groups.cox(chosen.btas, as.matrix(xdata), ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
 
-#' draw.kaplan
+#' separate2groups.cox
 #'
-#' @inheritParams draw.kaplan
-#'
-#' @param chosen.btas list.
-#' @param xdata matrix.
-#' @param ydata data.frame.
-#'
-#' @return object with logrank test and kaplan-meier survival plot
+#' @inheritParams separate2groups.cox
 #' @export
-#'
-setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata = 'data.frame'),
+#' @inherit separate2groups.cox return examples
+setMethod('separate2groups.cox', signature(chosen.btas = 'list', xdata = 'matrix', ydata = 'data.frame'),
           function(chosen.btas, xdata, ydata, probs, plot.title, xlim, ylim, expand.yzero, legend.outside) {
 
             if (nrow(xdata) != nrow(ydata)) {
@@ -188,7 +176,7 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
               do.call(forcats::fct_collapse, .)
             #
             if (length(levels(prognostic.index.df$group)) == 1) {
-              stop('draw.kaplan(): There is only one group, cannot create kaplan-meir curve with low and high risk groups')
+              stop('separate2groups.cox(): There is only one group, cannot create kaplan-meir curve with low and high risk groups')
             }
             futile.logger::flog.debug('')
             futile.logger::flog.debug('prognostic.index.df', prognostic.index.df, capture = TRUE)
@@ -205,6 +193,11 @@ setMethod('draw.kaplan', signature(chosen.btas = 'list', xdata = 'matrix', ydata
 
             futile.logger::flog.debug('')
             futile.logger::flog.debug('pvalue: %g\n', p_value)
+
+            if (no.plot) {
+              return(list(pvalue = p_value, plot = NULL, km = km))
+            }
+
             #
             # Plot survival curve
             #
