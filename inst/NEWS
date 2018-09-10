@@ -1,2 +1,10 @@
 # glmSparseNet
 ----------------------------------------------------------------
+
+## Changes in version 0.99.10
+
+- Renamed draw.kaplan to separate2groups.cox
+
+## Changes in version 0.99.9
+
+- Removed loose.rock functions from this package as they are published in CRAN
