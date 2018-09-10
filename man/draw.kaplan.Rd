@@ -2,7 +2,6 @@
 % Please edit documentation in R/draw.kaplan.R
 \name{draw.kaplan}
 \alias{draw.kaplan}
-\alias{separate2groups.cox}
 \title{draw.kaplan deprecation warning}
 \usage{
 draw.kaplan(...)

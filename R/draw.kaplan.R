@@ -1,7 +1,6 @@
 #' draw.kaplan deprecation warning
 #'
 #' @seealso separate2groups.cox
-#' @aliases separate2groups.cox
 #'
 #' @param ... see separate2groups.cox
 #'
