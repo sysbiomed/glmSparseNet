@@ -44,7 +44,7 @@ theme_set(ggplot2::theme_minimal())
 
 # Load data
 
-The data is loaded from an online curated dataset downloaded from TCGA using `TCGAbiolinks` bioconductor package and processed.
+The data is loaded from an online curated dataset downloaded from TCGA using `curatedTCGAData` bioconductor package and processed.
 
 To accelerate the process we use a very reduced dataset down to around 100 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
 
