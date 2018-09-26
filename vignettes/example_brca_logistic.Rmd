@@ -49,6 +49,7 @@ The data is loaded from an online curated dataset downloaded from TCGA using `cu
 To accelerate the process we use a very reduced dataset down to 107 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
 
 ```{r, include=FALSE}
+# chunk not included as it produces to many unnecessary messages
 brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 ```
 
@@ -64,7 +65,7 @@ bcr_sample_barcode <- rownames(xdata.raw)[grepl('TCGA-[0-9A-Z]+-[0-9A-Z]+-01',
                                      rownames(xdata.raw))]
 class.v <- array(1, length(bcr_sample_barcode))
 
-# keep metastatic samples (code 11)
+# keep normal tissues samples (code 11)
 bcr_sample_barcode <- c(bcr_sample_barcode, 
                         rownames(xdata.raw)[grepl('TCGA[-][0-9A-Z]+[-][0-9A-Z]+[-]11',
                                                   rownames(xdata.raw))])

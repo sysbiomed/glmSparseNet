@@ -120,7 +120,7 @@ qplot(degree.network[degree.network <= quantile(degree.network, probs = .99999)]
 * Dataset from curatedTCGAdata
 
 ```{r, include=FALSE}
-# hidden as it is quite verbose
+# chunk not included as it produces to many unnecessary messages
 brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 ```
 
