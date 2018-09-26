@@ -42,7 +42,7 @@ glmOrphan <- function(xdata, ydata, network, network.options = network.options.d
 #' glmHub(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian',
 #'        network.options = network.options.default(min.degree = .2))
 glmHub <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
-  network.options$trans.fun <- hub.heuristic
+  network.options$trans.fun <- hubHeuristic
   glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
 }
 
@@ -140,6 +140,6 @@ cv.glmDegree <- function(xdata, ydata, network, network.options = network.option
 #' cv.glmHub(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian',
 #'           network.options = network.options.default(min.degree = .2))
 cv.glmHub <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
-  network.options$trans.fun <- hub.heuristic
+  network.options$trans.fun <- hubHeuristic
   cv.glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
 }

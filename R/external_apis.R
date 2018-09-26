@@ -6,8 +6,8 @@
 #' @export
 #'
 #' @examples
-#' gene.names(c('ENSG00000114978','ENSG00000166211', 'ENSG00000183688'))
-gene.names <- function(ensembl.genes) {
+#' geneNames(c('ENSG00000114978','ENSG00000166211', 'ENSG00000183688'))
+geneNames <- function(ensembl.genes) {
 
   . <- NULL
 
@@ -49,8 +49,8 @@ gene.names <- function(ensembl.genes) {
 #' @export
 #'
 #' @examples
-#' ensembl.gene.names(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
-ensembl.gene.names <- function(gene.id) {
+#' ensemblGeneNames(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
+ensemblGeneNames <- function(gene.id) {
 
   . <- NULL
 
@@ -225,8 +225,8 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full', generate.plot
 #' @export
 #'
 #' @examples
-#' protein.to.ensembl.gene.names(c('ENSP00000235382','ENSP00000233944', 'ENSP00000216911'))
-protein.to.ensembl.gene.names <- function(ensembl.proteins) {
+#' protein2EnsemblGeneNames(c('ENSP00000235382','ENSP00000233944', 'ENSP00000216911'))
+protein2EnsemblGeneNames <- function(ensembl.proteins) {
   tryCatch({
     marts <- biomaRt::listMarts()
     index <- grep("ensembl genes",marts$version, ignore.case = TRUE)

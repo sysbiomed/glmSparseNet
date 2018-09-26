@@ -50,8 +50,6 @@ Suggests: testthat,
   survival,
   survcomp,
   pROC,
-  devtools,
-  roxygen2,
   VennDiagram,
   BiocStyle,
   curatedTCGAData

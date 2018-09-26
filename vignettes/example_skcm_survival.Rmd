@@ -91,7 +91,7 @@ xdata.raw    <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } 
 ydata.raw    <- ydata.raw[strtrim(rownames(xdata.raw), 12), ]
 
 set.seed(params$seed)
-small.subset <- c(gene.names(c('ENSG00000109790', 'ENSG00000109133', 'ENSG00000023734', 
+small.subset <- c(geneNames(c('ENSG00000109790', 'ENSG00000109133', 'ENSG00000023734', 
                   'ENSG00000183770', 'ENSG00000214617', 'ENSG00000185813', 
                   'ENSG00000183242'))$external_gene_name,
                   sample(colnames(xdata.raw), 100))
@@ -125,7 +125,7 @@ Taking the best model described by `lambda.min`
 coefs.v <- coef(fitted, s = 'lambda.min')[,1] %>% { .[. != 0]}
 coefs.v %>% { 
   data.frame(ensembl.id  = names(.), 
-             gene.name   = gene.names(names(.))$external_gene_name, 
+             gene.name   = geneNames(names(.))$external_gene_name, 
              coefficient = .,
              stringsAsFactors = FALSE)
   } %>%
@@ -136,15 +136,15 @@ coefs.v %>% {
 ## Hallmarks of Cancer
 
 ```{r hallmarks}
-gene.names(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
+geneNames(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
 ```
 
 ## Survival curves and Log rank test
 
 ```{r}
-separate2groups.cox(as.vector(coefs.v), 
-                    xdata[, names(coefs.v)], 
-                    ydata, 
-                    plot.title = 'Full dataset', legend.outside = FALSE)
+separate2GroupsCox(as.vector(coefs.v), 
+                   xdata[, names(coefs.v)], 
+                   ydata, 
+                   plot.title = 'Full dataset', legend.outside = FALSE)
 ```
 

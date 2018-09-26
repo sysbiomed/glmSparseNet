@@ -1,20 +1,4 @@
-#' draw.kaplan deprecation warning
-#'
-#' @seealso separate2groups.cox
-#'
-#' @param ... see separate2groups.cox
-#'
-#' @return object with logrank test and kaplan-meier survival plot
-#' @export
-draw.kaplan <- function(...) {
-  .Deprecated('separate2groups.cox',
-              package='glmSparseNet',
-              'The \'draw.kaplan\' function was renamed to \'separate2groups.cox\'.',
-              old = as.character(sys.call(sys.parent()))[1L])
-}
-
-
-#' separate2groups.cox
+#' Separate data in High and Low risk groups (based on Cox model)
 #'
 #' Mega function that draws multiple kaplan meyer survival curves (or just 1)
 #'
@@ -39,69 +23,69 @@ draw.kaplan <- function(...) {
 #' data('ovarian', package = 'survival')
 #' xdata <- ovarian[,c('age', 'resid.ds')]
 #' ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
-#' separate2groups.cox(c(age = 1, 0), xdata, ydata)
-#' separate2groups.cox(c(age = 1, 0.5), xdata, ydata)
-#' separate2groups.cox(c(age = 1), c(1,0,1,0,1,0), data.frame(time = runif(6), status = rbinom(6, 1, .5)))
-#' separate2groups.cox(list(aa = c(age = 1, 0.5), bb = c(age = 0, 1.5)), xdata, ydata)
-setGeneric('separate2groups.cox', function(chosen.btas, xdata, ydata,
-                                   probs          = c(.5, .5),
-                                   no.plot        = FALSE,
-                                   plot.title     = 'SurvivalCurves',
-                                   xlim           = NULL,
-                                   ylim           = NULL,
-                                   expand.yzero   = FALSE,
-                                   legend.outside = FALSE) {
-  stop('wrong arguments, see help for separate2groups.cox')
+#' separate2GroupsCox(c(age = 1, 0), xdata, ydata)
+#' separate2GroupsCox(c(age = 1, 0.5), xdata, ydata)
+#' separate2GroupsCox(c(age = 1), c(1,0,1,0,1,0), data.frame(time = runif(6), status = rbinom(6, 1, .5)))
+#' separate2GroupsCox(list(aa = c(age = 1, 0.5), bb = c(age = 0, 1.5)), xdata, ydata)
+setGeneric('separate2GroupsCox', function(chosen.btas, xdata, ydata,
+                                          probs          = c(.5, .5),
+                                          no.plot        = FALSE,
+                                          plot.title     = 'SurvivalCurves',
+                                          xlim           = NULL,
+                                          ylim           = NULL,
+                                          expand.yzero   = FALSE,
+                                          legend.outside = FALSE) {
+  stop('wrong arguments, see help for separate2GroupsCox')
 })
 
 
-#' separate2groups.cox
+#' Separate data in High and Low risk groups (based on Cox model)
 #'
-#' @inheritParams separate2groups.cox
+#' @inheritParams separate2GroupsCox
 #'
 #' @return object with logrank test and kaplan-meier survival plot
 #' @export
-#' @inherit separate2groups.cox return examples
-setMethod('separate2groups.cox', signature(chosen.btas = 'numeric', xdata = 'data.frame', ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) { separate2groups.cox(list(chosen.btas), as.matrix(xdata), ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
+#' @inherit separate2GroupsCox return examples
+setMethod('separate2GroupsCox', signature(chosen.btas = 'numeric', xdata = 'data.frame', ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) { separate2GroupsCox(list(chosen.btas), as.matrix(xdata), ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
 
-#' separate2groups.cox
+#' Separate data in High and Low risk groups (based on Cox model)
 #'
-#' @inheritParams separate2groups.cox
+#' @inheritParams separate2GroupsCox
 #'
 #' @export
-#' @inherit separate2groups.cox return examples
-setMethod('separate2groups.cox', signature(chosen.btas = 'numeric', xdata = 'matrix',     ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) {separate2groups.cox(list(chosen.btas), xdata, ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
+#' @inherit separate2GroupsCox return examples
+setMethod('separate2GroupsCox', signature(chosen.btas = 'numeric', xdata = 'matrix',     ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) {separate2GroupsCox(list(chosen.btas), xdata, ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
 
-#' separate2groups.cox
+#' Separate data in High and Low risk groups (based on Cox model)
 #'
-#' @inheritParams separate2groups.cox
+#' @inheritParams separate2GroupsCox
 #'
 #' @export
-#' @inherit separate2groups.cox return examples
-setMethod('separate2groups.cox', signature(chosen.btas = 'numeric', xdata = 'numeric',    ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) {separate2groups.cox(list(chosen.btas), as.matrix(xdata), ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
+#' @inherit separate2GroupsCox return examples
+setMethod('separate2GroupsCox', signature(chosen.btas = 'numeric', xdata = 'numeric',    ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) {separate2GroupsCox(list(chosen.btas), as.matrix(xdata), ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
 
-#' separate2groups.cox
+#' Separate data in High and Low risk groups (based on Cox model)
 #'
-#' @inheritParams separate2groups.cox
+#' @inheritParams separate2GroupsCox
 #'
 #' @export
 #' @inherit cv.glmSparseNet return examples
-setMethod('separate2groups.cox', signature(chosen.btas = 'list',    xdata = 'data.frame', ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) {separate2groups.cox(chosen.btas, as.matrix(xdata), ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
+setMethod('separate2GroupsCox', signature(chosen.btas = 'list',    xdata = 'data.frame', ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) {separate2GroupsCox(chosen.btas, as.matrix(xdata), ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
 
-#' separate2groups.cox
+#' Separate data in High and Low risk groups (based on Cox model)
 #'
-#' @inheritParams separate2groups.cox
+#' @inheritParams separate2GroupsCox
 #'
 #' @export
-#' @inherit separate2groups.cox return examples
-setMethod('separate2groups.cox', signature(chosen.btas = 'list',    xdata = 'numeric',    ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) { separate2groups.cox(chosen.btas, as.matrix(xdata), ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
+#' @inherit separate2GroupsCox return examples
+setMethod('separate2GroupsCox', signature(chosen.btas = 'list',    xdata = 'numeric',    ydata = 'data.frame'), function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) { separate2GroupsCox(chosen.btas, as.matrix(xdata), ydata, probs = probs, no.plot = no.plot, plot.title = plot.title, xlim = xlim, ylim = ylim, expand.yzero = expand.yzero, legend.outside = legend.outside)})
 
-#' separate2groups.cox
+#' Separate data in High and Low risk groups (based on Cox model)
 #'
-#' @inheritParams separate2groups.cox
+#' @inheritParams separate2GroupsCox
 #' @export
-#' @inherit separate2groups.cox return examples
-setMethod('separate2groups.cox', signature(chosen.btas = 'list', xdata = 'matrix', ydata = 'data.frame'),
+#' @inherit separate2GroupsCox return examples
+setMethod('separate2GroupsCox', signature(chosen.btas = 'list', xdata = 'matrix', ydata = 'data.frame'),
           function(chosen.btas, xdata, ydata, probs, no.plot, plot.title, xlim, ylim, expand.yzero, legend.outside) {
 
             if (nrow(xdata) != nrow(ydata)) {
@@ -176,7 +160,7 @@ setMethod('separate2groups.cox', signature(chosen.btas = 'list', xdata = 'matrix
               do.call(forcats::fct_collapse, .)
             #
             if (length(levels(prognostic.index.df$group)) == 1) {
-              stop('separate2groups.cox(): There is only one group, cannot create kaplan-meir curve with low and high risk groups')
+              stop('separate2GroupsCox(): There is only one group, cannot create kaplan-meir curve with low and high risk groups')
             }
             futile.logger::flog.debug('')
             futile.logger::flog.debug('prognostic.index.df', prognostic.index.df, capture = TRUE)

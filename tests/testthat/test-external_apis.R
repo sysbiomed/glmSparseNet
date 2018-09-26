@@ -14,7 +14,7 @@ test_that("gene name query", {
                        stringsAsFactors = FALSE,
                        row.names = 1)
 
-  res <- gene.names(rownames(target))
+  res <- geneNames(rownames(target))
   expect_equal(res$external_gene_name, target[res$ensembl_gene_id, 'gene.name'])
 })
 
@@ -32,7 +32,7 @@ test_that("protein query", {
                        stringsAsFactors = FALSE,
                        row.names = 1)
 
-  res <- protein.to.ensembl.gene.names(rownames(target))
+  res <- ensemblGeneNames(rownames(target))
   expect_equal(res$ensembl_gene_id, target[res$ensembl_peptide_id, 'gene.name'])
 })
 

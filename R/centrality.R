@@ -13,15 +13,15 @@
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' network.cor.parallel(xdata)
-network.cor.parallel <- function(xdata,
+#' networkCorParallel(xdata)
+networkCorParallel <- function(xdata,
                                  build.output  = 'matrix',
                                  n.cores       = 1,
                                  force.recalc.network  = FALSE,
                                  show.message  = FALSE, ...) {
-  network.generic.parallel(stats::cor, 'correlation', xdata, build.output = build.output, n.cores = n.cores,
-                           force.recalc.network = force.recalc.network,
-                           show.message = show.message, ...)
+  networkGenericParallel(stats::cor, 'correlation', xdata, build.output = build.output, n.cores = n.cores,
+                         force.recalc.network = force.recalc.network,
+                         show.message = show.message, ...)
 }
 
 #' Calculates the covariance network
@@ -40,14 +40,14 @@ network.cor.parallel <- function(xdata,
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 #' network.cov.parallel(xdata)
-network.cov.parallel <- function(xdata,
+networkCovParallel <- function(xdata,
                                  build.output  = 'matrix',
                                  n.cores       = 1,
                                  force.recalc.network  = FALSE,
                                  show.message  = FALSE, ...) {
-  network.generic.parallel(stats::cov, 'covariance', xdata, build.output = build.output, n.cores = n.cores,
-                           force.recalc.network = force.recalc.network,
-                           show.message = show.message, ...)
+  networkGenericParallel(stats::cov, 'covariance', xdata, build.output = build.output, n.cores = n.cores,
+                         force.recalc.network = force.recalc.network,
+                         show.message = show.message, ...)
 }
 
 #' Calculate the upper triu of the matrix
@@ -62,12 +62,12 @@ network.cov.parallel <- function(xdata,
 #' @param ... extra parameters for fun
 #'
 #' @return depends on build.output parameter
-network.generic.parallel <- function(fun, fun.prefix,
-                                     xdata,
-                                     build.output  = 'matrix',
-                                     n.cores       = 1,
-                                     force.recalc.network  = FALSE,
-                                     show.message  = FALSE, ...) {
+networkGenericParallel <- function(fun, fun.prefix,
+                                   xdata,
+                                   build.output  = 'matrix',
+                                   n.cores       = 1,
+                                   force.recalc.network  = FALSE,
+                                   show.message  = FALSE, ...) {
 
   # Windows only support 1 core
   if (.Platform$OS.type == 'windows') {
@@ -80,7 +80,7 @@ network.generic.parallel <- function(fun, fun.prefix,
   fun.aux <- function(xdata, ...) {
     result <- parallel::mclapply( as.numeric(seq_len(ncol(xdata)-1)), function(ix.i) {
       tryCatch({
-        result <- loose.rock::run.cache(network.worker, fun,
+        result <- loose.rock::run.cache(networkWorker, fun,
                                         xdata, ix.i,
                                         #
                                         cache.digest = list(xdata.sha256),
@@ -139,12 +139,12 @@ network.generic.parallel <- function(fun, fun.prefix,
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degree.cor(xdata)
-#' degree.cor(xdata, cutoff = .5)
-#' degree.cor(xdata, cutoff = .5, consider.unweighted = TRUE)
-setGeneric('degree.cor', function(xdata, cutoff = 0, consider.unweighted = FALSE,
-                                  force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                                  n.cores = 1, ...) {
+#' degreeCor(xdata)
+#' degreeCor(xdata, cutoff = .5)
+#' degreeCor(xdata, cutoff = .5, consider.unweighted = TRUE)
+setGeneric('degreeCor', function(xdata, cutoff = 0, consider.unweighted = FALSE,
+                                 force.recalc.degree = FALSE, force.recalc.network = FALSE,
+                                 n.cores = 1, ...) {
   stop('first argument must be a matrix')
 })
 
@@ -160,12 +160,12 @@ setGeneric('degree.cor', function(xdata, cutoff = 0, consider.unweighted = FALSE
 #'
 #' @return a vector of the degrees
 #' @export
-setMethod('degree.cor', signature('matrix'), function(xdata, cutoff = 0, consider.unweighted = FALSE,
-                                                      force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                                                      n.cores = 1, ...) {
-  return(degree.generic(stats::cor, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
-                 force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
-                 n.cores = n.cores, ...))
+setMethod('degreeCor', signature('matrix'), function(xdata, cutoff = 0, consider.unweighted = FALSE,
+                                                     force.recalc.degree = FALSE, force.recalc.network = FALSE,
+                                                     n.cores = 1, ...) {
+  return(degreeGeneric(stats::cor, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
+                       force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
+                       n.cores = n.cores, ...))
 })
 
 #' Calculate the degree of the covariance network based on xdata
@@ -184,12 +184,12 @@ setMethod('degree.cor', signature('matrix'), function(xdata, cutoff = 0, conside
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degree.cov(xdata)
-#' degree.cov(xdata, cutoff = .5)
-#' degree.cov(xdata, cutoff = .5, consider.unweighted = TRUE)
-setGeneric('degree.cov', function(xdata, cutoff = 0, consider.unweighted = FALSE,
-                                  force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                                  n.cores = 1, ...) {
+#' degreeCov(xdata)
+#' degreeCov(xdata, cutoff = .5)
+#' degreeCov(xdata, cutoff = .5, consider.unweighted = TRUE)
+setGeneric('degreeCov', function(xdata, cutoff = 0, consider.unweighted = FALSE,
+                                 force.recalc.degree = FALSE, force.recalc.network = FALSE,
+                                 n.cores = 1, ...) {
   stop('first argument must be a matrix')
 })
 
@@ -205,12 +205,12 @@ setGeneric('degree.cov', function(xdata, cutoff = 0, consider.unweighted = FALSE
 #'
 #' @return a vector of the degrees
 #' @export
-setMethod('degree.cov', signature('matrix'), function(xdata, cutoff = 0, consider.unweighted = FALSE,
-                                                      force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                                                      n.cores = 1, ...) {
-  return(degree.generic(stats::cov, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
-                        force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
-                        n.cores = n.cores, ...))
+setMethod('degreeCov', signature('matrix'), function(xdata, cutoff = 0, consider.unweighted = FALSE,
+                                                     force.recalc.degree = FALSE, force.recalc.network = FALSE,
+                                                     n.cores = 1, ...) {
+  return(degreeGeneric(stats::cov, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
+                       force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
+                       n.cores = n.cores, ...))
 })
 
 
@@ -225,7 +225,7 @@ setMethod('degree.cov', signature('matrix'), function(xdata, cutoff = 0, conside
 #' @param ... extra parameters for fun
 #'
 #' @return a vector with size `ncol(xdata) - ix.i`
-network.worker <- function(fun, xdata, ix.i, ...) {
+networkWorker <- function(fun, xdata, ix.i, ...) {
   n.col <- ncol(xdata)
   xdata.i <- xdata[,ix.i]
   result  <- fun(xdata[,ix.i], xdata[,seq(ix.i+1, ncol(xdata))], ...)
@@ -250,7 +250,7 @@ network.worker <- function(fun, xdata, ix.i, ...) {
 #' @param ... extra parameters for fun
 #'
 #' @return a vector of the degrees
-degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, consider.unweighted = FALSE,
+degreeGeneric <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, consider.unweighted = FALSE,
                            chunks = 1000, force.recalc.degree = FALSE, force.recalc.network = FALSE,
                            n.cores = 1, ...) {
 
@@ -265,7 +265,7 @@ degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, cons
 
   chunk.function <- function(xdata, max.ix, ix.outer, n.cores, cutoff, consider.unweighted, ...) {
     res.chunks <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
-      line <- network.worker(fun, xdata, ix.i, ...)
+      line <- networkWorker(fun, xdata, ix.i, ...)
       #
       line[is.na(line)]   <- 0 # failsafe in case there was a failure in cov (i.e. sd = 0)
       line                <- abs(line)
@@ -329,19 +329,19 @@ degree.generic <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, cons
 #' @examples
 #' # generate a random matrix of observations
 #' xdata <- matrix(rnorm(1000), nrow = 20)
-#' degree.sparsebn(xdata)
-setGeneric('degree.sparsebn', function(xdata,
-                                       type   = 'continuous',
-                                       levels = NULL,
-                                       ivn    = NULL,
-                                       n      = NULL,
-                                       object = NULL,
-                                       cutoff = 0,
-                                       consider.unweighted = TRUE,
-                                       n.cores = 1,
-                                       show.message         = FALSE,
-                                       force.recalc.degree  = FALSE,
-                                       force.recalc.network = FALSE, ...) {
+#' degreeSparsebn(xdata)
+setGeneric('degreeSparsebn', function(xdata,
+                                      type   = 'continuous',
+                                      levels = NULL,
+                                      ivn    = NULL,
+                                      n      = NULL,
+                                      object = NULL,
+                                      cutoff = 0,
+                                      consider.unweighted = TRUE,
+                                      n.cores = 1,
+                                      show.message         = FALSE,
+                                      force.recalc.degree  = FALSE,
+                                      force.recalc.network = FALSE, ...) {
   stop('first argument must be a matrix')
 })
 
@@ -364,19 +364,19 @@ setGeneric('degree.sparsebn', function(xdata,
 #' @return a vector of the degrees
 #'
 #' @export
-setMethod('degree.sparsebn', signature('matrix'), function(xdata,
-                                                           type   = 'continuous',
-                                                           levels = NULL,
-                                                           ivn    = NULL,
-                                                           n      = NULL,
-                                                           object = NULL,
-                                                           cutoff = 0,
-                                                           consider.unweighted = FALSE,
-                                                           n.cores = 1,
-                                                           show.message = FALSE,
-                                                           force.recalc.degree = FALSE,
-                                                           force.recalc.network = FALSE,
-                                                           ...) {
+setMethod('degreeSparsebn', signature('matrix'), function(xdata,
+                                                          type   = 'continuous',
+                                                          levels = NULL,
+                                                          ivn    = NULL,
+                                                          n      = NULL,
+                                                          object = NULL,
+                                                          cutoff = 0,
+                                                          consider.unweighted = FALSE,
+                                                          n.cores = 1,
+                                                          show.message = FALSE,
+                                                          force.recalc.degree = FALSE,
+                                                          force.recalc.network = FALSE,
+                                                          ...) {
   if (force.recalc.network) {
     force.recalc.degree <- TRUE
   }

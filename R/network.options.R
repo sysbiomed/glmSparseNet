@@ -72,34 +72,34 @@ network.options.default <- function(method     = 'pearson',
 #'
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 20)
-#' glmSparseNet:::calc.penalty(xdata, 'none')
-#' glmSparseNet:::calc.penalty(xdata, 'sparsebn')
-#' glmSparseNet:::calc.penalty(xdata, 'correlation')
-#' glmSparseNet:::calc.penalty(xdata, 'correlation', network.options.default(cutoff = .6))
-#' glmSparseNet:::calc.penalty(xdata, 'covariance')
-#' glmSparseNet:::calc.penalty(xdata, 'covariance', network.options.default(cutoff = .6))
-calc.penalty <- function(xdata, penalty.type, network.options = network.options.default()) {
+#' glmSparseNet:::calcPenalty(xdata, 'none')
+#' glmSparseNet:::calcPenalty(xdata, 'sparsebn')
+#' glmSparseNet:::calcPenalty(xdata, 'correlation')
+#' glmSparseNet:::calcPenalty(xdata, 'correlation', network.options.default(cutoff = .6))
+#' glmSparseNet:::calcPenalty(xdata, 'covariance')
+#' glmSparseNet:::calcPenalty(xdata, 'covariance', network.options.default(cutoff = .6))
+calcPenalty <- function(xdata, penalty.type, network.options = network.options.default()) {
   if (network.options$centrality == 'degree') {
     if (penalty.type == 'correlation') {
-      penalty.factor <- degree.cor(xdata,
-                                   method              = network.options$method,
-                                   consider.unweighted = network.options$unweighted,
-                                   cutoff              = network.options$cutoff,
-                                   #
-                                   n.cores = network.options$n.cores)
+      penalty.factor <- degreeCor(xdata,
+                                  method              = network.options$method,
+                                  consider.unweighted = network.options$unweighted,
+                                  cutoff              = network.options$cutoff,
+                                  #
+                                  n.cores = network.options$n.cores)
     } else if (penalty.type == 'covariance') {
-      penalty.factor <- degree.cov(xdata,
-                                   method              = network.options$method,
-                                   consider.unweighted = network.options$unweighted,
-                                   cutoff              = network.options$cutoff,
-                                   #
-                                   n.cores = network.options$n.cores)
+      penalty.factor <- degreeCov(xdata,
+                                  method              = network.options$method,
+                                  consider.unweighted = network.options$unweighted,
+                                  cutoff              = network.options$cutoff,
+                                  #
+                                  n.cores = network.options$n.cores)
     } else if (penalty.type == 'sparsebn') {
-      penalty.factor <- degree.sparsebn(xdata,
-                                        consider.unweighted = network.options$unweighted,
-                                        cutoff              = network.options$cutoff,
-                                        #
-                                        n.cores = network.options$n.cores)
+      penalty.factor <- degreeSparsebn(xdata,
+                                       consider.unweighted = network.options$unweighted,
+                                       cutoff              = network.options$cutoff,
+                                       #
+                                       n.cores = network.options$n.cores)
     } else if (penalty.type == 'none') {
       penalty.factor <- rep(1, ncol(xdata))
     } else {
@@ -120,8 +120,8 @@ calc.penalty <- function(xdata, penalty.type, network.options = network.options.
 #' @export
 #'
 #' @examples
-#' hub.heuristic(rnorm(1:10))
-hub.heuristic <- function(x) {
+#' hubHeuristic(rnorm(1:10))
+hubHeuristic <- function(x) {
 
   x <- x / max(x)
   return(heuristic.scale(1 - x))

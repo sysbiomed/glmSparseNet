@@ -151,7 +151,7 @@ names(coefs.v) %>% { hallmarks(.)$heatmap }
 ## Survival curves and Log rank test
 
 ```{r}
-separate2groups.cox(as.vector(coefs.v), 
+separate2GroupsCox(as.vector(coefs.v), 
                     xdata[, names(coefs.v)], 
                     ydata, 
                     plot.title = 'Full dataset', legend.outside = FALSE)

@@ -14,20 +14,20 @@
 #'  * matrix representing the network
 #'  * vector with already calculated penalty weights (can also be used directly with glmnet)
 #'
-setGeneric('glmSparseNet.private', function(fun, xdata, ydata, network, network.options = network.options.default(), ...) {
+setGeneric('glmSparseNetPrivate', function(fun, xdata, ydata, network, network.options = network.options.default(), ...) {
   stop('wrong arguments, see help for glmSparseNet')
 })
 
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @inheritParams glmSparseNet.private
+#' @inheritParams glmSparseNetPrivate
 #'
 #' @return an object just as glmnet
 #'
-setMethod('glmSparseNet.private', signature(xdata = 'matrix'), function(fun, xdata, ydata, network, network.options = network.options.default(), ...) {
+setMethod('glmSparseNetPrivate', signature(xdata = 'matrix'), function(fun, xdata, ydata, network, network.options = network.options.default(), ...) {
   if (is.character(network)) {
-    penalty.factor <- calc.penalty(xdata, network, network.options)
+    penalty.factor <- calcPenalty(xdata, network, network.options)
   } else if (is.matrix(network) || inherits(network, 'Matrix')) {
     penalty.factor <- (Matrix::colSums(network) + Matrix::rowSums(network))
   } else if (is.vector(network)) {
@@ -55,11 +55,11 @@ setMethod('glmSparseNet.private', signature(xdata = 'matrix'), function(fun, xda
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @inheritParams glmSparseNet.private
+#' @inheritParams glmSparseNetPrivate
 #' @param experiment.name name of experiment to use in MultiAssayExperiment object
 #'
 #' @return an object just as glmnet
-setMethod('glmSparseNet.private', signature(xdata = 'MultiAssayExperiment'), function(fun, xdata, ydata, network,
+setMethod('glmSparseNetPrivate', signature(xdata = 'MultiAssayExperiment'), function(fun, xdata, ydata, network,
                                                                                         experiment.name = NULL,
                                                                                         network.options = network.options.default(), ...) {
   if (is.null(experiment.name)) {
@@ -83,16 +83,16 @@ setMethod('glmSparseNet.private', signature(xdata = 'MultiAssayExperiment'), fun
   } else if (is.array(ydata) && !is.null(names(ydata))) {
     ydata <- ydata[rownames(xdata@colData)]
   }
-  return(glmSparseNet.private(fun, xdata[[experiment.name]], ydata, network, network.options, ...))
+  return(glmSparseNetPrivate(fun, xdata[[experiment.name]], ydata, network, network.options, ...))
 })
 
 
 #' Calculate GLM model with network-based regularization
 #'
-#' @inheritParams glmSparseNet.private
+#' @inheritParams glmSparseNetPrivate
 #'
 #' @return an object just as glmnet
-setMethod('glmSparseNet.private', signature(xdata = 'SummarizedExperiment'), function(fun, xdata, ydata, network,
+setMethod('glmSparseNetPrivate', signature(xdata = 'SummarizedExperiment'), function(fun, xdata, ydata, network,
                                                                                       network.options = network.options.default(), ...) {
-  return(glmSparseNet.private(fun, t(MultiAssayExperiment::assay(xdata)), ydata, network, network.options, ...))
+  return(glmSparseNetPrivate(fun, t(MultiAssayExperiment::assay(xdata)), ydata, network, network.options, ...))
 })

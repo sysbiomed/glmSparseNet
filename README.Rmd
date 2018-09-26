@@ -172,7 +172,7 @@ fit3 <- cv.glmSparseNet(xdata, ydata, family = 'cox',
                         nlambda = 1000,
                         network.options = network.options.default(cutoff = .6, 
                                                                   min.degree = 0.2,
-                                                                  trans.fun = hub.heuristic))
+                                                                  trans.fun = hubHeuristic))
 plot(fit3)
 ```
 

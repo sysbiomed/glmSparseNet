@@ -65,7 +65,7 @@ For this vignette, we use a cached version of all interaction with `score_thresh
 
 ```{r, eval=FALSE}
 # Not evaluated in vignette as it takes too long to download and process
-all.interactions.700 <- string.db.homo.sapiens(score_threshold = 700)
+all.interactions.700 <- stringDBhomoSapiens(score_threshold = 700)
 ```
 
 ```{r, include=FALSE}
@@ -78,7 +78,7 @@ all.interactions <- string.interactions.700.cache
 Build a sparse matrix object that contains the network.
 
 ```{r}
-string.network <- build.string.network(all.interactions, use.names = 'external')
+string.network <- buildStringNetwork(all.interactions, use.names = 'external')
 
 string.network.undirected <- string.network + Matrix::t(string.network)
 string.network.undirected <- (string.network.undirected != 0) * 1
@@ -219,7 +219,7 @@ selected.genes <- list()
 
 ### glmHub model
 
-Penalizes using the Hub heuristics, see `hub.heuristics` function definition for more details.
+Penalizes using the Hub heuristics, see `hubHeuristic` function definition for more details.
 
 ```{r, warning=FALSE, error=FALSE}
 cv.hub <- cv.glmHub(xdata, 
@@ -233,11 +233,11 @@ cv.hub <- cv.glmHub(xdata,
 Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
 
 ```{r, echo=FALSE}
-glmSparseNet::separate2groups.cox(as.vector(coef(cv.hub, s = 'lambda.min')[,1]), xdata, ydata,
-                                  plot.title = 'Full dataset', legend.outside = FALSE)
+glmSparseNet::separate2GroupsCox(as.vector(coef(cv.hub, s = 'lambda.min')[,1]), xdata, ydata,
+                                 plot.title = 'Full dataset', legend.outside = FALSE)
 
 selected.genes[['Hub']] <- coef(cv.hub, s = 'lambda.min')[,1] %>% { .[. != 0] } %>%
-  names %>% gene.names %>% { .[['external_gene_name']]} 
+  names %>% geneNames %>% { .[['external_gene_name']]} 
 ```
 
 ### glmOrphan model
@@ -255,11 +255,11 @@ cv.orphan <- cv.glmOrphan(xdata,
 Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
 
 ```{r, echo=FALSE}
-glmSparseNet::separate2groups.cox(as.vector(coef(cv.orphan, s = 'lambda.min')[,1]), xdata, ydata,
-                                  plot.title = 'Full dataset', legend.outside = FALSE)
+glmSparseNet::separate2GroupsCox(as.vector(coef(cv.orphan, s = 'lambda.min')[,1]), xdata, ydata,
+                                 plot.title = 'Full dataset', legend.outside = FALSE)
 
 selected.genes[['Orphan']] <- coef(cv.orphan, s = 'lambda.min')[,1] %>% { .[. != 0] } %>%
-  names %>% gene.names %>% { .[['external_gene_name']]} 
+  names %>% geneNamess %>% { .[['external_gene_name']]} 
 ```
 
 ### Elastic Net model *(without network-penalization)*
@@ -273,11 +273,11 @@ cv.glm <- cv.glmnet(xdata, Surv(ydata$time, ydata$status), family = 'cox', foldi
 Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
 
 ```{r, echo=FALSE}
-glmSparseNet::separate2groups.cox(as.vector(coef(cv.glm, s = 'lambda.min')[,1]), xdata, ydata, 
-                                  plot.title = 'Full dataset', legend.outside = FALSE)
+glmSparseNet::separate2GroupsCox(as.vector(coef(cv.glm, s = 'lambda.min')[,1]), xdata, ydata, 
+                                 plot.title = 'Full dataset', legend.outside = FALSE)
 
 selected.genes[['GLMnet']] <- coef(cv.glm, s = 'lambda.min')[,1] %>% { .[. != 0] } %>%
-  names %>% gene.names %>% { .[['external_gene_name']]} 
+  names %>% geneNames %>% { .[['external_gene_name']]} 
 ```
 
 ### Selected genes

@@ -10,9 +10,9 @@
 #' @export
 #' @examples
 #' \dontrun{
-#'     string.db.homo.sapiens(score_threshold = 800)
+#'     stringDBhomoSapiens(score_threshold = 800)
 #' }
-string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.text = TRUE) {
+stringDBhomoSapiens <- function(version = '10', score_threshold = 0, remove.text = TRUE) {
 
   . <- NULL
 
@@ -116,14 +116,14 @@ string.db.homo.sapiens <- function(version = '10', score_threshold = 0, remove.t
 #' @return a new matrix with gene ids instead of peptide ids. The size of matrix can be different as
 #' there may not be a mapping or a peptide mapping can have multiple genes.
 #' @export
-#' @seealso string.db.homo.sapiens
+#' @seealso stringDBhomoSapiens
 #' @examples
 #' data('string.interactions.700.cache', package = 'glmSparseNet')
 #' sample.interactions <- string.interactions.700.cache
-#' network <- build.string.network(sample.interactions)
+#' network <- buildStringNetwork(sample.interactions)
 #' # number of edges
 #' sum(network != 0)
-build.string.network <- function(string.tbl, use.names = 'protein') {
+buildStringNetwork <- function(string.tbl, use.names = 'protein') {
 
   # remove 9606. prefix
   string.tbl$from <- gsub('9606\\.', '', string.tbl$from)
@@ -134,12 +134,12 @@ build.string.network <- function(string.tbl, use.names = 'protein') {
 
   # if use.names is not default, then replace proteins with genes (either ensembl_id or gene_name)
   if (use.names == 'ensembl' || use.names == 'external') {
-    prot.map           <- protein.to.ensembl.gene.names(merged.prot)
+    prot.map           <- protein2EnsemblGeneNames(merged.prot)
     rownames(prot.map) <- prot.map$ensembl_peptide_id
 
     # use external gene names
     if (use.names == 'external') {
-      ext.genes           <- prot.map$ensembl_gene_id %>% unique %>% gene.names
+      ext.genes           <- prot.map$ensembl_gene_id %>% unique %>% geneNames
       rownames(ext.genes) <- ext.genes$ensembl_gene_id
 
       prot.map$ensembl_gene_id <- ext.genes[prot.map$ensembl_gene_id, 'external_gene_name']
