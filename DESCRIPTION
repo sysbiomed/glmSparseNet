@@ -52,7 +52,8 @@ Suggests: testthat,
   pROC,
   VennDiagram,
   BiocStyle,
-  curatedTCGAData
+  curatedTCGAData,
+  TCGAutils
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0
 BugReports: https://www.github.com/sysbiomed/glmSparseNet/issues

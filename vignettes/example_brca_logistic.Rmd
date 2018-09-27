@@ -58,34 +58,15 @@ brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 ```
 
 ```{r data.show, warning=FALSE, error=FALSE}
-xdata.raw <- t(assay(brca[[1]]))
-
-# keep primary solid tumor samples (code 01)
-bcr_sample_barcode <- rownames(xdata.raw)[grepl('TCGA-[0-9A-Z]+-[0-9A-Z]+-01',
-                                     rownames(xdata.raw))]
-class.v <- array(1, length(bcr_sample_barcode))
-
-# keep normal tissues samples (code 11)
-bcr_sample_barcode <- c(bcr_sample_barcode, 
-                        rownames(xdata.raw)[grepl('TCGA[-][0-9A-Z]+[-][0-9A-Z]+[-]11',
-                                                  rownames(xdata.raw))])
-class.v <- c(class.v, array(0, length(bcr_sample_barcode) - length(class.v)))
-
-names(class.v) <- bcr_sample_barcode
-
-# Get survival information
-ydata.raw <- colData(brca) %>% as.data.frame %>% 
-  # Keep only data relative to survival or samples
-  select(patientID)
-
-# Set index as the patientID
-rownames(ydata.raw) <- ydata.raw$patientID
+brca <- TCGAutils::splitAssays(brca, c('01','11'))
+xdata.raw <- t(cbind(assay(brca[[1]]), assay(brca[[2]])))
 
 # Get matches between survival and assay data
-common.codes <- bcr_sample_barcode[strtrim(bcr_sample_barcode, 12) %in% ydata.raw$patientID]
-xdata.raw    <- xdata.raw[common.codes, ]
-class.v      <- class.v[common.codes]
-xdata.raw    <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
+class.v        <- TCGAbiospec(rownames(xdata.raw))$sample_definition %>% factor
+names(class.v) <- rownames(xdata.raw)
+
+# keep features with standard deviation > 0
+xdata.raw <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
 
 set.seed(params$seed)
 small.subset <- c(geneNames(c('ENSG00000110448', 'ENSG00000124449', 'ENSG00000103494', 
@@ -146,28 +127,23 @@ geneNames(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
 ## Accuracy
 
 ```{r accuracy, echo=FALSE}
-resp <- predict(fitted, s = 'lambda.min', newx = xdata, type = 'response')
-flog.info('Misclassified (%d)', sum(abs(ydata - resp) > 0.5))
-flog.info('  * False positive: %d', sum(ydata - resp > 0.5))
-flog.info('  * False negative: %d', sum(ydata - resp < -0.5))
+resp <- predict(fitted, s = 'lambda.min', newx = xdata, type = 'class')
+flog.info('Misclassified (%d)', sum(ydata != resp))
+flog.info('  * False primary solid tumour: %d', sum(resp != ydata & resp == 'Primary Solid Tumor'))
+flog.info('  * False normal              : %d', sum(resp != ydata & resp == 'Solid Tissue Normal'))
 ```
 
 Histogram of predicted response
 
-```{r predict, echo=FALSE}
-qplot(resp, bins = 100)
-```
-
-Prediction vs. Observed
-
-```{r}
-qplot(resp, ydata, color = abs(resp - ydata) < 0.5) + theme(legend.position = 'none')
+```{r predict, echo=FALSE, warning=FALSE}
+response <- predict(fitted, s = 'lambda.min', newx = xdata, type = 'response')
+qplot(response, bins = 100)
 ```
 
 ROC curve
 
 ```{r roc, echo=FALSE}
-roc_obj <- pROC::roc(ydata, as.vector(resp))
+roc_obj <- pROC::roc(ydata, as.vector(response))
 
 data.frame(TPR = roc_obj$sensitivities, FPR = 1 - roc_obj$specificities) %>%
   ggplot() +geom_line(aes(FPR,TPR), color = 2, size = 1, alpha = 0.7)+
