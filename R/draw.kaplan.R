@@ -1,6 +1,6 @@
 #' Separate data in High and Low risk groups (based on Cox model)
 #'
-#' Mega function that draws multiple kaplan meyer survival curves (or just 1)
+#' Draws multiple kaplan meyer survival curves (or just 1) and calculates logrank test
 #'
 #' @param chosen.btas list of testing coefficients to calculate prognostic indexes, for example ``list(Age = some_vector)``
 #' @param xdata n x m matrix with n observations and m variables
@@ -41,6 +41,7 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
     xdata <- as.matrix(xdata)
   }
 
+  # checks if main arguments are correct.
   if (!inherits(chosen.btas, 'list')) {
     stop('chosen.btas argument must be a list or vector. See documentation ?separate2GroupsCox')
   } else if (!inherits(xdata, 'matrix')) {
