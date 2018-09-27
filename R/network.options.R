@@ -73,38 +73,34 @@ network.options.default <- function(method     = 'pearson',
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 20)
 #' glmSparseNet:::calcPenalty(xdata, 'none')
-#' glmSparseNet:::calcPenalty(xdata, 'sparsebn')
-#' glmSparseNet:::calcPenalty(xdata, 'correlation')
 #' glmSparseNet:::calcPenalty(xdata, 'correlation', network.options.default(cutoff = .6))
-#' glmSparseNet:::calcPenalty(xdata, 'covariance')
+#' glmSparseNet:::calcPenalty(xdata, 'correlation')
 #' glmSparseNet:::calcPenalty(xdata, 'covariance', network.options.default(cutoff = .6))
+#' glmSparseNet:::calcPenalty(xdata, 'covariance')
+#' glmSparseNet:::calcPenalty(xdata, 'sparsebn')
 calcPenalty <- function(xdata, penalty.type, network.options = network.options.default()) {
   if (network.options$centrality == 'degree') {
-    if (penalty.type == 'correlation') {
-      penalty.factor <- degreeCor(xdata,
-                                  method              = network.options$method,
+    penalty.factor <- switch (penalty.type,
+      correlation = degreeCor(xdata,
+                                method              = network.options$method,
+                                consider.unweighted = network.options$unweighted,
+                                cutoff              = network.options$cutoff,
+                                #
+                                n.cores = network.options$n.cores),
+      covariance = degreeCov(xdata,
+                               method              = network.options$method,
+                               consider.unweighted = network.options$unweighted,
+                               cutoff              = network.options$cutoff,
+                               #
+                               n.cores = network.options$n.cores),
+      sparsebn = degreeSparsebn(xdata,
                                   consider.unweighted = network.options$unweighted,
                                   cutoff              = network.options$cutoff,
                                   #
-                                  n.cores = network.options$n.cores)
-    } else if (penalty.type == 'covariance') {
-      penalty.factor <- degreeCov(xdata,
-                                  method              = network.options$method,
-                                  consider.unweighted = network.options$unweighted,
-                                  cutoff              = network.options$cutoff,
-                                  #
-                                  n.cores = network.options$n.cores)
-    } else if (penalty.type == 'sparsebn') {
-      penalty.factor <- degreeSparsebn(xdata,
-                                       consider.unweighted = network.options$unweighted,
-                                       cutoff              = network.options$cutoff,
-                                       #
-                                       n.cores = network.options$n.cores)
-    } else if (penalty.type == 'none') {
-      penalty.factor <- rep(1, ncol(xdata))
-    } else {
+                                  n.cores = network.options$n.cores),
+      none = rep(1, ncol(xdata)),
       stop('Unkown network type, see documentation of glmSparseNet')
-    }
+    )
   } else {
     stop(sprintf('Centrality method not recognised: %d', network.options$centrality))
   }
