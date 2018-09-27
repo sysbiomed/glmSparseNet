@@ -5,7 +5,7 @@
 \title{Calculate degree of correlation matrix}
 \usage{
 degreeSparsebn(xdata, type = "continuous", levels = NULL, ivn = NULL,
-  n = NULL, object = NULL, cutoff = 0, consider.unweighted = TRUE,
+  n = NULL, object = NULL, cutoff = 0, consider.unweighted = FALSE,
   n.cores = 1, show.message = FALSE, force.recalc.degree = FALSE,
   force.recalc.network = FALSE, ...)
 }

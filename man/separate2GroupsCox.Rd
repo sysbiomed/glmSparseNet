@@ -35,7 +35,7 @@ object with logrank test and kaplan-meier survival plot
 A list with plot, p-value and kaplan-meier object
 }
 \description{
-Mega function that draws multiple kaplan meyer survival curves (or just 1)
+Draws multiple kaplan meyer survival curves (or just 1) and calculates logrank test
 }
 \examples{
 data('ovarian', package = 'survival')
