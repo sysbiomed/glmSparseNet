@@ -330,53 +330,23 @@ degreeGeneric <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, consi
 #' # generate a random matrix of observations
 #' xdata <- matrix(rnorm(1000), nrow = 20)
 #' degreeSparsebn(xdata)
-setGeneric('degreeSparsebn', function(xdata,
-                                      type   = 'continuous',
-                                      levels = NULL,
-                                      ivn    = NULL,
-                                      n      = NULL,
-                                      object = NULL,
-                                      cutoff = 0,
-                                      consider.unweighted = TRUE,
-                                      n.cores = 1,
-                                      show.message         = FALSE,
-                                      force.recalc.degree  = FALSE,
-                                      force.recalc.network = FALSE, ...) {
-  stop('first argument must be a matrix')
-})
+degreeSparsebn <- function(xdata,
+                           type   = 'continuous',
+                           levels = NULL,
+                           ivn    = NULL,
+                           n      = NULL,
+                           object = NULL,
+                           cutoff = 0,
+                           consider.unweighted = FALSE,
+                           n.cores = 1,
+                           show.message = FALSE,
+                           force.recalc.degree = FALSE,
+                           force.recalc.network = FALSE,
+                           ...) {
+  if (!is(xdata, 'matrix')) {
+    stop('xdata argument must be a matrix object')
+  }
 
-#' Calculate degree of correlation matrix
-#'
-#' @param xdata calculate correlation matrix on each column
-#' @param type either "discrete" or "continuous", see sparsebnUtils::sparsebnData
-#' @param levels (optional) list of levels for each node. see sparsebnUtils::sparsebnData
-#' @param ivn (optional) list of interventions for each observation, see sparsebnUtils::sparsebnData
-#' @param n (optional) number of rows from data matrix to print, see sparsebnUtils::sparsebnData
-#' @param object (optional) an object of type sparsebnData, see sparsebnUtils::sparsebnData
-#' @param cutoff positive value that determines a cutoff value
-#' @param consider.unweighted consider all edges as 1 if they are greater than 0
-#' @param n.cores number of cores to be used
-#' @param force.recalc.degree force recalculation, instead of going to cache
-#' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
-#' @param show.message shows cache operation messages
-#' @param ... extra parameters for sparsebn::estimate.dag
-#'
-#' @return a vector of the degrees
-#'
-#' @export
-setMethod('degreeSparsebn', signature('matrix'), function(xdata,
-                                                          type   = 'continuous',
-                                                          levels = NULL,
-                                                          ivn    = NULL,
-                                                          n      = NULL,
-                                                          object = NULL,
-                                                          cutoff = 0,
-                                                          consider.unweighted = FALSE,
-                                                          n.cores = 1,
-                                                          show.message = FALSE,
-                                                          force.recalc.degree = FALSE,
-                                                          force.recalc.network = FALSE,
-                                                          ...) {
   if (force.recalc.network) {
     force.recalc.degree <- TRUE
   }
@@ -422,4 +392,4 @@ setMethod('degreeSparsebn', signature('matrix'), function(xdata,
 
   val <- Matrix::colSums(choosen.params$coefs) + Matrix::rowSums(choosen.params$coefs)
   return(val)
-})
+}
