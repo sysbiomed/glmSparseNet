@@ -222,9 +222,11 @@ networkWorker <- function(fun, xdata, ix.i, ...) {
 #' @param ... extra parameters for fun
 #'
 #' @return a vector of the degrees
-degreeGeneric <- function(fun, fun.prefix = 'operator', xdata, cutoff = 0, consider.unweighted = FALSE,
-                           chunks = 1000, force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                           n.cores = 1, ...) {
+degreeGeneric <- function(fun = stats::cor, fun.prefix = 'operator', xdata,
+                          cutoff = 0, consider.unweighted = FALSE,
+                          chunks = 1000, force.recalc.degree = FALSE,
+                          force.recalc.network = FALSE,
+                          n.cores = 1, ...) {
 
   # fail safe until windows has parallel computing support for mclapply
   if (.Platform$OS.type == 'windows') {
