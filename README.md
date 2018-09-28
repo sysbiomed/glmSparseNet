@@ -8,7 +8,7 @@ glmSparseNet
     -   [Function definition](#function-definition)
 -   [Example for survival analysis using RNA-seq data](#example-for-survival-analysis-using-rna-seq-data)
 -   [Visualization and Analytical tools](#visualization-and-analytical-tools)
-    -   [Survival curves with `draw.kaplan`](#survival-curves-with-draw.kaplan)
+    -   [Survival curves with `separate2groupsCox`](#survival-curves-with-separate2groupscox)
     -   [Heatmap with results retrived from the Cancer Hallmarks Analytics Tool *(CHAT)*](#heatmap-with-results-retrived-from-the-cancer-hallmarks-analytics-tool-chat)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -42,19 +42,9 @@ Instalation
 Bioconductor is necessary for the installation of this package.
 
 ``` r
-source("https://bioconductor.org/biocLite.R")
-
-biocLite('sysbiomed/loose.rock')
-biocLite('sysbiomed/glmSparseNet')
-
-#
-# Note in case of failure:
-
-# if the commands above fail, the problem might 
-#  be of a missing package named remotes
-#  try installing it and running again commands above
-
-# biocLite('remotes')
+if (!require("BiocManager"))
+    install.packages("BiocManager")
+BiocManager::install("glmSparseNet")
 ```
 
 Details
@@ -152,7 +142,7 @@ fit3 <- cv.glmSparseNet(xdata, ydata, family = 'cox',
                         nlambda = 1000,
                         network.options = network.options.default(cutoff = .6, 
                                                                   min.degree = 0.2,
-                                                                  trans.fun = hub.heuristic))
+                                                                  trans.fun = hubHeuristic))
 plot(fit3)
 ```
 
@@ -163,7 +153,7 @@ plot(fit3)
 Visualization and Analytical tools
 ----------------------------------
 
-### Survival curves with `draw.kaplan`
+### Survival curves with `separate2groupsCox`
 
 This function generates Kaplan-Meier survival model based on the estimated coefficients of the Cox model. It creates two groups based on the relative risk and displays both survival curves *(high vs. low-risk patients, as defined by the median)* and the corresponding results of log-rank tests.
 
@@ -180,11 +170,11 @@ best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
 Kaplan-Meier plot
 
 ``` r
-draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, ylim = c(0,1))
+separate2GroupsCox(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, ylim = c(0,1))
 ```
 
     ## $pvalue
-    ## [1] 1.733575e-08
+    ## [1] 2.728306e-07
     ## 
     ## $plot
 
@@ -195,8 +185,8 @@ draw.kaplan(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, yli
     ## Call: survfit(formula = survival::Surv(time, status) ~ group, data = prognostic.index.df)
     ## 
     ##            n events median 0.95LCL 0.95UCL
-    ## Low risk  40      3     NA      NA      NA
-    ## High risk 39     25   1105     562    2105
+    ## Low risk  40      5     NA      NA      NA
+    ## High risk 39     23   1105     579      NA
 
 ### Heatmap with results retrived from the Cancer Hallmarks Analytics Tool *(CHAT)*
 
