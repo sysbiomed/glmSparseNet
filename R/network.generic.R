@@ -14,18 +14,53 @@
 #'  * matrix representing the network
 #'  * vector with already calculated penalty weights (can also be used directly with glmnet)
 #'
-setGeneric('glmSparseNetPrivate', function(fun, xdata, ydata, network, network.options = network.options.default(), ...) {
-  stop('wrong arguments, see help for glmSparseNet')
-})
+glmSparseNetPrivate <- function(fun, xdata, ydata, network,
+                                experiment.name = NULL,
+                                network.options = network.options.default(),
+                                ...) {
+  #
+  # Sequential check of xdata argument
+  #   1. Checks if xdata is MultiAssayExperiment, if it is then transforms xdata in SummarizedExperiment
+  #   2. Checks if xdata is SummarizedExperiment and extract data to Matrix form
+  #   3. Checks if xdata is matrix, if it is transform to Matrix
+  #  note: this needs to be sequential instead of if () else (), as one transformation will pipe to another
+  if (inherits(xdata, 'MultiAssayExperiment')) {
+    if (is.null(experiment.name)) {
+      stop('experiment.name argument must be passed, see documentation.')
+    }
 
+    # filter the MultiAssayExperiment keeping only individuals with data in specific experiment
+    xdata <- reduce.by.experiment(xdata, experiment.name)
 
-#' Calculate GLM model with network-based regularization
-#'
-#' @inheritParams glmSparseNetPrivate
-#'
-#' @return an object just as glmnet
-#'
-setMethod('glmSparseNetPrivate', signature(xdata = 'matrix'), function(fun, xdata, ydata, network, network.options = network.options.default(), ...) {
+    # stop if output xdata has no rows (should not happen)
+    if( nrow(xdata@colData) == 0) {
+      stop('Experiment has no observations or the MultiAssayExperiment object is corrupt.')
+    }
+
+    # if ydata has rownames then it uses it to match with valid experiences
+    #  this is done to avoid missorted objects
+    if (is.matrix(ydata) || is.data.frame(ydata) || inherits(ydata, 'DataFrame')) {
+      if (!is.null(rownames(ydata))) {
+        ydata <- as.matrix(ydata[rownames(xdata@colData),])
+      }
+    } else if (is.array(ydata) && !is.null(names(ydata))) {
+      ydata <- ydata[rownames(xdata@colData)]
+    }
+    xdata <- xdata[[experiment.name]]
+  }
+
+  if (inherits(xdata, 'SummarizedExperiment')) {
+    xdata <- Matrix::as.matrix(t(SummarizedExperiment::assay(xdata)))
+  }
+
+  if (inherits(xdata, 'matrix')) {
+    xdata <- Matrix::as.matrix(xdata)
+  }
+
+  if (!inherits(xdata, 'Matrix')) {
+    stop('Check arguments for xdata, it must be a matrix, SummarizedExperiment of MultiAssayExperiment (this last one with experiment.name argument defined)')
+  }
+
   if (is.character(network)) {
     penalty.factor <- calcPenalty(xdata, network, network.options)
   } else if (is.matrix(network) || inherits(network, 'Matrix')) {
@@ -51,48 +86,4 @@ setMethod('glmSparseNetPrivate', signature(xdata = 'matrix'), function(fun, xdat
   obj <- fun(xdata, ydata, penalty.factor = penalty.factor, ...)
   obj$penalty.factor = penalty.factor
   return(obj)
-})
-
-#' Calculate GLM model with network-based regularization
-#'
-#' @inheritParams glmSparseNetPrivate
-#' @param experiment.name name of experiment to use in MultiAssayExperiment object
-#'
-#' @return an object just as glmnet
-setMethod('glmSparseNetPrivate', signature(xdata = 'MultiAssayExperiment'), function(fun, xdata, ydata, network,
-                                                                                        experiment.name = NULL,
-                                                                                        network.options = network.options.default(), ...) {
-  if (is.null(experiment.name)) {
-    stop('Experiment name must be passed, see documentation.')
-  }
-
-  # filter the MultiAssayExperiment keeping only individuals with data in specific experiment
-  xdata <- reduce.by.experiment(xdata, experiment.name)
-
-  # stop if output xdata has no rows (should not happen)
-  if( nrow(xdata@colData) == 0) {
-    stop('Experiment has no observations or the MultiAssayExperiment object is corrupt.')
-  }
-
-  # if ydata has rownames then it uses it to match with valid experiences
-  #  this is done to avoid missorted objects
-  if (is.matrix(ydata) || is.data.frame(ydata) || inherits(ydata, 'DataFrame')) {
-    if (!is.null(rownames(ydata))) {
-      ydata <- as.matrix(ydata[rownames(xdata@colData),])
-    }
-  } else if (is.array(ydata) && !is.null(names(ydata))) {
-    ydata <- ydata[rownames(xdata@colData)]
-  }
-  return(glmSparseNetPrivate(fun, xdata[[experiment.name]], ydata, network, network.options, ...))
-})
-
-
-#' Calculate GLM model with network-based regularization
-#'
-#' @inheritParams glmSparseNetPrivate
-#'
-#' @return an object just as glmnet
-setMethod('glmSparseNetPrivate', signature(xdata = 'SummarizedExperiment'), function(fun, xdata, ydata, network,
-                                                                                      network.options = network.options.default(), ...) {
-  return(glmSparseNetPrivate(fun, t(MultiAssayExperiment::assay(xdata)), ydata, network, network.options, ...))
-})
+}

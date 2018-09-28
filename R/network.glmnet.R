@@ -10,6 +10,7 @@
 #' @param ydata response data compatible with glmnet
 #' @param network type of network, see below
 #' @param network.options options to calculate network
+#' @param experiment.name name of experiment to use as input in MultiAssayExperiment object (only if xdata is an object of this class)
 #' @param ... parameters that glmnet accepts
 #'
 #' @return an object just as glmnet
@@ -44,44 +45,12 @@
 #'                family          = 'cox',
 #'                network         = 'correlation',
 #'                experiment.name = 'RNASeq2GeneNorm')
-setGeneric('glmSparseNet', function(xdata, ydata, network, network.options = network.options.default(), ...) {
-  stop('wrong arguments, see help for glmSparseNet')
-})
-
-#' Calculate GLM model with network-based regularization
-#'
-#' @inheritParams glmSparseNet
-#' @inherit glmSparseNet return details examples
-#' @export
-setMethod('glmSparseNet', signature(xdata = 'matrix'), function(xdata, ydata, network,
-                                                                  network.options = network.options.default(), ...) {
-  return(glmSparseNetPrivate(glmnet::glmnet, xdata, ydata, network = network, network.options = network.options, ...))
-})
-
-#' Calculate GLM model with network-based regularization
-#'
-#' @inheritParams glmSparseNet
-#' @param experiment.name name of experiment to use as input in MultiAssayExperiment object
-#'
-#' @inherit glmSparseNet return details examples
-#' @export
-setMethod('glmSparseNet', signature(xdata = 'MultiAssayExperiment'), function(xdata, ydata, network,
-                                                                                experiment.name = NULL,
-                                                                                network.options = network.options.default(), ...) {
-  return(glmSparseNetPrivate(glmnet::glmnet, xdata, ydata, network, experiment.name = experiment.name, network.options = network.options, ...))
-})
-
-
-#' Calculate GLM model with network-based regularization
-#'
-#' @inheritParams glmSparseNet
-#'
-#' @inherit glmSparseNet return details
-#' @export
-setMethod('glmSparseNet', signature(xdata = 'SummarizedExperiment'), function(xdata, ydata, network,
-                                                                                network.options = network.options.default(), ...) {
-  return(glmSparseNetPrivate(glmnet::glmnet, t(MultiAssayExperiment::assay(xdata)), ydata, network, network.options = network.options, ...))
-})
-
-
-
+glmSparseNet <- function(xdata, ydata, network,
+                         network.options = network.options.default(),
+                         experiment.name = NULL, ...) {
+  glmSparseNetPrivate(glmnet::glmnet, xdata, ydata,
+                      network = network,
+                      network.options = network.options,
+                      experiment.name = experiment.name,
+                      ...)
+}

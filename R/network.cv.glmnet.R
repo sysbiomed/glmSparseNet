@@ -10,6 +10,7 @@
 #' @param ydata response data compatible with glmnet
 #' @param network type of network, see below
 #' @param network.options options to calculate network
+#' @param experiment.name Name of experiment in MultiAssayExperiment
 #' @param ... parameters that cv.glmnet accepts
 #'
 #' @return an object just as cv.glmnet
@@ -44,45 +45,14 @@
 #'                   family          = 'cox',
 #'                   network         = 'correlation',
 #'                   experiment.name = 'RNASeq2GeneNorm')
-setGeneric('cv.glmSparseNet', function(xdata, ydata, network, network.options = network.options.default(), ...) {
-  stop('wrong arguments, see help for cv.glmSparseNet and cv.glmnet')
-})
-
-
-#' Calculate GLM model with network-based regularization
-#'
-#' @inheritParams cv.glmSparseNet
-#' @inherit cv.glmSparseNet return examples
-#' @export
-#'
-setMethod('cv.glmSparseNet', signature(xdata = 'matrix'), function(xdata, ydata, network,
-                                                                     network.options = network.options.default(), ...) {
-  return(glmSparseNetPrivate(glmnet::cv.glmnet, xdata, ydata, network, network.options = network.options, ...))
-})
-
-#' Calculate GLM model with network-based regularization
-#'
-#' @inheritParams cv.glmSparseNet
-#' @param experiment.name Name of experiment in MultiAssayExperiment
-#'
-#' @inherit cv.glmSparseNet return examples
-#' @export
-setMethod('cv.glmSparseNet', signature(xdata = 'MultiAssayExperiment'), function(xdata, ydata, network,
-                                                                                   experiment.name = NULL,
-                                                                                   network.options = network.options.default(), ...) {
-  return(glmSparseNetPrivate(glmnet::cv.glmnet, xdata, ydata, network, experiment.name = experiment.name , network.options = network.options, ...))
-})
-
-
-#' Calculate GLM model with network-based regularization
-#'
-#' @inheritParams cv.glmSparseNet
-#' @inherit cv.glmSparseNet return examples
-#' @export
-setMethod('cv.glmSparseNet', signature(xdata = 'SummarizedExperiment'), function(xdata, ydata, network,
-                                                                                   network.options = network.options.default(), ...) {
-  return(glmSparseNetPrivate(glmnet::cv.glmnet, xdata, ydata, network, network.options = network.options, ...))
-})
+cv.glmSparseNet <- function(xdata, ydata, network,
+                            network.options = network.options.default(),
+                            experiment.name = NULL,
+                            ...) {
+  return(glmSparseNetPrivate(glmnet::cv.glmnet, xdata, ydata, network,
+                             experiment.name = experiment.name ,
+                             network.options = network.options, ...))
+}
 
 
 
