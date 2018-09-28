@@ -1,7 +1,8 @@
 #' Calculates the correlation network
 #'
 #' @param xdata base data to calculate network
-#' @param build.output if output returns a 'matrix', 'vector' of the upper triu without the diagonal or NULL with any other argument
+#' @param build.output if output returns a 'matrix', 'vector' of the upper triu
+#' without the diagonal or NULL with any other argument
 #' @param n.cores number of cores to be used
 #' @param force.recalc.network force recalculation, instead of going to cache
 #' @param show.message shows cache operation messages
@@ -19,7 +20,8 @@ networkCorParallel <- function(xdata,
                                  n.cores       = 1,
                                  force.recalc.network  = FALSE,
                                  show.message  = FALSE, ...) {
-  networkGenericParallel(stats::cor, 'correlation', xdata, build.output = build.output, n.cores = n.cores,
+  networkGenericParallel(stats::cor, 'correlation', xdata,
+                         build.output = build.output, n.cores = n.cores,
                          force.recalc.network = force.recalc.network,
                          show.message = show.message, ...)
 }
@@ -27,7 +29,8 @@ networkCorParallel <- function(xdata,
 #' Calculates the covariance network
 #'
 #' @param xdata base data to calculate network
-#' @param build.output if output returns a 'matrix', 'vector' of the upper triu without the diagonal or NULL with any other argument
+#' @param build.output if output returns a 'matrix', 'vector' of the upper triu
+#' without the diagonal or NULL with any other argument
 #' @param n.cores number of cores to be used
 #' @param force.recalc.network force recalculation, instead of going to cache
 #' @param show.message shows cache operation messages
@@ -45,7 +48,8 @@ networkCovParallel <- function(xdata,
                                  n.cores       = 1,
                                  force.recalc.network  = FALSE,
                                  show.message  = FALSE, ...) {
-  networkGenericParallel(stats::cov, 'covariance', xdata, build.output = build.output, n.cores = n.cores,
+  networkGenericParallel(stats::cov, 'covariance', xdata,
+                         build.output = build.output, n.cores = n.cores,
                          force.recalc.network = force.recalc.network,
                          show.message = show.message, ...)
 }
@@ -53,9 +57,11 @@ networkCovParallel <- function(xdata,
 #' Calculate the upper triu of the matrix
 #'
 #' @param fun function that will calculate the edge weight between 2 nodes
-#' @param fun.prefix used to store low-level information on network as it can become to large to be stored in memory
+#' @param fun.prefix used to store low-level information on network as it can
+#' become to large to be stored in memory
 #' @param xdata base data to calculate network
-#' @param build.output if output returns a 'matrix', 'vector' of the upper triu without the diagonal or NULL with any other argument
+#' @param build.output if output returns a 'matrix', 'vector' of the upper triu
+#' without the diagonal or NULL with any other argument
 #' @param n.cores number of cores to be used
 #' @param force.recalc.network force recalculation, instead of going to cache
 #' @param show.message shows cache operation messages
@@ -78,7 +84,8 @@ networkGenericParallel <- function(fun, fun.prefix,
   xdata.sha256 <- loose.rock::digest.cache(xdata)
   #
   fun.aux <- function(xdata, ...) {
-    result <- parallel::mclapply( as.numeric(seq_len(ncol(xdata)-1)), function(ix.i) {
+    result <- parallel::mclapply(as.numeric(seq_len(ncol(xdata)-1)),
+                                 function(ix.i) {
       tryCatch({
         result <- loose.rock::run.cache(networkWorker, fun,
                                         xdata, ix.i,
@@ -114,10 +121,15 @@ networkGenericParallel <- function(fun, fun.prefix,
     sparse.data <- data.frame(i = c(), j = c(), p = c())
     for (ix in rev(seq_along(result))) {
       line <- result[[ix]]
-      sparse.data <- rbind(sparse.data, data.frame(i = array(ix, length(line)), j = ix + seq_along(line), p = as.vector(line)))
+      sparse.data <- rbind(sparse.data, data.frame(i = array(ix, length(line)),
+                                                   j = ix + seq_along(line),
+                                                   p = as.vector(line)))
       result[[ix]] <- NULL
     }
-    return(Matrix::sparseMatrix(i = sparse.data$i, j = sparse.data$j, x = sparse.data$p, dims = c(ncol(xdata), ncol(xdata)), symmetric = TRUE))
+    return(Matrix::sparseMatrix(i = sparse.data$i, j = sparse.data$j,
+                                x = sparse.data$p, dims = c(ncol(xdata),
+                                                            ncol(xdata)),
+                                symmetric = TRUE))
   } else {
     return(NULL)
   }
@@ -129,8 +141,10 @@ networkGenericParallel <- function(fun, fun.prefix,
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
 #' @param n.cores number of cores to be used
-#' @param force.recalc.degree force recalculation of penalty weights (but not the network), instead of going to cache
-#' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
+#' @param force.recalc.degree force recalculation of penalty weights (but not
+#' the network), instead of going to cache
+#' @param force.recalc.network force recalculation of network and penalty
+#' weights, instead of going to cache
 #' @param ... extra parameters for cor function
 #'
 #' @return a vector of the degrees
@@ -146,8 +160,10 @@ degreeCor <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
                       force.recalc.degree = FALSE, force.recalc.network = FALSE,
                       n.cores = 1, ...) {
 
-  return(degreeGeneric(stats::cor, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
-                       force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
+  return(degreeGeneric(stats::cor, 'correlation', xdata, cutoff = cutoff,
+                       consider.unweighted = consider.unweighted,
+                       force.recalc.degree = force.recalc.degree,
+                       force.recalc.network = force.recalc.network,
                        n.cores = n.cores, ...))
 }
 
@@ -157,8 +173,10 @@ degreeCor <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
 #' @param n.cores number of cores to be used
-#' @param force.recalc.degree force recalculation of penalty weights (but not the network), instead of going to cache
-#' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
+#' @param force.recalc.degree force recalculation of penalty weights (but not
+#' the network), instead of going to cache
+#' @param force.recalc.network force recalculation of network and penalty
+#' weights, instead of going to cache
 #' @param ... extra parameters for cov function
 #'
 #' @return a vector of the degrees
@@ -174,8 +192,10 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
                       force.recalc.degree = FALSE, force.recalc.network = FALSE,
                       n.cores = 1, ...) {
 
-  return(degreeGeneric(stats::cov, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
-                       force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
+  return(degreeGeneric(stats::cov, 'correlation', xdata, cutoff = cutoff,
+                       consider.unweighted = consider.unweighted,
+                       force.recalc.degree = force.recalc.degree,
+                       force.recalc.network = force.recalc.network,
                        n.cores = n.cores, ...))
 }
 
@@ -194,25 +214,30 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
 networkWorker <- function(fun, xdata, ix.i, ...) {
   n.col <- ncol(xdata)
   xdata.i <- xdata[,ix.i]
-  result  <- fun(as.vector(xdata[,ix.i]), base::as.matrix(xdata[,seq(ix.i+1, ncol(xdata))]), ...)
+  result  <- fun(as.vector(xdata[,ix.i]),
+                 base::as.matrix(xdata[,seq(ix.i+1, ncol(xdata))]), ...)
   result[is.na(result)] <- 0
   return(result)
 }
 
 #' Generic function to calculate degree based on data
 #'
-#' The assumption to use this function is that the network represented by a matrix is symetric and without
+#' The assumption to use this function is that the network represented by a
+#' matrix is symetric and without
 #' any connection the node and itself.
 #'
 #' @param fun function that will calculate the edge weight between 2 nodes
-#' @param fun.prefix used to store low-level information on network as it can become to large to be stored in memory
+#' @param fun.prefix used to store low-level information on network as it can
+#' become to large to be stored in memory
 #' @param xdata calculate correlation matrix on each column
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
 #' @param chunks calculate function at batches of this value (default is 1000)
 #' @param n.cores number of cores to be used
-#' @param force.recalc.degree force recalculation of penalty weights (but not the network), instead of going to cache
-#' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
+#' @param force.recalc.degree force recalculation of penalty weights (but not
+#' the network), instead of going to cache
+#' @param force.recalc.network force recalculation of network and penalty
+#' weights, instead of going to cache
 #' @param ... extra parameters for fun
 #'
 #' @return a vector of the degrees
@@ -239,11 +264,12 @@ degreeGeneric <- function(fun = stats::cor, fun.prefix = 'operator', xdata,
     stop('xdata argument must be a matrix object')
   }
 
-  chunk.function <- function(xdata, max.ix, ix.outer, n.cores, cutoff, consider.unweighted, ...) {
+  chunk.function <- function(xdata, max.ix, ix.outer, n.cores, cutoff,
+                             consider.unweighted, ...) {
     res.chunks <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
       line <- networkWorker(fun, xdata, ix.i, ...)
       #
-      line[is.na(line)]   <- 0 # failsafe in case there was a failure in cov (i.e. sd = 0)
+      line[is.na(line)]   <- 0 # failsafe (for example, when sd = 0)
       line                <- abs(line)
       line[line < cutoff] <- 0
       if (consider.unweighted) { line[line != 0] <- 1 }
@@ -259,7 +285,9 @@ degreeGeneric <- function(fun = stats::cor, fun.prefix = 'operator', xdata,
     degree <- array(0, ncol(xdata))
     for (ix.outer in seq(1, ncol(xdata) - 1, chunks)) {
       max.ix <- min(ix.outer + chunks - 1, ncol(xdata) - 1)
-      res.chunks <- loose.rock::run.cache(chunk.function, xdata, max.ix, ix.outer, n.cores, cutoff, consider.unweighted, ...,
+      res.chunks <- loose.rock::run.cache(chunk.function, xdata, max.ix,
+                                          ix.outer, n.cores, cutoff,
+                                          consider.unweighted, ...,
                                           cache.digest = list(xdata.sha256),
                                           cache.prefix = fun.prefix,
                                           show.message = FALSE,
@@ -285,16 +313,22 @@ degreeGeneric <- function(fun = stats::cor, fun.prefix = 'operator', xdata,
 #' Calculate degree of correlation matrix
 #'
 #' @param xdata calculate correlation matrix on each column
-#' @param type either "discrete" or "continuous", see sparsebnUtils::sparsebnData
-#' @param levels (optional) list of levels for each node. see sparsebnUtils::sparsebnData
-#' @param ivn (optional) list of interventions for each observation, see sparsebnUtils::sparsebnData
-#' @param n (optional) number of rows from data matrix to print, see sparsebnUtils::sparsebnData
-#' @param object (optional) an object of type sparsebnData, see sparsebnUtils::sparsebnData
+#' @param type either "discrete" or "continuous",
+#' see sparsebnUtils::sparsebnData
+#' @param levels (optional) list of levels for each node.
+#' see sparsebnUtils::sparsebnData
+#' @param ivn (optional) list of interventions for each observation,
+#' see sparsebnUtils::sparsebnData
+#' @param n (optional) number of rows from data matrix to print,
+#' see sparsebnUtils::sparsebnData
+#' @param object (optional) an object of type sparsebnData,
+#' see sparsebnUtils::sparsebnData
 #' @param cutoff positive value that determines a cutoff value
 #' @param consider.unweighted consider all edges as 1 if they are greater than 0
 #' @param n.cores number of cores to be used
 #' @param force.recalc.degree force recalculation, instead of going to cache
-#' @param force.recalc.network force recalculation of network and penalty weights, instead of going to cache
+#' @param force.recalc.network force recalculation of network and penalty
+#' weights, instead of going to cache
 #' @param show.message shows cache operation messages
 #' @param ... parameters for sparsebn::estimate.dag
 #'
@@ -355,7 +389,8 @@ degreeSparsebn <- function(xdata,
   choosen.params <- dag.params[[length(dag.params)]]
   #
   if (any(is.na(choosen.params$coefs@x))) {
-    warning('Some coefficients when estimating parameters are NA, they have been converted to 0')
+    warning(paste0('When estimating parameters, coefficients that are NA are ',
+                   'converted to 0'))
     choosen.params$coefs@x[is.na(choosen.params$coefs@x)] <- 0
   }
   x.vec                          <- abs(choosen.params$coefs@x)
@@ -366,6 +401,7 @@ degreeSparsebn <- function(xdata,
     choosen.params$coefs@x[choosen.params$coefs@x > 0] <- 1
   }
 
-  val <- Matrix::colSums(choosen.params$coefs) + Matrix::rowSums(choosen.params$coefs)
+  val <- Matrix::colSums(choosen.params$coefs) +
+    Matrix::rowSums(choosen.params$coefs)
   return(val)
 }

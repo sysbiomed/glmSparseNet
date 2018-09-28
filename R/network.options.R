@@ -11,10 +11,13 @@
 #' reduce.by.experiment(multi.assay, 'RNASeq2GeneNorm')
 reduce.by.experiment <- function(multi.assay, experiment.name) {
   # Get all valid individuals from experiment (lookup the mapping)
-  valid.ydata.id <- multi.assay@sampleMap[multi.assay@sampleMap$assay == experiment.name, 'primary']
+  primary.ix <- multi.assay@sampleMap$assay == experiment.name
+  valid.ydata.id <- multi.assay@sampleMap[primary.ix, 'primary']
 
-  # filter the MultiAssayExperiment keeping only individuals with data in specific experiment
-  suppressMessages(new.multi.assay <- multi.assay[,rownames(multi.assay@colData) %in% valid.ydata.id])
+  # filter the MultiAssayExperiment keeping only individuals with data in
+  #  specific experiment
+  valid.rows <- rownames(multi.assay@colData) %in% valid.ydata.id
+  suppressMessages(new.multi.assay <- multi.assay[,valid.rows])
 
   return(new.multi.assay)
 }
@@ -32,9 +35,9 @@ reduce.by.experiment <- function(multi.assay, experiment.name) {
 #' @param centrality centrality measure to use, currently only supports degree
 #' @param n.cores number of cores to use, default to 1
 #'
-#' The trans.fun argument takes a function definition that will apply a transformation
-#' to the penalty vector calculated from the degree. This transformation allows to
-#' change how the penalty is applied.
+#' The trans.fun argument takes a function definition that will apply a
+#' transformation to the penalty vector calculated from the degree. This
+#' transformation allows to change how the penalty is applied.
 #'
 #' @seealso glmOrphan glmDegree
 #'
@@ -73,36 +76,40 @@ network.options.default <- function(method     = 'pearson',
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 20)
 #' glmSparseNet:::calcPenalty(xdata, 'none')
-#' glmSparseNet:::calcPenalty(xdata, 'correlation', network.options.default(cutoff = .6))
+#' glmSparseNet:::calcPenalty(xdata, 'correlation',
+#'                            network.options.default(cutoff = .6))
 #' glmSparseNet:::calcPenalty(xdata, 'correlation')
-#' glmSparseNet:::calcPenalty(xdata, 'covariance', network.options.default(cutoff = .6))
+#' glmSparseNet:::calcPenalty(xdata, 'covariance',
+#'                            network.options.default(cutoff = .6))
 #' glmSparseNet:::calcPenalty(xdata, 'covariance')
 #' glmSparseNet:::calcPenalty(xdata, 'sparsebn')
-calcPenalty <- function(xdata, penalty.type, network.options = network.options.default()) {
+calcPenalty <- function(xdata, penalty.type,
+                        network.options = network.options.default()) {
   if (network.options$centrality == 'degree') {
     penalty.factor <- switch (penalty.type,
       correlation = degreeCor(xdata,
-                                method              = network.options$method,
-                                consider.unweighted = network.options$unweighted,
+                              method              = network.options$method,
+                              consider.unweighted = network.options$unweighted,
+                              cutoff              = network.options$cutoff,
+                              #
+                              n.cores = network.options$n.cores),
+      covariance = degreeCov(xdata,
+                             method              = network.options$method,
+                             consider.unweighted = network.options$unweighted,
+                             cutoff              = network.options$cutoff,
+                             #
+                             n.cores = network.options$n.cores),
+      sparsebn = degreeSparsebn(xdata,
+                               consider.unweighted = network.options$unweighted,
                                 cutoff              = network.options$cutoff,
                                 #
                                 n.cores = network.options$n.cores),
-      covariance = degreeCov(xdata,
-                               method              = network.options$method,
-                               consider.unweighted = network.options$unweighted,
-                               cutoff              = network.options$cutoff,
-                               #
-                               n.cores = network.options$n.cores),
-      sparsebn = degreeSparsebn(xdata,
-                                  consider.unweighted = network.options$unweighted,
-                                  cutoff              = network.options$cutoff,
-                                  #
-                                  n.cores = network.options$n.cores),
       none = rep(1, ncol(xdata)),
       stop('Unkown network type, see documentation of glmSparseNet')
     )
   } else {
-    stop(sprintf('Centrality method not recognised: %d', network.options$centrality))
+    stop(sprintf('Centrality method not recognised: %d',
+                 network.options$centrality))
   }
   return(network.options$trans.fun(penalty.factor))
 }
@@ -140,9 +147,12 @@ orphan.heuristic <- function(x) {
 #' Heuristic function to use in high dimensions
 #'
 #' @param x vector of values to scale
-#' @param sub.exp10 value to subtract to base 10 exponential, i.e. for `10^0 - sub.exp10 = 1 - sub.exp10`
-#' @param exp.mult parameter to multiply exponential, i.e. to have a negative exponential or positive
-#' @param sub.exp value to subtract for exponentional, i.e. if x = 0, `exp(0) - sub.exp = 1 - sub.exp`
+#' @param sub.exp10 value to subtract to base 10 exponential, for example:
+#' `10^0 - sub.exp10 = 1 - sub.exp10`
+#' @param exp.mult parameter to multiply exponential, i.e. to have a negative
+#' exponential or positive
+#' @param sub.exp value to subtract for exponentional, for example if x = 0,
+#' `exp(0) - sub.exp = 1 - sub.exp`
 #'
 #' @return a vector of scaled values
 #' @export

@@ -4,7 +4,8 @@
 #' @param score_threshold remove scores below threshold
 #' @param remove.text remove text mining-based scores
 #'
-#' @return a data.frame with rows representing an interaction between two proteins, and columns
+#' @return a data.frame with rows representing an interaction between two
+#' proteins, and columns
 #' the count of scores above the given score_threshold
 #'
 #' @export
@@ -12,7 +13,8 @@
 #' \dontrun{
 #'     stringDBhomoSapiens(score_threshold = 800)
 #' }
-stringDBhomoSapiens <- function(version = '10', score_threshold = 0, remove.text = TRUE) {
+stringDBhomoSapiens <- function(version = '10', score_threshold = 0,
+                                remove.text = TRUE) {
 
   . <- NULL
 
@@ -29,7 +31,8 @@ stringDBhomoSapiens <- function(version = '10', score_threshold = 0, remove.text
   tp53 <- string_db$mp( "tp53" )
 
   # get all interactions
-  all.interactions <- string_db$get_interactions(string_db$proteins$protein_external_id)
+  all.interactions <- string_db$proteins$protein_external_id %>%
+    string_db$get_interactions()
 
   # remove text.based columns
   if (remove.text) {
@@ -106,14 +109,18 @@ stringDBhomoSapiens <- function(version = '10', score_threshold = 0, remove.text
 
 #' Build gene network from peptide ids
 #'
-#' This can reduce the dimension of the original network, as there may not be a mapping
+#' This can reduce the dimension of the original network, as there may not be a
+#' mapping
 #' between peptide and gene id
 #'
-#' @param string.tbl matrix with colnames and rownames as ensembl peptide id (same order)
-#' @param use.names default is to use protein names ('protein'), other options are 'ensembl' for ensembl
+#' @param string.tbl matrix with colnames and rownames as ensembl peptide id
+#' (same order)
+#' @param use.names default is to use protein names ('protein'), other options
+#' are 'ensembl' for ensembl
 #' gene id or 'external' for external gene names
 #'
-#' @return a new matrix with gene ids instead of peptide ids. The size of matrix can be different as
+#' @return a new matrix with gene ids instead of peptide ids. The size of matrix
+#'  can be different as
 #' there may not be a mapping or a peptide mapping can have multiple genes.
 #' @export
 #' @seealso stringDBhomoSapiens
@@ -132,7 +139,8 @@ buildStringNetwork <- function(string.tbl, use.names = 'protein') {
   # get sorted list of proteins
   merged.prot <- sort(unique(c(string.tbl$from, string.tbl$to)))
 
-  # if use.names is not default, then replace proteins with genes (either ensembl_id or gene_name)
+  # if use.names is not default, then replace proteins with genes (either
+  #   ensembl_id or gene_name)
   if (use.names == 'ensembl' || use.names == 'external') {
     prot.map           <- protein2EnsemblGeneNames(merged.prot)
     rownames(prot.map) <- prot.map$ensembl_peptide_id
@@ -142,13 +150,14 @@ buildStringNetwork <- function(string.tbl, use.names = 'protein') {
       ext.genes           <- prot.map$ensembl_gene_id %>% unique %>% geneNames
       rownames(ext.genes) <- ext.genes$ensembl_gene_id
 
-      prot.map$ensembl_gene_id <- ext.genes[prot.map$ensembl_gene_id, 'external_gene_name']
+      prot.map$ensembl_gene_id <- ext.genes[prot.map$ensembl_gene_id,
+                                            'external_gene_name']
     }
 
     # keep only proteins that have mapping to gene
     new.string <- string.tbl %>%
-      dplyr::filter(rlang::UQ(as.name('from')) %in% prot.map$ensembl_peptide_id &
-                      rlang::UQ(as.name('to')) %in% prot.map$ensembl_peptide_id)
+     dplyr::filter(rlang::UQ(as.name('from')) %in% prot.map$ensembl_peptide_id &
+                   rlang::UQ(as.name('to')) %in% prot.map$ensembl_peptide_id)
 
     # replace protein with genes
     new.string$from <- as.vector(prot.map[new.string$from,'ensembl_gene_id'])

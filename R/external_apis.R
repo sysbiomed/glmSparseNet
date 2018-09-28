@@ -20,8 +20,10 @@ geneNames <- function(ensembl.genes) {
                                   'hsapiens_gene_ensembl',
                                   cache.prefix = 'biomart',
                                   show.message = FALSE)
-    results <- biomaRt::getBM(attributes = c("external_gene_name", "ensembl_gene_id"),
-                              filters = "ensembl_gene_id", values = ensembl.genes,
+    results <- biomaRt::getBM(attributes = c("external_gene_name",
+                                             "ensembl_gene_id"),
+                              filters = "ensembl_gene_id",
+                              values = ensembl.genes,
                               mart = mart)
 
     #
@@ -38,7 +40,9 @@ geneNames <- function(ensembl.genes) {
   }, error = function(msg) {
     warning(sprintf('Error when finding gene names:\n\t%s', msg))
   })
-  return(data.frame(ensembl_gene_id = ensembl.genes, external_gene_name = ensembl.genes, stringsAsFactors = FALSE))
+  return(data.frame(ensembl_gene_id = ensembl.genes,
+                    external_gene_name = ensembl.genes,
+                    stringsAsFactors = FALSE))
 }
 
 #' Retrieve ensembl gene names from biomaRt
@@ -63,7 +67,8 @@ ensemblGeneNames <- function(gene.id) {
                                   'hsapiens_gene_ensembl',
                                   cache.prefix = 'biomart',
                                   show.message = FALSE)
-    results <- biomaRt::getBM(attributes = c("external_gene_name", "ensembl_gene_id"),
+    results <- biomaRt::getBM(attributes = c("external_gene_name",
+                                             "ensembl_gene_id"),
                               filters = "external_gene_name", values = gene.id,
                               mart = mart)
 
@@ -81,7 +86,8 @@ ensemblGeneNames <- function(gene.id) {
   }, error = function(msg) {
     warning(sprintf('Error when finding gene names:\n\t%s', msg))
   })
-  return(data.frame(ensembl_gene_id = gene.id, external_gene_name = gene.id, stringsAsFactors = FALSE))
+  return(data.frame(ensembl_gene_id = gene.id, external_gene_name = gene.id,
+                    stringsAsFactors = FALSE))
 }
 
 #' Retrieve hallmarks of cancer count for genes
@@ -108,10 +114,14 @@ ensemblGeneNames <- function(gene.id) {
 #' @examples
 #' hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
 #' # hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
-hallmarks <- function(genes, metric = 'count', hierarchy = 'full', generate.plot = TRUE, show.message = FALSE) {
+hallmarks <- function(genes, metric = 'count', hierarchy = 'full',
+                      generate.plot = TRUE, show.message = FALSE) {
   valid.measures <- c('count', 'cprob', 'pmi', 'npmi')
   if (!metric %in% valid.measures) {
-    stop(sprintf('measure argument is not valid, it must be one of the followin: %s', paste(valid.measures, collapse = ', ')))
+    stop(
+    sprintf('measure argument is not valid, it must be one of the followin: %s',
+            paste(valid.measures, collapse = ', '))
+    )
   }
 
 
@@ -120,21 +130,27 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full', generate.plot
   #
   # necessary due to https://github.com/cambridgeltl/chat/issues/6
   if (metric == 'cprob') {
-    temp.res        <- hallmarks(all.genes, metric = 'count', hierarchy = 'full', show.message = FALSE, generate.plot = FALSE)
+    temp.res        <- hallmarks(all.genes, metric = 'count',
+                                 hierarchy = 'full', show.message = FALSE,
+                                 generate.plot = FALSE)
     good.ix         <- Matrix::rowSums(temp.res$hallmarks) != 0
     all.genes       <- sort(unique(rownames(temp.res$hallmarks[good.ix,])))
     df.no.hallmarks <- temp.res$no.hallmakrs
     #
-    cat('There is a bug in the Hallmarks\' API that requires the function to wait around 5 additional seconds to finish. Sorry.\n  bug report: https://github.com/cambridgeltl/chat/issues/6\n')
+    cat(paste0('There is a bug in the Hallmarks\' API that requires the ',
+               'function to wait around 5 additional seconds to finish. ',
+               'Sorry.\n  ',
+               'bug report: https://github.com/cambridgeltl/chat/issues/6\n'))
     Sys.sleep(5.5)
   } else {
     df.no.hallmarks <- NULL
   }
 
   # build base url for call
-  base.url <- sprintf('http://chat.lionproject.net/chartdata?measure=%s&hallmarks=%s', metric, hierarchy)
+  baseUrl <- 'http://chat.lionproject.net/chartdata?measure=%s&hallmarks=%s' %>%
+    sprintf(metric, hierarchy)
   # add genes
-  call.url <- sprintf('%s&q=%s', base.url, paste(all.genes, collapse = '&q='))
+  call.url <- sprintf('%s&q=%s', baseUrl, paste(all.genes, collapse = '&q='))
 
   conn  <- url(call.url, open = 'rt')
   lines <- readLines(conn)
@@ -196,14 +212,17 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full', generate.plot
 
     g1 <- reshape2::melt(df.scaled, id.vars = c('gene.name')) %>%
       dplyr::filter(rlang::UQ(as.name('value')) > 0) %>%
-      ggplot2::ggplot(ggplot2::aes_string('gene.name', 'variable', fill = 'value')) +
+      ggplot2::ggplot(ggplot2::aes_string('gene.name', 'variable',
+                                          fill = 'value')) +
         ggplot2::geom_raster() +
-        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
+                                                           hjust = 1)) +
         ggplot2::ggtitle('Hallmarks heatmap',
-                subtitle = stringr::str_wrap(sprintf('Selected genes without hallmarks (%d): %s',
-                                            length(df.no.hallmarks),
-                                            paste(df.no.hallmarks, collapse = ', ')),
-                                    width = 50)) +
+          subtitle = stringr::str_wrap(sprintf(
+                                    'Selected genes without hallmarks (%d): %s',
+                                      length(df.no.hallmarks),
+                                      paste(df.no.hallmarks, collapse = ', ')),
+                              width = 50)) +
         ggplot2::xlab('External Gene Name') + ggplot2::ylab('') +
         ggplot2::scale_fill_gradientn(colours = rev(grDevices::topo.colors(2)))
 
@@ -213,19 +232,23 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full', generate.plot
 
   df.scaled$gene.name <- NULL
 
-  return(list(hallmarks = df.scaled, no.hallmakrs = df.no.hallmarks, heatmap = g1))
+  return(list(hallmarks = df.scaled, no.hallmakrs = df.no.hallmarks,
+              heatmap = g1))
 }
 
 
 #' Retrieve ensembl gene ids from proteins
 #'
-#' @param ensembl.proteins character vector with gene names in ensembl_peptide_id format
+#' @param ensembl.proteins character vector with gene names in
+#' ensembl_peptide_id format
 #'
 #' @return a dataframe with external gene names, ensembl_peptide_id
 #' @export
 #'
 #' @examples
-#' protein2EnsemblGeneNames(c('ENSP00000235382','ENSP00000233944', 'ENSP00000216911'))
+#' protein2EnsemblGeneNames(c('ENSP00000235382',
+#'                            'ENSP00000233944',
+#'                            'ENSP00000216911'))
 protein2EnsemblGeneNames <- function(ensembl.proteins) {
   tryCatch({
     marts <- biomaRt::listMarts()

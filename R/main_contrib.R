@@ -1,7 +1,8 @@
 #' GLMNET model penalizing nodes with high degree
 #'
 #' This function overrides the `trans.fun` options in `network.options` with
-#' an heuristic described in Veríssimo et al. that penalizes nodes with high degree.
+#' an heuristic described in Veríssimo et al. that penalizes nodes with high
+#' degree.
 #'
 #' @param xdata input data, can be a matrix or MultiAssayExperiment
 #' @param ydata response data compatible with glmnet
@@ -17,15 +18,19 @@
 #' xdata <- matrix(rnorm(100), ncol = 20)
 #' glmOrphan(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian',
 #'           network.options = network.options.default(min.degree = .2))
-glmOrphan <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
+glmOrphan <- function(xdata, ydata, network,
+                      network.options = network.options.default(), ...) {
+
   network.options$trans.fun <- orphan.heuristic
-  glmSparseNet(xdata, ydata, network, network.options = network.options.default(), ...)
+  glmSparseNet(xdata, ydata, network,
+               network.options = network.options.default(), ...)
 }
 
 #' GLMNET model penalizing nodes with small degree
 #'
 #' This function overrides the `trans.fun` options in `network.options` with
-#' an heuristic described in Veríssimo et al. that penalizes nodes with small degree.
+#' an heuristic described in Veríssimo et al. that penalizes nodes with small
+#' degree.
 #'
 #' @param xdata input data, can be a matrix or MultiAssayExperiment
 #' @param ydata response data compatible with glmnet
@@ -41,7 +46,9 @@ glmOrphan <- function(xdata, ydata, network, network.options = network.options.d
 #' xdata <- matrix(rnorm(100), ncol = 20)
 #' glmHub(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian',
 #'        network.options = network.options.default(min.degree = .2))
-glmHub <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
+glmHub <- function(xdata, ydata, network,
+                   network.options = network.options.default(), ...) {
+
   network.options$trans.fun <- hubHeuristic
   glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
 }
@@ -66,7 +73,9 @@ glmHub <- function(xdata, ydata, network, network.options = network.options.defa
 #' xdata <- matrix(rnorm(100), ncol = 20)
 #' glmDegree(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian',
 #'           network.options = network.options.default(min.degree = .2))
-glmDegree <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
+glmDegree <- function(xdata, ydata, network,
+                      network.options = network.options.default(), ...) {
+
   network.options$trans.fun <- function(x) { return(1 / x)}
   glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
 }
@@ -74,7 +83,8 @@ glmDegree <- function(xdata, ydata, network, network.options = network.options.d
 #' GLMNET cross-validation model penalizing nodes with high degree
 #'
 #' This function overrides the `trans.fun` options in `network.options` with
-#' an heuristic described in Veríssimo et al. that penalizes nodes with high degree.
+#' an heuristic described in Veríssimo et al. that penalizes nodes with high
+#' degree.
 #'
 #' @param xdata input data, can be a matrix or MultiAssayExperiment
 #' @param ydata response data compatible with glmnet
@@ -90,7 +100,9 @@ glmDegree <- function(xdata, ydata, network, network.options = network.options.d
 #' xdata <- matrix(rnorm(100), ncol = 20)
 #' cv.glmOrphan(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian',
 #'              network.options = network.options.default(min.degree = .2))
-cv.glmOrphan <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
+cv.glmOrphan <- function(xdata, ydata, network,
+                         network.options = network.options.default(), ...) {
+
   network.options$trans.fun <- orphan.heuristic
   cv.glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
 }
@@ -115,7 +127,8 @@ cv.glmOrphan <- function(xdata, ydata, network, network.options = network.option
 #' xdata <- matrix(rnorm(100), ncol = 20)
 #' cv.glmDegree(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian',
 #'              network.options = network.options.default(min.degree = .2))
-cv.glmDegree <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
+cv.glmDegree <- function(xdata, ydata, network,
+                         network.options = network.options.default(), ...) {
   network.options$trans.fun <- function(x) { 1 / x}
   cv.glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
 }
@@ -123,7 +136,8 @@ cv.glmDegree <- function(xdata, ydata, network, network.options = network.option
 #' GLMNET cross-validation model penalizing nodes with small degree
 #'
 #' This function overrides the `trans.fun` options in `network.options` with
-#' an heuristic described in Veríssimo et al. that penalizes nodes with small degree.
+#' an heuristic described in Veríssimo et al. that penalizes nodes with small
+#' degree.
 #'
 #' @param xdata input data, can be a matrix or MultiAssayExperiment
 #' @param ydata response data compatible with glmnet
@@ -139,7 +153,9 @@ cv.glmDegree <- function(xdata, ydata, network, network.options = network.option
 #' xdata <- matrix(rnorm(100), ncol = 20)
 #' cv.glmHub(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian',
 #'           network.options = network.options.default(min.degree = .2))
-cv.glmHub <- function(xdata, ydata, network, network.options = network.options.default(), ...) {
+cv.glmHub <- function(xdata, ydata, network,
+                      network.options = network.options.default(), ...) {
+
   network.options$trans.fun <- hubHeuristic
   cv.glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
 }

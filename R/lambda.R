@@ -1,11 +1,14 @@
 #' Auxiliary function to generate suitable lambda parameters
 #'
-#' @param lambda.largest numeric value for largest number of lambda to consider (usually with a target of 1 selected variable)
+#' @param lambda.largest numeric value for largest number of lambda to consider
+#' (usually with a target of 1 selected variable)
 #' @param xdata X parameter for glmnet function
 #' @param ydata Y parameter for glmnet function
 #' @param family family parameter to glmnet function
-#' @param orders.of.magnitude.smaller minimum value for lambda (lambda.largest / 10^orders.of.magnitude.smaller)
-#' @param lambda.per.order.magnitude how many lambdas to create for each order of magnitude
+#' @param orders.of.magnitude.smaller minimum value for lambda
+#' (lambda.largest / 10^orders.of.magnitude.smaller)
+#' @param lambda.per.order.magnitude how many lambdas to create for each order
+#' of magnitude
 #'
 #' @return a numeric vector with suitable lambdas
 #' @export
