@@ -41,10 +41,10 @@
 #' ydata.valid <- xdata.valid@colData[,c('surv_event_time', 'vital_status')]
 #' colnames(ydata.valid) <- c('time', 'status')
 #' glmSparseNet(xdata.valid,
-#'                ydata.valid,
-#'                family          = 'cox',
-#'                network         = 'correlation',
-#'                experiment.name = 'RNASeq2GeneNorm')
+#'              ydata.valid,
+#'              family          = 'cox',
+#'              network         = 'correlation',
+#'              experiment.name = 'RNASeq2GeneNorm')
 glmSparseNet <- function(xdata, ydata, network,
                          network.options = network.options.default(),
                          experiment.name = NULL, ...) {

@@ -7,8 +7,8 @@
 #' @export
 #'
 #' @examples
-#' dat <- MultiAssayExperiment::miniACC
-#' reduce.by.experiment(dat, 'RNASeq2GeneNorm')
+#' multi.assay <- MultiAssayExperiment::miniACC
+#' reduce.by.experiment(multi.assay, 'RNASeq2GeneNorm')
 reduce.by.experiment <- function(multi.assay, experiment.name) {
   # Get all valid individuals from experiment (lookup the mapping)
   valid.ydata.id <- multi.assay@sampleMap[multi.assay@sampleMap$assay == experiment.name, 'primary']

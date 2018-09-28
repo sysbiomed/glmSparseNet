@@ -39,7 +39,7 @@ networkCorParallel <- function(xdata,
 #' @examples
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' network.cov.parallel(xdata)
+#' networkCovParallel(xdata)
 networkCovParallel <- function(xdata,
                                  build.output  = 'matrix',
                                  n.cores       = 1,

@@ -16,6 +16,8 @@ glmSparseNetPrivate(fun, xdata, ydata, network, experiment.name = NULL,
 
 \item{network}{type of network, see below}
 
+\item{experiment.name}{when xdata is a MultiAssayExperiment object this parameter is required}
+
 \item{network.options}{options to calculate network}
 
 \item{...}{parameters that glmnet accepts}

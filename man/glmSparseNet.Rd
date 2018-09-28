@@ -57,8 +57,8 @@ xdata.valid <- xdata[, rownames(xdata@colData)[valid.ix]]
 ydata.valid <- xdata.valid@colData[,c('surv_event_time', 'vital_status')]
 colnames(ydata.valid) <- c('time', 'status')
 glmSparseNet(xdata.valid,
-               ydata.valid,
-               family          = 'cox',
-               network         = 'correlation',
-               experiment.name = 'RNASeq2GeneNorm')
+             ydata.valid,
+             family          = 'cox',
+             network         = 'correlation',
+             experiment.name = 'RNASeq2GeneNorm')
 }

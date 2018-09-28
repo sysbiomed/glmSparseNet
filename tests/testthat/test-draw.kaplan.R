@@ -9,7 +9,9 @@ test_that("Calculates kaplan-meier data", {
 })
 
 test_that('Only one group in kaplan.meier gives error', {
-  expect_error(separate2GroupsCox(c(age = 0), ovarian$age, data.frame(time = ovarian$futime, status = ovarian$fustat)))
+  expect_warning(expect_error(separate2GroupsCox(c(age = 0),
+                                                 ovarian$age,
+                                                 data.frame(time = ovarian$futime, status = ovarian$fustat))))
 })
 
 test_that('All combinations of parameters possible for draw.kapan', {

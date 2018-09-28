@@ -42,6 +42,7 @@ inst/images
 ^run-cache
 ^vignettes/run-cache
 ^runcache
+^vignettes/VennDiagram
 
 # ------------------
 #      Releases

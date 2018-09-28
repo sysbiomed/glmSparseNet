@@ -18,6 +18,6 @@ a MultiExperimentAssay with only clinical data of that experiment
 Filter MultiAssayExperiment colData for specific experiment
 }
 \examples{
-dat <- MultiAssayExperiment::miniACC
-reduce.by.experiment(dat, 'RNASeq2GeneNorm')
+multi.assay <- MultiAssayExperiment::miniACC
+reduce.by.experiment(multi.assay, 'RNASeq2GeneNorm')
 }

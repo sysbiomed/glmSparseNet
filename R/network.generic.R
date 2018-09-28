@@ -4,6 +4,7 @@
 #' @param xdata input data, can be a matrix or MultiAssayExperiment
 #' @param ydata response data compatible with glmnet
 #' @param network type of network, see below
+#' @param experiment.name when xdata is a MultiAssayExperiment object this parameter is required
 #' @param network.options options to calculate network
 #' @param ... parameters that glmnet accepts
 #'
@@ -50,11 +51,11 @@ glmSparseNetPrivate <- function(fun, xdata, ydata, network,
   }
 
   if (inherits(xdata, 'SummarizedExperiment')) {
-    xdata <- base::matrix(t(SummarizedExperiment::assay(xdata)))
+    xdata <- t(SummarizedExperiment::assay(xdata))
   }
 
   if (inherits(xdata, 'Matrix')) {
-    xdata <- base::matrix(xdata)
+    xdata <- Matrix::as.matrix(xdata)
   }
 
   if (!inherits(xdata, 'matrix')) {

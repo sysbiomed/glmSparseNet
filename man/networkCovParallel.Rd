@@ -29,5 +29,5 @@ Calculates the covariance network
 \examples{
 n.col <- 6
 xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-network.cov.parallel(xdata)
+networkCovParallel(xdata)
 }
