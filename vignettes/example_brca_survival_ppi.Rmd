@@ -37,6 +37,7 @@ library(VennDiagram)
 library(loose.rock)
 library(futile.logger)
 library(curatedTCGAData)
+library(TCGAutils)
 
 library(glmSparseNet)
 
