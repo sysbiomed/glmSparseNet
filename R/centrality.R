@@ -145,9 +145,7 @@ networkGenericParallel <- function(fun, fun.prefix,
 degreeCor <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
                       force.recalc.degree = FALSE, force.recalc.network = FALSE,
                       n.cores = 1, ...) {
-  if (!is(xdata, 'matrix')) {
-    stop('xdata argument must be a matrix object')
-  }
+
   return(degreeGeneric(stats::cor, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
                        force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
                        n.cores = n.cores, ...))
@@ -176,10 +174,6 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
                       force.recalc.degree = FALSE, force.recalc.network = FALSE,
                       n.cores = 1, ...) {
 
-  if (!is(xdata, 'matrix')) {
-    stop('xdata argument must be a matrix object')
-  }
-
   return(degreeGeneric(stats::cov, 'correlation', xdata, cutoff = cutoff, consider.unweighted = consider.unweighted,
                        force.recalc.degree = force.recalc.degree, force.recalc.network = force.recalc.network,
                        n.cores = n.cores, ...))
@@ -200,7 +194,7 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
 networkWorker <- function(fun, xdata, ix.i, ...) {
   n.col <- ncol(xdata)
   xdata.i <- xdata[,ix.i]
-  result  <- fun(xdata[,ix.i], xdata[,seq(ix.i+1, ncol(xdata))], ...)
+  result  <- fun(as.vector(xdata[,ix.i]), base::as.matrix(xdata[,seq(ix.i+1, ncol(xdata))]), ...)
   result[is.na(result)] <- 0
   return(result)
 }
@@ -235,6 +229,14 @@ degreeGeneric <- function(fun = stats::cor, fun.prefix = 'operator', xdata,
 
   if (force.recalc.network) {
     force.recalc.degree <- force.recalc.network
+  }
+
+  if (inherits(xdata, 'matrix')) {
+    xdata <- Matrix::Matrix(xdata)
+  }
+
+  if (!inherits(xdata, 'Matrix')) {
+    stop('xdata argument must be a matrix object')
   }
 
   chunk.function <- function(xdata, max.ix, ix.outer, n.cores, cutoff, consider.unweighted, ...) {

@@ -4,7 +4,7 @@
 \alias{glmSparseNetPrivate}
 \title{Calculate GLM model with network-based regularization}
 \usage{
-glmSparseNetPrivate(fun, xdata, ydata, network,
+glmSparseNetPrivate(fun, xdata, ydata, network, experiment.name = NULL,
   network.options = network.options.default(), ...)
 }
 \arguments{

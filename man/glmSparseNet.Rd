@@ -5,7 +5,8 @@
 \title{Calculate GLM model with network-based regularization}
 \usage{
 glmSparseNet(xdata, ydata, network,
-  network.options = network.options.default(), ...)
+  network.options = network.options.default(), experiment.name = NULL,
+  ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}
@@ -15,6 +16,8 @@ glmSparseNet(xdata, ydata, network,
 \item{network}{type of network, see below}
 
 \item{network.options}{options to calculate network}
+
+\item{experiment.name}{name of experiment to use as input in MultiAssayExperiment object (only if xdata is an object of this class)}
 
 \item{...}{parameters that glmnet accepts}
 }

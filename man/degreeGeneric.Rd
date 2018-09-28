@@ -4,8 +4,8 @@
 \alias{degreeGeneric}
 \title{Generic function to calculate degree based on data}
 \usage{
-degreeGeneric(fun, fun.prefix = "operator", xdata, cutoff = 0,
-  consider.unweighted = FALSE, chunks = 1000,
+degreeGeneric(fun = stats::cor, fun.prefix = "operator", xdata,
+  cutoff = 0, consider.unweighted = FALSE, chunks = 1000,
   force.recalc.degree = FALSE, force.recalc.network = FALSE,
   n.cores = 1, ...)
 }

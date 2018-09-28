@@ -54,7 +54,7 @@ glmSparseNetPrivate <- function(fun, xdata, ydata, network,
   }
 
   if (inherits(xdata, 'matrix')) {
-    xdata <- Matrix::as.matrix(xdata)
+    xdata <- Matrix::Matrix(xdata)
   }
 
   if (!inherits(xdata, 'Matrix')) {

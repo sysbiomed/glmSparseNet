@@ -5,7 +5,8 @@
 \title{Calculate cross validating GLM model with network-based regularization}
 \usage{
 cv.glmSparseNet(xdata, ydata, network,
-  network.options = network.options.default(), ...)
+  network.options = network.options.default(), experiment.name = NULL,
+  ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}
@@ -15,6 +16,8 @@ cv.glmSparseNet(xdata, ydata, network,
 \item{network}{type of network, see below}
 
 \item{network.options}{options to calculate network}
+
+\item{experiment.name}{Name of experiment in MultiAssayExperiment}
 
 \item{...}{parameters that cv.glmnet accepts}
 }
