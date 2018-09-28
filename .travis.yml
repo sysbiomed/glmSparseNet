@@ -19,7 +19,7 @@ r:
 warnings_are_errors: false
 
 after_success:
-- Rscript -e 'library(covr);codecov()'
+- travis_wait Rscript -e 'library(covr);codecov()'
 
 env: _R_CHECK_CRAN_INCOMING_=FALSE
 
