@@ -77,15 +77,14 @@ ydata.raw <- colData(prad.primary.solid.tumor) %>% as.data.frame %>%
   # Keep only survival variables and codes
   select(patientID, status = vital_status, time) %>% 
   # Discard individuals with survival time less or equal to 0
-  filter(time > 0) %>% as.data.frame
+  filter(!is.na(time) & time > 0) %>% as.data.frame
 
 # Set index as the patientID
 rownames(ydata.raw) <- ydata.raw$patientID
 
-# keep only features that are in degree.network and have standard deviation > 0
-valid.features <- colnames(xdata.raw)[colnames(xdata.raw) %in% names(degree.network[degree.network > 0])]
-xdata.raw      <- xdata.raw[, valid.features]
-xdata.raw      <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
+# keep only features that have standard deviation > 0
+xdata.raw  <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw),]
+xdata.raw  <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
 
 # Order ydata the same as assay
 ydata.raw    <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
@@ -147,9 +146,9 @@ geneNames(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
 ## Survival curves and Log rank test
 
 ```{r}
-separate2groups.cox(as.vector(coefs.v), 
-                    xdata[, names(coefs.v)], 
-                    ydata, 
-                    plot.title = 'Full dataset', legend.outside = FALSE)
+separate2GroupsCox(as.vector(coefs.v), 
+                   xdata[, names(coefs.v)], 
+                   ydata, 
+                   plot.title = 'Full dataset', legend.outside = FALSE)
 ```
 

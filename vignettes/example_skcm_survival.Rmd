@@ -65,28 +65,34 @@ Build the survival data from the clinical columns.
 * Build two matrix objects that fit the data `xdata` and `ydata`
 
 ```{r data.show, warning=FALSE, error=FALSE}
-xdata.raw <- t(assay(skcm[[1]]))
+skcm.metastatic <- TCGAutils::splitAssays(skcm, '06')
+xdata.raw <- t(assay(skcm.metastatic[[1]]))
 
 # Get survival information
-ydata.raw <- colData(skcm) %>% as.data.frame %>% 
-  # Convert days to integer
-  mutate(Days.to.date.of.Death        = as.integer(Days.to.date.of.Death),
-         Days.to.Date.of.Last.Contact = as.integer(Days.to.Date.of.Last.Contact)) %>%
+ydata.raw <- colData(skcm.metastatic) %>% as.data.frame %>% 
   # Find max time between all days (ignoring missings)
   rowwise %>%
-  mutate(time = max(days_to_last_followup, Days.to.date.of.Death, 
-                    Days.to.Date.of.Last.Contact, days_to_death, na.rm = TRUE)) %>%
+  mutate(time = max(days_to_last_followup, days_to_death, na.rm = TRUE)) %>%
   # Keep only survival variables and codes
   select(patientID, status = vital_status, time) %>% 
   # Discard individuals with survival time less or equal to 0
-  filter(time > 0) %>% as.data.frame
+  filter(!is.na(time) & time > 0) %>% as.data.frame
+
+# Get survival information
+ydata.raw <- colData(skcm) %>% as.data.frame %>% 
+  # Find max time between all days (ignoring missings)
+  rowwise %>%
+  mutate(time = max(days_to_last_followup, days_to_death, na.rm = TRUE)) %>%
+  # Keep only survival variables and codes
+  select(patientID, status = vital_status, time) %>% 
+  # Discard individuals with survival time less or equal to 0
+  filter(!is.na(time) & time > 0) %>% as.data.frame
 
 # Set index as the patientID
 rownames(ydata.raw) <- ydata.raw$patientID
 
-# keep only features that are in degree.network and have standard deviation > 0
-valid.features <- colnames(xdata.raw)[colnames(xdata.raw) %in% names(degree.network[degree.network > 0])]
-xdata.raw      <- xdata.raw[, valid.features]
+# keep only features that have standard deviation > 0
+xdata.raw      <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw),]
 xdata.raw      <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
 
 # Order ydata the same as assay

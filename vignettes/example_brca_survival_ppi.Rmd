@@ -152,14 +152,14 @@ ydata.raw <- colData(brca.primary.solid.tumor) %>% as.data.frame %>%
   # Keep only survival variables and codes
   select(patientID, status = vital_status, time) %>% 
   # Discard individuals with survival time less or equal to 0
-  filter(time > 0) %>% as.data.frame
+  filter(!is.na(time) & time > 0) %>% as.data.frame
 
 # Set index as the patientID
 rownames(ydata.raw) <- ydata.raw$patientID
 
 # keep only features that are in degree.network and have standard deviation > 0
 valid.features <- colnames(xdata.raw)[colnames(xdata.raw) %in% names(degree.network[degree.network > 0])]
-xdata.raw      <- xdata.raw[, valid.features]
+xdata.raw      <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw), valid.features]
 xdata.raw      <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
 
 # Order ydata the same as assay
@@ -185,9 +185,8 @@ small.subset <- c('AAK1', 'ADRB1', 'AK7', 'ALK', 'APOBEC3F', 'ARID1B', 'BAMBI', 
 # make sure we have 100 genes
 small.subset <- c(small.subset, sample(colnames(xdata.raw), 51)) %>% unique %>% sort
 
-#xdata <- xdata.raw
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
-ydata <- ydata.raw %>% select(time, status)
+ydata <- ydata.raw %>% select(time, status) %>% filter(!is.na(time) | time < 0)
 ```
 
 * Build dataset that overlaps with STRING data
@@ -226,8 +225,8 @@ Penalizes using the Hub heuristics, see `hubHeuristic` function definition for m
 ```{r, warning=FALSE, error=FALSE}
 cv.hub <- cv.glmHub(xdata, 
                     Surv(ydata$time, ydata$status), 
-                    family = 'cox',
-                    foldid = foldid,
+                    family  = 'cox',
+                    foldid  = foldid,
                     network = my.string, 
                     network.options = network.options.default(min.degree = 0.2))
 ```
@@ -261,7 +260,7 @@ glmSparseNet::separate2GroupsCox(as.vector(coef(cv.orphan, s = 'lambda.min')[,1]
                                  plot.title = 'Full dataset', legend.outside = FALSE)
 
 selected.genes[['Orphan']] <- coef(cv.orphan, s = 'lambda.min')[,1] %>% { .[. != 0] } %>%
-  names %>% geneNamess %>% { .[['external_gene_name']]} 
+  names %>% geneNames %>% { .[['external_gene_name']]} 
 ```
 
 ### Elastic Net model *(without network-penalization)*

@@ -50,14 +50,14 @@ glmSparseNetPrivate <- function(fun, xdata, ydata, network,
   }
 
   if (inherits(xdata, 'SummarizedExperiment')) {
-    xdata <- Matrix::as.matrix(t(SummarizedExperiment::assay(xdata)))
+    xdata <- base::matrix(t(SummarizedExperiment::assay(xdata)))
   }
 
-  if (inherits(xdata, 'matrix')) {
-    xdata <- Matrix::Matrix(xdata)
+  if (inherits(xdata, 'Matrix')) {
+    xdata <- base::matrix(xdata)
   }
 
-  if (!inherits(xdata, 'Matrix')) {
+  if (!inherits(xdata, 'matrix')) {
     stop('Check arguments for xdata, it must be a matrix, SummarizedExperiment of MultiAssayExperiment (this last one with experiment.name argument defined)')
   }
 

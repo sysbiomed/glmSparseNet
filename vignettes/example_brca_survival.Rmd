@@ -11,7 +11,7 @@ vignette: >
   %\VignetteIndexEntry{Example for Survival Data -- Breast Invasive Carcinoma}
   %\VignetteEncoding{UTF-8}
 params:
-  seed: !r 1234567
+  seed: !r 41
 --- 
 
 ## Instalation
@@ -59,14 +59,12 @@ brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 ```
 
 ```{r data, warning=FALSE, message=FALSE}
-xdata.raw <- t(assay(brca[[1]]))
-
-# keep only primary solid tumor (code 01)
-bcr_sample_barcode <- rownames(xdata.raw)[grepl('TCGA-[0-9A-Z]+-[0-9A-Z]+-01',
-                                     rownames(xdata.raw))]
+# keep only solid tumour (code: 01)
+brca.primary.solid.tumor <- TCGAutils::splitAssays(brca, '01')
+xdata.raw <- t(assay(brca.primary.solid.tumor[[1]]))
 
 # Get survival information
-ydata.raw <- colData(brca) %>% as.data.frame %>% 
+ydata.raw <- colData(brca.primary.solid.tumor) %>% as.data.frame %>% 
   # Keep only data relative to survival or samples
   select(patientID, vital_status, 
          Days.to.date.of.Death, Days.to.Date.of.Last.Contact, 
@@ -82,18 +80,17 @@ ydata.raw <- colData(brca) %>% as.data.frame %>%
   # Keep only survival variables and codes
   select(patientID, status = vital_status, time) %>% 
   # Discard individuals with survival time less or equal to 0
-  filter(time > 0) %>% as.data.frame
+  filter(!is.na(time) & time > 0) %>% as.data.frame
 
 # Set index as the patientID
 rownames(ydata.raw) <- ydata.raw$patientID
 
 # Get matches between survival and assay data
-common.codes <- bcr_sample_barcode[strtrim(bcr_sample_barcode, 12) %in% ydata.raw$patientID]
-xdata.raw    <- xdata.raw[common.codes, ]
-xdata.raw    <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
+xdata.raw <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw),]
+xdata.raw <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
 
 # Order ydata the same as assay
-ydata.raw    <- ydata.raw[strtrim(rownames(xdata.raw), 12), ]
+ydata.raw    <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
 
 # Using only a subset of genes previously selected to keep this short example.
 set.seed(params$seed)
@@ -114,8 +111,7 @@ Fit model model penalizing by the hubs using the cross-validation function by `c
 set.seed(params$seed)
 fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status),
                     family  = 'cox',
-                    lambda.min.ratio = 0.2,
-                    nlambda = 200,
+                    lambda = buildLambda(1),
                     network = 'correlation', 
                     network.options = network.options.default(cutoff = .6, 
                                                               min.degree = .2))
