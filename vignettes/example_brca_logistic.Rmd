@@ -8,7 +8,7 @@ output:
     toc: true
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{Example for Classification Data -- Breast Invasive Carcinoma}
+  %\VignetteIndexEntry{Example for Classification -- Breast Invasive Carcinoma}
   %\VignetteEncoding{UTF-8}
 params:
   seed: !r 29221
@@ -45,9 +45,12 @@ theme_set(ggplot2::theme_minimal())
 
 # Load data
 
-The data is loaded from an online curated dataset downloaded from TCGA using `curatedTCGAData` bioconductor package and processed.
+The data is loaded from an online curated dataset downloaded from TCGA using 
+`curatedTCGAData` bioconductor package and processed.
 
-To accelerate the process we use a very reduced dataset down to 107 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
+To accelerate the process we use a very reduced dataset down to 107 variables 
+only *(genes)*, which is stored as a data object in this package. However, the 
+procedure to obtain the data manually is described in the following chunk.
 
 ```{r, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
