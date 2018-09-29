@@ -17,7 +17,7 @@
 #'  * vector with already calculated penalty weights (can also be used directly
 #'  with glmnet)
 #'
-glmSparseNetPrivate <- function(fun, xdata, ydata, network,
+.glmSparseNetPrivate <- function(fun, xdata, ydata, network,
                                 experiment.name = NULL,
                                 network.options = network.options.default(),
                                 ...) {
@@ -73,7 +73,7 @@ glmSparseNetPrivate <- function(fun, xdata, ydata, network,
   }
 
   if (is.character(network)) {
-    penalty.factor <- calcPenalty(xdata, network, network.options)
+    penalty.factor <- .calcPenalty(xdata, network, network.options)
   } else if (is.matrix(network) || inherits(network, 'Matrix')) {
     penalty.factor <- (Matrix::colSums(network) + Matrix::rowSums(network))
   } else if (is.vector(network)) {

@@ -21,7 +21,7 @@ networkCorParallel <- function(xdata,
                                force.recalc.network  = FALSE,
                                show.message  = FALSE, ...) {
 
-  networkGenericParallel(stats::cor, 'correlation', xdata,
+  .networkGenericParallel(stats::cor, 'correlation', xdata,
                          build.output = build.output, n.cores = n.cores,
                          force.recalc.network = force.recalc.network,
                          show.message = show.message, ...)
@@ -49,7 +49,7 @@ networkCovParallel <- function(xdata,
                                  n.cores       = 1,
                                  force.recalc.network  = FALSE,
                                  show.message  = FALSE, ...) {
-  networkGenericParallel(stats::cov, 'covariance', xdata,
+  .networkGenericParallel(stats::cov, 'covariance', xdata,
                          build.output = build.output, n.cores = n.cores,
                          force.recalc.network = force.recalc.network,
                          show.message = show.message, ...)
@@ -69,7 +69,7 @@ networkCovParallel <- function(xdata,
 #' @param ... extra parameters for fun
 #'
 #' @return depends on build.output parameter
-networkGenericParallel <- function(fun, fun.prefix,
+.networkGenericParallel <- function(fun, fun.prefix,
                                    xdata,
                                    build.output  = 'matrix',
                                    n.cores       = 1,
@@ -88,7 +88,7 @@ networkGenericParallel <- function(fun, fun.prefix,
     result <- parallel::mclapply(as.numeric(seq_len(ncol(xdata)-1)),
                                  function(ix.i) {
       tryCatch({
-        result <- loose.rock::run.cache(networkWorker, fun,
+        result <- loose.rock::run.cache(.networkWorker, fun,
                                         xdata, ix.i,
                                         #
                                         cache.digest = list(xdata.sha256),
@@ -161,11 +161,11 @@ degreeCor <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
                       force.recalc.degree = FALSE, force.recalc.network = FALSE,
                       n.cores = 1, ...) {
 
-  return(degreeGeneric(stats::cor, 'correlation', xdata, cutoff = cutoff,
-                       consider.unweighted = consider.unweighted,
-                       force.recalc.degree = force.recalc.degree,
-                       force.recalc.network = force.recalc.network,
-                       n.cores = n.cores, ...))
+  return(.degreeGeneric(stats::cor, 'correlation', xdata, cutoff = cutoff,
+                        consider.unweighted = consider.unweighted,
+                        force.recalc.degree = force.recalc.degree,
+                        force.recalc.network = force.recalc.network,
+                        n.cores = n.cores, ...))
 }
 
 #' Calculate the degree of the covariance network based on xdata
@@ -193,11 +193,11 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
                       force.recalc.degree = FALSE, force.recalc.network = FALSE,
                       n.cores = 1, ...) {
 
-  return(degreeGeneric(stats::cov, 'correlation', xdata, cutoff = cutoff,
-                       consider.unweighted = consider.unweighted,
-                       force.recalc.degree = force.recalc.degree,
-                       force.recalc.network = force.recalc.network,
-                       n.cores = n.cores, ...))
+  return(.degreeGeneric(stats::cov, 'correlation', xdata, cutoff = cutoff,
+                        consider.unweighted = consider.unweighted,
+                        force.recalc.degree = force.recalc.degree,
+                        force.recalc.network = force.recalc.network,
+                        n.cores = n.cores, ...))
 }
 
 
@@ -212,7 +212,7 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
 #' @param ... extra parameters for fun
 #'
 #' @return a vector with size `ncol(xdata) - ix.i`
-networkWorker <- function(fun, xdata, ix.i, ...) {
+.networkWorker <- function(fun, xdata, ix.i, ...) {
   n.col <- ncol(xdata)
   xdata.i <- xdata[,ix.i]
   result  <- fun(as.vector(xdata[,ix.i]),
@@ -242,7 +242,7 @@ networkWorker <- function(fun, xdata, ix.i, ...) {
 #' @param ... extra parameters for fun
 #'
 #' @return a vector of the degrees
-degreeGeneric <- function(fun = stats::cor, fun.prefix = 'operator', xdata,
+.degreeGeneric <- function(fun = stats::cor, fun.prefix = 'operator', xdata,
                           cutoff = 0, consider.unweighted = FALSE,
                           chunks = 1000, force.recalc.degree = FALSE,
                           force.recalc.network = FALSE,
@@ -268,7 +268,7 @@ degreeGeneric <- function(fun = stats::cor, fun.prefix = 'operator', xdata,
   chunk.function <- function(xdata, max.ix, ix.outer, n.cores, cutoff,
                              consider.unweighted, ...) {
     res.chunks <- parallel::mclapply(seq(ix.outer, max.ix , 1), function(ix.i) {
-      line <- networkWorker(fun, xdata, ix.i, ...)
+      line <- .networkWorker(fun, xdata, ix.i, ...)
       #
       line[is.na(line)]   <- 0 # failsafe (for example, when sd = 0)
       line                <- abs(line)
