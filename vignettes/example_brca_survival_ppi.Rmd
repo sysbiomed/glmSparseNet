@@ -143,12 +143,12 @@ xdata.raw <- t(assay(brca.primary.solid.tumor[[1]]))
 # Get survival information
 ydata.raw <- colData(brca.primary.solid.tumor) %>% as.data.frame %>% 
   # Convert days to integer
-  mutate(Days.to.date.of.Death        = as.integer(Days.to.date.of.Death),
-         Days.to.Date.of.Last.Contact = as.integer(Days.to.Date.of.Last.Contact)) %>%
+  mutate(Days.to.date.of.Death = as.integer(Days.to.date.of.Death),
+         Days.to.Last.Contact  = as.integer(Days.to.Date.of.Last.Contact)) %>%
   # Find max time between all days (ignoring missings)
   rowwise %>%
   mutate(time = max(days_to_last_followup, Days.to.date.of.Death, 
-                    Days.to.Date.of.Last.Contact, days_to_death, na.rm = TRUE)) %>%
+                    Days.to.Last.Contact, days_to_death, na.rm = TRUE)) %>%
   # Keep only survival variables and codes
   select(patientID, status = vital_status, time) %>% 
   # Discard individuals with survival time less or equal to 0
@@ -158,32 +158,43 @@ ydata.raw <- colData(brca.primary.solid.tumor) %>% as.data.frame %>%
 rownames(ydata.raw) <- ydata.raw$patientID
 
 # keep only features that are in degree.network and have standard deviation > 0
-valid.features <- colnames(xdata.raw)[colnames(xdata.raw) %in% names(degree.network[degree.network > 0])]
-xdata.raw      <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw), valid.features]
-xdata.raw      <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
+valid.features <- colnames(xdata.raw)[colnames(xdata.raw) %in% 
+                                        names(degree.network[degree.network > 0])]
+xdata.raw      <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% 
+                              rownames(ydata.raw), valid.features]
+xdata.raw      <- xdata.raw %>% 
+  { (apply(., 2, sd) != 0) } %>% 
+  { xdata.raw[, .] } %>% 
+  scale
 
 # Order ydata the same as assay
 ydata.raw    <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
 
 # Using only a subset of genes previously selected to keep this short example.
 set.seed(params$seed)
-small.subset <- c('AAK1', 'ADRB1', 'AK7', 'ALK', 'APOBEC3F', 'ARID1B', 'BAMBI', 'BRAF', 'BTG1', 
-                  'CACNG8', 'CASP12', 'CD5',  'CDA', 'CEP72', 'CPD', 'CSF2RB', 'CSN3', 'DCT', 
-                  'DLG3',  'DLL3', 'DPP4', 'DSG1', 'EDA2R', 'ERP27', 'EXD1', 'GABBR2',  
-                  'GADD45A', 'GBP1', 'HTR1F', 'IFNK', 'IRF2', 'IYD', 'KCNJ11',  'KRTAP5-6', 
-                  'MAFA', 'MAGEB4', 'MAP2K6', 'MCTS1', 'MMP15', 'MMP9',  'NFKBIA', 'NLRC4', 
-                  'NT5C1A', 'OPN4', 'OR13C5', 'OR13C8', 'OR2T6', 'OR4K2', 'OR52E6', 'OR5D14', 
-                  'OR5H1', 'OR6C4', 'OR7A17', 'OR8J3',  'OSBPL1A', 'PAK6', 'PDE11A', 'PELO', 
-                  'PGK1', 'PIK3CB', 'PMAIP1',  'POLR2B', 'POP1', 'PPFIA3', 'PSME1', 'PSME2', 
-                  'PTEN', 'PTGES3',  'QARS', 'RABGAP1', 'RBM3', 'RFC3', 'RGPD8', 'RPGRIP1L', 
-                  'SAV1',  'SDC1', 'SDC3', 'SEC16B', 'SFPQ', 'SFRP5', 'SIPA1L1', 'SLC2A14',  
-                  'SLC6A9', 'SPATA5L1', 'SPINT1', 'STAR', 'STXBP5', 'SUN3', 'TACC2',  'TACR1', 
-                  'TAGLN2', 'THPO', 'TNIP1', 'TP53', 'TRMT2B', 'TUBB1',  'VDAC1', 'VSIG8', 
-                  'WNT3A', 'WWOX', 'XRCC4', 'YME1L1', 'ZBTB11',  'ZSCAN21') %>% 
+small.subset <- c('AAK1', 'ADRB1', 'AK7', 'ALK', 'APOBEC3F', 'ARID1B', 'BAMBI', 
+                  'BRAF', 'BTG1', 'CACNG8', 'CASP12', 'CD5',  'CDA', 'CEP72', 
+                  'CPD', 'CSF2RB', 'CSN3', 'DCT', 'DLG3',  'DLL3', 'DPP4', 
+                  'DSG1', 'EDA2R', 'ERP27', 'EXD1', 'GABBR2',  'GADD45A', 
+                  'GBP1', 'HTR1F', 'IFNK', 'IRF2', 'IYD', 'KCNJ11',  'KRTAP5-6',
+                  'MAFA', 'MAGEB4', 'MAP2K6', 'MCTS1', 'MMP15', 'MMP9',  
+                  'NFKBIA', 'NLRC4', 'NT5C1A', 'OPN4', 'OR13C5', 'OR13C8', 
+                  'OR2T6', 'OR4K2', 'OR52E6', 'OR5D14', 'OR5H1', 'OR6C4', 
+                  'OR7A17', 'OR8J3',  'OSBPL1A', 'PAK6', 'PDE11A', 'PELO', 
+                  'PGK1', 'PIK3CB', 'PMAIP1',  'POLR2B', 'POP1', 'PPFIA3', 
+                  'PSME1', 'PSME2', 'PTEN', 'PTGES3',  'QARS', 'RABGAP1', 
+                  'RBM3', 'RFC3', 'RGPD8', 'RPGRIP1L', 'SAV1',  'SDC1', 'SDC3',
+                  'SEC16B', 'SFPQ', 'SFRP5', 'SIPA1L1', 'SLC2A14', 'SLC6A9',
+                  'SPATA5L1', 'SPINT1', 'STAR', 'STXBP5', 'SUN3', 'TACC2',
+                  'TACR1', 'TAGLN2', 'THPO', 'TNIP1', 'TP53', 'TRMT2B', 'TUBB1',
+                  'VDAC1', 'VSIG8', 'WNT3A', 'WWOX', 'XRCC4', 'YME1L1', 
+                  'ZBTB11',  'ZSCAN21') %>% 
   sample(size  = 50) %>% sort
 
 # make sure we have 100 genes
-small.subset <- c(small.subset, sample(colnames(xdata.raw), 51)) %>% unique %>% sort
+small.subset <- c(small.subset, sample(colnames(xdata.raw), 51)) %>% 
+  unique %>% 
+  sort
 
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
 ydata <- ydata.raw %>% select(time, status) %>% filter(!is.na(time) | time < 0)
@@ -202,7 +213,8 @@ my.string <- string.network.binary[small.subset, small.subset]
 Degree distribution for sample set of gene features *(in xdata)*.
 
 ```{r, echo=FALSE, warning=FALSE}
-qplot(my.degree, bins = 100, fill = my.colors(3)) + theme(legend.position = 'none')
+qplot(my.degree, bins = 100, fill = my.colors(3)) + 
+  theme(legend.position = 'none')
 ```
 
 ### Select balanced folds for cross-validation
@@ -220,7 +232,8 @@ selected.genes <- list()
 
 ### glmHub model
 
-Penalizes using the Hub heuristics, see `hubHeuristic` function definition for more details.
+Penalizes using the Hub heuristics, see `hubHeuristic` function definition for 
+more details.
 
 ```{r, warning=FALSE, error=FALSE}
 cv.hub <- cv.glmHub(xdata, 
@@ -231,36 +244,51 @@ cv.hub <- cv.glmHub(xdata,
                     network.options = network.options.default(min.degree = 0.2))
 ```
 
-Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
+Kaplan-Meier estimator separating individuals by low and high risk *(based on 
+model's coefficients)*
 
 ```{r, echo=FALSE}
-glmSparseNet::separate2GroupsCox(as.vector(coef(cv.hub, s = 'lambda.min')[,1]), xdata, ydata,
-                                 plot.title = 'Full dataset', legend.outside = FALSE)
+glmSparseNet::separate2GroupsCox(as.vector(coef(cv.hub, s = 'lambda.min')[,1]), 
+                                 xdata, ydata,
+                                 plot.title = 'Full dataset', 
+                                 legend.outside = FALSE)
 
-selected.genes[['Hub']] <- coef(cv.hub, s = 'lambda.min')[,1] %>% { .[. != 0] } %>%
-  names %>% geneNames %>% { .[['external_gene_name']]} 
+selected.genes[['Hub']] <- coef(cv.hub, s = 'lambda.min')[,1] %>% 
+  { .[. != 0] } %>%
+  names %>% 
+  geneNames %>% 
+  { .[['external_gene_name']]} 
 ```
 
 ### glmOrphan model
 
-Penalizes using the Orphan heuristics, see `orphan.heuristics` function definition for more details.
+Penalizes using the Orphan heuristics, see `orphan.heuristics` function 
+definition for more details.
 
 ```{r, warning=FALSE, error=FALSE}
 cv.orphan <- cv.glmOrphan(xdata, 
                           Surv(ydata$time, ydata$status), 
                           family = 'cox',
                           network = my.string, 
-                          network.options = network.options.default(min.degree = 0.2))
+                          network.options = network.options.default(
+                            min.degree = 0.2))
 ```
 
-Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
+Kaplan-Meier estimator separating individuals by low and high risk 
+*(based on model's coefficients)*
 
 ```{r, echo=FALSE}
-glmSparseNet::separate2GroupsCox(as.vector(coef(cv.orphan, s = 'lambda.min')[,1]), xdata, ydata,
-                                 plot.title = 'Full dataset', legend.outside = FALSE)
+glmSparseNet::separate2GroupsCox(as.vector(coef(cv.orphan, 
+                                                s = 'lambda.min')[,1]), 
+                                 xdata, ydata,
+                                 plot.title = 'Full dataset',
+                                 legend.outside = FALSE)
 
-selected.genes[['Orphan']] <- coef(cv.orphan, s = 'lambda.min')[,1] %>% { .[. != 0] } %>%
-  names %>% geneNames %>% { .[['external_gene_name']]} 
+selected.genes[['Orphan']] <- coef(cv.orphan, s = 'lambda.min')[,1] %>% 
+  { .[. != 0] } %>%
+  names %>% 
+  geneNames %>% 
+  { .[['external_gene_name']]} 
 ```
 
 ### Elastic Net model *(without network-penalization)*
@@ -268,17 +296,24 @@ selected.genes[['Orphan']] <- coef(cv.orphan, s = 'lambda.min')[,1] %>% { .[. !=
 Uses regular glmnet model as simple baseline
 
 ```{r, warning=FALSE, error=FALSE}
-cv.glm <- cv.glmnet(xdata, Surv(ydata$time, ydata$status), family = 'cox', foldid = foldid)
+cv.glm <- cv.glmnet(xdata, Surv(ydata$time, ydata$status), family = 'cox', 
+                    foldid = foldid)
 ```
 
-Kaplan-Meier estimator separating individuals by low and high risk *(based on model's coefficients)*
+Kaplan-Meier estimator separating individuals by low and high risk 
+*(based on model's coefficients)*
 
 ```{r, echo=FALSE}
-glmSparseNet::separate2GroupsCox(as.vector(coef(cv.glm, s = 'lambda.min')[,1]), xdata, ydata, 
-                                 plot.title = 'Full dataset', legend.outside = FALSE)
+glmSparseNet::separate2GroupsCox(as.vector(coef(cv.glm, s = 'lambda.min')[,1]), 
+                                 xdata, ydata, 
+                                 plot.title = 'Full dataset', 
+                                 legend.outside = FALSE)
 
-selected.genes[['GLMnet']] <- coef(cv.glm, s = 'lambda.min')[,1] %>% { .[. != 0] } %>%
-  names %>% geneNames %>% { .[['external_gene_name']]} 
+selected.genes[['GLMnet']] <- coef(cv.glm, s = 'lambda.min')[,1] %>% 
+  { .[. != 0] } %>%
+  names %>% 
+  geneNames %>% 
+  { .[['external_gene_name']]} 
 ```
 
 ### Selected genes
@@ -288,7 +323,8 @@ Venn diagram of overlapping genes.
 ```{r, echo=FALSE, warning=FALSE}
 venn.plot <- venn.diagram(selected.genes , 
                           NULL, 
-                          fill           = c(my.colors(5), my.colors(3), my.colors(4)), 
+                          fill           = c(my.colors(5), my.colors(3), 
+                                             my.colors(4)), 
                           alpha          = c(0.3,0.3, .3), 
                           cex            = 2, 
                           cat.fontface   = 4, 
@@ -298,7 +334,9 @@ grid.draw(venn.plot)
 
 Descriptive table showing which genes are selected in each model
 
-We can observe, that elastic net without network-based penalization selects the best model with 40% more genes than glmOrphan and glmHub, without loosing accuracy.
+We can observe, that elastic net without network-based penalization selects the 
+best model with 40% more genes than glmOrphan and glmHub, without loosing 
+accuracy.
 
 *note*: size of circles represent the degree of that gene in network.
 
@@ -309,8 +347,10 @@ melt(selected.genes) %>%
          L1     = factor(L1)) %>%
   mutate(value = fct_reorder(value, Degree)) %>%
   as.data.frame %>% ggplot() +
-  geom_point(aes(value, L1, size = Degree), shape = my.symbols(3), color = my.colors(3)) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0), legend.position = 'top') +
+  geom_point(aes(value, L1, size = Degree), shape = my.symbols(3), 
+             color = my.colors(3)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0), 
+        legend.position = 'top') +
   ylab('Model') + xlab('Gene') + 
   scale_size_continuous(trans = 'log10')
 ```

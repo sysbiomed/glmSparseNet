@@ -45,9 +45,12 @@ theme_set(ggplot2::theme_minimal())
 
 # Load data
 
-The data is loaded from an online curated dataset downloaded from TCGA using `curatedTCGAData` bioconductor package and processed.
+The data is loaded from an online curated dataset downloaded from TCGA using 
+`curatedTCGAData` bioconductor package and processed.
 
-To accelerate the process we use a very reduced dataset down to 107 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
+To accelerate the process we use a very reduced dataset down to 107 variables 
+only *(genes)*, which is stored as a data object in this package. However, the 
+procedure to obtain the data manually is described in the following chunk.
 
 ```{r curated_data, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
@@ -61,7 +64,8 @@ skcm <- curatedTCGAData(diseaseCode = "SKCM", assays = "RNASeq2GeneNorm", FALSE)
 
 Build the survival data from the clinical columns.
 
-* Merge survival times for patients, which have different columns in case they are alive or dead.
+* Merge survival times for patients, which have different columns in case they 
+are alive or dead.
 * Build two matrix objects that fit the data `xdata` and `ydata`
 
 ```{r data.show, warning=FALSE, error=FALSE}
@@ -92,15 +96,20 @@ ydata.raw <- colData(skcm) %>% as.data.frame %>%
 rownames(ydata.raw) <- ydata.raw$patientID
 
 # keep only features that have standard deviation > 0
-xdata.raw      <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw),]
-xdata.raw      <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
+xdata.raw      <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% 
+                              rownames(ydata.raw),]
+xdata.raw      <- xdata.raw %>% 
+  { (apply(., 2, sd) != 0) } %>% 
+  { xdata.raw[, .] } %>% 
+  scale
 
 # Order ydata the same as assay
 ydata.raw    <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
 
 set.seed(params$seed)
-small.subset <- c(geneNames(c('ENSG00000109790', 'ENSG00000109133', 'ENSG00000023734', 
-                  'ENSG00000183770', 'ENSG00000214617', 'ENSG00000185813', 
+small.subset <- c(geneNames(c('ENSG00000109790', 'ENSG00000109133', 
+                              'ENSG00000023734', 'ENSG00000183770', 
+                              'ENSG00000214617', 'ENSG00000185813', 
                   'ENSG00000183242'))$external_gene_name,
                   sample(colnames(xdata.raw), 100))
 
@@ -110,16 +119,22 @@ ydata <- ydata.raw %>% select(time, status)
 
 # Fit models
 
-Fit model model penalizing by the hubs using the cross-validation function by `cv.glmHub`.
+Fit model model penalizing by the hubs using the cross-validation function by 
+`cv.glmHub`.
 
 ```{r fit}
-fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status), family  = 'cox', network = 'correlation', 
-                    network.options = network.options.default(min.degree = .2, cutoff = .6))
+fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status), family  = 'cox', 
+                    network = 'correlation', 
+                    network.options = network.options.default(min.degree = .2, 
+                                                              cutoff = .6))
 ```
 
 # Results of Cross Validation
 
-Shows the results of `100` different parameters used to find the optimal value in 10-fold cross-validation. The two vertical dotted lines represent the best model and a model with less variables selected *(genes)*, but within a standard error distance from the best.
+Shows the results of `100` different parameters used to find the optimal value 
+in 10-fold cross-validation. The two vertical dotted lines represent the best 
+model and a model with less variables selected *(genes)*, but within a standard
+error distance from the best.
 
 ```{r results}
 plot(fitted)

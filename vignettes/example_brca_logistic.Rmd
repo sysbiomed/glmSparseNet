@@ -67,15 +67,22 @@ class.v        <- TCGAbiospec(rownames(xdata.raw))$sample_definition %>% factor
 names(class.v) <- rownames(xdata.raw)
 
 # keep features with standard deviation > 0
-xdata.raw <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
+xdata.raw <- xdata.raw %>% 
+  { (apply(., 2, sd) != 0) } %>% 
+  { xdata.raw[, .] } %>%
+  scale
 
 set.seed(params$seed)
-small.subset <- c(geneNames(c('ENSG00000110448', 'ENSG00000124449', 'ENSG00000103494', 
-                  'ENSG00000172053', 'ENSG00000136758', 'ENSG00000051382', 
-                  'ENSG00000128655', 'ENSG00000100368', 'ENSG00000115884', 
-                  'ENSG00000179363', 'ENSG00000091106', 'ENSG00000178403', 
-                  'ENSG00000066422', 'ENSG00000110448', 'ENSG00000124449', 
-                  'ENSG00000230445', 'ENSG00000172053', 'ENSG00000185122'))$external_gene_name, 
+small.subset <- c(geneNames(c('ENSG00000110448', 'ENSG00000124449', 
+                              'ENSG00000103494', 'ENSG00000172053', 
+                              'ENSG00000136758', 'ENSG00000051382', 
+                              'ENSG00000128655', 'ENSG00000100368', 
+                              'ENSG00000115884', 'ENSG00000179363', 
+                              'ENSG00000091106', 'ENSG00000178403', 
+                              'ENSG00000066422', 'ENSG00000110448', 
+                              'ENSG00000124449', 'ENSG00000230445', 
+                              'ENSG00000172053', 
+                              'ENSG00000185122'))$external_gene_name, 
                    sample(colnames(xdata.raw), 100))
 
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
@@ -84,7 +91,8 @@ ydata <- class.v
 
 # Fit models
 
-Fit model model penalizing by the hubs using the cross-validation function by `cv.glmHub`.
+Fit model model penalizing by the hubs using the cross-validation function by 
+`cv.glmHub`.
 
 ```{r fit.show}
 fitted <- cv.glmHub(xdata, ydata, 
@@ -97,7 +105,10 @@ fitted <- cv.glmHub(xdata, ydata,
 
 # Results of Cross Validation
 
-Shows the results of `1000` different parameters used to find the optimal value in 10-fold cross-validation. The two vertical dotted lines represent the best model and a model with less variables selected *(genes)*, but within a standard error distance from the best.
+Shows the results of `1000` different parameters used to find the optimal value 
+in 10-fold cross-validation. The two vertical dotted lines represent the best 
+model and a model with less variables selected *(genes)*, but within a standard 
+error distance from the best.
 
 ```{r results}
 plot(fitted)
@@ -130,8 +141,10 @@ geneNames(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
 ```{r accuracy, echo=FALSE}
 resp <- predict(fitted, s = 'lambda.min', newx = xdata, type = 'class')
 flog.info('Misclassified (%d)', sum(ydata != resp))
-flog.info('  * False primary solid tumour: %d', sum(resp != ydata & resp == 'Primary Solid Tumor'))
-flog.info('  * False normal              : %d', sum(resp != ydata & resp == 'Solid Tissue Normal'))
+flog.info('  * False primary solid tumour: %d', 
+          sum(resp != ydata & resp == 'Primary Solid Tumor'))
+flog.info('  * False normal              : %d', 
+          sum(resp != ydata & resp == 'Solid Tissue Normal'))
 ```
 
 Histogram of predicted response

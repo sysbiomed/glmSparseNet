@@ -45,9 +45,12 @@ theme_set(ggplot2::theme_minimal())
 
 # Load data
 
-The data is loaded from an online curated dataset downloaded from TCGA using `curatedTCGAData` bioconductor package and processed.
+The data is loaded from an online curated dataset downloaded from TCGA using 
+`curatedTCGAData` bioconductor package and processed.
 
-To accelerate the process we use a very reduced dataset down to 107 variables only *(genes)*, which is stored as a data object in this package. However, the procedure to obtain the data manually is described in the following chunk.
+To accelerate the process we use a very reduced dataset down to 107 variables 
+only *(genes)*, which is stored as a data object in this package. However, the 
+procedure to obtain the data manually is described in the following chunk.
 
 ```{r curated_data, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
@@ -71,12 +74,12 @@ ydata.raw <- colData(brca.primary.solid.tumor) %>% as.data.frame %>%
          days_to_death,         days_to_last_followup,
          Vital.Status) %>% 
   # Convert days to integer
-  mutate(Days.to.date.of.Death        = as.integer(Days.to.date.of.Death)) %>%
-  mutate(Days.to.Date.of.Last.Contact = as.integer(Days.to.Date.of.Last.Contact)) %>%
+  mutate(Days.to.date.of.Death = as.integer(Days.to.date.of.Death)) %>%
+  mutate(Days.to.Last.Contact  = as.integer(Days.to.Date.of.Last.Contact)) %>%
   # Find max time between all days (ignoring missings)
   rowwise %>%
   mutate(time = max(days_to_last_followup,        Days.to.date.of.Death, 
-                    Days.to.Date.of.Last.Contact, days_to_death, na.rm = TRUE)) %>%
+                    Days.to.Last.Contact, days_to_death, na.rm = TRUE)) %>%
   # Keep only survival variables and codes
   select(patientID, status = vital_status, time) %>% 
   # Discard individuals with survival time less or equal to 0
@@ -86,8 +89,12 @@ ydata.raw <- colData(brca.primary.solid.tumor) %>% as.data.frame %>%
 rownames(ydata.raw) <- ydata.raw$patientID
 
 # Get matches between survival and assay data
-xdata.raw <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw),]
-xdata.raw <- xdata.raw %>% { (apply(., 2, sd) != 0) } %>% { xdata.raw[, .] } %>% scale
+xdata.raw <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% 
+                         rownames(ydata.raw),]
+xdata.raw <- xdata.raw %>% 
+  { (apply(., 2, sd) != 0) } %>% 
+  { xdata.raw[, .] } %>% 
+  scale
 
 # Order ydata the same as assay
 ydata.raw    <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
@@ -97,7 +104,8 @@ set.seed(params$seed)
 small.subset <- c('CD5', 'CSF2RB', 'IRGC', 'NEUROG2', 'NLRC4', 'PDE11A',  
                   'PTEN', 'TP53', 'BRAF',
                   'PIK3CB', 'QARS', 'RFC3', 'RPGRIP1L', 'SDC1', 'TMEM31', 
-                  'YME1L1', 'ZBTB11', sample(colnames(xdata.raw), 100)) %>% unique
+                  'YME1L1', 'ZBTB11', sample(colnames(xdata.raw), 100)) %>% 
+  unique
 
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
 ydata <- ydata.raw %>% select(time, status)
@@ -105,7 +113,8 @@ ydata <- ydata.raw %>% select(time, status)
 
 # Fit models
 
-Fit model model penalizing by the hubs using the cross-validation function by `cv.glmHub`.
+Fit model model penalizing by the hubs using the cross-validation function by 
+`cv.glmHub`.
 
 ```{r fit}
 set.seed(params$seed)
@@ -119,7 +128,10 @@ fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status),
 
 # Results of Cross Validation
 
-Shows the results of `100` different parameters used to find the optimal value in 10-fold cross-validation. The two vertical dotted lines represent the best model and a model with less variables selected *(genes)*, but within a standard error distance from the best.
+Shows the results of `100` different parameters used to find the optimal value 
+in 10-fold cross-validation. The two vertical dotted lines represent the best 
+model and a model with less variables selected *(genes)*, but within a standard 
+error distance from the best.
 
 ```{r results}
 plot(fitted)
