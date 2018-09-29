@@ -52,15 +52,22 @@ theme_set(ggplot2::theme_minimal())
 
 ## Overview
 
-This vignette uses the STRING database (https://string-db.org/) of protein-protein interactions as the network-based penalizer in generalized linear models using Breast invasive carcinoma sample dataset.
+This vignette uses the STRING database (https://string-db.org/) of 
+protein-protein interactions as the network-based penalizer in generalized 
+linear models using Breast invasive carcinoma sample dataset.
 
-The degree vector is calculated manually to account for genes that are not present in the STRING database, as these will not have any interactions, i.e. edges.
+The degree vector is calculated manually to account for genes that are not 
+present in the STRING database, as these will not have any interactions, 
+i.e. edges.
 
 ## Download Data from STRING
 
-Retrieve all interactions from [STRING databse](https://string-db.org/). We have included a helper function that retrieves the Homo sapiens known interactions.
+Retrieve all interactions from [STRING databse](https://string-db.org/). 
+We have included a helper function that retrieves the Homo sapiens known 
+interactions.
 
-For this vignette, we use a cached version of all interaction with `score_threshold = 700`
+For this vignette, we use a cached version of all interaction with 
+`score_threshold = 700`
 
 *Note*: Text-based interactions are excluded from the network.
 
@@ -70,7 +77,8 @@ all.interactions.700 <- stringDBhomoSapiens(score_threshold = 700)
 ```
 
 ```{r, include=FALSE}
-futile.logger::flog.info('data', data('string.interactions.700.cache', package = 'glmSparseNet'), capture = TRUE)
+futile.logger::flog.info('data', data('string.interactions.700.cache', 
+                                      package = 'glmSparseNet'), capture = TRUE)
 all.interactions <- string.interactions.700.cache
 ```
 
@@ -93,19 +101,22 @@ string.network.undirected <- (string.network.undirected != 0) * 1
 flog.info('Directed graph (score_threshold = %d)', 700)
 flog.info('  *       total edges: %d', sum(string.network != 0))
 flog.info('  *    unique protein: %d', nrow(string.network))
-flog.info('  * edges per protein: %f', sum(string.network != 0) / nrow(string.network) )
+flog.info('  * edges per protein: %f', 
+          sum(string.network != 0) / nrow(string.network) )
 flog.info('')
 flog.info('Undirected graph (score_threshold = %d)', 700)
 flog.info('  *       total edges: %d', sum(string.network.undirected != 0) / 2)
 flog.info('  *    unique protein: %d', nrow(string.network.undirected))
-flog.info('  * edges per protein: %f', sum(string.network.undirected != 0) / 2 / nrow(string.network.undirected) )
+flog.info('  * edges per protein: %f', 
+          sum(string.network.undirected != 0)/2/nrow(string.network.undirected))
 ```
 
 ### Summary of degree *(indegree + outdegree)*
 
 ```{r, echo=FALSE}
 string.network.binary <- (string.network.undirected != 0) * 1
-degree.network        <- (Matrix::rowSums(string.network.binary) + Matrix::colSums(string.network.binary)) / 2
+degree.network        <- (Matrix::rowSums(string.network.binary) + 
+                            Matrix::colSums(string.network.binary)) / 2
 
 flog.info('Summary of degree:', summary(degree.network), capture = TRUE)
 ```
@@ -113,7 +124,10 @@ flog.info('Summary of degree:', summary(degree.network), capture = TRUE)
 ### Histogram of degree *(up until 99.999% quantile)*
 
 ```{r, warning=FALSE}
-qplot(degree.network[degree.network <= quantile(degree.network, probs = .99999)], geom = 'histogram', fill = my.colors(2), bins = 100) + theme(legend.position = 'none') + xlab('Degree (up until 99.999% quantile)')
+qplot(degree.network[degree.network <= quantile(degree.network, 
+                                                probs = .99999)], 
+      geom = 'histogram', fill = my.colors(2), bins = 100) + 
+  theme(legend.position = 'none') + xlab('Degree (up until 99.999% quantile)')
 ```
 
 ## glmSparseNet
@@ -132,7 +146,8 @@ brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
 Build the survival data from the clinical columns.
 
 * Selects only primary solid tumour samples
-* Merge survival times for patients, which have different columns in case they are alive or dead.
+* Merge survival times for patients, which have different columns in case they 
+are alive or dead.
 * Build two matrix objects that fit the data `xdata` and `ydata`
 
 ```{r data.show, warning=FALSE, error=FALSE}
@@ -159,7 +174,7 @@ rownames(ydata.raw) <- ydata.raw$patientID
 
 # keep only features that are in degree.network and have standard deviation > 0
 valid.features <- colnames(xdata.raw)[colnames(xdata.raw) %in% 
-                                        names(degree.network[degree.network > 0])]
+                                      names(degree.network[degree.network > 0])]
 xdata.raw      <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% 
                               rownames(ydata.raw), valid.features]
 xdata.raw      <- xdata.raw %>% 
