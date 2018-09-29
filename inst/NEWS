@@ -1,6 +1,15 @@
 # glmSparseNet
 ----------------------------------------------------------------
 
+## Changes in version 0.99.14
+
+- Renamed functions to camelCase
+- Renamed non-exported functions with '.' prefix
+- Removed most methods, as suggested by Bioc reviewer
+- Removed commented code
+- Changed functions that handle tcga data to use TCGAutils package
+- Many more described in https://github.com/Bioconductor/Contributions/issues/849#issuecomment-422594871
+
 ## Changes in version 0.99.13
 
 - Renamed draw.kaplan to separate2groups.cox
