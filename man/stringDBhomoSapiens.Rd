@@ -20,7 +20,7 @@ proteins, and columns
 the count of scores above the given score_threshold
 }
 \description{
-Download protein-protein interactions from STRING DB (for a specific species)
+Download protein-protein interactions from STRING DB
 }
 \examples{
 \dontrun{
