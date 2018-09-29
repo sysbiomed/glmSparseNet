@@ -2,7 +2,7 @@
 % Please edit documentation in R/string_db.R
 \name{stringDBhomoSapiens}
 \alias{stringDBhomoSapiens}
-\title{Download protein-protein interactions from STRING DB (for a specific species)}
+\title{Download protein-protein interactions from STRING DB}
 \usage{
 stringDBhomoSapiens(version = "10", score_threshold = 0,
   remove.text = TRUE)

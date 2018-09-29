@@ -1,4 +1,4 @@
-#' Download protein-protein interactions from STRING DB (for a specific species)
+#' Download protein-protein interactions from STRING DB
 #'
 #' @param version version of the database to use
 #' @param score_threshold remove scores below threshold
