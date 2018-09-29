@@ -21,9 +21,9 @@ network.options.default(method = "pearson", unweighted = TRUE,
 
 \item{n.cores}{number of cores to use, default to 1
 
-The trans.fun argument takes a function definition that will apply a transformation
-to the penalty vector calculated from the degree. This transformation allows to
-change how the penalty is applied.}
+The trans.fun argument takes a function definition that will apply a
+transformation to the penalty vector calculated from the degree. This
+transformation allows to change how the penalty is applied.}
 
 \item{trans.fun}{see below}
 }

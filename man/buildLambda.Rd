@@ -9,7 +9,8 @@ buildLambda(lambda.largest = NULL, xdata = NULL, ydata = NULL,
   lambda.per.order.magnitude = 150)
 }
 \arguments{
-\item{lambda.largest}{numeric value for largest number of lambda to consider (usually with a target of 1 selected variable)}
+\item{lambda.largest}{numeric value for largest number of lambda to consider
+(usually with a target of 1 selected variable)}
 
 \item{xdata}{X parameter for glmnet function}
 
@@ -17,9 +18,11 @@ buildLambda(lambda.largest = NULL, xdata = NULL, ydata = NULL,
 
 \item{family}{family parameter to glmnet function}
 
-\item{orders.of.magnitude.smaller}{minimum value for lambda (lambda.largest / 10^orders.of.magnitude.smaller)}
+\item{orders.of.magnitude.smaller}{minimum value for lambda
+(lambda.largest / 10^orders.of.magnitude.smaller)}
 
-\item{lambda.per.order.magnitude}{how many lambdas to create for each order of magnitude}
+\item{lambda.per.order.magnitude}{how many lambdas to create for each order
+of magnitude}
 }
 \value{
 a numeric vector with suitable lambdas

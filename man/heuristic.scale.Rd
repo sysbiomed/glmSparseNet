@@ -9,11 +9,14 @@ heuristic.scale(x, sub.exp10 = -1, exp.mult = -1, sub.exp = -1)
 \arguments{
 \item{x}{vector of values to scale}
 
-\item{sub.exp10}{value to subtract to base 10 exponential, i.e. for `10^0 - sub.exp10 = 1 - sub.exp10`}
+\item{sub.exp10}{value to subtract to base 10 exponential, for example:
+`10^0 - sub.exp10 = 1 - sub.exp10`}
 
-\item{exp.mult}{parameter to multiply exponential, i.e. to have a negative exponential or positive}
+\item{exp.mult}{parameter to multiply exponential, i.e. to have a negative
+exponential or positive}
 
-\item{sub.exp}{value to subtract for exponentional, i.e. if x = 0, `exp(0) - sub.exp = 1 - sub.exp`}
+\item{sub.exp}{value to subtract for exponentional, for example if x = 0,
+`exp(0) - sub.exp = 1 - sub.exp`}
 }
 \value{
 a vector of scaled values

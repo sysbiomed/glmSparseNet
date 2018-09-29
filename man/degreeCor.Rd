@@ -15,9 +15,11 @@ degreeCor(xdata, cutoff = 0, consider.unweighted = FALSE,
 
 \item{consider.unweighted}{consider all edges as 1 if they are greater than 0}
 
-\item{force.recalc.degree}{force recalculation of penalty weights (but not the network), instead of going to cache}
+\item{force.recalc.degree}{force recalculation of penalty weights (but not
+the network), instead of going to cache}
 
-\item{force.recalc.network}{force recalculation of network and penalty weights, instead of going to cache}
+\item{force.recalc.network}{force recalculation of network and penalty
+weights, instead of going to cache}
 
 \item{n.cores}{number of cores to be used}
 

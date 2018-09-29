@@ -15,7 +15,8 @@ stringDBhomoSapiens(version = "10", score_threshold = 0,
 \item{remove.text}{remove text mining-based scores}
 }
 \value{
-a data.frame with rows representing an interaction between two proteins, and columns
+a data.frame with rows representing an interaction between two
+proteins, and columns
 the count of scores above the given score_threshold
 }
 \description{

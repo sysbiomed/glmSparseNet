@@ -16,7 +16,8 @@ glmSparseNetPrivate(fun, xdata, ydata, network, experiment.name = NULL,
 
 \item{network}{type of network, see below}
 
-\item{experiment.name}{when xdata is a MultiAssayExperiment object this parameter is required}
+\item{experiment.name}{when xdata is a MultiAssayExperiment object this
+parameter is required}
 
 \item{network.options}{options to calculate network}
 
@@ -28,7 +29,8 @@ network parameter accepts:
 
  * string to calculate network based on data (correlation, covariance)
  * matrix representing the network
- * vector with already calculated penalty weights (can also be used directly with glmnet)
+ * vector with already calculated penalty weights (can also be used directly
+ with glmnet)
 }
 \description{
 Calculate GLM model with network-based regularization

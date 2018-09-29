@@ -16,10 +16,11 @@
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 #' networkCorParallel(xdata)
 networkCorParallel <- function(xdata,
-                                 build.output  = 'matrix',
-                                 n.cores       = 1,
-                                 force.recalc.network  = FALSE,
-                                 show.message  = FALSE, ...) {
+                               build.output  = 'matrix',
+                               n.cores       = 1,
+                               force.recalc.network  = FALSE,
+                               show.message  = FALSE, ...) {
+
   networkGenericParallel(stats::cor, 'correlation', xdata,
                          build.output = build.output, n.cores = n.cores,
                          force.recalc.network = force.recalc.network,

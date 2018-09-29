@@ -3,14 +3,16 @@
 \docType{data}
 \name{string.interactions.700.cache}
 \alias{string.interactions.700.cache}
-\title{Cache of protein-protein interactions dataset, as it takes some time to retrieve and process
+\title{Cache of protein-protein interactions dataset, as it takes some time to
+retrieve and process
 this will facilitate the vignette building}
 \format{An object of class \code{data.frame} with 246450 rows and 14 columns.}
 \usage{
 string.interactions.700.cache
 }
 \description{
-It was filtered with combined_scores and individual scores below 700 without text-based scores
+It was filtered with combined_scores and individual scores below 700 without
+text-based scores
 }
 \examples{
 head(string.interactions.700.cache)

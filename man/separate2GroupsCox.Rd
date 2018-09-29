@@ -9,13 +9,15 @@ separate2GroupsCox(chosen.btas, xdata, ydata, probs = c(0.5, 0.5),
   ylim = NULL, expand.yzero = FALSE, legend.outside = FALSE)
 }
 \arguments{
-\item{chosen.btas}{list of testing coefficients to calculate prognostic indexes, for example ``list(Age = some_vector)``}
+\item{chosen.btas}{list of testing coefficients to calculate prognostic
+indexes, for example ``list(Age = some_vector)``}
 
 \item{xdata}{n x m matrix with n observations and m variables}
 
 \item{ydata}{Survival object}
 
-\item{probs}{How to separate high and low risk patients 50\%-50\% is the default, but for top and bottom 40\% -> c(.4,.6)}
+\item{probs}{How to separate high and low risk patients 50\%-50\% is the
+default, but for top and bottom 40\% -> c(.4,.6)}
 
 \item{no.plot}{Only calculate p-value and do not generate survival curve plot}
 
@@ -35,7 +37,8 @@ object with logrank test and kaplan-meier survival plot
 A list with plot, p-value and kaplan-meier object
 }
 \description{
-Draws multiple kaplan meyer survival curves (or just 1) and calculates logrank test
+Draws multiple kaplan meyer survival curves (or just 1) and calculates
+logrank test
 }
 \examples{
 data('ovarian', package = 'survival')
@@ -45,5 +48,6 @@ separate2GroupsCox(c(age = 1, 0), xdata, ydata)
 separate2GroupsCox(c(age = 1, 0.5), xdata, ydata)
 separate2GroupsCox(c(age = 1), c(1,0,1,0,1,0),
                    data.frame(time = runif(6), status = rbinom(6, 1, .5)))
-separate2GroupsCox(list(aa = c(age = 1, 0.5), bb = c(age = 0, 1.5)), xdata, ydata)
+separate2GroupsCox(list(aa = c(age = 1, 0.5),
+                        bb = c(age = 0, 1.5)), xdata, ydata)
 }

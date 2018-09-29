@@ -12,15 +12,20 @@ degreeSparsebn(xdata, type = "continuous", levels = NULL, ivn = NULL,
 \arguments{
 \item{xdata}{calculate correlation matrix on each column}
 
-\item{type}{either "discrete" or "continuous", see sparsebnUtils::sparsebnData}
+\item{type}{either "discrete" or "continuous",
+see sparsebnUtils::sparsebnData}
 
-\item{levels}{(optional) list of levels for each node. see sparsebnUtils::sparsebnData}
+\item{levels}{(optional) list of levels for each node.
+see sparsebnUtils::sparsebnData}
 
-\item{ivn}{(optional) list of interventions for each observation, see sparsebnUtils::sparsebnData}
+\item{ivn}{(optional) list of interventions for each observation,
+see sparsebnUtils::sparsebnData}
 
-\item{n}{(optional) number of rows from data matrix to print, see sparsebnUtils::sparsebnData}
+\item{n}{(optional) number of rows from data matrix to print,
+see sparsebnUtils::sparsebnData}
 
-\item{object}{(optional) an object of type sparsebnData, see sparsebnUtils::sparsebnData}
+\item{object}{(optional) an object of type sparsebnData,
+see sparsebnUtils::sparsebnData}
 
 \item{cutoff}{positive value that determines a cutoff value}
 
@@ -32,7 +37,8 @@ degreeSparsebn(xdata, type = "continuous", levels = NULL, ivn = NULL,
 
 \item{force.recalc.degree}{force recalculation, instead of going to cache}
 
-\item{force.recalc.network}{force recalculation of network and penalty weights, instead of going to cache}
+\item{force.recalc.network}{force recalculation of network and penalty
+weights, instead of going to cache}
 
 \item{...}{parameters for sparsebn::estimate.dag}
 }

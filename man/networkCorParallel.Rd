@@ -10,7 +10,8 @@ networkCorParallel(xdata, build.output = "matrix", n.cores = 1,
 \arguments{
 \item{xdata}{base data to calculate network}
 
-\item{build.output}{if output returns a 'matrix', 'vector' of the upper triu without the diagonal or NULL with any other argument}
+\item{build.output}{if output returns a 'matrix', 'vector' of the upper triu
+without the diagonal or NULL with any other argument}
 
 \item{n.cores}{number of cores to be used}
 

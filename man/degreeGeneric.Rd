@@ -12,7 +12,8 @@ degreeGeneric(fun = stats::cor, fun.prefix = "operator", xdata,
 \arguments{
 \item{fun}{function that will calculate the edge weight between 2 nodes}
 
-\item{fun.prefix}{used to store low-level information on network as it can become to large to be stored in memory}
+\item{fun.prefix}{used to store low-level information on network as it can
+become to large to be stored in memory}
 
 \item{xdata}{calculate correlation matrix on each column}
 
@@ -22,9 +23,11 @@ degreeGeneric(fun = stats::cor, fun.prefix = "operator", xdata,
 
 \item{chunks}{calculate function at batches of this value (default is 1000)}
 
-\item{force.recalc.degree}{force recalculation of penalty weights (but not the network), instead of going to cache}
+\item{force.recalc.degree}{force recalculation of penalty weights (but not
+the network), instead of going to cache}
 
-\item{force.recalc.network}{force recalculation of network and penalty weights, instead of going to cache}
+\item{force.recalc.network}{force recalculation of network and penalty
+weights, instead of going to cache}
 
 \item{n.cores}{number of cores to be used}
 
@@ -34,6 +37,7 @@ degreeGeneric(fun = stats::cor, fun.prefix = "operator", xdata,
 a vector of the degrees
 }
 \description{
-The assumption to use this function is that the network represented by a matrix is symetric and without
+The assumption to use this function is that the network represented by a
+matrix is symetric and without
 any connection the node and itself.
 }

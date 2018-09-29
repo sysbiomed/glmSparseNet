@@ -23,7 +23,8 @@ see cv.glmSparseNet
 }
 \description{
 This function overrides the `trans.fun` options in `network.options` with
-an heuristic described in Veríssimo et al. that penalizes nodes with small degree.
+an heuristic described in Veríssimo et al. that penalizes nodes with small
+degree.
 }
 \examples{
 xdata <- matrix(rnorm(100), ncol = 20)

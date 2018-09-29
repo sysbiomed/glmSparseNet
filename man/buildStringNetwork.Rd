@@ -7,17 +7,21 @@
 buildStringNetwork(string.tbl, use.names = "protein")
 }
 \arguments{
-\item{string.tbl}{matrix with colnames and rownames as ensembl peptide id (same order)}
+\item{string.tbl}{matrix with colnames and rownames as ensembl peptide id
+(same order)}
 
-\item{use.names}{default is to use protein names ('protein'), other options are 'ensembl' for ensembl
+\item{use.names}{default is to use protein names ('protein'), other options
+are 'ensembl' for ensembl
 gene id or 'external' for external gene names}
 }
 \value{
-a new matrix with gene ids instead of peptide ids. The size of matrix can be different as
+a new matrix with gene ids instead of peptide ids. The size of matrix
+ can be different as
 there may not be a mapping or a peptide mapping can have multiple genes.
 }
 \description{
-This can reduce the dimension of the original network, as there may not be a mapping
+This can reduce the dimension of the original network, as there may not be a
+mapping
 between peptide and gene id
 }
 \examples{
