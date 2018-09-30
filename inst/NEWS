@@ -1,6 +1,10 @@
 # glmSparseNet
 ----------------------------------------------------------------
 
+## Changes in version 0.99.15
+
+- Speeds up ppi vignette
+
 ## Changes in version 0.99.14
 
 - Renamed functions to camelCase

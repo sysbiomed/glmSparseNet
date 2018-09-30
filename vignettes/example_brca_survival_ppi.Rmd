@@ -74,12 +74,13 @@ For this vignette, we use a cached version of all interaction with
 ```{r, eval=FALSE}
 # Not evaluated in vignette as it takes too long to download and process
 all.interactions.700 <- stringDBhomoSapiens(score_threshold = 700)
+string.network       <- buildStringNetwork(all.interactions.700, 
+                                           use.names = 'external')
 ```
 
 ```{r, include=FALSE}
-futile.logger::flog.info('data', data('string.interactions.700.cache', 
-                                      package = 'glmSparseNet'), capture = TRUE)
-all.interactions <- string.interactions.700.cache
+data('string.network.700.cache', package = 'glmSparseNet')
+string.network <- string.network.700.cache
 ```
 
 ## Build network matrix
@@ -87,8 +88,6 @@ all.interactions <- string.interactions.700.cache
 Build a sparse matrix object that contains the network.
 
 ```{r}
-string.network <- buildStringNetwork(all.interactions, use.names = 'external')
-
 string.network.undirected <- string.network + Matrix::t(string.network)
 string.network.undirected <- (string.network.undirected != 0) * 1
 ```
@@ -153,7 +152,7 @@ are alive or dead.
 ```{r data.show, warning=FALSE, error=FALSE}
 # keep only solid tumour (code: 01)
 brca.primary.solid.tumor <- TCGAutils::splitAssays(brca, '01')
-xdata.raw <- t(assay(brca.primary.solid.tumor[[1]]))
+xdata.raw                <- t(assay(brca.primary.solid.tumor[[1]]))
 
 # Get survival information
 ydata.raw <- colData(brca.primary.solid.tumor) %>% as.data.frame %>% 
@@ -177,10 +176,7 @@ valid.features <- colnames(xdata.raw)[colnames(xdata.raw) %in%
                                       names(degree.network[degree.network > 0])]
 xdata.raw      <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% 
                               rownames(ydata.raw), valid.features]
-xdata.raw      <- xdata.raw %>% 
-  { (apply(., 2, sd) != 0) } %>% 
-  { xdata.raw[, .] } %>% 
-  scale
+xdata.raw      <- scale(xdata.raw)
 
 # Order ydata the same as assay
 ydata.raw    <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
@@ -283,7 +279,8 @@ definition for more details.
 ```{r, warning=FALSE, error=FALSE}
 cv.orphan <- cv.glmOrphan(xdata, 
                           Surv(ydata$time, ydata$status), 
-                          family = 'cox',
+                          family  = 'cox',
+                          foldid  = foldid,
                           network = my.string, 
                           network.options = network.options.default(
                             min.degree = 0.2))
@@ -311,7 +308,9 @@ selected.genes[['Orphan']] <- coef(cv.orphan, s = 'lambda.min')[,1] %>%
 Uses regular glmnet model as simple baseline
 
 ```{r, warning=FALSE, error=FALSE}
-cv.glm <- cv.glmnet(xdata, Surv(ydata$time, ydata$status), family = 'cox', 
+cv.glm <- cv.glmnet(xdata, 
+                    Surv(ydata$time, ydata$status), 
+                    family = 'cox', 
                     foldid = foldid)
 ```
 

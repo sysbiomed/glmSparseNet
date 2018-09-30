@@ -76,17 +76,10 @@ xdata.raw <- xdata.raw %>%
   scale
 
 set.seed(params$seed)
-small.subset <- c(geneNames(c('ENSG00000110448', 'ENSG00000124449', 
-                              'ENSG00000103494', 'ENSG00000172053', 
-                              'ENSG00000136758', 'ENSG00000051382', 
-                              'ENSG00000128655', 'ENSG00000100368', 
-                              'ENSG00000115884', 'ENSG00000179363', 
-                              'ENSG00000091106', 'ENSG00000178403', 
-                              'ENSG00000066422', 'ENSG00000110448', 
-                              'ENSG00000124449', 'ENSG00000230445', 
-                              'ENSG00000172053', 
-                              'ENSG00000185122'))$external_gene_name, 
-                   sample(colnames(xdata.raw), 100))
+small.subset <- c('CD5', 'CSF2RB', 'HSF1', 'IRGC', 'LRRC37A6P', 'NEUROG2', 
+                  'NLRC4', 'PDE11A', 'PIK3CB', 'QARS', 'RPGRIP1L', 'SDC1', 
+                  'TMEM31', 'YME1L1', 'ZBTB11', 
+                  sample(colnames(xdata.raw), 100))
 
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
 ydata <- class.v

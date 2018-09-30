@@ -17,9 +17,9 @@ params:
 ## Instalation
 
 ```{r, eval=FALSE}
-if (!require("BiocManager"))
-  install.packages("BiocManager")
-BiocManager::install("glmSparseNet")
+if (!require('BiocManager'))
+  install.packages('BiocManager')
+BiocManager::install('glmSparseNet')
 ```
 
 # Required Packages
@@ -54,11 +54,11 @@ procedure to obtain the data manually is described in the following chunk.
 
 ```{r curated_data, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
-skcm <- curatedTCGAData(diseaseCode = "SKCM", assays = "RNASeq2GeneNorm", FALSE)
+skcm <- curatedTCGAData(diseaseCode = 'SKCM', assays = 'RNASeq2GeneNorm', FALSE)
 ```
 
 ```{r curated_data_non_eval, eval=FALSE}
-skcm <- curatedTCGAData(diseaseCode = "SKCM", assays = "RNASeq2GeneNorm", FALSE)
+skcm <- curatedTCGAData(diseaseCode = 'SKCM', assays = 'RNASeq2GeneNorm', FALSE)
 ```
 
 
@@ -107,11 +107,8 @@ xdata.raw      <- xdata.raw %>%
 ydata.raw    <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
 
 set.seed(params$seed)
-small.subset <- c(geneNames(c('ENSG00000109790', 'ENSG00000109133', 
-                              'ENSG00000023734', 'ENSG00000183770', 
-                              'ENSG00000214617', 'ENSG00000185813', 
-                  'ENSG00000183242'))$external_gene_name,
-                  sample(colnames(xdata.raw), 100))
+small.subset <- c('FOXL2', 'KLHL5', 'PCYT2', 'SLC6A10P', 'STRAP', 'TMEM33',
+                  'WT1-AS', sample(colnames(xdata.raw), 100))
 
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
 ydata <- ydata.raw %>% select(time, status)
@@ -123,7 +120,10 @@ Fit model model penalizing by the hubs using the cross-validation function by
 `cv.glmHub`.
 
 ```{r fit}
-fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status), family  = 'cox', 
+fitted <- cv.glmHub(xdata, 
+                    Surv(ydata$time, ydata$status), 
+                    family  = 'cox', 
+                    foldid  = balanced.cv.folds(!!ydata$status)$output,
                     network = 'correlation', 
                     network.options = network.options.default(min.degree = .2, 
                                                               cutoff = .6))
