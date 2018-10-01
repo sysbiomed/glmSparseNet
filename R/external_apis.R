@@ -120,8 +120,8 @@ ensemblGeneNames <- function(gene.id) {
 #' @export
 #'
 #' @examples
+#' hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
 #' \dontrun{
-#'     hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
 #'     hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
 #' }
 hallmarks <- function(genes, metric = 'count', hierarchy = 'full',
@@ -258,11 +258,9 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full',
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#'      protein2EnsemblGeneNames(c('ENSP00000235382',
-#'                                'ENSP00000233944',
-#'                                'ENSP00000216911'))
-#' }
+#' protein2EnsemblGeneNames(c('ENSP00000235382',
+#'                            'ENSP00000233944',
+#'                            'ENSP00000216911'))
 protein2EnsemblGeneNames <- function(ensembl.proteins) {
     tryCatch({
         marts <- biomaRt::listMarts()
