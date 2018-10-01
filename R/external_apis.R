@@ -6,12 +6,10 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#'     geneNames(c('ENSG00000114978','ENSG00000166211', 'ENSG00000183688'))
-#' }
+#' geneNames(c('ENSG00000114978','ENSG00000166211', 'ENSG00000183688'))
 geneNames <- function(ensembl.genes) {
 
-  . <- NULL
+    . <- NULL
 
     tryCatch({
         marts <- biomaRt::listMarts()
