@@ -1,6 +1,10 @@
 # glmSparseNet
 ----------------------------------------------------------------
 
+## Changes in version 0.99.17
+
+- Converts to 4 space indentation
+
 ## Changes in version 0.99.15
 
 - Speeds up ppi vignette
