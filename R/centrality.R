@@ -19,7 +19,8 @@ networkCorParallel <- function(xdata,
                                build.output  = 'matrix',
                                n.cores       = 1,
                                force.recalc.network  = FALSE,
-                               show.message  = FALSE, ...) {
+                               show.message  = FALSE,
+                               ...) {
 
     .networkGenericParallel(stats::cor, 'correlation', xdata,
                             build.output = build.output, n.cores = n.cores,
@@ -87,27 +88,26 @@ networkCovParallel <- function(xdata,
     fun.aux <- function(xdata, ...) {
         result <- parallel::mclapply(as.numeric(seq_len(ncol(xdata)-1)),
                                      function(ix.i) {
-          tryCatch({
-              result <- loose.rock::run.cache(
-                  .networkWorker, fun,
-                  xdata, ix.i,
-                  #
-                  cache.digest = list(xdata.sha256),
-                  cache.prefix = fun.prefix,
-                  show.message = show.message,
-                  force.recalc = force.recalc.network,
-                  ...
-              )
-          },
-          error = function(error.str) {
-              futile.logger::flog.error('This error has occured %s', error.str)
-          })
-          if (build.output == 'vector' || build.output == 'matrix') {
-              return(result)
-          } else {
-              return(TRUE)
-          }
-          #}
+            tryCatch({
+                result <- loose.rock::run.cache(
+                    .networkWorker, fun,
+                    xdata, ix.i,
+                    #
+                    cache.digest = list(xdata.sha256),
+                    cache.prefix = fun.prefix,
+                    show.message = show.message,
+                    force.recalc = force.recalc.network,
+                    ...
+                )
+            },
+            error = function(error.str) {
+                futile.logger::flog.error('This error has occured %s', error.str)
+            })
+            if (build.output == 'vector' || build.output == 'matrix') {
+                return(result)
+            } else {
+                return(TRUE)
+            }
         }, mc.cores = n.cores, mc.silent = FALSE, mc.preschedule = TRUE)
         return(result)
     }
