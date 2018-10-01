@@ -13,15 +13,15 @@ geneNames <- function(ensembl.genes) {
 
   . <- NULL
 
-  tryCatch({
-      marts <- biomaRt::listMarts()
-      index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
-      mart <- biomaRt::useMart(marts$biomart[index])
-      mart <- loose.rock::run.cache(biomaRt::useMart,
-                                    marts$biomart[index],
-                                    'hsapiens_gene_ensembl',
-                                    cache.prefix = 'biomart',
-                                    show.message = FALSE)
+    tryCatch({
+        marts <- biomaRt::listMarts()
+        index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
+        mart <- biomaRt::useMart(marts$biomart[index])
+        mart <- loose.rock::run.cache(biomaRt::useMart,
+                                      marts$biomart[index],
+                                      'hsapiens_gene_ensembl',
+                                      cache.prefix = 'biomart',
+                                      show.message = FALSE)
         results <- biomaRt::getBM(attributes = c("external_gene_name",
                                                  "ensembl_gene_id"),
                                   filters = "ensembl_gene_id",
@@ -33,11 +33,12 @@ geneNames <- function(ensembl.genes) {
         #  and add them with same ensembl_id
 
         results <- ensembl.genes[!ensembl.genes %in%
-                                   results$ensembl_gene_id] %>% {
-            data.frame(external_gene_name = .,
-                     ensembl_gene_id    = .,
-                     stringsAsFactors   = FALSE)
-        } %>% rbind(results)
+                                     results$ensembl_gene_id] %>%
+            {
+                data.frame(external_gene_name = .,
+                           ensembl_gene_id    = .,
+                           stringsAsFactors   = FALSE)
+            } %>% rbind(results)
 
         return(dplyr::arrange(results,
                               rlang::UQ(as.name('external_gene_name'))))
@@ -83,11 +84,12 @@ ensemblGeneNames <- function(gene.id) {
         # Check if any genes does not have an external_gene_name
         #  and add them with same ensembl_id
 
-        results <- gene.id[!gene.id %in% results$external_gene_name] %>% {
-            data.frame(external_gene_name = .,
-                       ensembl_gene_id    = .,
-                       stringsAsFactors   = FALSE)
-        } %>% rbind(results)
+        results <- gene.id[!gene.id %in% results$external_gene_name] %>%
+            {
+                data.frame(external_gene_name = .,
+                           ensembl_gene_id    = .,
+                           stringsAsFactors   = FALSE)
+            } %>% rbind(results)
 
         return(dplyr::arrange(results,
                               rlang::UQ(as.name('external_gene_name'))))
@@ -229,14 +231,14 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full',
               ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
                                                                  hjust = 1)) +
               ggplot2::ggtitle('Hallmarks heatmap',
-                subtitle = stringr::str_wrap(sprintf(
-                  'Selected genes without hallmarks (%d): %s',
-                  length(df.no.hallmarks),
-                  paste(df.no.hallmarks, collapse = ', ')),
-                                             width = 50)) +
+                  subtitle = stringr::str_wrap(sprintf(
+                      'Selected genes without hallmarks (%d): %s',
+                      length(df.no.hallmarks),
+                      paste(df.no.hallmarks, collapse = ', ')),
+                                               width = 50)) +
               ggplot2::xlab('External Gene Name') + ggplot2::ylab('') +
               ggplot2::scale_fill_gradientn(
-                colours = rev(grDevices::topo.colors(2)))
+                  colours = rev(grDevices::topo.colors(2)))
 
     } else {
         g1 = NULL
