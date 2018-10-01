@@ -10,16 +10,16 @@
 #' multi.assay <- MultiAssayExperiment::miniACC
 #' reduce.by.experiment(multi.assay, 'RNASeq2GeneNorm')
 reduce.by.experiment <- function(multi.assay, experiment.name) {
-  # Get all valid individuals from experiment (lookup the mapping)
-  primary.ix <- multi.assay@sampleMap$assay == experiment.name
-  valid.ydata.id <- multi.assay@sampleMap[primary.ix, 'primary']
+    # Get all valid individuals from experiment (lookup the mapping)
+    primary.ix <- multi.assay@sampleMap$assay == experiment.name
+    valid.ydata.id <- multi.assay@sampleMap[primary.ix, 'primary']
 
-  # filter the MultiAssayExperiment keeping only individuals with data in
-  #  specific experiment
-  valid.rows <- rownames(multi.assay@colData) %in% valid.ydata.id
-  suppressMessages(new.multi.assay <- multi.assay[,valid.rows])
+    # filter the MultiAssayExperiment keeping only individuals with data in
+    #  specific experiment
+    valid.rows <- rownames(multi.assay@colData) %in% valid.ydata.id
+    suppressMessages(new.multi.assay <- multi.assay[,valid.rows])
 
-  return(new.multi.assay)
+    return(new.multi.assay)
 }
 
 #' Setup network options
@@ -53,13 +53,13 @@ network.options.default <- function(method     = 'pearson',
                                     min.degree = 0,
                                     n.cores    = 1,
                                     trans.fun  = function(x) { x }) {
-  return(list(method = method,
-              unweighted = unweighted,
-              cutoff = cutoff,
-              centrality = centrality,
-              n.cores = n.cores,
-              min.degree = min.degree,
-              trans.fun = trans.fun))
+    return(list(method = method,
+                unweighted = unweighted,
+                cutoff = cutoff,
+                centrality = centrality,
+                n.cores = n.cores,
+                min.degree = min.degree,
+                trans.fun = trans.fun))
 }
 
 
@@ -85,33 +85,36 @@ network.options.default <- function(method     = 'pearson',
 #' glmSparseNet:::.calcPenalty(xdata, 'sparsebn')
 .calcPenalty <- function(xdata, penalty.type,
                         network.options = network.options.default()) {
-  if (network.options$centrality == 'degree') {
-    penalty.factor <- switch (penalty.type,
-      correlation = degreeCor(xdata,
-                              method              = network.options$method,
-                              consider.unweighted = network.options$unweighted,
-                              cutoff              = network.options$cutoff,
-                              #
-                              n.cores = network.options$n.cores),
-      covariance = degreeCov(xdata,
-                             method              = network.options$method,
-                             consider.unweighted = network.options$unweighted,
-                             cutoff              = network.options$cutoff,
-                             #
-                             n.cores = network.options$n.cores),
-      sparsebn = degreeSparsebn(xdata,
-                               consider.unweighted = network.options$unweighted,
-                                cutoff              = network.options$cutoff,
-                                #
-                                n.cores = network.options$n.cores),
-      none = rep(1, ncol(xdata)),
-      stop('Unkown network type, see documentation of glmSparseNet')
-    )
-  } else {
-    stop(sprintf('Centrality method not recognised: %d',
-                 network.options$centrality))
-  }
-  return(network.options$trans.fun(penalty.factor))
+    if (network.options$centrality == 'degree') {
+        penalty.factor <- switch (penalty.type,
+            correlation = degreeCor(
+                xdata,
+                method              = network.options$method,
+                consider.unweighted = network.options$unweighted,
+                cutoff              = network.options$cutoff,
+                #
+                n.cores = network.options$n.cores),
+            covariance = degreeCov(
+                xdata,
+                method              = network.options$method,
+                consider.unweighted = network.options$unweighted,
+                cutoff              = network.options$cutoff,
+                #
+                n.cores = network.options$n.cores),
+            sparsebn = degreeSparsebn(
+                xdata,
+                consider.unweighted = network.options$unweighted,
+                cutoff              = network.options$cutoff,
+                #
+                n.cores = network.options$n.cores),
+            none = rep(1, ncol(xdata)),
+            stop('Unkown network type, see documentation of glmSparseNet')
+        )
+    } else {
+        stop(sprintf('Centrality method not recognised: %d',
+                     network.options$centrality))
+    }
+    return(network.options$trans.fun(penalty.factor))
 }
 
 
@@ -126,8 +129,8 @@ network.options.default <- function(method     = 'pearson',
 #' hubHeuristic(rnorm(1:10))
 hubHeuristic <- function(x) {
 
-  x <- x / max(x)
-  return(heuristic.scale(1 - x))
+    x <- x / max(x)
+    return(heuristic.scale(1 - x))
 }
 
 #' Heuristic function to penalize nodes with high degree
@@ -140,8 +143,8 @@ hubHeuristic <- function(x) {
 #' @examples
 #' orphan.heuristic(rnorm(1:10))
 orphan.heuristic <- function(x) {
-  x <- x / max(x)
-  return(heuristic.scale(x))
+    x <- x / max(x)
+    return(heuristic.scale(x))
 }
 
 #' Heuristic function to use in high dimensions
@@ -160,5 +163,5 @@ orphan.heuristic <- function(x) {
 #' @examples
 #' orphan.heuristic(rnorm(1:10))
 heuristic.scale <- function(x, sub.exp10 = - 1, exp.mult = -1, sub.exp = -1) {
-  return(sub.exp10 + 10^(-exp.mult * (exp(x) + sub.exp)))
+    return(sub.exp10 + 10^(-exp.mult * (exp(x) + sub.exp)))
 }
