@@ -5,7 +5,7 @@
 \title{Calculate GLM model with network-based regularization}
 \usage{
 .glmSparseNetPrivate(fun, xdata, ydata, network, experiment.name = NULL,
-  network.options = network.options.default(), ...)
+  network.options = networkOptions(), ...)
 }
 \arguments{
 \item{fun}{function to be called (glmnet or cv.glmnet)}

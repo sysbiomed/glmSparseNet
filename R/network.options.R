@@ -8,8 +8,8 @@
 #'
 #' @examples
 #' multi.assay <- MultiAssayExperiment::miniACC
-#' reduce.by.experiment(multi.assay, 'RNASeq2GeneNorm')
-reduce.by.experiment <- function(multi.assay, experiment.name) {
+#' reduceByExperiment(multi.assay, 'RNASeq2GeneNorm')
+reduceByExperiment <- function(multi.assay, experiment.name) {
     # Get all valid individuals from experiment (lookup the mapping)
     primary.ix <- multi.assay@sampleMap$assay == experiment.name
     valid.ydata.id <- multi.assay@sampleMap[primary.ix, 'primary']
@@ -45,14 +45,14 @@ reduce.by.experiment <- function(multi.assay, experiment.name) {
 #' @export
 #'
 #' @examples
-#' network.options.default(unweighted = FALSE)
-network.options.default <- function(method     = 'pearson',
-                                    unweighted = TRUE,
-                                    cutoff     = 0,
-                                    centrality = 'degree',
-                                    min.degree = 0,
-                                    n.cores    = 1,
-                                    trans.fun  = function(x) { x }) {
+#' networkOptions(unweighted = FALSE)
+networkOptions <- function(method     = 'pearson',
+                           unweighted = TRUE,
+                           cutoff     = 0,
+                           centrality = 'degree',
+                           min.degree = 0,
+                           n.cores    = 1,
+                           trans.fun  = function(x) { x }) {
     return(list(method = method,
                 unweighted = unweighted,
                 cutoff = cutoff,
@@ -77,14 +77,14 @@ network.options.default <- function(method     = 'pearson',
 #' xdata <- matrix(rnorm(100), ncol = 20)
 #' glmSparseNet:::.calcPenalty(xdata, 'none')
 #' glmSparseNet:::.calcPenalty(xdata, 'correlation',
-#'                             network.options.default(cutoff = .6))
+#'                             networkOptions(cutoff = .6))
 #' glmSparseNet:::.calcPenalty(xdata, 'correlation')
 #' glmSparseNet:::.calcPenalty(xdata, 'covariance',
-#'                             network.options.default(cutoff = .6))
+#'                             networkOptions(cutoff = .6))
 #' glmSparseNet:::.calcPenalty(xdata, 'covariance')
 #' glmSparseNet:::.calcPenalty(xdata, 'sparsebn')
 .calcPenalty <- function(xdata, penalty.type,
-                        network.options = network.options.default()) {
+                        network.options = networkOptions()) {
     if (network.options$centrality == 'degree') {
         penalty.factor <- switch (penalty.type,
             correlation = degreeCor(
@@ -130,7 +130,7 @@ network.options.default <- function(method     = 'pearson',
 hubHeuristic <- function(x) {
 
     x <- x / max(x)
-    return(heuristic.scale(1 - x))
+    return(heuristicScale(1 - x))
 }
 
 #' Heuristic function to penalize nodes with high degree
@@ -141,10 +141,10 @@ hubHeuristic <- function(x) {
 #' @export
 #'
 #' @examples
-#' orphan.heuristic(rnorm(1:10))
-orphan.heuristic <- function(x) {
+#' orphanHeuristic(rnorm(1:10))
+orphanHeuristic <- function(x) {
     x <- x / max(x)
-    return(heuristic.scale(x))
+    return(heuristicScale(x))
 }
 
 #' Heuristic function to use in high dimensions
@@ -161,7 +161,7 @@ orphan.heuristic <- function(x) {
 #' @export
 #'
 #' @examples
-#' orphan.heuristic(rnorm(1:10))
-heuristic.scale <- function(x, sub.exp10 = - 1, exp.mult = -1, sub.exp = -1) {
+#' heuristicScale(rnorm(1:10))
+heuristicScale <- function(x, sub.exp10 = - 1, exp.mult = -1, sub.exp = -1) {
     return(sub.exp10 + 10^(-exp.mult * (exp(x) + sub.exp)))
 }

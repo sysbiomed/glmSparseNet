@@ -252,7 +252,7 @@ cv.hub <- cv.glmHub(xdata,
                     family  = 'cox',
                     foldid  = foldid,
                     network = my.string, 
-                    network.options = network.options.default(min.degree = 0.2))
+                    network.options = networkOptions(min.degree = 0.2))
 ```
 
 Kaplan-Meier estimator separating individuals by low and high risk *(based on 
@@ -273,7 +273,7 @@ selected.genes[['Hub']] <- coef(cv.hub, s = 'lambda.min')[,1] %>%
 
 ### glmOrphan model
 
-Penalizes using the Orphan heuristics, see `orphan.heuristics` function 
+Penalizes using the Orphan heuristics, see `orphanHeuristic` function 
 definition for more details.
 
 ```{r, warning=FALSE, error=FALSE}
@@ -282,8 +282,7 @@ cv.orphan <- cv.glmOrphan(xdata,
                           family  = 'cox',
                           foldid  = foldid,
                           network = my.string, 
-                          network.options = network.options.default(
-                            min.degree = 0.2))
+                          network.options = networkOptions(min.degree = 0.2))
 ```
 
 Kaplan-Meier estimator separating individuals by low and high risk 

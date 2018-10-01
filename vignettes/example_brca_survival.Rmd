@@ -122,8 +122,8 @@ fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status),
                     family  = 'cox',
                     lambda = buildLambda(1),
                     network = 'correlation', 
-                    network.options = network.options.default(cutoff = .6, 
-                                                              min.degree = .2))
+                    network.options = networkOptions(cutoff = .6, 
+                                                     min.degree = .2))
 ```
 
 # Results of Cross Validation

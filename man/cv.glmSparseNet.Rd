@@ -5,8 +5,7 @@
 \title{Calculate cross validating GLM model with network-based regularization}
 \usage{
 cv.glmSparseNet(xdata, ydata, network,
-  network.options = network.options.default(), experiment.name = NULL,
-  ...)
+  network.options = networkOptions(), experiment.name = NULL, ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}
@@ -31,25 +30,37 @@ network parameter accepts:
 * string to calculate network based on data (correlation, covariance)
  * matrix representing the network
  * vector with already calculated penalty weights (can also be used directly
- with glmnet)
+   glmnet)
 }
 \examples{
-xdata <- matrix(rnorm(100), ncol = 20)
-cv.glmSparseNet(xdata, rnorm(nrow(xdata)), 'correlation',family = 'gaussian')
-cv.glmSparseNet(xdata, rnorm(nrow(xdata)), 'covariance', family = 'gaussian')
+
+\dontrun{
+    # Gaussian model
+    xdata <- matrix(rnorm(500), ncol = 5)
+    cv.glmSparseNet(xdata, rnorm(nrow(xdata)), 'correlation',
+                    family = 'gaussian')
+    cv.glmSparseNet(xdata, rnorm(nrow(xdata)), 'covariance',
+                    family = 'gaussian')
+}
 
 #
 #
-# Using MultiAssayExperiment
+# Using MultiAssayExperiment with survival model
 
+
+#
 # load data
 xdata <- MultiAssayExperiment::miniACC
+
+#
 # build valid data with days of last follow up or to event
 event.ix <- which(!is.na(xdata$days_to_death))
 cens.ix <- which(!is.na(xdata$days_to_last_followup))
 xdata$surv_event_time <- array(NA, nrow(colData(xdata)))
 xdata$surv_event_time[event.ix] <- xdata$days_to_death[event.ix]
 xdata$surv_event_time[cens.ix] <- xdata$days_to_last_followup[cens.ix]
+
+#
 # Keep only valid individuals
 valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
                       !is.na(xdata$vital_status) &
@@ -57,8 +68,11 @@ valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
 xdata.valid <- xdata[, rownames(colData(xdata))[valid.ix]]
 ydata.valid <- colData(xdata.valid)[,c('surv_event_time', 'vital_status')]
 colnames(ydata.valid) <- c('time', 'status')
+
+#
 cv.glmSparseNet(xdata.valid,
                 ydata.valid,
+                nfolds          = 5,
                 family          = 'cox',
                 network         = 'correlation',
                 experiment.name = 'RNASeq2GeneNorm')

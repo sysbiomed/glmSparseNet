@@ -4,8 +4,7 @@
 \alias{glmDegree}
 \title{GLMNET model penalizing nodes with small degree}
 \usage{
-glmDegree(xdata, ydata, network,
-  network.options = network.options.default(), ...)
+glmDegree(xdata, ydata, network, network.options = networkOptions(), ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}
@@ -30,7 +29,7 @@ nodes with small degree.
 xdata <- matrix(rnorm(100), ncol = 5)
 glmDegree(xdata, rnorm(nrow(xdata)), 'correlation',
           family = 'gaussian',
-          network.options = network.options.default(min.degree = .2))
+          network.options = networkOptions(min.degree = .2))
 }
 \seealso{
 glmNetSparse

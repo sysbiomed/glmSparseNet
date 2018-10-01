@@ -19,7 +19,7 @@
 #'
 .glmSparseNetPrivate <- function(fun, xdata, ydata, network,
                                 experiment.name = NULL,
-                                network.options = network.options.default(),
+                                network.options = networkOptions(),
                                 ...) {
     #
     # Sequential check of xdata argument
@@ -37,7 +37,7 @@
 
         # filter the MultiAssayExperiment keeping only individuals with data in
         #  specific experiment
-        xdata <- reduce.by.experiment(xdata, experiment.name)
+        xdata <- reduceByExperiment(xdata, experiment.name)
 
         # stop if output xdata has no rows (should not happen)
         if( nrow(xdata@colData) == 0) {

@@ -4,8 +4,7 @@
 \alias{glmHub}
 \title{GLMNET model penalizing nodes with small degree}
 \usage{
-glmHub(xdata, ydata, network,
-  network.options = network.options.default(), ...)
+glmHub(xdata, ydata, network, network.options = networkOptions(), ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}
@@ -29,7 +28,7 @@ degree.
 \examples{
 xdata <- matrix(rnorm(100), ncol = 5)
 glmHub(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian',
-       network.options = network.options.default(min.degree = .2))
+       network.options = networkOptions(min.degree = .2))
 }
 \seealso{
 glmNetSparse

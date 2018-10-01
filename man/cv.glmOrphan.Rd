@@ -4,8 +4,8 @@
 \alias{cv.glmOrphan}
 \title{GLMNET cross-validation model penalizing nodes with high degree}
 \usage{
-cv.glmOrphan(xdata, ydata, network,
-  network.options = network.options.default(), ...)
+cv.glmOrphan(xdata, ydata, network, network.options = networkOptions(),
+  ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}
@@ -31,7 +31,7 @@ xdata <- matrix(rnorm(100), ncol = 5)
 cv.glmOrphan(xdata, rnorm(nrow(xdata)), 'correlation',
              family = 'gaussian',
              nfolds = 5,
-             network.options = network.options.default(min.degree = .2))
+             network.options = networkOptions(min.degree = .2))
 }
 \seealso{
 glmNetSparse

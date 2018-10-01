@@ -81,8 +81,8 @@ cv.glmSparseNet(xdata,
                 ydata, 
                 family = 'cox', 
                 network = 'correlation', 
-                network.options = network.options.default(cutoff = .6, 
-                                                          min.degree = 0.2))
+                network.options = networkOptions(cutoff = .6, 
+                                                 min.degree = 0.2))
 ```
 
 Example for survival analysis using RNA-seq data
@@ -140,9 +140,11 @@ fit3 <- cv.glmSparseNet(xdata, ydata, family = 'cox',
                         experiment.name = 'RNASeq2GeneNorm', 
                         alpha = .7,
                         nlambda = 1000,
-                        network.options = network.options.default(cutoff = .6, 
-                                                                  min.degree = 0.2,
-                                                                  trans.fun = hubHeuristic))
+                        network.options = networkOptions(
+                            cutoff = .6, 
+                            min.degree = 0.2,
+                            trans.fun = hubHeuristic)
+                        )
 plot(fit3)
 ```
 
@@ -162,7 +164,7 @@ This function generates Kaplan-Meier survival model based on the estimated coeff
 #  * it takes the input data, response and coefficients
 #  * calculates the relative risk
 #  * separates individuals based on relative risk into High/Low risk groups
-xdata.reduced   <- reduce.by.experiment(xdata, 'RNASeq2GeneNorm')
+xdata.reduced   <- reduceByExperiment(xdata, 'RNASeq2GeneNorm')
 ydata.km        <- ydata[rownames(xdata.reduced@colData),]
 best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
 ```
@@ -174,7 +176,7 @@ separate2GroupsCox(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.
 ```
 
     ## $pvalue
-    ## [1] 2.728306e-07
+    ## [1] 3.878366e-07
     ## 
     ## $plot
 

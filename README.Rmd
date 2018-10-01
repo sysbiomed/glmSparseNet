@@ -97,8 +97,8 @@ cv.glmSparseNet(xdata,
                 ydata, 
                 family = 'cox', 
                 network = 'correlation', 
-                network.options = network.options.default(cutoff = .6, 
-                                                          min.degree = 0.2))
+                network.options = networkOptions(cutoff = .6, 
+                                                 min.degree = 0.2))
 ```
 
 
@@ -170,9 +170,11 @@ fit3 <- cv.glmSparseNet(xdata, ydata, family = 'cox',
                         experiment.name = 'RNASeq2GeneNorm', 
                         alpha = .7,
                         nlambda = 1000,
-                        network.options = network.options.default(cutoff = .6, 
-                                                                  min.degree = 0.2,
-                                                                  trans.fun = hubHeuristic))
+                        network.options = networkOptions(
+                            cutoff = .6, 
+                            min.degree = 0.2,
+                            trans.fun = hubHeuristic)
+                        )
 plot(fit3)
 ```
 
@@ -189,7 +191,7 @@ This function generates Kaplan-Meier survival model based on the estimated coeff
 #  * it takes the input data, response and coefficients
 #  * calculates the relative risk
 #  * separates individuals based on relative risk into High/Low risk groups
-xdata.reduced   <- reduce.by.experiment(xdata, 'RNASeq2GeneNorm')
+xdata.reduced   <- reduceByExperiment(xdata, 'RNASeq2GeneNorm')
 ydata.km        <- ydata[rownames(xdata.reduced@colData),]
 best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
 ```
@@ -211,7 +213,7 @@ hallmarks(names(best.model.coef)[best.model.coef > 0])$heatmap
 
 ```{r glmnet.classic, include=FALSE, eval=FALSE}
 # Comparing against a classical GLMNET call
-xdata.reduced <- reduce.by.experiment(xdata, 'RNASeq2GeneNorm')
+xdata.reduced <- reduceByExperiment(xdata, 'RNASeq2GeneNorm')
 xdata.surv    <- t(assay(xdata.reduced[['RNASeq2GeneNorm']]))
 ydata.reduced <- ydata[xdata.reduced$patientID,]
 ydata.surv    <- Surv(ydata.reduced$time, ydata.reduced$status)

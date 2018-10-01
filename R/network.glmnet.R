@@ -48,7 +48,7 @@
 #'              network         = 'correlation',
 #'              experiment.name = 'RNASeq2GeneNorm')
 glmSparseNet <- function(xdata, ydata, network,
-                         network.options = network.options.default(),
+                         network.options = networkOptions(),
                          experiment.name = NULL, ...) {
     .glmSparseNetPrivate(glmnet::glmnet, xdata, ydata,
                          network = network,

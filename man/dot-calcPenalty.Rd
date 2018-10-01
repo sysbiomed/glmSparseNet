@@ -4,8 +4,7 @@
 \alias{.calcPenalty}
 \title{Calculate penalty based on data}
 \usage{
-.calcPenalty(xdata, penalty.type,
-  network.options = network.options.default())
+.calcPenalty(xdata, penalty.type, network.options = networkOptions())
 }
 \arguments{
 \item{xdata}{input data}
@@ -24,10 +23,10 @@ Internal method to calculate the network using data-dependant methods
 xdata <- matrix(rnorm(100), ncol = 20)
 glmSparseNet:::.calcPenalty(xdata, 'none')
 glmSparseNet:::.calcPenalty(xdata, 'correlation',
-                            network.options.default(cutoff = .6))
+                            networkOptions(cutoff = .6))
 glmSparseNet:::.calcPenalty(xdata, 'correlation')
 glmSparseNet:::.calcPenalty(xdata, 'covariance',
-                            network.options.default(cutoff = .6))
+                            networkOptions(cutoff = .6))
 glmSparseNet:::.calcPenalty(xdata, 'covariance')
 glmSparseNet:::.calcPenalty(xdata, 'sparsebn')
 }

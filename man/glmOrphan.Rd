@@ -4,8 +4,7 @@
 \alias{glmOrphan}
 \title{GLMNET model penalizing nodes with high degree}
 \usage{
-glmOrphan(xdata, ydata, network,
-  network.options = network.options.default(), ...)
+glmOrphan(xdata, ydata, network, network.options = networkOptions(), ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}
@@ -29,7 +28,7 @@ degree.
 \examples{
 xdata <- matrix(rnorm(100), ncol = 5)
 glmOrphan(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian',
-          network.options = network.options.default(min.degree = .2))
+          network.options = networkOptions(min.degree = .2))
 }
 \seealso{
 glmNetSparse
