@@ -120,8 +120,8 @@ ensemblGeneNames <- function(gene.id) {
 #' @export
 #'
 #' @examples
-#' hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
 #' \dontrun{
+#'     hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
 #'     hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
 #' }
 hallmarks <- function(genes, metric = 'count', hierarchy = 'full',

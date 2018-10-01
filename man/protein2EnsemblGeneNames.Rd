@@ -17,9 +17,7 @@ a dataframe with external gene names, ensembl_peptide_id
 Retrieve ensembl gene ids from proteins
 }
 \examples{
-\dontrun{
-     protein2EnsemblGeneNames(c('ENSP00000235382',
-                               'ENSP00000233944',
-                               'ENSP00000216911'))
-}
+protein2EnsemblGeneNames(c('ENSP00000235382',
+                           'ENSP00000233944',
+                           'ENSP00000216911'))
 }

@@ -27,7 +27,7 @@ an heuristic described in Veríssimo et al. that penalizes nodes with small
 degree.
 }
 \examples{
-xdata <- matrix(rnorm(100), ncol = 20)
+xdata <- matrix(rnorm(100), ncol = 5)
 glmHub(xdata, rnorm(nrow(xdata)), 'correlation', family = 'gaussian',
        network.options = network.options.default(min.degree = .2))
 }
