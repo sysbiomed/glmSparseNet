@@ -16,5 +16,7 @@ a dataframe with external gene names, ensembl_id
 Retrieve gene names from biomaRt
 }
 \examples{
-geneNames(c('ENSG00000114978','ENSG00000166211', 'ENSG00000183688'))
+\dontrun{
+    geneNames(c('ENSG00000114978','ENSG00000166211', 'ENSG00000183688'))
+}
 }
