@@ -50,9 +50,9 @@
 glmSparseNet <- function(xdata, ydata, network,
                          network.options = network.options.default(),
                          experiment.name = NULL, ...) {
-  .glmSparseNetPrivate(glmnet::glmnet, xdata, ydata,
-                      network = network,
-                      network.options = network.options,
-                      experiment.name = experiment.name,
-                      ...)
+    .glmSparseNetPrivate(glmnet::glmnet, xdata, ydata,
+                         network = network,
+                         network.options = network.options,
+                         experiment.name = experiment.name,
+                         ...)
 }

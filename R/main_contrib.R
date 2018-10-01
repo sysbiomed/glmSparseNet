@@ -21,9 +21,9 @@
 glmOrphan <- function(xdata, ydata, network,
                       network.options = network.options.default(), ...) {
 
-  network.options$trans.fun <- orphan.heuristic
-  glmSparseNet(xdata, ydata, network,
-               network.options = network.options.default(), ...)
+    network.options$trans.fun <- orphan.heuristic
+    glmSparseNet(xdata, ydata, network,
+                 network.options = network.options.default(), ...)
 }
 
 #' GLMNET model penalizing nodes with small degree
@@ -49,8 +49,9 @@ glmOrphan <- function(xdata, ydata, network,
 glmHub <- function(xdata, ydata, network,
                    network.options = network.options.default(), ...) {
 
-  network.options$trans.fun <- hubHeuristic
-  glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
+    network.options$trans.fun <- hubHeuristic
+    glmSparseNet(xdata, ydata, network,
+                 network.options = network.options, ...)
 }
 
 #' GLMNET model penalizing nodes with small degree
@@ -76,8 +77,9 @@ glmHub <- function(xdata, ydata, network,
 glmDegree <- function(xdata, ydata, network,
                       network.options = network.options.default(), ...) {
 
-  network.options$trans.fun <- function(x) { return(1 / x)}
-  glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
+    network.options$trans.fun <- function(x) { return(1 / x)}
+    glmSparseNet(xdata, ydata, network,
+                 network.options = network.options, ...)
 }
 
 #' GLMNET cross-validation model penalizing nodes with high degree
@@ -103,8 +105,9 @@ glmDegree <- function(xdata, ydata, network,
 cv.glmOrphan <- function(xdata, ydata, network,
                          network.options = network.options.default(), ...) {
 
-  network.options$trans.fun <- orphan.heuristic
-  cv.glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
+    network.options$trans.fun <- orphan.heuristic
+    cv.glmSparseNet(xdata, ydata, network,
+                    network.options = network.options, ...)
 }
 
 #' GLMNET cross-validation model penalizing nodes with small degree
@@ -129,8 +132,9 @@ cv.glmOrphan <- function(xdata, ydata, network,
 #'              network.options = network.options.default(min.degree = .2))
 cv.glmDegree <- function(xdata, ydata, network,
                          network.options = network.options.default(), ...) {
-  network.options$trans.fun <- function(x) { 1 / x}
-  cv.glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
+    network.options$trans.fun <- function(x) { 1 / x}
+    cv.glmSparseNet(xdata, ydata, network,
+                    network.options = network.options, ...)
 }
 
 #' GLMNET cross-validation model penalizing nodes with small degree
@@ -156,6 +160,7 @@ cv.glmDegree <- function(xdata, ydata, network,
 cv.glmHub <- function(xdata, ydata, network,
                       network.options = network.options.default(), ...) {
 
-  network.options$trans.fun <- hubHeuristic
-  cv.glmSparseNet(xdata, ydata, network, network.options = network.options, ...)
+    network.options$trans.fun <- hubHeuristic
+    cv.glmSparseNet(xdata, ydata, network,
+                    network.options = network.options, ...)
 }
