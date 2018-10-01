@@ -1,5 +1,6 @@
 set.seed(1985)
-xdata <- matrix(rnorm(70000), nrow = 500)
+xdata <- matrix(rnorm(7000), nrow = 175)
+
 cov.p <- abs(cov(xdata, method = 'pearson'))
 diag(cov.p) <- 0
 cov.s <- abs(cov(xdata, method = 'spearman'))

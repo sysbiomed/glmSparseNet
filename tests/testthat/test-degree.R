@@ -1,5 +1,5 @@
 set.seed(1985)
-xdata <- matrix(rnorm(70000), nrow = 500)
+xdata <- matrix(rnorm(7000), nrow = 175)
 
 cor.p <- abs(cor(xdata, method = 'pearson')) - diag(ncol(xdata))
 cor.s <- abs(cor(xdata, method = 'spearman')) - diag(ncol(xdata))
