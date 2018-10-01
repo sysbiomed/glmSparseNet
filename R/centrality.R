@@ -101,7 +101,8 @@ networkCovParallel <- function(xdata,
                 )
             },
             error = function(error.str) {
-                futile.logger::flog.error('This error has occured %s', error.str)
+                futile.logger::flog.error('This error has occured %s',
+                                          error.str)
             })
             if (build.output == 'vector' || build.output == 'matrix') {
                 return(result)
