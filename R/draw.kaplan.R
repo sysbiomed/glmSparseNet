@@ -79,15 +79,15 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
     # calculate prognostic indexes for each patient and btas
     prognostic.index <- tryCatch(xdata %*% chosen.btas.mat,
                                  error = function(err){
-        message('      xdata is.matrix(.) =', is.matrix(xdata), '\n')
-        message('chosen.btas is.matrix(.) =', is.matrix(chosen.btas.mat), '\n')
-        messaget('      xdata (nrow)x(ncol) =', sprintf('%dx%d', nrow(xdata),
-                                                        ncol(xdata)), '\n')
-        message('chosen.btas (nrow)x(ncol) =',
-                sprintf('%dx%d',
-                        nrow(chosen.btas.mat),
-                        ncol(chosen.btas.mat)), '\n')
-        stop(err)
+        stop('xdata is.matrix(.) = ', is.matrix(xdata), '\n',
+             ' chosen.btas is.matrix(.) = ', is.matrix(chosen.btas.mat), '\n',
+             '      xdata (nrow)x(ncol) = ', sprintf('%dx%d',
+                                                     nrow(xdata),
+                                                     ncol(xdata)), '\n',
+             'chosen.btas (nrow)x(ncol) = ', sprintf('%dx%d',
+                                                     nrow(chosen.btas.mat),
+                                                     ncol(chosen.btas.mat)),
+             '\n', '  error description: ', err)
     })
 
     colnames(prognostic.index) <- names(chosen.btas)
