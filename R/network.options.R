@@ -1,26 +1,3 @@
-#' Filter MultiAssayExperiment colData for specific experiment
-#'
-#' @param multi.assay MultiAssayExperiment object
-#' @param experiment.name name of experiment
-#'
-#' @return a MultiExperimentAssay with only clinical data of that experiment
-#' @export
-#'
-#' @examples
-#' multi.assay <- MultiAssayExperiment::miniACC
-#' reduceByExperiment(multi.assay, 'RNASeq2GeneNorm')
-reduceByExperiment <- function(multi.assay, experiment.name) {
-    # Get all valid individuals from experiment (lookup the mapping)
-    primary.ix <- multi.assay@sampleMap$assay == experiment.name
-    valid.ydata.id <- multi.assay@sampleMap[primary.ix, 'primary']
-
-    # filter the MultiAssayExperiment keeping only individuals with data in
-    #  specific experiment
-    valid.rows <- rownames(multi.assay@colData) %in% valid.ydata.id
-    suppressMessages(new.multi.assay <- multi.assay[,valid.rows])
-
-    return(new.multi.assay)
-}
 
 #' Setup network options
 #'

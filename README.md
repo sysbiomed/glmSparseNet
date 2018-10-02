@@ -145,6 +145,12 @@ fit3 <- cv.glmSparseNet(xdata, ydata, family = 'cox',
                             min.degree = 0.2,
                             trans.fun = hubHeuristic)
                         )
+```
+
+    ## harmonizing input:
+    ##   removing 13 colData rownames not in sampleMap 'primary'
+
+``` r
 plot(fit3)
 ```
 
@@ -164,7 +170,13 @@ This function generates Kaplan-Meier survival model based on the estimated coeff
 #  * it takes the input data, response and coefficients
 #  * calculates the relative risk
 #  * separates individuals based on relative risk into High/Low risk groups
-xdata.reduced   <- reduceByExperiment(xdata, 'RNASeq2GeneNorm')
+xdata.reduced   <- as(xdata[,,'RNASeq2GeneNorm'], 'MatchedAssayExperiment')
+```
+
+    ## harmonizing input:
+    ##   removing 13 colData rownames not in sampleMap 'primary'
+
+``` r
 ydata.km        <- ydata[rownames(xdata.reduced@colData),]
 best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
 ```
@@ -176,7 +188,7 @@ separate2GroupsCox(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.
 ```
 
     ## $pvalue
-    ## [1] 3.878366e-07
+    ## [1] 3.651606e-07
     ## 
     ## $plot
 

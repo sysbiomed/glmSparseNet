@@ -146,10 +146,10 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full',
         all.genes       <- sort(unique(rownames(temp.res$hallmarks[good.ix,])))
         df.no.hallmarks <- temp.res$no.hallmakrs
         #
-        cat(paste0('There is a bug in the Hallmarks\' API that requires the ',
-                   'function to wait around 5 additional seconds to finish. ',
-                   'Sorry.\nbug report: ',
-                   'https://github.com/cambridgeltl/chat/issues/6\n'))
+        message('There is a bug in the Hallmarks\' API that requires the ',
+                'function to wait around 5 additional seconds to finish.\n',
+                'Sorry. bug report: ',
+                'https://github.com/cambridgeltl/chat/issues/6\n')
         Sys.sleep(5.5)
     } else {
         df.no.hallmarks <- NULL

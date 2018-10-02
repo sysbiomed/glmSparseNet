@@ -37,7 +37,7 @@
 
         # filter the MultiAssayExperiment keeping only individuals with data in
         #  specific experiment
-        xdata <- reduceByExperiment(xdata, experiment.name)
+        xdata <- as(xdata[,,experiment.name], 'MatchedAssayExperiment')
 
         # stop if output xdata has no rows (should not happen)
         if( nrow(xdata@colData) == 0) {
