@@ -1,0 +1,19 @@
+citHeader("To cite glmSparseNet in publications use:")
+
+citEntry(entry = "Article",
+    title = "Sparse network-based regularization for the analysis of patientomics high-dimensional survival data",
+    author = personList(
+        as.person("André Veríssimo"),
+        as.person("Eunice Carrasquinha"),
+        as.person("Marta B. Lopes"),
+        as.person("Arlindo L. Oliveira"),
+        as.person("Marie-France Sagot"),
+        as.person("Susana Vinga")),
+    journal = "bioRxiv",
+    year = "2018",
+    textVersion =
+    paste("André Veríssimo et al.",
+        "Sparse network-based regularization for the analysis of patientomics high-dimensional survival data.",
+        "bioRxiv 403402,",
+        "DOI: https://doi.org/10.1101/403402")
+)

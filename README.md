@@ -1,6 +1,10 @@
 glmSparseNet
 ================
 
+> Elastic-Net models with additional regularization based on network centrality metrics
+
+[![Travis-CI Build Status](https://travis-ci.org/sysbiomed/glmSparseNet.svg?branch=master)](https://travis-ci.org/sysbiomed/glmSparseNet) [![Coverage status](https://codecov.io/gh/sysbiomed/glmSparseNet/branch/master/graph/badge.svg)](https://codecov.io/github/sysbiomed/glmSparseNet?branch=master)
+
 -   [Overview](#overview)
 -   [Citation](#citation)
 -   [Instalation](#instalation)
@@ -11,17 +15,14 @@ glmSparseNet
     -   [Survival curves with `separate2groupsCox`](#survival-curves-with-separate2groupscox)
     -   [Heatmap with results retrived from the Cancer Hallmarks Analytics Tool *(CHAT)*](#heatmap-with-results-retrived-from-the-cancer-hallmarks-analytics-tool-chat)
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-> Elastic-Net models with additional regularization based on network centrality metrics
-
-[![Travis-CI Build Status](https://travis-ci.org/sysbiomed/glmSparseNet.svg?branch=master)](https://travis-ci.org/sysbiomed/glmSparseNet) [![Coverage status](https://codecov.io/gh/sysbiomed/glmSparseNet/branch/master/graph/badge.svg)](https://codecov.io/github/sysbiomed/glmSparseNet?branch=master)
+<!-- README.md and README.html are generated from README.Rmd. Please edit that file -->
 
 Overview
 --------
 
 `glmSparseNet` is a R package that generalizes sparse regression models when the features *(e.g. genes)* have a graph structure *(e.g. protein-protein interactions)*, by including network-based regularizers. `glmSparseNet` uses the `glmnet` R-package, by including centrality measures of the network as penalty weights in the regularization. The current version implements regularization based on node degree, i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution or orphan genes in the solution. All the `glmnet` distribution families are supported, namely *"gaussian"*, *"poisson"*, *"binomial"*, *"multinomial"*, *"cox"*, and *"mgaussian"*.
 
-It adds two new main functions called `glmSparseNet` and `cv.glmSparseNet` that extend both model inference and model selection via cross-validation with network-based regularization. These functions are very flexible and allow to transform the penalty weights after the centrality metric is calculated, thus allowing to change how it affects the regularization. To facilitate users, we made available a function that will penalize low connected nodes in the network - `glmDegree` - and another that will penalize hubs - `glmOrphan`.
+It adds two new main functions called `glmSparseNet` and `cv.glmSparseNet` that extend both model inference and model selection via cross-validation with network-based regularization. These functions are very flexible and allow to transform the penalty weights after the centrality metric is calculated, thus allowing to change how it affects the regularization. To facilitate users, we made available a function that will penalize low connected nodes in the network - `glmHub` or `glmDegree` - and another that will penalize hubs - `glmOrphan`.
 
 <span style="display:block;text-align:center">![Overview of the R-Package pipeline](inst/images/overview.png)</span>
 
@@ -30,9 +31,9 @@ Below, we provide one example for survival analysis using transcriptomic data fr
 Citation
 --------
 
-Veríssimo, A., Oliveira, A.L., Sagot, M.-F., & Vinga, S. (2016). DegreeCox – a network-based regularization method for survival analysis. BMC Bioinformatics. 17(16): 449. <https://doi.org/10.1186/s12859-016-1310-4>
+Veríssimo, A., Carrasquinha E., Lopes, M.B., Oliveira, A.L., Sagot, M.-F. & Vinga S. (2018), Sparse network-based regularization for the analysis of patientomics high-dimensional survival data. bioRxiv 403402; doi: <https://doi.org/10.1101/403402>
 
-A more detailed description of the extensions here developed will be released soon in a manuscript (under preparation).
+Veríssimo, A., Oliveira, A.L., Sagot, M.-F., & Vinga, S. (2016). DegreeCox – a network-based regularization method for survival analysis. BMC Bioinformatics. 17(16): 449. <https://doi.org/10.1186/s12859-016-1310-4>
 
 This package was developed by André Veríssimo, Eunice Carrasquinha, Marta B. Lopes and Susana Vinga under the project SOUND, funded from the European Union Horizon 2020 research and innovation program under grant agreement No. 633974.
 
@@ -145,12 +146,6 @@ fit3 <- cv.glmSparseNet(xdata, ydata, family = 'cox',
                             min.degree = 0.2,
                             trans.fun = hubHeuristic)
                         )
-```
-
-    ## harmonizing input:
-    ##   removing 13 colData rownames not in sampleMap 'primary'
-
-``` r
 plot(fit3)
 ```
 
@@ -188,7 +183,7 @@ separate2GroupsCox(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.
 ```
 
     ## $pvalue
-    ## [1] 3.651606e-07
+    ## [1] 2.618577e-07
     ## 
     ## $plot
 
