@@ -31,7 +31,7 @@ Below, we provide one example for survival analysis using transcriptomic data fr
 Citation
 --------
 
-Veríssimo, A., Carrasquinha E., Lopes, M.B., Oliveira, A.L., Sagot, M.-F. & Vinga S. (2018), Sparse network-based regularization for the analysis of patientomics high-dimensional survival data. bioRxiv 403402; doi: <https://doi.org/10.1101/403402>
+Veríssimo, A., Carrasquinha E., Lopes, M.B., Oliveira, A.L., Sagot, M.-F. & Vinga, S. (2018), Sparse network-based regularization for the analysis of patientomics high-dimensional survival data. bioRxiv 403402; doi: <https://doi.org/10.1101/403402>
 
 Veríssimo, A., Oliveira, A.L., Sagot, M.-F., & Vinga, S. (2016). DegreeCox – a network-based regularization method for survival analysis. BMC Bioinformatics. 17(16): 449. <https://doi.org/10.1186/s12859-016-1310-4>
 
