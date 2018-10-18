@@ -36,7 +36,10 @@ default, but for top and bottom 40\% -> c(.4,.6)}
 \value{
 object with logrank test and kaplan-meier survival plot
 
-A list with plot, p-value and kaplan-meier object
+A list with plot, p-value and kaplan-meier object. The plot was drawn from
+survminer::ggsurvplot with only the palette, data and fit arguments being
+defined and keeping all other defaults that can be customized as additional
+parameters to this function.
 }
 \description{
 Draws multiple kaplan meyer survival curves (or just 1) and calculates
@@ -52,4 +55,7 @@ separate2GroupsCox(c(age = 1), c(1,0,1,0,1,0),
                    data.frame(time = runif(6), status = rbinom(6, 1, .5)))
 separate2GroupsCox(list(aa = c(age = 1, 0.5),
                         bb = c(age = 0, 1.5)), xdata, ydata)
+}
+\seealso{
+survminer::ggsurvplot
 }

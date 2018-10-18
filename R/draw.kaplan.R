@@ -19,10 +19,14 @@
 #'
 #' @return object with logrank test and kaplan-meier survival plot
 #'
-#' A list with plot, p-value and kaplan-meier object
+#' A list with plot, p-value and kaplan-meier object. The plot was drawn from
+#' survminer::ggsurvplot with only the palette, data and fit arguments being
+#' defined and keeping all other defaults that can be customized as additional
+#' parameters to this function.
 #'
 #' @export
 #'
+#' @seealso survminer::ggsurvplot
 #' @examples
 #' data('ovarian', package = 'survival')
 #' xdata <- ovarian[,c('age', 'resid.ds')]
@@ -238,5 +242,5 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
 
 
     # return p-value, plot and km object
-    return(list(pvalue = p_value, plot = p1$plot, km = km))
+    return(list(pvalue = p_value, plot = p1, km = km))
 }
