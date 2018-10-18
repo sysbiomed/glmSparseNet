@@ -200,7 +200,6 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
                                 conf.int = FALSE,
                                 palette = col.ix,
                                 data = prognostic.index.df,
-                                surv.median.line = "hv", # add the median line
                                 ggtheme = ggplot2::theme_minimal(),
                                 ...)
 
