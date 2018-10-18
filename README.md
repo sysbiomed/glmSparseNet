@@ -1,9 +1,9 @@
 glmSparseNet
 ================
 
-> Elastic-Net models with additional regularization based on network centrality metrics
+<!-- README.md and README.html are generated from README.Rmd. Please edit that file -->
 
-[![Travis-CI Build Status](https://travis-ci.org/sysbiomed/glmSparseNet.svg?branch=master)](https://travis-ci.org/sysbiomed/glmSparseNet) [![Coverage status](https://codecov.io/gh/sysbiomed/glmSparseNet/branch/master/graph/badge.svg)](https://codecov.io/github/sysbiomed/glmSparseNet?branch=master)
+> Elastic-Net models with additional regularization based on network centrality metrics
 
 -   [Overview](#overview)
 -   [Citation](#citation)
@@ -15,7 +15,7 @@ glmSparseNet
     -   [Survival curves with `separate2groupsCox`](#survival-curves-with-separate2groupscox)
     -   [Heatmap with results retrived from the Cancer Hallmarks Analytics Tool *(CHAT)*](#heatmap-with-results-retrived-from-the-cancer-hallmarks-analytics-tool-chat)
 
-<!-- README.md and README.html are generated from README.Rmd. Please edit that file -->
+[![Travis-CI Build Status](https://travis-ci.org/sysbiomed/glmSparseNet.svg?branch=master)](https://travis-ci.org/sysbiomed/glmSparseNet) [![Coverage status](https://codecov.io/gh/sysbiomed/glmSparseNet/branch/master/graph/badge.svg)](https://codecov.io/github/sysbiomed/glmSparseNet?branch=master)
 
 Overview
 --------
@@ -146,6 +146,12 @@ fit3 <- cv.glmSparseNet(xdata, ydata, family = 'cox',
                             min.degree = 0.2,
                             trans.fun = hubHeuristic)
                         )
+```
+
+    ## harmonizing input:
+    ##   removing 13 colData rownames not in sampleMap 'primary'
+
+``` r
 plot(fit3)
 ```
 
@@ -182,8 +188,10 @@ Kaplan-Meier plot
 separate2GroupsCox(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, ylim = c(0,1))
 ```
 
+    ## Coordinate system already present. Adding new coordinate system, which will replace the existing one.
+
     ## $pvalue
-    ## [1] 2.618577e-07
+    ## [1] 3.651606e-07
     ## 
     ## $plot
 

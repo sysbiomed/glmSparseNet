@@ -216,10 +216,10 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
         p1$plot <- p1$plot + ggplot2::coord_cartesian(ylim=ylim, xlim = xlim)
 
     if (length(chosen.btas) == 1) {
-        p1 <- p1 + ggplot2::ggtitle(paste0(gsub('_', ' ', plot.title),
+        p1$plot <- p1$plot + ggplot2::ggtitle(paste0(gsub('_', ' ', plot.title),
                                            '\np_value = ',p_value))
     } else {
-        p1 <- p1 + ggplot2::ggtitle(paste0(gsub('_', ' ', plot.title)))
+        p1$plot <- p1$plot + ggplot2::ggtitle(paste0(gsub('_', ' ', plot.title)))
     }
 
     p1$plot <- p1$plot +
