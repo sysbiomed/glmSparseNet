@@ -6,7 +6,7 @@
 \usage{
 separate2GroupsCox(chosen.btas, xdata, ydata, probs = c(0.5, 0.5),
   no.plot = FALSE, plot.title = "SurvivalCurves", xlim = NULL,
-  ylim = NULL, expand.yzero = FALSE, legend.outside = FALSE)
+  ylim = NULL, expand.yzero = FALSE, legend.outside = FALSE, ...)
 }
 \arguments{
 \item{chosen.btas}{list of testing coefficients to calculate prognostic
@@ -30,6 +30,8 @@ default, but for top and bottom 40\% -> c(.4,.6)}
 \item{expand.yzero}{expand to y = 0}
 
 \item{legend.outside}{If TRUE legend will be outside plot, otherwise inside}
+
+\item{...}{additional parameters to survminer::ggsurvplot}
 }
 \value{
 object with logrank test and kaplan-meier survival plot

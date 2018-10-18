@@ -14,7 +14,7 @@ params:
   seed: !r 20188102
 ---
 
-## Instalation
+# Instalation
 
 ```{r, eval=FALSE}
 if (!require("BiocManager"))
@@ -22,7 +22,7 @@ if (!require("BiocManager"))
 BiocManager::install("glmSparseNet")
 ```
 
-## Required Packages
+# Required Packages
 
 ```{r packages, message=FALSE, warning=FALSE}
 library(dplyr)
@@ -50,7 +50,7 @@ library(glmSparseNet)
 theme_set(ggplot2::theme_minimal())
 ```
 
-## Overview
+# Overview
 
 This vignette uses the STRING database (https://string-db.org/) of 
 protein-protein interactions as the network-based penalizer in generalized 
@@ -83,7 +83,7 @@ data('string.network.700.cache', package = 'glmSparseNet')
 string.network <- string.network.700.cache
 ```
 
-## Build network matrix
+# Build network matrix
 
 Build a sparse matrix object that contains the network.
 
@@ -92,9 +92,9 @@ string.network.undirected <- string.network + Matrix::t(string.network)
 string.network.undirected <- (string.network.undirected != 0) * 1
 ```
 
-## Network Statistics
+# Network Statistics
 
-### Graph information
+## Graph information
 
 ```{r, echo=FALSE, collapse=TRUE}
 flog.info('Directed graph (score_threshold = %d)', 700)
@@ -110,7 +110,7 @@ flog.info('  * edges per protein: %f',
           sum(string.network.undirected != 0)/2/nrow(string.network.undirected))
 ```
 
-### Summary of degree *(indegree + outdegree)*
+## Summary of degree *(indegree + outdegree)*
 
 ```{r, echo=FALSE}
 string.network.binary <- (string.network.undirected != 0) * 1
@@ -120,7 +120,7 @@ degree.network        <- (Matrix::rowSums(string.network.binary) +
 flog.info('Summary of degree:', summary(degree.network), capture = TRUE)
 ```
 
-### Histogram of degree *(up until 99.999% quantile)*
+## Histogram of degree *(up until 99.999% quantile)*
 
 ```{r, warning=FALSE}
 qplot(degree.network[degree.network <= quantile(degree.network, 
@@ -129,7 +129,7 @@ qplot(degree.network[degree.network <= quantile(degree.network,
   theme(legend.position = 'none') + xlab('Degree (up until 99.999% quantile)')
 ```
 
-## glmSparseNet
+# `glmSparseNet`
 
 * Dataset from curatedTCGAdata
 
@@ -228,7 +228,7 @@ qplot(my.degree, bins = 100, fill = my.colors(3)) +
   theme(legend.position = 'none')
 ```
 
-### Select balanced folds for cross-validation
+## Select balanced folds for cross-validation
 
 ```{r}
 set.seed(params$seed)
@@ -241,7 +241,7 @@ foldid <- balanced.cv.folds(!!ydata$status)$output
 selected.genes <- list()
 ```
 
-### glmHub model
+## glmHub model
 
 Penalizes using the Hub heuristics, see `hubHeuristic` function definition for 
 more details.
@@ -271,7 +271,7 @@ selected.genes[['Hub']] <- coef(cv.hub, s = 'lambda.min')[,1] %>%
   { .[['external_gene_name']]} 
 ```
 
-### glmOrphan model
+## glmOrphan model
 
 Penalizes using the Orphan heuristics, see `orphanHeuristic` function 
 definition for more details.
@@ -302,7 +302,7 @@ selected.genes[['Orphan']] <- coef(cv.orphan, s = 'lambda.min')[,1] %>%
   { .[['external_gene_name']]} 
 ```
 
-### Elastic Net model *(without network-penalization)*
+## Elastic Net model *(without network-penalization)*
 
 Uses regular glmnet model as simple baseline
 
@@ -329,7 +329,7 @@ selected.genes[['GLMnet']] <- coef(cv.glm, s = 'lambda.min')[,1] %>%
   { .[['external_gene_name']]} 
 ```
 
-### Selected genes
+## Selected genes
 
 Venn diagram of overlapping genes.
 

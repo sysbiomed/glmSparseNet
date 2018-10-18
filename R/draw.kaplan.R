@@ -15,6 +15,7 @@
 #' @param ylim Optional argument to limit the y-axis view
 #' @param legend.outside If TRUE legend will be outside plot, otherwise inside
 #' @param expand.yzero expand to y = 0
+#' @param ... additional parameters to survminer::ggsurvplot
 #'
 #' @return object with logrank test and kaplan-meier survival plot
 #'
@@ -36,7 +37,8 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
                                probs = c(.5, .5), no.plot = FALSE,
                                plot.title = 'SurvivalCurves',
                                xlim = NULL, ylim = NULL, expand.yzero = FALSE,
-                               legend.outside = FALSE) {
+                               legend.outside = FALSE,
+                               ...) {
 
     # convert between compatible formats
     if(inherits(chosen.btas, 'numeric')) {
@@ -186,70 +188,56 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
         my.alpha <- 1
     }
 
-    # plot using ggfortify library's autoplot.survfit
-    requireNamespace('ggfortify')
-    p1 <- ggplot2::autoplot(km, conf.int = FALSE,
-                            xlab = 'Time', ylab = 'Cumulative Survival',
-                            surv.size = 1, censor.alpha = .8,
-                            surv.alpha = my.alpha)
-    # generate title name
-    titlename <- gsub('_', ' ', plot.title)
-    titlename <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", titlename,
-                      perl=TRUE)
-    #
-    # add light theme (that has a white grid)
-    p1 <- p1 + ggplot2::theme_light()
-    # change legend options in ggplot
-    p1 <- p1 +
-        ggplot2::theme(
-            legend.key = ggplot2::element_blank(),
-            legend.title = ggplot2::element_text(colour = "grey10",
-                                                 size = 10),
-            legend.background = ggplot2::element_rect(colour = "gray")
-        )
-    # make sure the 0% is shown
+    if (length(chosen.btas) > 1) {
+        col.ix <-
+            loose.rock::my.colors()[c(1,2,4,3,10,6,12,9,5,7,8,
+                                      11,13,14,15,16,17)]
+    } else {
+        col.ix <- c('seagreen', 'indianred2')
+    }
+
+    p1 <- survminer::ggsurvplot(km,
+                                conf.int = FALSE,
+                                palette = col.ix,
+                                data = prognostic.index.df,
+                                surv.median.line = "hv", # add the median line
+                                ggtheme = ggplot2::theme_minimal(),
+                                ...)
+
     if (expand.yzero)
-        p1 <- p1 + ggplot2::expand_limits(y=.047)
+        p1$plot <- p1$plot + ggplot2::expand_limits(y=.047)
     # limit the x axis if needed
     if (!is.null(xlim))
-        p1 <- p1 + ggplot2::coord_cartesian(xlim=xlim, ylim = ylim)
+        p1$plot <- p1$plot + ggplot2::coord_cartesian(xlim=xlim, ylim = ylim)
     if (!is.null(ylim))
-        p1 <- p1 + ggplot2::coord_cartesian(ylim=ylim, xlim = xlim)
-    #
-    # colors for the lines
-    #  if more than one btas then paired curves (low and high) should have the
-    #  same color, otherwise, red and green!
-    if (length(chosen.btas) > 1) {
-        col.ix <- c(1,2,4,3,10,6,12,9,5,7,8,11,13,14,15,16,17)
-        p1 <- p1 +
-          ggplot2::scale_colour_manual(
-              values = c(loose.rock::my.colors()[col.ix])
-          )
-        p1 <- p1 + ggplot2::theme(legend.title = ggplot2::element_blank())
-        width <- 6
-        height <- 4
-    } else {
-        p1 <- p1 +
-            ggplot2::scale_colour_manual(values = c('seagreen', 'indianred2'))
-        p1 <- p1 + ggplot2::labs(colour = paste0("p-value = ", format(p_value)))
-        width <- 6
-        height <- 4
-    }
-    if (legend.outside == TRUE)
-        p1 <- p1 + ggplot2::theme(legend.key.size = ggplot2::unit(20,"points"))
-    else
-        p1 <- p1 + ggplot2::theme(legend.position = c(1,1),
-                                  legend.justification = c(1, 1),
-                                  legend.key.size = ggplot2::unit(20,"points"))
-    # save to file
-    #
-    # after saving, show title in R plot
+        p1$plot <- p1$plot + ggplot2::coord_cartesian(ylim=ylim, xlim = xlim)
+
     if (length(chosen.btas) == 1) {
         p1 <- p1 + ggplot2::ggtitle(paste0(gsub('_', ' ', plot.title),
-                                         '\np_value = ',p_value))
+                                           '\np_value = ',p_value))
     } else {
         p1 <- p1 + ggplot2::ggtitle(paste0(gsub('_', ' ', plot.title)))
     }
+
+    p1$plot <- p1$plot +
+        ggplot2::labs(colour = paste0("p-value = ", format(p_value)))
+
+    p1$plot <- p1$plot + ggplot2::theme(
+        legend.key = ggplot2::element_blank(),
+        legend.title = ggplot2::element_text(colour = "grey10",
+                                             size = 10),
+        legend.background = ggplot2::element_rect(colour = "gray")
+    )
+
+    if (legend.outside == TRUE)
+        p1$plot <- p1$plot +
+            ggplot2::theme(legend.key.size = ggplot2::unit(20,"points"))
+    else
+        p1$plot <- p1$plot + ggplot2::theme(legend.position = c(1,1),
+                                  legend.justification = c(1, 1),
+                                  legend.key.size = ggplot2::unit(20,"points"))
+
+
     # return p-value, plot and km object
-    return(list(pvalue = p_value, plot = p1, km = km))
+    return(list(pvalue = p_value, plot = p1$plot, km = km))
 }
