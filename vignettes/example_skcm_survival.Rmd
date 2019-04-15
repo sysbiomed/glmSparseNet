@@ -1,0 +1,172 @@
+---
+title: "Example for Survival Data -- Skin Melanoma"
+author: "Eunice Carrasquinha and André Veríssimo"
+date: "`r Sys.Date()`"
+output: 
+  BiocStyle::html_document:
+    number_sections: yes
+    toc: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Example for Survival Data -- Skin Melanoma}
+  %\VignetteEncoding{UTF-8}
+params:
+  seed: !r 2922
+--- 
+
+## Instalation
+
+```{r, eval=FALSE}
+if (!require('BiocManager'))
+  install.packages('BiocManager')
+BiocManager::install('glmSparseNet')
+```
+
+# Required Packages
+
+```{r packages, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(survival)
+library(loose.rock)
+library(futile.logger)
+library(curatedTCGAData)
+library(TCGAutils)
+#
+library(glmSparseNet)
+#
+# Some general options for futile.logger the debugging package
+.Last.value <- flog.layout(layout.format('[~l] ~m'))
+.Last.value <- loose.rock::show.message(FALSE)
+# Setting ggplot2 default theme as minimal
+theme_set(ggplot2::theme_minimal())
+```
+
+# Load data
+
+The data is loaded from an online curated dataset downloaded from TCGA using 
+`curatedTCGAData` bioconductor package and processed.
+
+To accelerate the process we use a very reduced dataset down to 107 variables 
+only *(genes)*, which is stored as a data object in this package. However, the 
+procedure to obtain the data manually is described in the following chunk.
+
+```{r curated_data, include=FALSE}
+# chunk not included as it produces to many unnecessary messages
+skcm <- curatedTCGAData(diseaseCode = 'SKCM', assays = 'RNASeq2GeneNorm', FALSE, cache = tempdir())
+```
+
+```{r curated_data_non_eval, eval=FALSE}
+skcm <- curatedTCGAData(diseaseCode = 'SKCM', assays = 'RNASeq2GeneNorm', FALSE, cache = tempdir())
+```
+
+
+Build the survival data from the clinical columns.
+
+* Merge survival times for patients, which have different columns in case they 
+are alive or dead.
+* Build two matrix objects that fit the data `xdata` and `ydata`
+
+```{r data.show, warning=FALSE, error=FALSE}
+skcm.metastatic <- TCGAutils::splitAssays(skcm, '06')
+xdata.raw <- t(assay(skcm.metastatic[[1]]))
+
+# Get survival information
+ydata.raw <- colData(skcm.metastatic) %>% as.data.frame %>% 
+  # Find max time between all days (ignoring missings)
+  rowwise %>%
+  mutate(time = max(days_to_last_followup, days_to_death, na.rm = TRUE)) %>%
+  # Keep only survival variables and codes
+  select(patientID, status = vital_status, time) %>% 
+  # Discard individuals with survival time less or equal to 0
+  filter(!is.na(time) & time > 0) %>% as.data.frame
+
+# Get survival information
+ydata.raw <- colData(skcm) %>% as.data.frame %>% 
+  # Find max time between all days (ignoring missings)
+  rowwise %>%
+  mutate(time = max(days_to_last_followup, days_to_death, na.rm = TRUE)) %>%
+  # Keep only survival variables and codes
+  select(patientID, status = vital_status, time) %>% 
+  # Discard individuals with survival time less or equal to 0
+  filter(!is.na(time) & time > 0) %>% as.data.frame
+
+# Set index as the patientID
+rownames(ydata.raw) <- ydata.raw$patientID
+
+# keep only features that have standard deviation > 0
+xdata.raw      <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% 
+                              rownames(ydata.raw),]
+xdata.raw      <- xdata.raw %>% 
+  { (apply(., 2, sd) != 0) } %>% 
+  { xdata.raw[, .] } %>% 
+  scale
+
+# Order ydata the same as assay
+ydata.raw    <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
+
+set.seed(params$seed)
+small.subset <- c('FOXL2', 'KLHL5', 'PCYT2', 'SLC6A10P', 'STRAP', 'TMEM33',
+                  'WT1-AS', sample(colnames(xdata.raw), 100))
+
+xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
+ydata <- ydata.raw %>% select(time, status)
+```
+
+# Fit models
+
+Fit model model penalizing by the hubs using the cross-validation function by 
+`cv.glmHub`.
+
+```{r fit}
+fitted <- cv.glmHub(xdata, 
+                    Surv(ydata$time, ydata$status), 
+                    family  = 'cox', 
+                    foldid  = balanced.cv.folds(!!ydata$status)$output,
+                    network = 'correlation', 
+                    network.options = networkOptions(min.degree = .2, 
+                                                     cutoff = .6))
+```
+
+# Results of Cross Validation
+
+Shows the results of `100` different parameters used to find the optimal value 
+in 10-fold cross-validation. The two vertical dotted lines represent the best 
+model and a model with less variables selected *(genes)*, but within a standard
+error distance from the best.
+
+```{r results}
+plot(fitted)
+```
+
+## Coefficients of selected model from Cross-Validation
+
+Taking the best model described by `lambda.min`
+
+```{r show_coefs}
+coefs.v <- coef(fitted, s = 'lambda.min')[,1] %>% { .[. != 0]}
+coefs.v %>% { 
+  data.frame(ensembl.id  = names(.), 
+             gene.name   = geneNames(names(.))$external_gene_name, 
+             coefficient = .,
+             stringsAsFactors = FALSE)
+  } %>%
+  arrange(gene.name) %>%
+  knitr::kable()
+```
+
+## Hallmarks of Cancer
+
+```{r hallmarks}
+geneNames(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
+```
+
+## Survival curves and Log rank test
+
+```{r}
+separate2GroupsCox(as.vector(coefs.v), 
+                   xdata[, names(coefs.v)], 
+                   ydata, 
+                   plot.title = 'Full dataset', legend.outside = FALSE)
+```
+
