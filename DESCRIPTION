@@ -55,6 +55,6 @@ Suggests: testthat,
   curatedTCGAData,
   TCGAutils
 VignetteBuilder: knitr
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 BugReports: https://www.github.com/sysbiomed/glmSparseNet/issues
 URL: https://www.github.com/sysbiomed/glmSparseNet
