@@ -1,6 +1,15 @@
 # glmSparseNet
 ----------------------------------------------------------------
 
+## Changes in version 1.2.0
+
+- Depends on more recent version of loose.rock (previous was deprecated)
+- Release of new Bioconductor 3.9
+
+## Changes in version 1.1.0
+
+- Official release of glmSparseNet in Bioconductor
+
 ## Changes in version 0.99.17
 
 - Converts to 4 space indentation
