@@ -2,6 +2,8 @@ language: R
 sudo: false
 cache: packages
 
+script: true
+
 r_packages:
   - covr
   - devtools
