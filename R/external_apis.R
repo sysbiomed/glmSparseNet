@@ -161,9 +161,21 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full',
     # add genes
     call.url <- sprintf('%s&q=%s', baseUrl, paste(all.genes, collapse = '&q='))
 
-    conn  <- url(call.url, open = 'rt')
-    lines <- readLines(conn)
-    close.connection(conn, type = 'r') # close connection
+    lines <- NULL
+    conn <- NULL
+    tryCatch({
+        suppressWarnings({conn  <- url(call.url, open = 'rt') })
+        lines <- readLines(conn)
+        close.connection(conn, type = 'r') # close connection
+    }, error = function(err) {
+        warning('Cannot call Hallmark API, please try again later.')
+    })
+
+    if (is.null(lines)) {
+        return(list(hallmarks = NULL,
+                    no.hallmakrs = NULL,
+                    heatmap = NULL))
+    }
 
     item_group <- cumsum(grepl(sprintf("^[A-Za-z0-9\\._,-]+\t%s", metric),
                                lines))
