@@ -2,7 +2,7 @@ language: R
 sudo: false
 cache: packages
 
-script: true
+# script: true # use to recach travis packages -- https://steinbaugh.com/posts/travis-cache.html
 
 r_packages:
   - covr
