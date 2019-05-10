@@ -43,7 +43,7 @@ Imports: SummarizedExperiment,
   rlang,
   parallel,
   methods,
-  loose.rock (>= 1.0.11)
+  loose.rock (>= 1.0.12)
 Suggests: testthat,
   knitr,
   rmarkdown,

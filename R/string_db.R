@@ -19,8 +19,8 @@ stringDBhomoSapiens <- function(version = '10', score_threshold = 0,
     . <- NULL
 
     STRINGdb::get_STRING_species(version = version, species_name=NULL) %>%
-        dplyr::arrange(rlang::UQ(as.name('official_name'))) %>%
-        dplyr::filter(rlang::UQ(as.name('official_name')) == 'homo_sapiens')
+        dplyr::arrange(!!(as.name('official_name'))) %>%
+        dplyr::filter(!!(as.name('official_name')) == 'homo_sapiens')
 
     # downloading Homo sapiens
     string_db <- STRINGdb::STRINGdb$new(version         = version,
@@ -103,7 +103,7 @@ stringDBhomoSapiens <- function(version = '10', score_threshold = 0,
 
     all.interactions$combined_score <- combined.score
     interactions <- all.interactions %>%
-        dplyr::filter(rlang::UQ(as.name('combined_score')) >= score_threshold)
+        dplyr::filter(!!(as.name('combined_score')) >= score_threshold)
 
     return(interactions)
 }
@@ -159,9 +159,9 @@ buildStringNetwork <- function(string.tbl, use.names = 'protein') {
 
         # keep only proteins that have mapping to gene
         new.string <- string.tbl %>%
-           dplyr::filter(rlang::UQ(as.name('from')) %in%
+           dplyr::filter(!!(as.name('from')) %in%
                              prot.map$ensembl_peptide_id &
-                         rlang::UQ(as.name('to')) %in%
+                         !!(as.name('to')) %in%
                              prot.map$ensembl_peptide_id)
 
         # replace protein with genes

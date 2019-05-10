@@ -39,7 +39,7 @@ geneNames <- function(ensembl.genes) {
             } %>% rbind(results)
 
         return(dplyr::arrange(results,
-                              rlang::UQ(as.name('external_gene_name'))))
+                              !!(as.name('external_gene_name'))))
     }, error = function(msg) {
         warning(sprintf('Error when finding gene names:\n\t%s', msg))
     })
@@ -90,7 +90,7 @@ ensemblGeneNames <- function(gene.id) {
             } %>% rbind(results)
 
         return(dplyr::arrange(results,
-                              rlang::UQ(as.name('external_gene_name'))))
+                              !!(as.name('external_gene_name'))))
     }, error = function(msg) {
         warning(sprintf('Error when finding gene names:\n\t%s', msg))
     })
@@ -234,7 +234,7 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full',
         df.scaled$gene.name <- rownames(df.scaled)
 
         g1 <- reshape2::melt(df.scaled, id.vars = c('gene.name')) %>%
-            dplyr::filter(rlang::UQ(as.name('value')) > 0) %>%
+            dplyr::filter(!!(as.name('value')) > 0) %>%
             ggplot2::ggplot(ggplot2::aes_string('gene.name', 'variable',
                                                 fill = 'value')) +
               ggplot2::geom_raster() +
@@ -290,7 +290,7 @@ protein2EnsemblGeneNames <- function(ensembl.proteins) {
                                   mart    = mart)
         #
         return(dplyr::arrange(results,
-                              rlang::UQ(as.name('ensembl_peptide_id'))))
+                              !!(as.name('ensembl_peptide_id'))))
     }, error = function(msg) {
         warning(sprintf('Error when finding gene names:\n\t%s', msg))
     })

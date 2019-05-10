@@ -11,7 +11,7 @@ vignette: >
   %\VignetteIndexEntry{Example for Survival Data -- Skin Melanoma}
   %\VignetteEncoding{UTF-8}
 params:
-  seed: !r 2922
+  seed: !r 8432
 --- 
 
 ## Instalation
