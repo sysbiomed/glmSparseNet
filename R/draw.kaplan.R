@@ -164,6 +164,7 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
     # Generate the Kaplan-Meier survival object
     km        <- survival::survfit(survival::Surv(time, status) ~ group,
                                    data = prognostic.index.df)
+    km$custom.data <- prognostic.index.df
     futile.logger::flog.debug('')
     futile.logger::flog.debug('kaplan-meier object', km, capture = TRUE)
     # Calculate the logrank test p-value
@@ -239,7 +240,6 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
         p1$plot <- p1$plot + ggplot2::theme(legend.position = c(1,1),
                                   legend.justification = c(1, 1),
                                   legend.key.size = ggplot2::unit(20,"points"))
-
 
     # return p-value, plot and km object
     return(list(pvalue = p_value, plot = p1, km = km))
