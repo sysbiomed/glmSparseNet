@@ -51,13 +51,11 @@ To accelerate the process we use a very reduced dataset down to 107 variables
 only *(genes)*, which is stored as a data object in this package. However, the 
 procedure to obtain the data manually is described in the following chunk.
 
-```{r, include=FALSE}
-# chunk not included as it produces to many unnecessary messages
-brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
-```
-
-```{r, eval=FALSE}
-brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
+```{r,include=TRUE,results="hide",message=FALSE,warning=FALSE}
+brca <- curatedTCGAData(
+    diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
+    version = "1.1.38", dry.run = FALSE
+)
 ```
 
 ```{r data.show, warning=FALSE, error=FALSE}
