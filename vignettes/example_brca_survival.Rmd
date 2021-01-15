@@ -53,11 +53,11 @@ procedure to obtain the data manually is described in the following chunk.
 
 ```{r curated_data, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
-brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
+brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", version = "1.1.38", dry.run = FALSE)
 ```
 
 ```{r curated_data_non_eval, eval=FALSE}
-brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", FALSE)
+brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", version = "1.1.38", dry.run = FALSE)
 ```
 
 ```{r data, warning=FALSE, message=FALSE}
