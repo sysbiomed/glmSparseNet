@@ -4,6 +4,13 @@ cache: packages
 
 # script: true # use to recach travis packages -- https://steinbaugh.com/posts/travis-cache.html
 
+addons:
+  apt:
+    update: true
+
+before_install:
+  - sudo apt-get -y install libgit2-dev
+
 r_packages:
   - usethis
   - covr
