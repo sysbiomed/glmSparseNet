@@ -5,6 +5,7 @@ cache: packages
 # script: true # use to recach travis packages -- https://steinbaugh.com/posts/travis-cache.html
 
 r_packages:
+  - usethis
   - covr
   - devtools
   - roxygen2
