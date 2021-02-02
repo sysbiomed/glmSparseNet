@@ -4,8 +4,7 @@
 \alias{cv.glmOrphan}
 \title{GLMNET cross-validation model penalizing nodes with high degree}
 \usage{
-cv.glmOrphan(xdata, ydata, network, network.options = networkOptions(),
-  ...)
+cv.glmOrphan(xdata, ydata, network, network.options = networkOptions(), ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}

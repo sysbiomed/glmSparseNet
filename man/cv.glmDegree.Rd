@@ -4,8 +4,7 @@
 \alias{cv.glmDegree}
 \title{GLMNET cross-validation model penalizing nodes with small degree}
 \usage{
-cv.glmDegree(xdata, ydata, network, network.options = networkOptions(),
-  ...)
+cv.glmDegree(xdata, ydata, network, network.options = networkOptions(), ...)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}

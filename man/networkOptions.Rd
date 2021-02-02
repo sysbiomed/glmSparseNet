@@ -4,9 +4,15 @@
 \alias{networkOptions}
 \title{Setup network options}
 \usage{
-networkOptions(method = "pearson", unweighted = TRUE, cutoff = 0,
-  centrality = "degree", min.degree = 0, n.cores = 1,
-  trans.fun = function(x) {     x })
+networkOptions(
+  method = "pearson",
+  unweighted = TRUE,
+  cutoff = 0,
+  centrality = "degree",
+  min.degree = 0,
+  n.cores = 1,
+  trans.fun = function(x) {     x }
+)
 }
 \arguments{
 \item{method}{in case of correlation and covariance, which method to use}

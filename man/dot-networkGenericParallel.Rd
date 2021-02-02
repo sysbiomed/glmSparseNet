@@ -4,9 +4,16 @@
 \alias{.networkGenericParallel}
 \title{Calculate the upper triu of the matrix}
 \usage{
-.networkGenericParallel(fun, fun.prefix, xdata, build.output = "matrix",
-  n.cores = 1, force.recalc.network = FALSE, show.message = FALSE,
-  ...)
+.networkGenericParallel(
+  fun,
+  fun.prefix,
+  xdata,
+  build.output = "matrix",
+  n.cores = 1,
+  force.recalc.network = FALSE,
+  show.message = FALSE,
+  ...
+)
 }
 \arguments{
 \item{fun}{function that will calculate the edge weight between 2 nodes}

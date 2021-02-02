@@ -4,9 +4,14 @@
 \alias{buildLambda}
 \title{Auxiliary function to generate suitable lambda parameters}
 \usage{
-buildLambda(lambda.largest = NULL, xdata = NULL, ydata = NULL,
-  family = NULL, orders.of.magnitude.smaller = 3,
-  lambda.per.order.magnitude = 150)
+buildLambda(
+  lambda.largest = NULL,
+  xdata = NULL,
+  ydata = NULL,
+  family = NULL,
+  orders.of.magnitude.smaller = 3,
+  lambda.per.order.magnitude = 150
+)
 }
 \arguments{
 \item{lambda.largest}{numeric value for largest number of lambda to consider

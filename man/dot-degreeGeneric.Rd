@@ -4,10 +4,18 @@
 \alias{.degreeGeneric}
 \title{Generic function to calculate degree based on data}
 \usage{
-.degreeGeneric(fun = stats::cor, fun.prefix = "operator", xdata,
-  cutoff = 0, consider.unweighted = FALSE, chunks = 1000,
-  force.recalc.degree = FALSE, force.recalc.network = FALSE,
-  n.cores = 1, ...)
+.degreeGeneric(
+  fun = stats::cor,
+  fun.prefix = "operator",
+  xdata,
+  cutoff = 0,
+  consider.unweighted = FALSE,
+  chunks = 1000,
+  force.recalc.degree = FALSE,
+  force.recalc.network = FALSE,
+  n.cores = 1,
+  ...
+)
 }
 \arguments{
 \item{fun}{function that will calculate the edge weight between 2 nodes}

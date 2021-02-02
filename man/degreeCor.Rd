@@ -4,9 +4,15 @@
 \alias{degreeCor}
 \title{Calculate the degree of the correlation network based on xdata}
 \usage{
-degreeCor(xdata, cutoff = 0, consider.unweighted = FALSE,
-  force.recalc.degree = FALSE, force.recalc.network = FALSE,
-  n.cores = 1, ...)
+degreeCor(
+  xdata,
+  cutoff = 0,
+  consider.unweighted = FALSE,
+  force.recalc.degree = FALSE,
+  force.recalc.network = FALSE,
+  n.cores = 1,
+  ...
+)
 }
 \arguments{
 \item{xdata}{calculate correlation matrix on each column}

@@ -4,8 +4,13 @@
 \alias{hallmarks}
 \title{Retrieve hallmarks of cancer count for genes}
 \usage{
-hallmarks(genes, metric = "count", hierarchy = "full",
-  generate.plot = TRUE, show.message = FALSE)
+hallmarks(
+  genes,
+  metric = "count",
+  hierarchy = "full",
+  generate.plot = TRUE,
+  show.message = FALSE
+)
 }
 \arguments{
 \item{genes}{gene names}

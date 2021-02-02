@@ -4,9 +4,19 @@
 \alias{separate2GroupsCox}
 \title{Separate data in High and Low risk groups (based on Cox model)}
 \usage{
-separate2GroupsCox(chosen.btas, xdata, ydata, probs = c(0.5, 0.5),
-  no.plot = FALSE, plot.title = "SurvivalCurves", xlim = NULL,
-  ylim = NULL, expand.yzero = FALSE, legend.outside = FALSE, ...)
+separate2GroupsCox(
+  chosen.btas,
+  xdata,
+  ydata,
+  probs = c(0.5, 0.5),
+  no.plot = FALSE,
+  plot.title = "SurvivalCurves",
+  xlim = NULL,
+  ylim = NULL,
+  expand.yzero = FALSE,
+  legend.outside = FALSE,
+  ...
+)
 }
 \arguments{
 \item{chosen.btas}{list of testing coefficients to calculate prognostic

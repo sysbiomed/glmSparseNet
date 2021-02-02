@@ -4,8 +4,14 @@
 \alias{cv.glmSparseNet}
 \title{Calculate cross validating GLM model with network-based regularization}
 \usage{
-cv.glmSparseNet(xdata, ydata, network,
-  network.options = networkOptions(), experiment.name = NULL, ...)
+cv.glmSparseNet(
+  xdata,
+  ydata,
+  network,
+  network.options = networkOptions(),
+  experiment.name = NULL,
+  ...
+)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment}

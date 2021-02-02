@@ -4,8 +4,14 @@
 \alias{networkCorParallel}
 \title{Calculates the correlation network}
 \usage{
-networkCorParallel(xdata, build.output = "matrix", n.cores = 1,
-  force.recalc.network = FALSE, show.message = FALSE, ...)
+networkCorParallel(
+  xdata,
+  build.output = "matrix",
+  n.cores = 1,
+  force.recalc.network = FALSE,
+  show.message = FALSE,
+  ...
+)
 }
 \arguments{
 \item{xdata}{base data to calculate network}

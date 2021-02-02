@@ -5,7 +5,9 @@
 \alias{string.network.700.cache}
 \title{Cache of protein-protein network, as it takes some time to
 retrieve and process this will facilitate the vignette building}
-\format{An object of class \code{dgCMatrix} with 11033 rows and 11033 columns.}
+\format{
+An object of class \code{dgCMatrix} with 11033 rows and 11033 columns.
+}
 \usage{
 string.network.700.cache
 }
