@@ -135,11 +135,13 @@ qplot(degree.network[degree.network <= quantile(degree.network,
 
 ```{r, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
-brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", version = "1.1.38", dry.run = FALSE)
+brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", 
+                        version = "1.1.38", dry.run = FALSE)
 ```
 
 ```{r, eval=FALSE}
-brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", version = "1.1.38", dry.run = FALSE)
+brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", 
+                        version = "1.1.38", dry.run = FALSE)
 ```
 
 Build the survival data from the clinical columns.

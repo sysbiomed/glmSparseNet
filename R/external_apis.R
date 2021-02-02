@@ -281,6 +281,7 @@ protein2EnsemblGeneNames <- function(ensembl.proteins) {
         mart  <- loose.rock::run.cache(biomaRt::useMart,
                                        marts$biomart[index],
                                        'hsapiens_gene_ensembl',
+                                       host = 'https://www.ensembl.org',
                                        cache.prefix = 'biomart')
         #
         results <- biomaRt::getBM(attributes = c('ensembl_peptide_id',

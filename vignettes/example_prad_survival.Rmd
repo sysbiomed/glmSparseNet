@@ -54,11 +54,13 @@ following chunk.
 
 ```{r curated_data, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
-prad <- curatedTCGAData(diseaseCode = "PRAD", assays = "RNASeq2GeneNorm", FALSE)
+prad <- curatedTCGAData(diseaseCode = "PRAD", assays = "RNASeq2GeneNorm", 
+                        dry.run = FALSE)
 ```
 
 ```{r curated_data_non_eval, eval=FALSE}
-prad <- curatedTCGAData(diseaseCode = "PRAD", assays = "RNASeq2GeneNorm", FALSE)
+prad <- curatedTCGAData(diseaseCode = "PRAD", assays = "RNASeq2GeneNorm",
+                        dry.run = FALSE)
 ```
 
 Build the survival data from the clinical columns.
