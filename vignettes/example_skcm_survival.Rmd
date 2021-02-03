@@ -53,11 +53,13 @@ procedure to obtain the data manually is described in the following chunk.
 
 ```{r curated_data, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
-skcm <- curatedTCGAData(diseaseCode = 'SKCM', assays = 'RNASeq2GeneNorm', FALSE, cache = tempdir())
+skcm <- curatedTCGAData(diseaseCode = 'SKCM', assays = 'RNASeq2GeneNorm', 
+                        version = '1.1.38',  dry.run = FALSE)
 ```
 
 ```{r curated_data_non_eval, eval=FALSE}
-skcm <- curatedTCGAData(diseaseCode = 'SKCM', assays = 'RNASeq2GeneNorm', FALSE, cache = tempdir())
+skcm <- curatedTCGAData(diseaseCode = 'SKCM', assays = 'RNASeq2GeneNorm', 
+                        version = '1.1.38',  dry.run = FALSE)
 ```
 
 

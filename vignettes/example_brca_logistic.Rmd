@@ -52,10 +52,14 @@ only *(genes)*, which is stored as a data object in this package. However, the
 procedure to obtain the data manually is described in the following chunk.
 
 ```{r,include=TRUE,results="hide",message=FALSE,warning=FALSE}
-brca <- curatedTCGAData(
-    diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
-    version = "1.1.38", dry.run = FALSE
+brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
+                        version = "1.1.38", dry.run = FALSE
 )
+```
+
+```{r curated_data_non_eval, eval=FALSE}
+brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
+                        version = "1.1.38", dry.run = FALSE)
 ```
 
 ```{r data.show, warning=FALSE, error=FALSE}
