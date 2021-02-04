@@ -1,7 +1,7 @@
 Package: glmSparseNet
 Type: Package
 Title: Network Centrality Metrics for Elastic-Net Regularized Models
-Version: 1.9.1
+Version: 1.9.2
 Authors@R: c(person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre")),
              person("Susana", "Vinga", email = "susanavinga@tecnico.ulisboa.pt", role = "aut"),
              person("Eunice", "Carrasquinha", email = "eunice.trigueirao@tecnico.ulisboa.pt", role = "ctb"),
@@ -27,22 +27,19 @@ biocViews: Software,
   GraphAndNetwork
 Depends: R (>= 3.5), Matrix, MultiAssayExperiment, glmnet
 Imports: SummarizedExperiment,
-  STRINGdb,
   biomaRt,
   futile.logger,
   sparsebn,
   sparsebnUtils,
   forcats,
   dplyr,
+  glue,
   readr,
   ggplot2,
   survminer,
   reshape2,
-  stats,
   stringr,
-  rlang,
   parallel,
-  methods,
   loose.rock (>= 1.0.12)
 Suggests: testthat,
   knitr,
