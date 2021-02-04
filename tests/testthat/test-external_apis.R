@@ -1,18 +1,19 @@
 context("external_apis")
 
 test_that("gene name query", {
-  target <- data.frame(ensembl = c('ENSG00000114978',
-                                   'ENSG00000166211',
-                                   'ENSG00000183688',
-                                   'ENSG00000171862',
-                                   'ENSG00000141510'),
-                       gene.name = c('MOB1A',
-                                    'SPIC',
-                                    'RFLNB',
-                                    'PTEN',
-                                    'TP53'),
-                       stringsAsFactors = FALSE,
-                       row.names = 1)
+  target <- data.frame(
+    ensembl = c('ENSG00000114978',
+                 'ENSG00000166211',
+                 'ENSG00000183688',
+                 'ENSG00000171862',
+                 'ENSG00000141510'),
+    gene.name = c('MOB1A',
+                  'SPIC',
+                  'RFLNB',
+                  'PTEN',
+                  'TP53'),
+    stringsAsFactors = FALSE,
+    row.names = 1)
 
   res <- geneNames(rownames(target))
   expect_equal(res$external_gene_name, target[res$ensembl_gene_id, 'gene.name'])

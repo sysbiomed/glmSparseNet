@@ -1,31 +1,48 @@
 #' Retrieve gene names from biomaRt
 #'
 #' @param ensembl.genes character vector with gene names in ensembl_id format
-#'
+#' @param use.cache Boolean indicating if biomaRt cache should be used
+#' 
 #' @return a dataframe with external gene names, ensembl_id
 #' @export
 #'
 #' @examples
 #' geneNames(c('ENSG00000114978','ENSG00000166211', 'ENSG00000183688'))
-geneNames <- function(ensembl.genes) {
+geneNames <- function(ensembl.genes, use.cache = TRUE) {
 
     . <- NULL
 
     tryCatch({
         marts <- biomaRt::listMarts()
         index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
+        #
         mart <- biomaRt::useMart(marts$biomart[index])
+        #
         mart <- loose.rock::run.cache(biomaRt::useMart,
                                       marts$biomart[index],
                                       'hsapiens_gene_ensembl',
+                                      host = 'https://www.ensembl.org',
                                       cache.prefix = 'biomart',
+                                      # verbose = TRUE,
                                       show.message = FALSE)
-        results <- biomaRt::getBM(attributes = c("external_gene_name",
-                                                 "ensembl_gene_id"),
-                                  filters = "ensembl_gene_id",
-                                  values = ensembl.genes,
-                                  mart = mart)
-
+        #
+        results <- tryCatch({
+            biomaRt::getBM(attributes = c("external_gene_name",
+                                                     "ensembl_gene_id"),
+                                      filters = "ensembl_gene_id",
+                                      values = ensembl.genes,
+                                      useCache = use.cache,
+                                      # verbose = TRUE,
+                                      mart = mart)
+        }, error = function(error) {})
+        
+        if (is.null(results) && use.cache) {
+            warning('There was a problem getting the genes, trying without a cache.')
+            return(geneNames(ensembl.genes, FALSE))
+        } else if (is.null(results)) {
+            stop('There was a problem with biomaRt::getBM()')
+        }
+        
         #
         # Check if any genes does not have an external_gene_name
         #  and add them with same ensembl_id
@@ -265,7 +282,8 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full',
 #'
 #' @param ensembl.proteins character vector with gene names in
 #' ensembl_peptide_id format
-#'
+#' @param use.cache Boolean indicating if biomaRt cache should be used
+#' 
 #' @return a dataframe with external gene names, ensembl_peptide_id
 #' @export
 #'
@@ -273,7 +291,7 @@ hallmarks <- function(genes, metric = 'count', hierarchy = 'full',
 #' protein2EnsemblGeneNames(c('ENSP00000235382',
 #'                            'ENSP00000233944',
 #'                            'ENSP00000216911'))
-protein2EnsemblGeneNames <- function(ensembl.proteins) {
+protein2EnsemblGeneNames <- function(ensembl.proteins, use.cache = TRUE) {
     tryCatch({
         marts <- biomaRt::listMarts()
         index <- grep("ensembl genes",marts$version, ignore.case = TRUE)
@@ -282,13 +300,26 @@ protein2EnsemblGeneNames <- function(ensembl.proteins) {
                                        marts$biomart[index],
                                        'hsapiens_gene_ensembl',
                                        host = 'https://www.ensembl.org',
-                                       cache.prefix = 'biomart')
+                                       cache.prefix = 'biomart',
+                                       show.message = FALSE)
         #
-        results <- biomaRt::getBM(attributes = c('ensembl_peptide_id',
-                                                 'ensembl_gene_id'),
-                                  filters = 'ensembl_peptide_id',
-                                  values  = ensembl.proteins,
-                                  mart    = mart)
+        results <- tryCatch({
+            biomaRt::getBM(attributes = c("ensembl_peptide_id",
+                                          "ensembl_gene_id"),
+                           filters = "ensembl_peptide_id",
+                           values = ensembl.proteins,
+                           useCache = use.cache,
+                           # verbose = TRUE,
+                           mart = mart)
+        }, error = function(error) {})
+        
+        if (is.null(results) && use.cache) {
+            warning('There was a problem getting the gene names, trying without a cache.')
+            return(protein2EnsemblGeneNames(ensembl.proteins, FALSE))
+        } else if (is.null(results)) {
+            stop('There was a problem with biomaRt::getBM()')
+        }
+        
         #
         return(dplyr::arrange(results,
                               !!(as.name('ensembl_peptide_id'))))
