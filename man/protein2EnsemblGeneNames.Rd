@@ -4,11 +4,13 @@
 \alias{protein2EnsemblGeneNames}
 \title{Retrieve ensembl gene ids from proteins}
 \usage{
-protein2EnsemblGeneNames(ensembl.proteins)
+protein2EnsemblGeneNames(ensembl.proteins, use.cache = TRUE)
 }
 \arguments{
 \item{ensembl.proteins}{character vector with gene names in
 ensembl_peptide_id format}
+
+\item{use.cache}{Boolean indicating if biomaRt cache should be used}
 }
 \value{
 a dataframe with external gene names, ensembl_peptide_id

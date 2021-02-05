@@ -23,5 +23,6 @@ Inspired by STRINGdb Bioconductor package, but using curl
 as file may be too big to handle.
 }
 \examples{
-downloadFileLocal('https://string-db.org/api/tsv-no-header/version')
+glmSparseNet:::downloadFileLocal(
+  'https://string-db.org/api/tsv-no-header/version')
 }

@@ -11,7 +11,9 @@
 #' @param remove.text remove text-based interactions
 #'
 #' @return table with combined score
-calculate.combined.score <- function(all.interactions, score_threshold, remove.text) {
+calculate.combined.score <- function(all.interactions, 
+                                     score_threshold, 
+                                     remove.text) {
     # We manually compute using the guide in stringdb's faq
     prior <- 0.041
     
@@ -21,15 +23,20 @@ calculate.combined.score <- function(all.interactions, score_threshold, remove.t
     }
     
     # normalize between 0 and 1
-    mat <- as.matrix(all.interactions %>% dplyr::select(-dplyr::starts_with('protein'))) / 1000
+    mat <- as.matrix(all.interactions %>% 
+                         dplyr::select(-dplyr::starts_with('protein'))) / 1000
     non_homology.ixs <- which(colnames(mat) != 'homology')
     
     # compute prior away
     mat[, non_homology.ixs] <- compute.prior(mat[, non_homology.ixs], prior)
     
     # then, combine the direct and transferred scores for each category:
-    for (ix in c('neighborhood', 'coexpression', 'experiments', 'database', 'textmining')) {
-        mat[, ix] <- 1 - (1 - mat[, ix]) * (1 - mat[, paste0(ix, '_transferred', sep = '')])
+    combined <- c('neighborhood', 'coexpression', 'experiments', 
+                  'database', 'textmining')
+    for (ix in combined) {
+        mat[, ix] <- 1 - 
+            (1 - mat[, ix]) * 
+            (1 - mat[, paste0(ix, '_transferred', sep = '')])
     }
     
     # now, do the homology correction on cooccurrence and textmining:
@@ -56,11 +63,13 @@ calculate.combined.score <- function(all.interactions, score_threshold, remove.t
             (1 - mat[, 'textmining'])
     }
     
-    # and lastly, do the 1 - conversion again, and put back the prior *exactly once*
+    # and lastly, do the 1 - conversion again, and put back the prior 
+    #  *exactly once*
     combined_score <- prior + (1 - prior) * (1 - combined_score)
     
     return(all.interactions %>% 
-        dplyr::select(from = !!as.name('protein1'), to = !!as.name('protein2')) %>% 
+        dplyr::select(from = !!as.name('protein1'), 
+                      to = !!as.name('protein2')) %>% 
         dplyr::mutate(combined_score = floor(combined_score * 1000)) %>% 
         #
         # Refilter combined score
@@ -79,7 +88,7 @@ calculate.combined.score <- function(all.interactions, score_threshold, remove.t
 #'
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'     stringDBhomoSapiens(score_threshold = 800)
 #' }
 stringDBhomoSapiens <- function(version = '11.0', 
@@ -128,7 +137,7 @@ stringDBhomoSapiens <- function(version = '11.0',
 #' @export
 #' @seealso stringDBhomoSapiens
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'   all.interactions.700 <- stringDBhomoSapiens(score_threshold = 700)
 #'   string.network       <- buildStringNetwork(all.interactions.700,
 #'                                               use.names = 'external')

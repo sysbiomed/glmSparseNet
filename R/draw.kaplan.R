@@ -220,7 +220,8 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
         p1$plot <- p1$plot + ggplot2::ggtitle(paste0(gsub('_', ' ', plot.title),
                                            '\np_value = ',p_value))
     } else {
-        p1$plot <- p1$plot + ggplot2::ggtitle(paste0(gsub('_', ' ', plot.title)))
+        p1$plot <- p1$plot + 
+          ggplot2::ggtitle(paste0(gsub('_', ' ', plot.title)))
     }
 
     p1$plot <- p1$plot +

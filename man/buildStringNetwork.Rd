@@ -25,7 +25,7 @@ mapping
 between peptide and gene id
 }
 \examples{
-\dontrun{
+\donttest{
   all.interactions.700 <- stringDBhomoSapiens(score_threshold = 700)
   string.network       <- buildStringNetwork(all.interactions.700,
                                               use.names = 'external')

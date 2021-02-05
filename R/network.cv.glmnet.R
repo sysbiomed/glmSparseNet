@@ -19,7 +19,7 @@
 #'
 #' @examples
 #'
-#' \dontrun{
+#' \donttest{
 #'     # Gaussian model
 #'     xdata <- matrix(rnorm(500), ncol = 5)
 #'     cv.glmSparseNet(xdata, rnorm(nrow(xdata)), 'correlation',

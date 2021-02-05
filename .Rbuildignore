@@ -67,3 +67,5 @@ logger\.txt
 # vignettes/example_skcm_survival\.Rmd
 
 vignettes/_stringdb_test\.Rmd
+
+^\.git$

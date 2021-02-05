@@ -4,10 +4,12 @@
 \alias{geneNames}
 \title{Retrieve gene names from biomaRt}
 \usage{
-geneNames(ensembl.genes)
+geneNames(ensembl.genes, use.cache = TRUE)
 }
 \arguments{
 \item{ensembl.genes}{character vector with gene names in ensembl_id format}
+
+\item{use.cache}{Boolean indicating if biomaRt cache should be used}
 }
 \value{
 a dataframe with external gene names, ensembl_id

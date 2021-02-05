@@ -22,7 +22,7 @@ the count of scores above the given score_threshold
 Download protein-protein interactions from STRING DB
 }
 \examples{
-\dontrun{
+\donttest{
     stringDBhomoSapiens(score_threshold = 800)
 }
 }

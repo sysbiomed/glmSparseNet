@@ -39,7 +39,7 @@ limit between 0 and 1 for cprob and -1 and 1 for npmi
 Retrieve hallmarks of cancer count for genes
 }
 \examples{
-\dontrun{
+\donttest{
     hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
     hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
 }

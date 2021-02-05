@@ -37,7 +37,8 @@ geneNames <- function(ensembl.genes, use.cache = TRUE) {
         }, error = function(error) {})
         
         if (is.null(results) && use.cache) {
-            warning('There was a problem getting the genes, trying without a cache.')
+            warning('There was a problem getting the genes,',
+                    ' trying without a cache.')
             return(geneNames(ensembl.genes, FALSE))
         } else if (is.null(results)) {
             stop('There was a problem with biomaRt::getBM()')
@@ -73,7 +74,7 @@ geneNames <- function(ensembl.genes, use.cache = TRUE) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'     ensemblGeneNames(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
 #' }
 ensemblGeneNames <- function(gene.id) {
@@ -137,7 +138,7 @@ ensemblGeneNames <- function(gene.id) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'     hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
 #'     hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
 #' }
@@ -314,7 +315,8 @@ protein2EnsemblGeneNames <- function(ensembl.proteins, use.cache = TRUE) {
         }, error = function(error) {})
         
         if (is.null(results) && use.cache) {
-            warning('There was a problem getting the gene names, trying without a cache.')
+            warning('There was a problem getting the gene names,',
+                    ' trying without a cache.')
             return(protein2EnsemblGeneNames(ensembl.proteins, FALSE))
         } else if (is.null(results)) {
             stop('There was a problem with biomaRt::getBM()')
