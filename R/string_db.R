@@ -142,7 +142,7 @@ stringDBhomoSapiens <- function(version = '11.0',
 #'   string.network       <- buildStringNetwork(all.interactions.700,
 #'                                               use.names = 'external')
 #'   # number of edges
-#'   sum(network != 0)
+#'   sum(string.network != 0)
 #' }
 buildStringNetwork <- function(string.tbl, use.names = 'protein') {
     

@@ -30,7 +30,7 @@ between peptide and gene id
   string.network       <- buildStringNetwork(all.interactions.700,
                                               use.names = 'external')
   # number of edges
-  sum(network != 0)
+  sum(string.network != 0)
 }
 }
 \seealso{
