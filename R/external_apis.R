@@ -27,6 +27,7 @@ geneNames <- function(ensembl.genes, use.cache = TRUE) {
                                       show.message = FALSE)
         #
         results <- tryCatch({
+            httr::set_config(httr::config(ssl_verifypeer = FALSE), override = FALSE)
             biomaRt::getBM(attributes = c("external_gene_name",
                                                      "ensembl_gene_id"),
                                       filters = "ensembl_gene_id",
@@ -34,7 +35,11 @@ geneNames <- function(ensembl.genes, use.cache = TRUE) {
                                       useCache = use.cache,
                                       # verbose = TRUE,
                                       mart = mart)
-        }, error = function(error) {})
+        }, 
+        error = function(error) {},
+        finally = function() {
+            httr::set_config(httr::config())
+        })
         
         if (is.null(results) && use.cache) {
             warning('There was a problem getting the genes,',
@@ -69,6 +74,7 @@ geneNames <- function(ensembl.genes, use.cache = TRUE) {
 #' Retrieve ensembl gene names from biomaRt
 #'
 #' @param gene.id character vector with gene names
+#' @param use.cache Boolean indicating if biomaRt cache should be used
 #'
 #' @return a dataframe with external gene names, ensembl_id
 #' @export
@@ -77,7 +83,7 @@ geneNames <- function(ensembl.genes, use.cache = TRUE) {
 #' \donttest{
 #'     ensemblGeneNames(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
 #' }
-ensemblGeneNames <- function(gene.id) {
+ensemblGeneNames <- function(gene.id, use.cache = TRUE) {
 
     . <- NULL
 
@@ -90,12 +96,30 @@ ensemblGeneNames <- function(gene.id) {
                                       'hsapiens_gene_ensembl',
                                       cache.prefix = 'biomart',
                                       show.message = FALSE)
-        results <- biomaRt::getBM(attributes = c("external_gene_name",
-                                                 "ensembl_gene_id"),
-                                  filters = "external_gene_name",
-                                  values = gene.id,
-                                  mart = mart)
-
+        
+        results <- tryCatch({
+            httr::set_config(httr::config(ssl_verifypeer = FALSE), override = FALSE)
+            
+            biomaRt::getBM(attributes = c("external_gene_name",
+                                                     "ensembl_gene_id"),
+                                      filters = "external_gene_name",
+                                      values = gene.id,
+                                      useCache = use.cache,
+                                      mart = mart)
+        }, 
+        error = function(error) {},
+        finally = function() {
+            httr::set_config(httr::config())
+        })
+        
+        if (is.null(results) && use.cache) {
+            warning('There was a problem getting the genes,',
+                    ' trying without a cache.')
+            return(ensemblGeneNames(gene.id, FALSE))
+        } else if (is.null(results)) {
+            stop('There was a problem with biomaRt::getBM()')
+        }
+        
         #
         # Check if any genes does not have an external_gene_name
         #  and add them with same ensembl_id
@@ -305,6 +329,8 @@ protein2EnsemblGeneNames <- function(ensembl.proteins, use.cache = TRUE) {
                                        show.message = FALSE)
         #
         results <- tryCatch({
+            httr::set_config(httr::config(ssl_verifypeer = FALSE), override = FALSE)
+            
             biomaRt::getBM(attributes = c("ensembl_peptide_id",
                                           "ensembl_gene_id"),
                            filters = "ensembl_peptide_id",
@@ -312,7 +338,11 @@ protein2EnsemblGeneNames <- function(ensembl.proteins, use.cache = TRUE) {
                            useCache = use.cache,
                            # verbose = TRUE,
                            mart = mart)
-        }, error = function(error) {})
+        }, 
+        error = function(error) {},
+        finally = function() {
+            httr::set_config(httr::config())
+        })
         
         if (is.null(results) && use.cache) {
             warning('There was a problem getting the gene names,',
