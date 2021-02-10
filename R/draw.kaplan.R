@@ -137,12 +137,12 @@ separate2GroupsCox <- function(
       
       ydata.new <- ydata
       # xdata.new <- NULL
-      if (length(unique(prognostic.index)) > 1 && sum(low.risk.ix) + sum(low.risk.ix) > length(prognostic.index)) {
+      if (length(unique(prognostic.index)) > 1 && sum(low.risk.ix) + sum(high.risk.ix) > length(prognostic.index)) {
         str.message <- paste0(
           'The cutoff values given to the function allow for some over ',
-          'samples in both groups, with:\n  high risk size (', sum(low.risk.ix), ') ',
+          'samples in both groups, with:\n  high risk size (', sum(high.risk.ix), ') ',
           '+ low risk size (', sum(low.risk.ix),') not equal to ',
-          'xdata/ydata rows (', sum(low.risk.ix) + sum(low.risk.ix), 
+          'xdata/ydata rows (', sum(high.risk.ix) + sum(low.risk.ix), 
           ' != ', length(prognostic.index), ')\n\n'
         )
         
