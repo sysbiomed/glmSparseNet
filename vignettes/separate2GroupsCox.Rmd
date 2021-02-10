@@ -1,0 +1,126 @@
+---
+title: "Separate 2 groups in Cox regression"
+author: "André Veríssimo"
+date: "`r Sys.Date()`"
+output: 
+  BiocStyle::html_document:
+    number_sections: yes
+    toc: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Separate 2 groups in Cox regression}
+  %\VignetteEncoding{UTF-8}
+--- 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+## Instalation
+
+```{r, eval=FALSE}
+if (!require("BiocManager"))
+  install.packages("BiocManager")
+BiocManager::install("glmSparseNet")
+```
+
+# Required Packages
+
+```{r packages, message=FALSE, warning=FALSE}
+devtools::load_all()
+library(futile.logger)
+library(ggplot2)
+#library(glmSparseNet)
+
+# Some general options for futile.logger the debugging package
+.Last.value <- flog.layout(layout.format('[~l] ~m'))
+.Last.value <- loose.rock::show.message(FALSE)
+# Setting ggplot2 default theme as minimal
+theme_set(ggplot2::theme_minimal())
+```
+
+## Prepare data
+
+```{r}
+data('ovarian', package = 'survival')
+xdata <- ovarian[,c('age', 'resid.ds')]
+ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
+```
+
+## Separate using age as co-variate _(group cutoff is median calculated relative risk)_
+
+```{r}
+res.age <- separate2GroupsCox(c(age = 1, 0), xdata, ydata)
+```
+
+### Kaplan-Meier survival results
+
+```{r, echo=FALSE}
+res.age$km
+```
+
+### Plot
+
+A individual is attributed to low-risk group if its calculated relative risk _(using Cox Proportional model)_ is below or equal the median risk.
+
+The opposite for the high-risk groups, populated with individuals above the median relative-risk.
+
+```{r, echo=FALSE}
+res.age$plot
+```
+
+## Separate using age as co-variate _(group cutoff is 40% - 60%)_
+
+```{r}
+res.age.40.60 <- separate2GroupsCox(c(age = 1, 0), xdata, ydata, probs = c(.4, .6))
+```
+
+### Kaplan-Meier survival results
+
+```{r, echo=FALSE}
+res.age.40.60$km
+```
+
+### Plot
+
+A individual is attributed to low-risk group if its calculated relative risk _(using Cox Proportional model)_ is below the median risk.
+
+The opposite for the high-risk groups, populated with individuals above the median relative-risk.
+
+```{r, echo=FALSE}
+res.age.40.60$plot
+```
+
+## Separate using age as co-variate _(group cutoff is 60% - 40%)_
+
+This is a special case where you want to use a cutoff that includes some sample on both high and low risks groups.
+
+```{r}
+res.age.60.40 <- separate2GroupsCox(
+  chosen.btas = c(age = 1, 0), 
+  xdata, 
+  ydata, 
+  probs = c(.6, .4),
+  stop.when.overlap = FALSE
+)
+```
+
+### Kaplan-Meier survival results
+
+```{r, echo=FALSE}
+cat('Kaplan-Meier results','\n')
+res.age.60.40$km
+```
+
+### Plot
+
+A individual is attributed to low-risk group if its calculated relative risk _(using Cox Proportional model)_ is below the median risk.
+
+The opposite for the high-risk groups, populated with individuals above the median relative-risk.
+
+```{r, echo=FALSE}
+res.age.60.40$plot
+```
+
+

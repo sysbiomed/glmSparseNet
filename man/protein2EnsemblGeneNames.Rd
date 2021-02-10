@@ -4,13 +4,16 @@
 \alias{protein2EnsemblGeneNames}
 \title{Retrieve ensembl gene ids from proteins}
 \usage{
-protein2EnsemblGeneNames(ensembl.proteins, use.cache = TRUE)
+protein2EnsemblGeneNames(ensembl.proteins, use.cache = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{ensembl.proteins}{character vector with gene names in
 ensembl_peptide_id format}
 
 \item{use.cache}{Boolean indicating if biomaRt cache should be used}
+
+\item{verbose}{When using biomaRt in webservice mode and setting verbose to
+TRUE, the XML query to the webservice will be printed.}
 }
 \value{
 a dataframe with external gene names, ensembl_peptide_id
@@ -19,7 +22,9 @@ a dataframe with external gene names, ensembl_peptide_id
 Retrieve ensembl gene ids from proteins
 }
 \examples{
-protein2EnsemblGeneNames(c('ENSP00000235382',
-                           'ENSP00000233944',
-                           'ENSP00000216911'))
+protein2EnsemblGeneNames(c(
+    'ENSP00000235382',
+    'ENSP00000233944',
+    'ENSP00000216911'
+))
 }

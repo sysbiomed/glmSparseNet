@@ -15,6 +15,9 @@
 #' @param ylim Optional argument to limit the y-axis view
 #' @param legend.outside If TRUE legend will be outside plot, otherwise inside
 #' @param expand.yzero expand to y = 0
+#' @param stop.when.overlap when probs vector allows for overlapping of samples
+#' in both groups, then stop. Otherwise it will calculate with duplicate 
+#' samples, i.e. simply adding them to xdata and ydata (in a different group)
 #' @param ... additional parameters to survminer::ggsurvplot
 #'
 #' @return object with logrank test and kaplan-meier survival plot
@@ -37,13 +40,16 @@
 #'                    data.frame(time = runif(6), status = rbinom(6, 1, .5)))
 #' separate2GroupsCox(list(aa = c(age = 1, 0.5),
 #'                         bb = c(age = 0, 1.5)), xdata, ydata)
-separate2GroupsCox <- function(chosen.btas, xdata, ydata,
-                               probs = c(.5, .5), no.plot = FALSE,
-                               plot.title = 'SurvivalCurves',
-                               xlim = NULL, ylim = NULL, expand.yzero = FALSE,
-                               legend.outside = FALSE,
-                               ...) {
-
+separate2GroupsCox <- function(
+    chosen.btas, xdata, ydata,
+    probs = c(.5, .5), no.plot = FALSE,
+    plot.title = 'SurvivalCurves',
+    xlim = NULL, ylim = NULL, expand.yzero = FALSE,
+    legend.outside = FALSE,
+    stop.when.overlap = TRUE,
+    ...
+) {
+    #
     # convert between compatible formats
     if(inherits(chosen.btas, 'numeric')) {
         chosen.btas <- list(chosen.btas)
@@ -100,7 +106,7 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
     futile.logger::flog.debug('')
     futile.logger::flog.debug('prognostic.index', prognostic.index,
                               capture = TRUE)
-    prognostic.index.df <- data.frame(time = c(), status = c(), group = c())
+    prognostic.index.df <- data.frame(time = c(), status = c(), group = c(), index = c())
     # populate a data.frame with all patients (multiple rows per patients if has
     # multiple btas) already calculate high/low risk groups
 
@@ -108,6 +114,7 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
       # threshold
       #
       #
+      sample.ixs <- rownames(prognostic.index)
       temp.group <- array(-1, dim(prognostic.index)[1])
       pi.thres <- stats::quantile(prognostic.index[,ix], probs = c(probs[1],
                                                                    probs[2]))
@@ -119,18 +126,53 @@ separate2GroupsCox <- function(chosen.btas, xdata, ydata,
       }
 
       # low risk
-      temp.group[prognostic.index[,ix] <=  pi.thres[1]] <- (2 * ix) - 1
+      low.risk.ix <- prognostic.index[,ix] <=  pi.thres[1]
+      temp.group[low.risk.ix] <- (2 * ix) - 1
       # high risk
-      temp.group[prognostic.index[,ix] > pi.thres[2]] <- (2 * ix)
+      high.risk.ix <- prognostic.index[,ix] > pi.thres[2]
+      temp.group[high.risk.ix] <- (2 * ix)
+      
+      ydata.new <- ydata
+      # xdata.new <- NULL
+      
+      if (sum(low.risk.ix) + sum(low.risk.ix) > length(prognostic.index)) {
+        str.message <- paste0(
+          'The cutoff values given to the function allow for some over ',
+          'samples in both groups, with:\n  high risk size (', sum(low.risk.ix), ') ',
+          '+ low risk size (', sum(low.risk.ix),') not equal to ',
+          'xdata/ydata rows (', sum(low.risk.ix) + sum(low.risk.ix), 
+          ' != ', length(prognostic.index), ')\n\n'
+        )
+        
+        if (stop.when.overlap) {
+          stop(str.message, 'Stopping execution...')
+        } 
+        
+        warning(
+          str.message, 
+              'We are continuing with execution as parameter stop.when.overlap ',
+              'is FALSE.\n',
+              '  note: This adds duplicate samples to ydata and xdata xdata'
+        )
+        
+        overlap.samples <- which(as.vector(high.risk.ix & low.risk.ix))
+        #
+        prognostic.index <- t(t(c(prognostic.index[,], prognostic.index[overlap.samples,])))
+        ydata.new <- rbind(ydata, ydata[overlap.samples,])
+        # xdata.new <- rbind(xdata, xdata[overlap.samples,])
+        sample.ixs <- c(sample.ixs, sample.ixs[overlap.samples])
+        temp.group <- c(temp.group, rep((2 * ix) - 1, length(overlap.samples)))
+      }
       #
       valid_ix <- temp.group != -1
       #
       prognostic.index.df <- rbind(prognostic.index.df,
                                    data.frame(
                                        pi = prognostic.index[valid_ix, ix],
-                                       time   = ydata$time[valid_ix],
-                                       status = ydata$status[valid_ix],
-                                       group  = temp.group[valid_ix]))
+                                       time   = ydata.new$time[valid_ix],
+                                       status = ydata.new$status[valid_ix],
+                                       group  = temp.group[valid_ix],
+                                       index  = sample.ixs[valid_ix]))
     }
     # factor the group
     prognostic.index.df$group <- factor(prognostic.index.df$group)

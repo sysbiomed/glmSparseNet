@@ -15,6 +15,7 @@ separate2GroupsCox(
   ylim = NULL,
   expand.yzero = FALSE,
   legend.outside = FALSE,
+  stop.when.overlap = TRUE,
   ...
 )
 }
@@ -40,6 +41,10 @@ default, but for top and bottom 40\% -> c(.4,.6)}
 \item{expand.yzero}{expand to y = 0}
 
 \item{legend.outside}{If TRUE legend will be outside plot, otherwise inside}
+
+\item{stop.when.overlap}{when probs vector allows for overlapping of samples
+in both groups, then stop. Otherwise it will calculate with duplicate 
+samples, i.e. simply adding them to xdata and ydata (in a different group)}
 
 \item{...}{additional parameters to survminer::ggsurvplot}
 }

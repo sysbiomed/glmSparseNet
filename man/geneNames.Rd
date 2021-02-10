@@ -4,12 +4,15 @@
 \alias{geneNames}
 \title{Retrieve gene names from biomaRt}
 \usage{
-geneNames(ensembl.genes, use.cache = TRUE)
+geneNames(ensembl.genes, use.cache = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{ensembl.genes}{character vector with gene names in ensembl_id format}
 
 \item{use.cache}{Boolean indicating if biomaRt cache should be used}
+
+\item{verbose}{When using biomaRt in webservice mode and setting verbose to
+TRUE, the XML query to the webservice will be printed.}
 }
 \value{
 a dataframe with external gene names, ensembl_id
