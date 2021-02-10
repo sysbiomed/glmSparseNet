@@ -28,10 +28,9 @@ BiocManager::install("glmSparseNet")
 # Required Packages
 
 ```{r packages, message=FALSE, warning=FALSE}
-devtools::load_all()
 library(futile.logger)
 library(ggplot2)
-#library(glmSparseNet)
+library(glmSparseNet)
 
 # Some general options for futile.logger the debugging package
 .Last.value <- flog.layout(layout.format('[~l] ~m'))

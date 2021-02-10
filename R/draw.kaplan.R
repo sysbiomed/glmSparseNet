@@ -115,6 +115,9 @@ separate2GroupsCox <- function(
       #
       #
       sample.ixs <- rownames(prognostic.index)
+      if (is.null(sample.ixs)) {
+        sample.ixs <- seq(nrow(prognostic.index))
+      }
       temp.group <- array(-1, dim(prognostic.index)[1])
       pi.thres <- stats::quantile(prognostic.index[,ix], probs = c(probs[1],
                                                                    probs[2]))
@@ -134,8 +137,7 @@ separate2GroupsCox <- function(
       
       ydata.new <- ydata
       # xdata.new <- NULL
-      
-      if (sum(low.risk.ix) + sum(low.risk.ix) > length(prognostic.index)) {
+      if (length(unique(prognostic.index)) > 1 && sum(low.risk.ix) + sum(low.risk.ix) > length(prognostic.index)) {
         str.message <- paste0(
           'The cutoff values given to the function allow for some over ',
           'samples in both groups, with:\n  high risk size (', sum(low.risk.ix), ') ',
