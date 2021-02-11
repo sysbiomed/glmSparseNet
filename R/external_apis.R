@@ -22,7 +22,7 @@
 #' @return data.frame with attributes as columns and values translated to them
 #'
 #' @examples
-#' biomart.load(
+#' glmSparseNet:::biomart.load(
 #'     attributes = c("external_gene_name","ensembl_gene_id"), 
 #'     filters = "external_gene_name", 
 #'     values = c('MOB1A','RFLNB', 'SPIC', 'TP53')
