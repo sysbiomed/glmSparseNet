@@ -2,6 +2,7 @@
 
 export(buildLambda)
 export(buildStringNetwork)
+export(curl.workaround)
 export(cv.glmDegree)
 export(cv.glmHub)
 export(cv.glmOrphan)

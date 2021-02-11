@@ -1,3 +1,50 @@
+#' Workaround for bug with curl when fetching specific ensembl mirror
+#' 
+#' https://github.com/grimbough/biomaRt/issues/39
+#'
+#' @param expr expression
+#'
+#' @return result of expression
+#' @export
+#'
+#' @examples
+#' \donttest{
+#' glmSparseNet:::curl.workaround({
+#'     biomaRt::useEnsembl(
+#'         biomart = "genes", 
+#'         dataset = 'hsapiens_gene_ensembl')
+#' })
+#' }
+curl.workaround <- function(expr) {
+    result <- tryCatch(
+        {expr}, 
+        error = function(err) {
+        err
+    })
+    
+    if (inherits(result, 'error') || is.null(result)) {
+        warning(
+            "There was an problem, calling the function with ",
+            "ssl_verifypeer to FALSE", "\n\n\t error: ", result$message)
+        # httr::set_config(httr::config(
+        #    ssl_verifypeer = 0L, 
+        #    ssl_verifyhost = 0L, 
+        #    verbose = 0L))
+        result <- httr::with_config(
+            config = httr::config(
+                ssl_verifypeer = 0L, 
+                ssl_verifyhost = 0L, 
+                verbose = 1L
+            ),
+            {expr},
+            override = FALSE
+        )
+        # httr::reset_config()
+    }
+    
+    return(result)
+}
+
 #' Common call to biomaRt to avoid repetitive code
 #'
 #' @seealso geneNames
@@ -32,10 +79,12 @@
 biomart.load <- function(
     attributes, filters, values, use.cache, verbose
 ) {
-    #
-    # suggestion from 
-    #  https://github.com/grimbough/biomaRt/issues/39#issuecomment-776157304
-    mart <- httr::with_config(config = httr::config(ssl_verifypeer = FALSE), 
+
+    
+    # local function that's used twice due to bug with curl
+    
+    
+    mart <- curl.workaround({
         loose.rock::run.cache(
             biomaRt::useEnsembl,
             biomart = "genes",
@@ -45,23 +94,22 @@ biomart.load <- function(
             # loose.rock::run.cache arguments
             cache.prefix = 'biomart.useEnsembl',
             show.message = FALSE
-        ), override = FALSE)
+        )
+    })
+    
     #
     results <- tryCatch({
-        httr::with_config(
-            config = httr::config(ssl_verifypeer = FALSE), 
+        curl.workaround(
             biomaRt::getBM(
                 attributes = attributes,
                 filters = filters,
                 values = values,
                 useCache = use.cache,
-                # verbose = TRUE,
+                verbose = verbose,
                 mart = mart
-            ), 
-            override = FALSE
+            )
         )
-    }, 
-    error = function(error) {
+    }, error = function(error) {
         if (use.cache) {
             warning(
                 'There was a problem getting the genes,',
@@ -75,7 +123,7 @@ biomart.load <- function(
         warning(error)
     })
     
-    if (is.null(results) && use.cache) {
+    if ((inherits(results, 'error') || is.null(results)) && use.cache) {
         # retrying without cache
         return(
             biomart.load(
