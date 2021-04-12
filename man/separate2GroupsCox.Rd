@@ -61,7 +61,7 @@ Draws multiple kaplan meyer survival curves (or just 1) and calculates
 logrank test
 }
 \examples{
-data('ovarian', package = 'survival')
+data('cancer', package = 'survival')
 xdata <- ovarian[,c('age', 'resid.ds')]
 ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
 separate2GroupsCox(c(age = 1, 0), xdata, ydata)
