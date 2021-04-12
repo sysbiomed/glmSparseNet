@@ -69,5 +69,6 @@ logger\.txt
 vignettes/_stringdb_test\.Rmd
 
 ^\.git$
+^\.github$
 ^doc$
 ^Meta$
