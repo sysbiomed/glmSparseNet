@@ -32,8 +32,9 @@
 #' @seealso survminer::ggsurvplot
 #' @examples
 #' data('cancer', package = 'survival')
-#' xdata <- ovarian[,c('age', 'resid.ds')]
-#' ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
+#' xdata <- survival::ovarian[,c('age', 'resid.ds')]
+#' ydata <- data.frame(time = survival::ovarian$futime, 
+#'                     status = survival::ovarian$fustat)
 #' separate2GroupsCox(c(age = 1, 0), xdata, ydata)
 #' separate2GroupsCox(c(age = 1, 0.5), xdata, ydata)
 #' separate2GroupsCox(c(age = 1), c(1,0,1,0,1,0),

@@ -63,7 +63,7 @@ brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
 ```
 
 ```{r data.show, warning=FALSE, error=FALSE}
-brca <- TCGAutils::splitAssays(brca, c('01','11'))
+brca <- TCGAutils::TCGAsplitAssays(brca, c('01','11'))
 xdata.raw <- t(cbind(assay(brca[[1]]), assay(brca[[2]])))
 
 # Get matches between survival and assay data

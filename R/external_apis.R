@@ -312,17 +312,27 @@ hallmarks <- function(
     }
 
     # build base url for call
-    baseUrl <- 'http://chat.lionproject.net/chartdata?measure=%s&hallmarks=%s'
+    baseUrl <- 'https://chat.lionproject.net/chartdata?measure=%s&hallmarks=%s'
     baseUrl <- sprintf(baseUrl, metric, hierarchy)
     # add genes
     call.url <- sprintf('%s&q=%s', baseUrl, paste(all.genes, collapse = '&q='))
 
     lines <- NULL
     conn <- NULL
-    tryCatch({
-        suppressWarnings({conn  <- url(call.url, open = 'rt') })
-        lines <- readLines(conn)
-        close.connection(conn, type = 'r') # close connection
+    lines <- tryCatch({
+        
+        # certificate has been left to expire
+        result <- httr::with_config(
+            config = httr::config(
+                ssl_verifypeer = 0L, 
+                ssl_verifyhost = 0L, 
+                verbose = 0L
+            ),
+            {httr::RETRY("GET", url = call.url, times = 3, encode = "json")},
+            override = FALSE
+        )
+        result <- httr::content(result) %>% strsplit('\n')
+        result[[1]]
     }, error = function(err) {
         warning('Cannot call Hallmark API, please try again later.')
     })
