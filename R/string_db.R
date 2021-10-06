@@ -175,6 +175,13 @@ buildStringNetwork <- function(string.tbl, use.names = 'protein') {
                           !!(as.name('to')) %in%
                               prot.map$ensembl_peptide_id)
         
+        # empty gene ids default to previous code
+        prot.map <- prot.map %>% 
+          dplyr::mutate(ensembl_gene_id = 
+                          dplyr::if_else(!!(as.name('ensembl_gene_id')) == "", 
+                                         !!(as.name('ensembl_peptide_id')), 
+                                         !!(as.name('ensembl_gene_id'))))
+    
         # replace protein with genes
         new.string$from <- as.vector(prot.map[new.string$from,
                                               'ensembl_gene_id'])
