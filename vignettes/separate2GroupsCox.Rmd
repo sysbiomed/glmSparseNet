@@ -43,8 +43,8 @@ theme_set(ggplot2::theme_minimal())
 
 ```{r}
 data('ovarian', package = 'survival')
-xdata <- ovarian[,c('age', 'resid.ds')]
-ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
+xdata <- survival$ovarian[,c('age', 'resid.ds')]
+ydata <- data.frame(time = survival$ovarian$futime, status = survival$ovarian$fustat)
 ```
 
 ## Separate using age as co-variate _(group cutoff is median calculated relative risk)_
