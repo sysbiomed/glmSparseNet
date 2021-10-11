@@ -204,9 +204,7 @@ geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
 #' @export
 #'
 #' @examples
-#' \donttest{
-#'     ensemblGeneNames(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
-#' }
+#' ensemblGeneNames(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
 ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
 
     . <- NULL
@@ -270,8 +268,8 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
 #' @export
 #'
 #' @examples
+#' hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
 #' \donttest{
-#'     hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
 #'     hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
 #' }
 hallmarks <- function(
@@ -293,7 +291,7 @@ hallmarks <- function(
     all.genes <- sort(unique(genes))
 
     #
-    # necessary due to https://github.com/cambridgeltl/chat/issues/6
+    # necessary due to issue #6 in cambridgeltl/chat
     if (metric == 'cprob') {
         temp.res        <- hallmarks(all.genes, metric = 'count',
                                      hierarchy = 'full', show.message = FALSE,
@@ -305,7 +303,7 @@ hallmarks <- function(
         message('There is a bug in the Hallmarks\' API that requires the ',
                 'function to wait around 5 additional seconds to finish.\n',
                 'Sorry. bug report: ',
-                'https://github.com/cambridgeltl/chat/issues/6\n')
+                'cambridgeltl/chat/issues/6\n')
         Sys.sleep(5.5)
     } else {
         df.no.hallmarks <- NULL

@@ -21,7 +21,5 @@ a dataframe with external gene names, ensembl_id
 Retrieve ensembl gene names from biomaRt
 }
 \examples{
-\donttest{
-    ensemblGeneNames(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
-}
+ensemblGeneNames(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
 }
