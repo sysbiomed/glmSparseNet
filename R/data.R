@@ -8,7 +8,6 @@
 #' @docType data
 #' @references \url{https://string-db.org/}
 #' @keywords data
-#' @examples
-#' head(string.network.700.cache)
+#' @usage data('string.network.700.cache', package = 'glmSparseNet')
 'string.network.700.cache'
 

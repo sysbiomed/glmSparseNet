@@ -20,7 +20,8 @@ vector with penalty weights
 Internal method to calculate the network using data-dependant methods
 }
 \examples{
-xdata <- matrix(rnorm(100), ncol = 20)
+set.seed(1985)
+xdata <- matrix(rnorm(1000), nrow = 200)
 glmSparseNet:::.calcPenalty(xdata, 'none')
 glmSparseNet:::.calcPenalty(xdata, 'correlation',
                             networkOptions(cutoff = .6))

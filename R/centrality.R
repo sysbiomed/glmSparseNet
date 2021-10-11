@@ -15,17 +15,24 @@
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 #' networkCorParallel(xdata)
-networkCorParallel <- function(xdata,
-                               build.output  = 'matrix',
-                               n.cores       = 1,
-                               force.recalc.network  = FALSE,
-                               show.message  = FALSE,
-                               ...) {
-
-    .networkGenericParallel(stats::cor, 'correlation', xdata,
-                            build.output = build.output, n.cores = n.cores,
-                            force.recalc.network = force.recalc.network,
-                            show.message = show.message, ...)
+networkCorParallel <- function(
+  xdata,
+  build.output  = 'matrix',
+  n.cores       = 1,
+  force.recalc.network  = FALSE,
+  show.message  = FALSE,
+  ...) {
+  
+  .networkGenericParallel(
+    stats::cor, 
+    'correlation', 
+    xdata,
+    build.output = build.output, 
+    n.cores = n.cores,
+    force.recalc.network = force.recalc.network,
+    show.message = show.message, 
+    ...
+  )
 }
 
 #' Calculates the covariance network
@@ -349,11 +356,8 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
 #'
 #' @examples
 #' # generate a random matrix of observations
-#' \donttest{
-#'   set.seed(1985)
-#'   xdata <- matrix(rnorm(1000), nrow = 200)
-#'   degreeSparsebn(xdata)
-#' }
+#' xdata <- matrix(rnorm(100), ncol = 50)
+#' degreeSparsebn(xdata, force.recalc.network = TRUE)
 degreeSparsebn <- function(xdata,
                            type   = 'continuous',
                            levels = NULL,
@@ -375,6 +379,9 @@ degreeSparsebn <- function(xdata,
         force.recalc.degree <- TRUE
     }
 
+    message("Sparsebn support has been removed pending upstream changes.")
+    return(NULL)
+  
     # generate data that sparsebn understands)
     sparse.xdata <- loose.rock::run.cache(sparsebnUtils::sparsebnData,
                                           xdata,

@@ -51,7 +51,7 @@ networkOptions <- function(method     = 'pearson',
 #' @return vector with penalty weights
 #'
 #' @examples
-#' xdata <- matrix(rnorm(100), ncol = 20)
+#' xdata <- matrix(rnorm(1000), ncol = 200)
 #' glmSparseNet:::.calcPenalty(xdata, 'none')
 #' glmSparseNet:::.calcPenalty(xdata, 'correlation',
 #'                             networkOptions(cutoff = .6))
