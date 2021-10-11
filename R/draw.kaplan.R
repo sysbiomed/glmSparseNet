@@ -107,7 +107,8 @@ separate2GroupsCox <- function(
     futile.logger::flog.debug('')
     futile.logger::flog.debug('prognostic.index', prognostic.index,
                               capture = TRUE)
-    prognostic.index.df <- data.frame(time = c(), status = c(), group = c(), index = c())
+    prognostic.index.df <- 
+      data.frame(time = c(), status = c(), group = c(), index = c())
     # populate a data.frame with all patients (multiple rows per patients if has
     # multiple btas) already calculate high/low risk groups
 
@@ -138,10 +139,14 @@ separate2GroupsCox <- function(
       
       ydata.new <- ydata
       # xdata.new <- NULL
-      if (length(unique(prognostic.index)) > 1 && sum(low.risk.ix) + sum(high.risk.ix) > length(prognostic.index)) {
+      if (
+        length(unique(prognostic.index)) > 1 && 
+        sum(low.risk.ix) + sum(high.risk.ix) > length(prognostic.index)
+        ) {
         str.message <- paste0(
           'The cutoff values given to the function allow for some over ',
-          'samples in both groups, with:\n  high risk size (', sum(high.risk.ix), ') ',
+          'samples in both groups, with:\n  high risk size (', 
+          sum(high.risk.ix), ') ',
           '+ low risk size (', sum(low.risk.ix),') not equal to ',
           'xdata/ydata rows (', sum(high.risk.ix) + sum(low.risk.ix), 
           ' != ', length(prognostic.index), ')\n\n'
@@ -153,14 +158,15 @@ separate2GroupsCox <- function(
         
         warning(
           str.message, 
-              'We are continuing with execution as parameter stop.when.overlap ',
-              'is FALSE.\n',
-              '  note: This adds duplicate samples to ydata and xdata xdata'
+          'We are continuing with execution as parameter stop.when.overlap ',
+          'is FALSE.\n',
+          '  note: This adds duplicate samples to ydata and xdata xdata'
         )
         
         overlap.samples <- which(as.vector(high.risk.ix & low.risk.ix))
         #
-        prognostic.index <- t(t(c(prognostic.index[,], prognostic.index[overlap.samples,])))
+        prognostic.index <-
+          t(t(c(prognostic.index[,], prognostic.index[overlap.samples,])))
         ydata.new <- rbind(ydata, ydata[overlap.samples,])
         # xdata.new <- rbind(xdata, xdata[overlap.samples,])
         sample.ixs <- c(sample.ixs, sample.ixs[overlap.samples])

@@ -13,7 +13,7 @@ curl.workaround(expr)
 result of expression
 }
 \description{
-https://github.com/grimbough/biomaRt/issues/39
+Should be solved in issue #39, will test to remove it.
 }
 \examples{
 \donttest{

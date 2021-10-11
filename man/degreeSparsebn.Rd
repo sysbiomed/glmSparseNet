@@ -61,7 +61,9 @@ Calculate degree of correlation matrix
 }
 \examples{
 # generate a random matrix of observations
-set.seed(1985)
-xdata <- matrix(rnorm(1000), nrow = 20)
-degreeSparsebn(xdata)
+\donttest{
+  set.seed(1985)
+  xdata <- matrix(rnorm(1000), nrow = 200)
+  degreeSparsebn(xdata)
+}
 }

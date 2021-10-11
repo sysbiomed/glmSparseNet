@@ -1,6 +1,6 @@
 #' Workaround for bug with curl when fetching specific ensembl mirror
 #' 
-#' https://github.com/grimbough/biomaRt/issues/39
+#' Should be solved in issue #39, will test to remove it.
 #'
 #' @param expr expression
 #'
