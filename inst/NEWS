@@ -1,6 +1,11 @@
 # glmSparseNet
 ----------------------------------------------------------------
 
+## Changes in 1.11.0
+
+- sparsebn has been disabled pending upstream corrections (examples
+from that package failed to pass)
+
 ## Changes in version 1.2.0
 
 - Depends on more recent version of loose.rock (previous was deprecated)
