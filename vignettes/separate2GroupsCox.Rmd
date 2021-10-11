@@ -45,10 +45,14 @@ theme_set(ggplot2::theme_minimal())
 ```{r}
 data('cancer', package = 'survival')
 xdata <- survival::ovarian[,c('age', 'resid.ds')]
-ydata <- data.frame(time = survival::ovarian$futime, status = survival::ovarian$fustat)
+ydata <- data.frame(
+  time = survival::ovarian$futime,
+  status = survival::ovarian$fustat
+)
 ```
 
-## Separate using age as co-variate _(group cutoff is median calculated relative risk)_
+## Separate using age as co-variate 
+_(group cutoff is median calculated relative risk)_
 
 ```{r}
 res.age <- separate2GroupsCox(c(age = 1, 0), xdata, ydata)
@@ -62,9 +66,12 @@ res.age$km
 
 ### Plot
 
-A individual is attributed to low-risk group if its calculated relative risk _(using Cox Proportional model)_ is below or equal the median risk.
+A individual is attributed to low-risk group if its calculated 
+relative risk _(using Cox Proportional model)_ is below or equal
+the median risk.
 
-The opposite for the high-risk groups, populated with individuals above the median relative-risk.
+The opposite for the high-risk groups, populated with individuals 
+above the median relative-risk.
 
 ```{r, echo=FALSE}
 res.age$plot
@@ -73,7 +80,12 @@ res.age$plot
 ## Separate using age as co-variate _(group cutoff is 40% - 60%)_
 
 ```{r}
-res.age.40.60 <- separate2GroupsCox(c(age = 1, 0), xdata, ydata, probs = c(.4, .6))
+res.age.40.60 <- 
+  separate2GroupsCox(c(age = 1, 0), 
+                     xdata, 
+                     ydata, 
+                     probs = c(.4, .6)
+  )
 ```
 
 ### Kaplan-Meier survival results
@@ -84,9 +96,11 @@ res.age.40.60$km
 
 ### Plot
 
-A individual is attributed to low-risk group if its calculated relative risk _(using Cox Proportional model)_ is below the median risk.
+A individual is attributed to low-risk group if its calculated
+relative risk _(using Cox Proportional model)_ is below the median risk.
 
-The opposite for the high-risk groups, populated with individuals above the median relative-risk.
+The opposite for the high-risk groups, populated with individuals above 
+the median relative-risk.
 
 ```{r, echo=FALSE}
 res.age.40.60$plot
@@ -94,7 +108,8 @@ res.age.40.60$plot
 
 ## Separate using age as co-variate _(group cutoff is 60% - 40%)_
 
-This is a special case where you want to use a cutoff that includes some sample on both high and low risks groups.
+This is a special case where you want to use a cutoff that includes
+some sample on both high and low risks groups.
 
 ```{r}
 res.age.60.40 <- separate2GroupsCox(
@@ -115,12 +130,19 @@ res.age.60.40$km
 
 ### Plot
 
-A individual is attributed to low-risk group if its calculated relative risk _(using Cox Proportional model)_ is below the median risk.
+A individual is attributed to low-risk group if its calculated 
+relative risk _(using Cox Proportional model)_ is below the median risk.
 
-The opposite for the high-risk groups, populated with individuals above the median relative-risk.
+The opposite for the high-risk groups, populated with individuals above 
+the median relative-risk.
 
 ```{r, echo=FALSE}
 res.age.60.40$plot
 ```
 
 
+# Session Info
+
+```{r sessionInfo}
+sessionInfo()
+```

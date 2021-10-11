@@ -158,12 +158,16 @@ xdata.raw                <- t(assay(brca.primary.solid.tumor[[1]]))
 # Get survival information
 ydata.raw <- colData(brca.primary.solid.tumor) %>% as.data.frame %>% 
   # Convert days to integer
-  dplyr::mutate(Days.to.date.of.Death = as.integer(Days.to.date.of.Death),
-                Days.to.Last.Contact  = as.integer(Days.to.Date.of.Last.Contact)) %>%
+  dplyr::mutate(
+    Days.to.date.of.Death = as.integer(Days.to.date.of.Death),
+    Days.to.Last.Contact  = as.integer(Days.to.Date.of.Last.Contact)
+  ) %>%
   # Find max time between all days (ignoring missings)
   dplyr::rowwise() %>%
-  dplyr::mutate(time = max(days_to_last_followup, Days.to.date.of.Death, 
-                           Days.to.Last.Contact, days_to_death, na.rm = TRUE)) %>%
+  dplyr::mutate(
+    time = max(days_to_last_followup, Days.to.date.of.Death, 
+    Days.to.Last.Contact, days_to_death, na.rm = TRUE)
+  ) %>%
   # Keep only survival variables and codes
   dplyr::select(patientID, status = vital_status, time) %>% 
   # Discard individuals with survival time less or equal to 0
@@ -373,3 +377,8 @@ melt(selected.genes) %>%
 ```
 
 
+# Session Info
+
+```{r sessionInfo}
+sessionInfo()
+```

@@ -79,7 +79,9 @@ xdata.raw <- t(assay(prad.primary.solid.tumor[[1]]))
 ydata.raw <- colData(prad.primary.solid.tumor) %>% as.data.frame %>% 
   # Find max time between all days (ignoring missings)
   dplyr::rowwise() %>%
-  dplyr::mutate(time = max(days_to_last_followup, days_to_death, na.rm = TRUE)) %>%
+  dplyr::mutate(
+    time = max(days_to_last_followup, days_to_death, na.rm = TRUE)
+  ) %>%
   # Keep only survival variables and codes
   dplyr::select(patientID, status = vital_status, time) %>% 
   # Discard individuals with survival time less or equal to 0
@@ -168,3 +170,8 @@ separate2GroupsCox(as.vector(coefs.v),
                    plot.title = 'Full dataset', legend.outside = FALSE)
 ```
 
+# Session Info
+
+```{r sessionInfo}
+sessionInfo()
+```

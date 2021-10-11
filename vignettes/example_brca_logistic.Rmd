@@ -163,3 +163,9 @@ data.frame(TPR = roc_obj$sensitivities, FPR = 1 - roc_obj$specificities) %>%
            y = "True Positive Rate (Sensitivity)")
 ```
 
+# Session Info
+
+```{r sessionInfo}
+sessionInfo()
+```
+
