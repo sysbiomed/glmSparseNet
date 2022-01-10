@@ -139,6 +139,7 @@ There is some pre-processing needed to remove patients with invalid follow-up da
 
 ```{r multi.assay}
 # load data
+data('miniACC', package="MultiAssayExperiment")
 xdata <- miniACC
 
 # build valid data with days of last follow up or to event

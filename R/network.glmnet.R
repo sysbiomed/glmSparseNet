@@ -27,7 +27,8 @@
 #' #
 #' # Using MultiAssayExperiment
 #' # load data
-#' xdata <- MultiAssayExperiment::miniACC
+#' data('miniACC', package="MultiAssayExperiment")
+#' xdata <- miniACC
 #' # TODO aking out x indivudals missing values
 #' # build valid data with days of last follow up or to event
 #' event.ix <- which(!is.na(xdata$days_to_death))

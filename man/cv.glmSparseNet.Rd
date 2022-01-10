@@ -56,7 +56,8 @@ network parameter accepts:
 
 #
 # load data
-xdata <- MultiAssayExperiment::miniACC
+data('miniACC', package="MultiAssayExperiment")
+xdata <- miniACC
 
 #
 # build valid data with days of last follow up or to event
