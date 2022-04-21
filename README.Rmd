@@ -119,7 +119,6 @@ library(reshape2)
 library(MultiAssayExperiment)
 library(survival)
 library(glmnet)
-# library(loose.rock)
 library(glmSparseNet)
 ```
 
@@ -131,7 +130,6 @@ library(reshape2)
 library(MultiAssayExperiment)
 library(survival)
 library(glmnet)
-library(loose.rock)
 library(glmSparseNet)
 ```
 

@@ -28,7 +28,6 @@ BiocManager::install('glmSparseNet')
 library(dplyr)
 library(ggplot2)
 library(survival)
-library(loose.rock)
 library(futile.logger)
 library(curatedTCGAData)
 library(TCGAutils)
@@ -37,7 +36,7 @@ library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
-.Last.value <- loose.rock::show.message(FALSE)
+.Last.value <- glmSparseNet:::show.message(FALSE)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
 ```
@@ -131,7 +130,7 @@ Fit model model penalizing by the hubs using the cross-validation function by
 fitted <- cv.glmHub(xdata, 
                     Surv(ydata$time, ydata$status), 
                     family  = 'cox', 
-                    foldid  = balanced.cv.folds(!!ydata$status)$output,
+                    foldid  = glmSparseNet:::balanced.cv.folds(!!ydata$status)$output,
                     network = 'correlation', 
                     network.options = networkOptions(min.degree = .2, 
                                                      cutoff = .6))

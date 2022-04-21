@@ -33,7 +33,6 @@ library(parallel)
 library(reshape2)
 library(survival)
 library(VennDiagram)
-library(loose.rock)
 library(futile.logger)
 library(curatedTCGAData)
 library(TCGAutils)
@@ -43,7 +42,7 @@ library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
 .Last.value <- flog.layout(layout.format('[~l] ~m'))
-.Last.value <- loose.rock::show.message(FALSE)
+.Last.value <- glmSparseNet:::show.message(FALSE)
 
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
@@ -240,7 +239,7 @@ qplot(my.degree, bins = 100, fill = my.colors(3)) +
 
 ```{r}
 set.seed(params$seed)
-foldid <- balanced.cv.folds(!!ydata$status)$output
+foldid <- glmSparseNet:::balanced.cv.folds(!!ydata$status)$output
 ```
 
 
