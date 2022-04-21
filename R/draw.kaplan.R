@@ -246,7 +246,7 @@ separate2GroupsCox <- function(
 
     if (length(chosen.btas) > 1) {
         col.ix <-
-            loose.rock::my.colors()[c(1,2,4,3,10,6,12,9,5,7,8,
+          my.colors()[c(1,2,4,3,10,6,12,9,5,7,8,
                                       11,13,14,15,16,17)]
     } else {
         col.ix <- c('seagreen', 'indianred2')

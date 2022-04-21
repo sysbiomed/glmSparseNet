@@ -85,13 +85,13 @@ biomart.load <- function(
     
     
     mart <- curl.workaround({
-        loose.rock::run.cache(
+      run.cache(
             biomaRt::useEnsembl,
             biomart = "genes",
             dataset = 'hsapiens_gene_ensembl',
             host = 'https://www.ensembl.org',
             verbose = verbose,
-            # loose.rock::run.cache arguments
+            # glmSparseNet:::run.cache arguments
             cache.prefix = 'biomart.useEnsembl',
             show.message = FALSE
         )
@@ -296,6 +296,10 @@ hallmarks <- function(
         temp.res        <- hallmarks(all.genes, metric = 'count',
                                      hierarchy = 'full', show.message = FALSE,
                                      generate.plot = FALSE)
+
+        if (!is.null(temp.res$error)) {
+          return(temp.res)
+        }
         good.ix         <- Matrix::rowSums(temp.res$hallmarks) != 0
         all.genes       <- sort(unique(rownames(temp.res$hallmarks[good.ix,])))
         df.no.hallmarks <- temp.res$no.hallmakrs
@@ -332,13 +336,17 @@ hallmarks <- function(
         result <- httr::content(result) %>% strsplit('\n')
         result[[1]]
     }, error = function(err) {
-        warning('Cannot call Hallmark API, please try again later.')
+        message('Cannot call Hallmark API, please try again later.')
+        return(NULL)
     })
 
     if (is.null(lines)) {
-        return(list(hallmarks = NULL,
-                    no.hallmakrs = NULL,
-                    heatmap = NULL))
+        return(list(
+          hallmarks = NULL,
+          no.hallmakrs = NULL,
+          heatmap = NULL,
+          error = "Couldn't contact Hallmark API, please try again later"
+        ))
     }
 
     item_group <- cumsum(grepl(sprintf("^[A-Za-z0-9\\._,-]+\t%s", metric),

@@ -5,7 +5,7 @@ cor.p <- abs(cor(xdata, method = 'pearson')) - diag(ncol(xdata))
 cor.s <- abs(cor(xdata, method = 'spearman')) - diag(ncol(xdata))
 
 # use a temporary directory that can be written
-loose.rock::base.dir(tempdir())
+glmSparseNet:::base.dir(tempdir())
 
 context('Degree - Correlation - Pearson')
 

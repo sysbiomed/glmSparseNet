@@ -90,13 +90,13 @@ networkCovParallel <- function(xdata,
     }
 
     #
-    xdata.sha256 <- loose.rock::digest.cache(xdata)
+    xdata.sha256 <- digest.cache(xdata)
     #
     fun.aux <- function(xdata, ...) {
         result <- parallel::mclapply(as.numeric(seq_len(ncol(xdata)-1)),
                                      function(ix.i) {
             tryCatch({
-                result <- loose.rock::run.cache(
+                result <- run.cache(
                     .networkWorker, fun,
                     xdata, ix.i,
                     #
@@ -119,7 +119,7 @@ networkCovParallel <- function(xdata,
         }, mc.cores = n.cores, mc.silent = FALSE, mc.preschedule = TRUE)
         return(result)
     }
-    result <- loose.rock::run.cache(fun.aux, xdata,
+    result <- run.cache(fun.aux, xdata,
                                     #
                                     cache.prefix = 'fun.aux',
                                     cache.digest = list(xdata.sha256),
@@ -298,7 +298,7 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
         degree <- array(0, ncol(xdata))
         for (ix.outer in seq(1, ncol(xdata) - 1, chunks)) {
             max.ix <- min(ix.outer + chunks - 1, ncol(xdata) - 1)
-            res.chunks <- loose.rock::run.cache(
+            res.chunks <- run.cache(
                 chunk.function, xdata, max.ix,
                 ix.outer, n.cores, cutoff,
                 consider.unweighted, ...,
@@ -316,9 +316,9 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
         return(degree)
     }
     #
-    xdata.sha256 <- loose.rock::digest.cache(xdata)
+    xdata.sha256 <- digest.cache(xdata)
 
-    val <- loose.rock::run.cache(
+    val <- run.cache(
         weigthed.aux, xdata, cutoff, consider.unweighted,
         cache.digest = list(xdata.sha256),
         cache.prefix = sprintf('degree.%s', fun.prefix),
@@ -383,7 +383,7 @@ degreeSparsebn <- function(xdata,
     return(NULL)
   
     # generate data that sparsebn understands)
-    sparse.xdata <- loose.rock::run.cache(sparsebnUtils::sparsebnData,
+    sparse.xdata <- run.cache(sparsebnUtils::sparsebnData,
                                           xdata,
                                           type         = type,
                                           levels       = levels,
@@ -394,13 +394,13 @@ degreeSparsebn <- function(xdata,
                                           show.message = show.message)
 
     # estimate dag structure, upperbound was wrongfully set
-    dag <- loose.rock::run.cache(sparsebn::estimate.dag, sparse.xdata, ...,
+    dag <- run.cache(sparsebn::estimate.dag, sparse.xdata, ...,
                                  cache.prefix = 'dag',
                                  force.recalc = force.recalc.network,
                                  show.message = show.message)
 
     # estimate parameters for dag
-    dag.params <- loose.rock::run.cache(sparsebnUtils::estimate.parameters,
+    dag.params <- run.cache(sparsebnUtils::estimate.parameters,
                                         dag,
                                         data         = sparse.xdata,
                                         cache.prefix = 'dag.params',
