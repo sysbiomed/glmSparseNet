@@ -17,6 +17,7 @@ run-cache
 *.tar.bz2
 vignettes/personal_Rmds
 vignettes/folders
+vignettes/VennDiagram.*.log
 tmp/
 doc
 Meta
