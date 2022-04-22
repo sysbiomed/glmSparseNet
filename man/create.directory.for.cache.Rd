@@ -20,7 +20,7 @@ Create directories for cache
 }
 \examples{
 glmSparseNet:::create.directory.for.cache(tempdir(), 'abcd')
-\dontrun{
+\donttest{
   glmSparseNet:::create.directory.for.cache(
     file.path(getwd(), 'run-cache'), 'abcd'
   )

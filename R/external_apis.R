@@ -5,7 +5,6 @@
 #' @param expr expression
 #'
 #' @return result of expression
-#' @export
 #'
 #' @examples
 #' \donttest{

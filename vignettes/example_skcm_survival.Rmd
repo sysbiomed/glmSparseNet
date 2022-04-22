@@ -127,13 +127,15 @@ Fit model model penalizing by the hubs using the cross-validation function by
 `cv.glmHub`.
 
 ```{r fit}
-fitted <- cv.glmHub(xdata, 
-                    Surv(ydata$time, ydata$status), 
-                    family  = 'cox', 
-                    foldid  = glmSparseNet:::balanced.cv.folds(!!ydata$status)$output,
-                    network = 'correlation', 
-                    network.options = networkOptions(min.degree = .2, 
-                                                     cutoff = .6))
+fitted <- cv.glmHub(
+  xdata, 
+  Surv(ydata$time, ydata$status), 
+  family  = 'cox', 
+  foldid  = glmSparseNet:::balanced.cv.folds(!!ydata$status)$output,
+  network = 'correlation', 
+  network.options = networkOptions(min.degree = .2, 
+                                   cutoff = .6)
+)
 ```
 
 # Results of Cross Validation

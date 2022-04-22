@@ -50,7 +50,7 @@ tempdir.cache <- function() {
 #' #   for the first argument
 #' glmSparseNet:::run.cache(c, 1, 2, 3, 4)
 #' glmSparseNet:::run.cache(c, a=1, 2, c= 3, 4)
-#' \dontrun{
+#' \donttest{
 #' # Using a local folder
 #' # glmSparseNet:::run.cache(c, 1, 2, 3, 4, base.dir = "runcache")
 #' }
@@ -118,7 +118,10 @@ build.function.digest <- function(fun) {
 #'
 #' @param base.dir directory where to build this file
 #'
+#' @return the path to the file it has written
+#'
 #' @examples
+#' 
 #' glmSparseNet:::write.readme(tempdir())
 write.readme <- function(base.dir) {
   readme.path <- file.path(base.dir, "what_is_this_folder.txt")
@@ -131,8 +134,10 @@ write.readme <- function(base.dir) {
     "This folder can be safely deleted as it only contains a cache of the",
     "results of functions",
     "",
-    "package link in BioConductor: https://bioconductor.org/packages/release/bioc/html/glmSparseNet.html",
-    "github link: https://github.com/sysbiomed/glmSparseNet",
+    "package link in BioConductor:",
+    "   https://bioconductor.org/packages/release/bioc/html/glmSparseNet.html",
+    "github link: ",
+    "   https://github.com/sysbiomed/glmSparseNet",
     "",
     "Have a great day"
   )
@@ -146,6 +151,7 @@ write.readme <- function(base.dir) {
       # do nothing as an error here should not block the main process
     })
   }
+  return(readme.path)
 }
 
 #' Create directories for cache
@@ -158,7 +164,7 @@ write.readme <- function(base.dir) {
 #'
 #' @examples
 #' glmSparseNet:::create.directory.for.cache(tempdir(), 'abcd')
-#' \dontrun{
+#' \donttest{
 #'   glmSparseNet:::create.directory.for.cache(
 #'     file.path(getwd(), 'run-cache'), 'abcd'
 #'   )

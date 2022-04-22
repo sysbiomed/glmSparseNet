@@ -9,9 +9,13 @@ write.readme(base.dir)
 \arguments{
 \item{base.dir}{directory where to build this file}
 }
+\value{
+the path to the file it has written
+}
 \description{
 Write a file in run-cache directory to explain the origin
 }
 \examples{
+
 glmSparseNet:::write.readme(tempdir())
 }
