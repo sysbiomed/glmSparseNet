@@ -16,7 +16,7 @@
 #'   'https://string-db.org/api/tsv-no-header/version')
 downloadFileLocal <- function (urlStr, oD = tempdir()) 
 {
-  fileName = tail(strsplit(urlStr, "/")[[1]], 1)
+  fileName = utils::tail(strsplit(urlStr, "/")[[1]], 1)
   temp <- file.path(oD, fileName)
   if (!file.exists(temp) || file.info(temp)$size == 0) {
     message("STRINGdb download: This might take some time, please be patient.")

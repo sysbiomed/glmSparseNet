@@ -28,5 +28,4 @@ glmSparseNet:::.calcPenalty(xdata, 'correlation')
 glmSparseNet:::.calcPenalty(xdata, 'covariance',
                             networkOptions(cutoff = .6))
 glmSparseNet:::.calcPenalty(xdata, 'covariance')
-glmSparseNet:::.calcPenalty(xdata, 'sparsebn')
 }

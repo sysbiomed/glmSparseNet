@@ -1,11 +1,12 @@
 #' @importFrom dplyr %>%
-#' @import Matrix
-#' @import glmnet
-#' @import methods
-#' @import forcats
+#' @importFrom Matrix as.matrix sparseMatrix colSums rowSums
+#' @importFrom glmnet glmnet cv.glmnet
+#' @importFrom methods setGeneric is setMethod findMethods
+#' @importFrom methods as
+#' @importFrom utils tail download.file
+#' @importFrom forcats fct_collapse
 #' @import futile.options
-#' @import sparsebn
-#' @import sparsebnUtils
-#' @import MultiAssayExperiment
-#' @import SummarizedExperiment
+#' @importFrom SummarizedExperiment assay
 NULL
+
+#@import MultiAssayExperiment

@@ -59,7 +59,6 @@ networkOptions <- function(method     = 'pearson',
 #' glmSparseNet:::.calcPenalty(xdata, 'covariance',
 #'                             networkOptions(cutoff = .6))
 #' glmSparseNet:::.calcPenalty(xdata, 'covariance')
-#' glmSparseNet:::.calcPenalty(xdata, 'sparsebn')
 .calcPenalty <- function(xdata, penalty.type,
                         network.options = networkOptions()) {
     if (network.options$centrality == 'degree') {
@@ -74,12 +73,6 @@ networkOptions <- function(method     = 'pearson',
             covariance = degreeCov(
                 xdata,
                 method              = network.options$method,
-                consider.unweighted = network.options$unweighted,
-                cutoff              = network.options$cutoff,
-                #
-                n.cores = network.options$n.cores),
-            sparsebn = degreeSparsebn(
-                xdata,
                 consider.unweighted = network.options$unweighted,
                 cutoff              = network.options$cutoff,
                 #

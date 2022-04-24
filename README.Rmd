@@ -68,11 +68,10 @@ BiocManager::install("glmSparseNet")
 
 This package extends the `glmnet` r-package with network-based regularization based on features relations. This network can be calculated from the data itself or using external networks to enrich the model.
 
-There are 3 methods available to use data-dependant methods to generate the network:
+There are 2 methods available to use data-dependant methods to generate the network:
 
 1. Correlation matrix with cutoff;
 1. Covariance matrix with cutoff;
-1. Sparse bayesian networks using `sparsebn` package.
 
 Alternatively, the network can be passed as an adjancency matrix or an already calculate metric for each node.
 
@@ -83,7 +82,7 @@ The main functions from this packages are the `glmSparseNet` and `cv.glmSparseNe
 * `xdata`: A MultiAssayExperiment object or an input matrix of dimension `Observations x Features`
 * `ydata`: Response object that can take different forms depending on the model family that is used
 * `family`: Model type that can take: *"gaussian"*, *"poisson"*, *"binomial"*, *"multinomial"*, *"cox"*, and *"mgaussian"*
-* `network`: Network to use in penalization, it can take as input: "correlation", "covariance", "sparsebn", a matrix object with p.vars x p.vars representing the network, a weighted vector of penalties
+* `network`: Network to use in penalization, it can take as input: "correlation", "covariance", a matrix object with p.vars x p.vars representing the network, a weighted vector of penalties
 * `experiment.name`: Optional parameter used with a "MultiAssayExperiment" object as input
 * `network.options`: Optional parameter defining the options to process the network, such as:
   * `cutoff`: A real number to use to remove edges from the network
