@@ -7,6 +7,5 @@
 #' @importFrom forcats fct_collapse
 #' @import futile.options
 #' @importFrom SummarizedExperiment assay
+#' @importFrom MultiAssayExperiment assay
 NULL
-
-#@import MultiAssayExperiment
