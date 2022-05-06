@@ -76,12 +76,14 @@
     if (is.character(network)) {
         penalty.factor <- .calcPenalty(xdata, network, network.options)
     } else if (is.matrix(network) || inherits(network, 'Matrix')) {
-        penalty.factor <- (Matrix::colSums(network) + Matrix::rowSums(network))
+        penalty.factor <- (Matrix::colSums(network) + Matrix::rowSums(network)) %>% 
+          network.options$trans.fun()
     } else if (is.vector(network)) {
         if (length(network) != ncol(xdata)) {
             stop('Network vector size does not match xdata input')
         }
-        penalty.factor <- network
+        penalty.factor <- network %>% 
+          network.options$trans.fun()
     } else {
         stop('There was an error with network argumnent')
     }

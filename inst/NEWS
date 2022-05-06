@@ -1,6 +1,14 @@
 # glmSparseNet
 ----------------------------------------------------------------
 
+## Changes in 1.14.3
+
+- Corrects bug when calculating the penalty.factor from a matrix (as it was not applying the transformation function)
+
+## Changes in 1.14.2
+
+- Corrects all CRAN deprecations (includes code from loose.rock in this package)
+
 ## Changes in 1.11.0
 
 - sparsebn has been disabled pending upstream corrections (examples
