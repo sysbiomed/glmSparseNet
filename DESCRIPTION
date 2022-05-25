@@ -25,7 +25,7 @@ biocViews: Software,
   Survival,
   Network, 
   GraphAndNetwork
-Depends: R (>= 4), Matrix, MultiAssayExperiment, glmnet
+Depends: R (>= 4.0), Matrix, MultiAssayExperiment, glmnet
 Imports: SummarizedExperiment,
   biomaRt,
   futile.logger,
