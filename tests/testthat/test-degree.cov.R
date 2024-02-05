@@ -24,12 +24,27 @@ test_that("Degree with cutoff", {
 })
 
 test_that("Degree forcing recalculation", {
-  diff.degree <- degreeCov(xdata, method = "pearson", cutoff = 0, chunks = 10, n.cores = 2, force.recalc.degree = TRUE, force.recalc.network = TRUE) - colSums(cov.p)
+  diff.degree <- degreeCov(
+    xdata,
+    method = "pearson",
+    cutoff = 0,
+    chunks = 10,
+    n.cores = 2,
+    force.recalc.degree = TRUE,
+    force.recalc.network = TRUE
+  ) - colSums(cov.p)
   expect_lt(sum(abs(diff.degree)), 1e-09)
 })
 
 test_that("Degree forcing recalculation of degree only", {
-  diff.degree <- degreeCov(xdata, method = "pearson", cutoff = 0, chunks = 10, n.cores = 2, force.recalc.degree = TRUE) - colSums(cov.p)
+  diff.degree <- degreeCov(
+    xdata,
+    method = "pearson",
+    cutoff = 0,
+    chunks = 10,
+    n.cores = 2,
+    force.recalc.degree = TRUE
+  ) - colSums(cov.p)
   expect_lt(sum(abs(diff.degree)), 1e-09)
 })
 

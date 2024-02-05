@@ -49,9 +49,11 @@
 
     # if ydata has rownames then it uses it to match with valid experiences
     #  this is done to avoid missorted objects
-    if (is.matrix(ydata) ||
-      is.data.frame(ydata) ||
-      inherits(ydata, "DataFrame")) {
+    if (
+      is.matrix(ydata) ||
+        is.data.frame(ydata) ||
+        inherits(ydata, "DataFrame")
+    ) {
       if (!is.null(rownames(ydata))) {
         ydata <- as.matrix(ydata[rownames(xdata@colData), ])
       }
@@ -102,7 +104,7 @@
       "all 0 values, this might lead to convergence problems. Try",
       " changing some of the network options."
     )
-    # penalty.factor <- rep(1, length(penalty.factor))
+    # penalty.factor <- rep(1, length(penalty.factor)) # nolint: commented_code_linter
   } else if (any(penalty.factor == 0)) {
     warning(
       "The penalty.factor calculated from network (or given) has ",

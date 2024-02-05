@@ -23,8 +23,9 @@ calculate.combined.score <- function(all.interactions,
   }
 
   # normalize between 0 and 1
-  mat <- as.matrix(all.interactions |>
-    dplyr::select(-dplyr::starts_with("protein"))) / 1000
+  mat <- as.matrix(
+    dplyr::select(all.interactions, -dplyr::starts_with("protein"))
+  ) / 1000
   non_homology.ixs <- which(colnames(mat) != "homology")
 
   # compute prior away
@@ -53,18 +54,16 @@ calculate.combined.score <- function(all.interactions,
   )]
 
   # next, do the 1 - multiplication
-  combined_score <-
-    (1 - mat[, "neighborhood"]) *
-      (1 - mat[, "fusion"]) *
-      (1 - mat[, "cooccurence"]) *
-      (1 - mat[, "coexpression"]) *
-      (1 - mat[, "experiments"])
+  combined_score <- (1 - mat[, "neighborhood"]) *
+    (1 - mat[, "fusion"]) *
+    (1 - mat[, "cooccurence"]) *
+    (1 - mat[, "coexpression"]) *
+    (1 - mat[, "experiments"])
 
   if (!remove.text) {
-    combined_score <-
-      combined_score *
-        (1 - mat[, "database"]) *
-        (1 - mat[, "textmining"])
+    combined_score <- combined_score *
+      (1 - mat[, "database"]) *
+      (1 - mat[, "textmining"])
   }
 
   # and lastly, do the 1 - conversion again, and put back the prior
@@ -100,6 +99,7 @@ calculate.combined.score <- function(all.interactions,
 stringDBhomoSapiens <- function(version = "11.0",
                                 score_threshold = 0,
                                 remove.text = TRUE) {
+  # nolint start: object_usage_linter
   species <- 9606 # Homo sapiens
   links <- "links.full" # what data to retrieve
 
@@ -108,6 +108,7 @@ stringDBhomoSapiens <- function(version = "11.0",
   url.path <- "download/protein.{links}.v{version}" |> glue::glue()
   url.file <- "{species}.protein.{links}.v{version}.txt.gz" |> glue::glue()
   url <- "https://{url.domain}/{url.path}/{url.file}" |> glue::glue()
+  # nolint end: object_usage_linter
 
   # download string data from string-db.org
   #
@@ -181,10 +182,10 @@ buildStringNetwork <- function(string.tbl, use.names = "protein") {
 
     # keep only proteins that have mapping to gene
     new.string <- string.tbl |>
-      dplyr::filter(!!(as.name("from")) %in%
-        prot.map$ensembl_peptide_id &
-        !!(as.name("to")) %in%
-          prot.map$ensembl_peptide_id)
+      dplyr::filter(
+        !!(as.name("from")) %in% prot.map$ensembl_peptide_id &
+         !!(as.name("to")) %in% prot.map$ensembl_peptide_id
+      )
 
     # empty gene ids default to previous code
     prot.map <- prot.map |>

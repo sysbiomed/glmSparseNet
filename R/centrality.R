@@ -240,8 +240,6 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
 #'
 #' @return a vector with size `ncol(xdata) - ix.i`
 .networkWorker <- function(fun, xdata, ix.i, ...) {
-  n.col <- ncol(xdata)
-  xdata.i <- xdata[, ix.i]
   result <- fun(
     as.vector(xdata[, ix.i]),
     base::as.matrix(xdata[, seq(ix.i + 1, ncol(xdata))]), ...
@@ -295,7 +293,7 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
 
   chunk.function <- function(xdata, max.ix, ix.outer, n.cores, cutoff,
                              consider.unweighted, ...) {
-    res.chunks <- parallel::mclapply(seq(ix.outer, max.ix, 1),
+    parallel::mclapply(seq(ix.outer, max.ix, 1),
       function(ix.i) {
         line <- .networkWorker(fun, xdata, ix.i, ...)
         #

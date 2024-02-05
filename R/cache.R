@@ -101,8 +101,8 @@ build.function.digest <- function(fun) {
   } else if (is.primitive(fun)) {
     fun
   } else if (
-    methods::is(fun, "function") &&
-      !is.null(attributes(fun)$srcref)) {
+    methods::is(fun, "function") && !is.null(attributes(fun)$srcref)
+  ) {
     toString(attributes(fun)$srcref)
   } else if (!is.null(body(fun))) {
     body(fun)

@@ -62,9 +62,11 @@ separate2GroupsCox <- function(
   }
 
   # convert between compatible formats
-  if (inherits(xdata, "data.frame") ||
-    inherits(xdata, "numeric") ||
-    inherits(xdata, "matrix")) {
+  if (
+    inherits(xdata, "data.frame") ||
+      inherits(xdata, "numeric") ||
+      inherits(xdata, "matrix")
+  ) {
     #
     xdata <- as.matrix(xdata)
   }
@@ -75,24 +77,26 @@ separate2GroupsCox <- function(
       "chosen.btas argument must be a list or vector. ",
       "See documentation ?separate2GroupsCox"
     )
-  } else if (!inherits(xdata, "matrix")) {
+  }
+  if (!inherits(xdata, "matrix")) {
     stop(
       "xdata argument must be a matrix, data.frame or vector ",
       "See documentation ?separate2GroupsCox"
     )
-  } else if (!inherits(ydata, "data.frame")) {
+  }
+  if (!inherits(ydata, "data.frame")) {
     stop(
       "ydata argument must be a data.frame. ",
       "See documentation ?separate2GroupsCox"
     )
   }
-
   if (nrow(xdata) != nrow(ydata)) {
     stop(sprintf(
       "Rows in xdata (%d) and ydata (%d) must be the same",
       nrow(xdata), nrow(ydata)
     ))
-  } else if (!all(ncol(xdata) == vapply(chosen.btas, length, 1))) {
+  }
+  if (!all(ncol(xdata) == vapply(chosen.btas, length, 1))) {
     stop(
       "All or some of the chosen.btas (%s) have different ",
       sprintf("number of variables from xdata (%d)"),
@@ -145,7 +149,7 @@ separate2GroupsCox <- function(
     #
     sample.ixs <- rownames(prognostic.index)
     if (is.null(sample.ixs)) {
-      sample.ixs <- seq(nrow(prognostic.index))
+      sample.ixs <- seq_len(nrow(prognostic.index))
     }
     temp.group <- array(-1, dim(prognostic.index)[1])
     pi.thres <- stats::quantile(prognostic.index[, ix], probs = c(
@@ -153,8 +157,10 @@ separate2GroupsCox <- function(
       probs[2]
     ))
 
-    if (sum(prognostic.index[, ix] <= pi.thres[1]) == 0 ||
-      sum(prognostic.index[, ix] > pi.thres[2]) == 0) {
+    if (
+      sum(prognostic.index[, ix] <= pi.thres[1]) == 0 ||
+        sum(prognostic.index[, ix] > pi.thres[2]) == 0
+    ) {
       pi.thres[1] <- stats::median(unique(prognostic.index[, ix]))
       pi.thres[2] <- pi.thres[1]
     }
@@ -167,7 +173,7 @@ separate2GroupsCox <- function(
     temp.group[high.risk.ix] <- (2 * ix)
 
     ydata.new <- ydata
-    # xdata.new <- NULL
+
     if (
       length(unique(prognostic.index)) > 1 &&
         sum(low.risk.ix) + sum(high.risk.ix) > length(prognostic.index)
@@ -197,7 +203,7 @@ separate2GroupsCox <- function(
       prognostic.index <-
         t(t(c(prognostic.index[, ], prognostic.index[overlap.samples, ])))
       ydata.new <- rbind(ydata, ydata[overlap.samples, ])
-      # xdata.new <- rbind(xdata, xdata[overlap.samples,])
+
       sample.ixs <- c(sample.ixs, sample.ixs[overlap.samples])
       temp.group <- c(temp.group, rep((2 * ix) - 1, length(overlap.samples)))
     }
@@ -274,11 +280,7 @@ separate2GroupsCox <- function(
   # remove group= from legend
   names(km$strata) <- gsub("group=", "", names(km$strata))
   # if there are more than 1 btas then lines should have transparency
-  if (length(chosen.btas) > 1) {
-    my.alpha <- .5
-  } else {
-    my.alpha <- 1
-  }
+  # (removed as it was not being used .5 and 1)
 
   if (length(chosen.btas) > 1) {
     col.ix <-

@@ -30,10 +30,7 @@ curl.workaround <- function(expr) {
       "There was an problem, calling the function with ",
       "ssl_verifypeer to FALSE", "\n\n\t error: ", result$message
     )
-    # httr::set_config(httr::config(
-    #    ssl_verifypeer = 0L,
-    #    ssl_verifyhost = 0L,
-    #    verbose = 0L))
+
     result <- httr::with_config(
       config = httr::config(
         ssl_verifypeer = 0L,
@@ -45,7 +42,6 @@ curl.workaround <- function(expr) {
       },
       override = FALSE
     )
-    # httr::reset_config()
   }
 
   return(result)
@@ -86,7 +82,6 @@ biomart.load <- function(
     attributes, filters, values, use.cache, verbose) {
   # local function that's used twice due to bug with curl
 
-
   mart <- curl.workaround({
     run.cache(
       biomaRt::useEnsembl,
@@ -94,7 +89,7 @@ biomart.load <- function(
       dataset = "hsapiens_gene_ensembl",
       host = "https://www.ensembl.org",
       verbose = verbose,
-      # glmSparseNet:::run.cache arguments
+      # run.cache arguments
       cache.prefix = "biomart.useEnsembl",
       show.message = FALSE
     )
@@ -177,7 +172,7 @@ geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
         ],
         stringsAsFactors = FALSE
       ) |>
-        dplyr::mutate(ensembl_gene_id = external_gene_name) |>
+        dplyr::mutate(ensembl_gene_id = .data$external_gene_name) |>
         rbind(results) |>
         dplyr::arrange("external_gene_name")
     },
@@ -223,7 +218,7 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
         external_gene_name = gene.id[!gene.id %in% results$external_gene_name],
         stringsAsFactors = FALSE
       ) |>
-        dplyr::mutate(ensembl_gene_id = external_gene_name) |>
+        dplyr::mutate(ensembl_gene_id = .data$external_gene_name) |>
         rbind(results) |>
         dplyr::arrange("external_gene_name")
     },

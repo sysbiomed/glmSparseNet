@@ -327,9 +327,7 @@ Kaplan-Meier estimator separating individuals by low and high risk
 
 ```{r, echo=FALSE, eval=!is.null(brca)}
 glmSparseNet::separate2GroupsCox(
-  as.vector(coef(cv.orphan,
-    s = "lambda.min"
-  )[, 1]),
+  as.vector(coef(cv.orphan, s = "lambda.min")[, 1]),
   xdata, ydata,
   plot.title = "Full dataset",
   legend.outside = FALSE
