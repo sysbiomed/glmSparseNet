@@ -1,5 +1,5 @@
 #' Workaround for bug with curl when fetching specific ensembl mirror
-#' 
+#'
 #' Should be solved in issue #39, will test to remove it.
 #'
 #' @param expr expression
@@ -10,29 +10,29 @@
 #' \donttest{
 #' glmSparseNet:::curl.workaround({
 #'     biomaRt::useEnsembl(
-#'         biomart = "genes", 
+#'         biomart = "genes",
 #'         dataset = 'hsapiens_gene_ensembl')
 #' })
 #' }
 curl.workaround <- function(expr) {
     result <- tryCatch(
-        {expr}, 
+        {expr},
         error = function(err) {
         err
     })
-    
+
     if (inherits(result, 'error') || is.null(result)) {
         warning(
             "There was an problem, calling the function with ",
             "ssl_verifypeer to FALSE", "\n\n\t error: ", result$message)
         # httr::set_config(httr::config(
-        #    ssl_verifypeer = 0L, 
-        #    ssl_verifyhost = 0L, 
+        #    ssl_verifypeer = 0L,
+        #    ssl_verifyhost = 0L,
         #    verbose = 0L))
         result <- httr::with_config(
             config = httr::config(
-                ssl_verifypeer = 0L, 
-                ssl_verifyhost = 0L, 
+                ssl_verifypeer = 0L,
+                ssl_verifyhost = 0L,
                 verbose = 1L
             ),
             {expr},
@@ -40,7 +40,7 @@ curl.workaround <- function(expr) {
         )
         # httr::reset_config()
     }
-    
+
     return(result)
 }
 
@@ -51,14 +51,14 @@ curl.workaround <- function(expr) {
 #' @seealso protein2EnsemblGeneNames
 #' @seealso biomaRt::getBM()
 #' @seealso biomaRt::useEnsembl()
-#' 
-#' @param attributes Attributes you want to retrieve. A possible list of 
+#'
+#' @param attributes Attributes you want to retrieve. A possible list of
 #' attributes can be retrieved using the function biomaRt::listAttributes.
-#' @param filters Filters (one or more) that should be used in the query. 
-#' A possible list of filters can be retrieved using the function 
+#' @param filters Filters (one or more) that should be used in the query.
+#' A possible list of filters can be retrieved using the function
 #' biomaRt::listFilters.
-#' @param values Values of the filter, e.g. vector of affy IDs. If multiple 
-#' filters are specified then the argument should be a list of vectors of 
+#' @param values Values of the filter, e.g. vector of affy IDs. If multiple
+#' filters are specified then the argument should be a list of vectors of
 #' which the position of each vector corresponds to the position of the filters
 #' in the filters argument
 #' @param use.cache Boolean indicating if biomaRt cache should be used
@@ -69,8 +69,8 @@ curl.workaround <- function(expr) {
 #'
 #' @examples
 #' glmSparseNet:::biomart.load(
-#'     attributes = c("external_gene_name","ensembl_gene_id"), 
-#'     filters = "external_gene_name", 
+#'     attributes = c("external_gene_name","ensembl_gene_id"),
+#'     filters = "external_gene_name",
 #'     values = c('MOB1A','RFLNB', 'SPIC', 'TP53'),
 #'     use.cache = TRUE,
 #'     verbose = FALSE
@@ -79,10 +79,10 @@ biomart.load <- function(
     attributes, filters, values, use.cache, verbose
 ) {
 
-    
+
     # local function that's used twice due to bug with curl
-    
-    
+
+
     mart <- curl.workaround({
       run.cache(
             biomaRt::useEnsembl,
@@ -95,7 +95,7 @@ biomart.load <- function(
             show.message = FALSE
         )
     })
-    
+
     #
     results <- tryCatch({
         curl.workaround(
@@ -112,7 +112,7 @@ biomart.load <- function(
         if (use.cache) {
             warning(
                 'There was a problem getting the genes,',
-                ' trying without a cache.', 
+                ' trying without a cache.',
                 '\n\t',
                 error
             )
@@ -121,7 +121,7 @@ biomart.load <- function(
         }
         warning(error)
     })
-    
+
     if ((inherits(results, 'error') || is.null(results)) && use.cache) {
         # retrying without cache
         return(
@@ -133,7 +133,7 @@ biomart.load <- function(
                 verbose = verbose
             )
         )
-    } 
+    }
     return(results)
 }
 
@@ -144,7 +144,7 @@ biomart.load <- function(
 #' @param use.cache Boolean indicating if biomaRt cache should be used
 #' @param verbose When using biomaRt in webservice mode and setting verbose to
 #' TRUE, the XML query to the webservice will be printed.
-#' 
+#'
 #' @return a dataframe with external gene names, ensembl_id
 #' @export
 #'
@@ -162,7 +162,7 @@ geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
             use.cache = use.cache,
             verbose = verbose
         )
-        
+
         #
         # Check if any genes does not have an external_gene_name
         #  and add them with same ensembl_id
@@ -198,7 +198,7 @@ geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
 #' @param use.cache Boolean indicating if biomaRt cache should be used
 #' @param verbose When using biomaRt in webservice mode and setting verbose to
 #' TRUE, the XML query to the webservice will be printed.
-#' 
+#'
 #' @return a dataframe with external gene names, ensembl_id
 #' @export
 #'
@@ -216,7 +216,7 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
             use.cache = use.cache,
             verbose = verbose
         )
-        
+
         #
         # Check if any genes does not have an external_gene_name
         #  and add them with same ensembl_id
@@ -238,7 +238,7 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
     })
     return(
         data.frame(
-            ensembl_gene_id = gene.id, 
+            ensembl_gene_id = gene.id,
             external_gene_name = gene.id,
             stringsAsFactors = FALSE
         )
@@ -272,163 +272,17 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
 #'     hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
 #' }
 hallmarks <- function(
-    genes, 
-    metric = 'count', 
+    genes,
+    metric = 'count',
     hierarchy = 'full',
-    generate.plot = TRUE, 
+    generate.plot = TRUE,
     show.message = FALSE
 ) {
-    #
-    valid.measures <- c('count', 'cprob', 'pmi', 'npmi')
-    if (!metric %in% valid.measures) {
-        stop('measure argument is not valid, it must be one of the following: ',
-              paste(valid.measures, collapse = ', ')
-        )
-    }
-
-
-    all.genes <- sort(unique(genes))
-
-    #
-    # necessary due to issue #6 in cambridgeltl/chat
-    if (metric == 'cprob') {
-        temp.res        <- hallmarks(all.genes, metric = 'count',
-                                     hierarchy = 'full', show.message = FALSE,
-                                     generate.plot = FALSE)
-
-        if (!is.null(temp.res$error)) {
-          return(temp.res)
-        }
-        good.ix         <- Matrix::rowSums(temp.res$hallmarks) != 0
-        all.genes       <- sort(unique(rownames(temp.res$hallmarks[good.ix,])))
-        df.no.hallmarks <- temp.res$no.hallmakrs
-        #
-        message('There is a bug in the Hallmarks\' API that requires the ',
-                'function to wait around 5 additional seconds to finish.\n',
-                'Sorry. bug report: ',
-                'cambridgeltl/chat/issues/6\n')
-        Sys.sleep(5.5)
-    } else {
-        df.no.hallmarks <- NULL
-    }
-
-    # build base url for call
-    baseUrl <- 'https://chat.lionproject.net/chartdata?measure=%s&hallmarks=%s'
-    baseUrl <- sprintf(baseUrl, metric, hierarchy)
-    # add genes
-    call.url <- sprintf('%s&q=%s', baseUrl, paste(all.genes, collapse = '&q='))
-
-    lines <- NULL
-    conn <- NULL
-    lines <- tryCatch({
-        
-        # certificate has been left to expire
-        result <- httr::with_config(
-            config = httr::config(
-                ssl_verifypeer = 0L, 
-                ssl_verifyhost = 0L, 
-                verbose = 0L
-            ),
-            {httr::RETRY("GET", url = call.url, times = 3, encode = "json")},
-            override = FALSE
-        )
-        result <- httr::content(result) %>% strsplit('\n')
-        result[[1]]
-    }, error = function(err) {
-        message('Cannot call Hallmark API, please try again later.')
-        return(NULL)
-    })
-
-    if (is.null(lines)) {
-        return(list(
-          hallmarks = NULL,
-          no.hallmakrs = NULL,
-          heatmap = NULL,
-          error = "Couldn't contact Hallmark API, please try again later"
-        ))
-    }
-
-    item_group <- cumsum(grepl(sprintf("^[A-Za-z0-9\\._,-]+\t%s", metric),
-                               lines))
-    all.items  <- list()
-    col.names  <- c()
-
-    for (ix in split(lines, item_group)){
-        item.id <- gsub(sprintf("\t%s", metric),"", ix[1])
-        # prepare results
-        item.val  <- list()
-        my.names  <- c('gene.name')
-        my.values <- c(item.id)
-        for (line in ix[-1]) {
-            if (line == '') {
-                next
-            }
-            my.split  <- strsplit(line, '\t')[[1]]
-            my.names  <- c(my.names, my.split[1])
-            my.values <- c(my.values, as.numeric(my.split[2]))
-            col.names <- c(col.names, my.split[[1]])
-        }
-        names(my.values) <- my.names
-        all.items[[item.id]] <- my.values
-    }
-
-    col.names <- unique(col.names)
-    df <- data.frame()
-    for (ix in all.items) {
-        # convert to numeric
-        new.ix <- as.numeric(ix[names(ix) != 'gene.name'])
-        # set previous names
-        names(new.ix) <- names(ix)[names(ix) != 'gene.name']
-        # create temporary data frame with controlled column names
-        temp.df <- data.frame(t(new.ix[col.names]))
-        rownames(temp.df) <- ix['gene.name']
-        df <- rbind(df, temp.df)
-    }
-
-    df.scaled <- t(scale(t(df)))
-    na.ix     <- which(apply(df.scaled, 1, function(col) {
-        return(all(is.nan(col)))
-    }))
-    df.scaled <- df # use counts
-
-    if (is.null(df.no.hallmarks)) {
-        df.no.hallmarks <- data.frame(
-          gene.name = sort(rownames(df.scaled)[na.ix]),
-          stringsAsFactors = FALSE)$gene.name
-    }
-
-    df.scaled <- cbind(gene.name = rownames(df.scaled), df.scaled)
-
-    #
-    # Generate heatmap
-    if (generate.plot) {
-        df.scaled$gene.name <- rownames(df.scaled)
-
-        g1 <- reshape2::melt(df.scaled, id.vars = c('gene.name')) %>%
-            dplyr::filter(!!(as.name('value')) > 0) %>%
-            ggplot2::ggplot(ggplot2::aes_string('gene.name', 'variable',
-                                                fill = 'value')) +
-              ggplot2::geom_raster() +
-              ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
-                                                                 hjust = 1)) +
-              ggplot2::ggtitle('Hallmarks heatmap',
-                  subtitle = stringr::str_wrap(sprintf(
-                      'Selected genes without hallmarks (%d): %s',
-                      length(df.no.hallmarks),
-                      paste(df.no.hallmarks, collapse = ', ')),
-                                               width = 50)) +
-              ggplot2::xlab('External Gene Name') + ggplot2::ylab('') +
-              ggplot2::scale_fill_gradientn(
-                  colours = rev(grDevices::topo.colors(2)))
-
-    } else {
-        g1 = NULL
-    }
-
-    df.scaled$gene.name <- NULL
-
-    return(list(hallmarks = df.scaled, no.hallmakrs = df.no.hallmarks,
-                heatmap = g1))
+  lifecycle::deprecate_stop(
+    "1.21.0",
+    "hallmarks()",
+    details = "API is no longer available"
+  )
 }
 
 
@@ -439,7 +293,7 @@ hallmarks <- function(
 #' @param use.cache Boolean indicating if biomaRt cache should be used
 #' @param verbose When using biomaRt in webservice mode and setting verbose to
 #' TRUE, the XML query to the webservice will be printed.
-#' 
+#'
 #' @return a dataframe with external gene names, ensembl_peptide_id
 #' @export
 #'
@@ -461,7 +315,7 @@ protein2EnsemblGeneNames <- function(
             use.cache = use.cache,
             verbose = verbose
         )
-        
+
         #
         return(
             dplyr::arrange(results, !!(as.name('ensembl_peptide_id')))

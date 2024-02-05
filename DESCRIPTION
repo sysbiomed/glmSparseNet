@@ -39,6 +39,7 @@ Imports:
     ggplot2,
     glue,
     httr,
+    lifecycle,
     methods,
     parallel,
     readr,
