@@ -163,22 +163,22 @@ brca.primary.solid.tumor <- TCGAutils::TCGAsplitAssays(brca, '01')
 xdata.raw                <- t(assay(brca.primary.solid.tumor[[1]]))
 
 # Get survival information
-ydata.raw <- colData(brca.primary.solid.tumor) %>% as.data.frame %>% 
+ydata.raw <- colData(brca.primary.solid.tumor) |> as.data.frame() |>
   # Convert days to integer
   dplyr::mutate(
     Days.to.date.of.Death = as.integer(Days.to.date.of.Death),
     Days.to.Last.Contact  = as.integer(Days.to.Date.of.Last.Contact)
-  ) %>%
+  ) |> 
   # Find max time between all days (ignoring missings)
-  dplyr::rowwise() %>%
+  dplyr::rowwise() |> 
   dplyr::mutate(
     time = max(days_to_last_followup, Days.to.date.of.Death, 
     Days.to.Last.Contact, days_to_death, na.rm = TRUE)
-  ) %>%
+  ) |> 
   # Keep only survival variables and codes
-  dplyr::select(patientID, status = vital_status, time) %>% 
+  dplyr::select(patientID, status = vital_status, time) |> 
   # Discard individuals with survival time less or equal to 0
-  dplyr::filter(!is.na(time) & time > 0) %>% 
+  dplyr::filter(!is.na(time) & time > 0) |> 
   as.data.frame()
 
 # Set index as the patientID
@@ -212,17 +212,17 @@ small.subset <- c('AAK1', 'ADRB1', 'AK7', 'ALK', 'APOBEC3F', 'ARID1B', 'BAMBI',
                   'SPATA5L1', 'SPINT1', 'STAR', 'STXBP5', 'SUN3', 'TACC2',
                   'TACR1', 'TAGLN2', 'THPO', 'TNIP1', 'TP53', 'TRMT2B', 'TUBB1',
                   'VDAC1', 'VSIG8', 'WNT3A', 'WWOX', 'XRCC4', 'YME1L1', 
-                  'ZBTB11',  'ZSCAN21') %>% 
-  sample(size  = 50) %>% sort
+                  'ZBTB11',  'ZSCAN21') |>
+  sample(size  = 50) |> sort()
 
 # make sure we have 100 genes
-small.subset <- c(small.subset, sample(colnames(xdata.raw), 51)) %>% 
-  unique %>% 
-  sort
+small.subset <- c(small.subset, sample(colnames(xdata.raw), 51)) |>
+  unique() |>
+  sort()
 
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
-ydata <- ydata.raw %>% 
-  dplyr::select(time, status) %>% 
+ydata <- ydata.raw |>
+  dplyr::select(time, status) |>
   dplyr::filter(!is.na(time) | time < 0)
 ```
 
@@ -279,11 +279,10 @@ glmSparseNet::separate2GroupsCox(as.vector(coef(cv.hub, s = 'lambda.min')[,1]),
                                  plot.title = 'Full dataset', 
                                  legend.outside = FALSE)
 
-selected.genes[['Hub']] <- coef(cv.hub, s = 'lambda.min')[,1] %>% 
-  { .[. != 0] } %>%
-  names %>% 
-  geneNames %>% 
-  { .[['external_gene_name']]} 
+selected.genes[['Hub']] <- Filter(\(.x) .x != 0, coef(cv.hub, s = 'lambda.min')[, 1]) |> 
+  names() |> 
+  geneNames() |>
+  `[[`("external_gene_name")
 ```
 
 ## glmOrphan model
@@ -310,11 +309,10 @@ glmSparseNet::separate2GroupsCox(as.vector(coef(cv.orphan,
                                  plot.title = 'Full dataset',
                                  legend.outside = FALSE)
 
-selected.genes[['Orphan']] <- coef(cv.orphan, s = 'lambda.min')[,1] %>% 
-  { .[. != 0] } %>%
-  names %>% 
-  geneNames %>% 
-  { .[['external_gene_name']]} 
+selected.genes[['Orphan']] <- Filter(\(.x) .x != 0, coef(cv.orphan, s = 'lambda.min')[, 1]) |> 
+  names() |> 
+  geneNames() |>
+  `[[`("external_gene_name")
 ```
 
 ## Elastic Net model *(without network-penalization)*
@@ -337,11 +335,10 @@ glmSparseNet::separate2GroupsCox(as.vector(coef(cv.glm, s = 'lambda.min')[,1]),
                                  plot.title = 'Full dataset', 
                                  legend.outside = FALSE)
 
-selected.genes[['GLMnet']] <- coef(cv.glm, s = 'lambda.min')[,1] %>% 
-  { .[. != 0] } %>%
-  names %>% 
-  geneNames %>% 
-  { .[['external_gene_name']]} 
+selected.genes[['GLMnet']] <- Filter(\(.x) .x != 0, coef(cv.glm, s = 'lambda.min')[, 1]) |> 
+  names() |> 
+  geneNames() |>
+  `[[`("external_gene_name")
 ```
 
 ## Selected genes
@@ -369,18 +366,23 @@ accuracy.
 *note*: size of circles represent the degree of that gene in network.
 
 ```{r, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
-melt(selected.genes) %>% 
+melt(selected.genes) |>
   mutate(Degree = my.degree[value], 
          value  = factor(value), 
-         L1     = factor(L1)) %>%
-  mutate(value = fct_reorder(value, Degree)) %>%
-  as.data.frame %>% ggplot() +
-  geom_point(aes(value, L1, size = Degree), shape = my.symbols(3), 
-             color = my.colors(3)) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0), 
-        legend.position = 'top') +
-  ylab('Model') + xlab('Gene') + 
-  scale_size_continuous(trans = 'log10')
+         L1     = factor(L1)) |>
+  mutate(value = fct_reorder(value, Degree)) |>
+  as.data.frame() |>
+  ggplot() +
+    geom_point(
+      aes(value, L1, size = Degree), shape = my.symbols(3), color = my.colors(3)
+    ) +
+    theme(
+      axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0), 
+      legend.position = 'top'
+    ) +
+    ylab('Model') + 
+    xlab('Gene') + 
+    scale_size_continuous(trans = 'log10')
 ```
 
 

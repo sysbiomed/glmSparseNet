@@ -1,4 +1,3 @@
-#' @importFrom dplyr %>%
 #' @importFrom Matrix as.matrix sparseMatrix colSums rowSums
 #' @importFrom glmnet glmnet cv.glmnet
 #' @importFrom methods setGeneric is setMethod findMethods

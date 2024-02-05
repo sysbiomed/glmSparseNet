@@ -111,7 +111,7 @@ test_that("run.cache base.dir in folder that does have access", {
     ),
     15
   )
-  
+
   expect_equal(
     run.cache(
       c, 1, 2, 3, 4, 5,
@@ -128,73 +128,73 @@ test_that("Test slight differences in code", {
   fun.1 <- function(val1) {
     return(val1^2)
   }
-  
+
   expect_identical(
     glmSparseNet:::build.function.digest(fun.1),
     glmSparseNet:::build.function.digest(fun.1)
   )
-  
+
   # main code to compare
   fun.1.one.space <- function( val1) {
     return(val1^2)
   }
-  
+
   expect_failure(
     expect_identical(
       glmSparseNet:::build.function.digest(fun.1),
       glmSparseNet:::build.function.digest(fun.1.one.space)
     )
   )
-  
+
   # changes in spaces
   fun.1.spaces <- function(val1) { return(val1^2) }
-  
+
   expect_failure(
     expect_identical(
       glmSparseNet:::build.function.digest(fun.1),
       glmSparseNet:::build.function.digest(fun.1.spaces)
     )
   )
-  
+
   # same as fun.1 but defined in a different name
   fun.2 <- function(val1) {
     return(val1^2)
   }
-  
+
   expect_identical(
     glmSparseNet:::build.function.digest(fun.1),
     glmSparseNet:::build.function.digest(fun.2)
   )
-  
+
   # small difference in argument, but same body
   fun.2.slight.diff <- function(val2) {
     return(val1^2)
   }
-  
+
   expect_failure(
     expect_identical(
       glmSparseNet:::build.function.digest(fun.1),
       glmSparseNet:::build.function.digest(fun.2.slight.diff)
     )
   )
-  
+
   # using different variable
   fun.2.diff <- function(val2) {
     return(val2^2)
   }
-  
+
   expect_failure(
     expect_identical(
       glmSparseNet:::build.function.digest(fun.1),
       glmSparseNet:::build.function.digest(fun.2.diff)
     )
   )
-  
+
   # adds a new argument (usused in body)
   fun.2.diff.arg <- function(val1, val2 = FALSE) {
     return(val1^2)
   }
-  
+
   expect_failure(
     expect_identical(
       glmSparseNet:::build.function.digest(fun.1),
@@ -206,10 +206,10 @@ test_that("Test slight differences in code", {
 # Primitives have a very similar code
 test_that("Two primitives give different results", {
   unique.tmp.dir <- file.path(tempdir(), 'two_primitives-run.cache')
-  
+
   run.cache(sum, 1, 2, 3, 4, base.dir = unique.tmp.dir)
   run.cache(c, 1, 2, 3, 4, base.dir = unique.tmp.dir)
-  
+
   expect_failure(
     expect_identical(
       run.cache(sum, 1, 2, 3, 4, base.dir = unique.tmp.dir),
@@ -263,7 +263,7 @@ test_that("builds different hash for different functions", {
     vapply, var, warning, weekdays, weighted.mean, which, with, within,
     write, xtfrm
   )
-  
+
   fun.from.packages <- c(
     dplyr::all_equal, dplyr::anti_join, dplyr::arrange,
     dplyr::as.tbl, dplyr::between, dplyr::bind_cols, dplyr::bind_rows,
@@ -280,18 +280,17 @@ test_that("builds different hash for different functions", {
     ggplot2::geom_histogram, ggplot2::geom_line, ggplot2::scale_fill_brewer,
     ggplot2::stat_qq_line, grid::unit, reshape2::melt
   )
-  
+
   all.funs <- c(list.of.fun, fun.from.packages)
-  
-  list.of.fun.digest <- c(all.funs) %>%
-    sapply(glmSparseNet:::build.function.digest)
-  
+
+  list.of.fun.digest <- sapply(all.funs, glmSparseNet:::build.function.digest)
+
   for (digest.ix in unique(list.of.fun.digest[duplicated(list.of.fun.digest)])) {
     print(all.funs[list.of.fun.digest == digest.ix])
     cat("----------------")
   }
-  
-  
+
+
   expect_identical(
     length(unique(list.of.fun.digest)),
     length(list.of.fun) + length(fun.from.packages))
@@ -319,7 +318,7 @@ test_that("run.cache add to hash", {
     ),
     'Saving in cache'
   )
-  
+
   one <- capture_messages(
     run.cache(
       sum, 1, 2, 3, 4, 5,
@@ -382,7 +381,7 @@ test_that("run.cache with seed", {
     ),
     'Loading from cache'
   )
-  
+
   expect_false(rnorm10 == rnorm11)
 })
 
@@ -421,7 +420,7 @@ test_that("run.cache show.message option works", {
     ),
     'Saving in cache'
   )
-  
+
   expect_message(
     run.cache(
       sum, 1, 2, 3, 4, 5,
@@ -429,7 +428,7 @@ test_that("run.cache show.message option works", {
     ),
     NA
   )
-  
+
   show.message(FALSE)
   expect_message(
     run.cache(
@@ -437,7 +436,7 @@ test_that("run.cache show.message option works", {
     ),
     NA
   )
-  
+
   expect_message(
     run.cache(
       sum, 1, 2, 3, 4, 5,
@@ -457,7 +456,7 @@ test_that("run.cache base.dir option works", {
     cache1.os <- cache1
     cache2.os <- cache2
   }
-  
+
   expect_message(
     run.cache(
       sum, 1, 2, 3, 4, 5, 9,
@@ -465,7 +464,7 @@ test_that("run.cache base.dir option works", {
     ),
     cache0.os
   )
-  
+
   expect_message(
     run.cache(
       sum, 1, 2, 3, 4, 5, 8,
@@ -473,7 +472,7 @@ test_that("run.cache base.dir option works", {
     ),
     cache1.os
   )
-  
+
   expect_message(
     run.cache(
       sum, 1, 2, 3, 4, 5, 9,
@@ -481,7 +480,7 @@ test_that("run.cache base.dir option works", {
     ),
     cache0.os
   )
-  
+
   base.dir(cache2)
   expect_message(
     run.cache(

@@ -73,13 +73,11 @@ brca <- TCGAutils::TCGAsplitAssays(brca, c('01','11'))
 xdata.raw <- t(cbind(assay(brca[[1]]), assay(brca[[2]])))
 
 # Get matches between survival and assay data
-class.v        <- TCGAbiospec(rownames(xdata.raw))$sample_definition %>% factor
+class.v        <- TCGAbiospec(rownames(xdata.raw))$sample_definition |> factor()
 names(class.v) <- rownames(xdata.raw)
 
 # keep features with standard deviation > 0
-xdata.raw <- xdata.raw %>% 
-  { (apply(., 2, sd) != 0) } %>% 
-  { xdata.raw[, .] } %>%
+xdata.raw <-  xdata.raw[, apply(xdata.raw, 2, sd) != 0] |>
   scale()
 
 set.seed(params$seed)
@@ -122,21 +120,14 @@ plot(fitted)
 Taking the best model described by `lambda.min`
 
 ```{r show_coefs, eval=!is.null(brca)}
-coefs.v <- coef(fitted, s = 'lambda.min')[,1] %>% { .[. != 0]}
-coefs.v %>% { 
-  data.frame(ensembl.id  = names(.), 
-             gene.name   = geneNames(names(.))$external_gene_name, 
-             coefficient = .,
-             stringsAsFactors = FALSE)
-  } %>%
-  arrange(gene.name) %>%
+coefs.v <- Filter(\(.x) .x != 0, coef(fitted, s = 'lambda.min')[, 1])
+data.frame(
+  ensembl.id = names(coefs.v), 
+  gene.name = geneNames(names(coefs.v))$external_gene_name, 
+  coefficient = coefs.v,
+  stringsAsFactors = FALSE) |>
+  arrange(gene.name) |>
   knitr::kable()
-```
-
-## Hallmarks of Cancer
-
-```{r hallmarks, eval=!is.null(brca)}
-geneNames(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
 ```
 
 ## Accuracy
@@ -162,7 +153,7 @@ ROC curve
 ```{r roc, echo=FALSE, eval=!is.null(brca)}
 roc_obj <- pROC::roc(ydata, as.vector(response))
 
-data.frame(TPR = roc_obj$sensitivities, FPR = 1 - roc_obj$specificities) %>%
+data.frame(TPR = roc_obj$sensitivities, FPR = 1 - roc_obj$specificities) |>
   ggplot() +geom_line(aes(FPR,TPR), color = 2, size = 1, alpha = 0.7)+
       labs(title= sprintf("ROC curve (AUC = %f)", pROC::auc(roc_obj)), 
            x = "False Positive Rate (1-Specificity)", 

@@ -75,39 +75,38 @@ brca.primary.solid.tumor <- TCGAutils::TCGAsplitAssays(brca, '01')
 xdata.raw <- t(assay(brca.primary.solid.tumor[[1]]))
 
 # Get survival information
-ydata.raw <- colData(brca.primary.solid.tumor) %>% as.data.frame %>% 
+ydata.raw <- colData(brca.primary.solid.tumor) |> as.data.frame() |> 
   # Keep only data relative to survival or samples
   dplyr::select(patientID, vital_status, 
          Days.to.date.of.Death, Days.to.Date.of.Last.Contact, 
          days_to_death,         days_to_last_followup,
-         Vital.Status) %>% 
+         Vital.Status) |> 
   # Convert days to integer
-  dplyr::mutate(Days.to.date.of.Death = as.integer(Days.to.date.of.Death)) %>%
+  dplyr::mutate(Days.to.date.of.Death = as.integer(Days.to.date.of.Death)) |> 
   dplyr::mutate(
     Days.to.Last.Contact  = as.integer(Days.to.Date.of.Last.Contact)
-  ) %>%
+  ) |> 
   # Find max time between all days (ignoring missings)
-  dplyr::rowwise() %>%
+  dplyr::rowwise() |> 
   dplyr::mutate(
     time = max(days_to_last_followup, Days.to.date.of.Death, 
                Days.to.Last.Contact, days_to_death, na.rm = TRUE)
-  ) %>%
+  ) |> 
   # Keep only survival variables and codes
-  dplyr::select(patientID, status = vital_status, time) %>% 
+  dplyr::select(patientID, status = vital_status, time) |> 
   # Discard individuals with survival time less or equal to 0
-  dplyr::filter(!is.na(time) & time > 0) %>% 
+  dplyr::filter(!is.na(time) & time > 0) |> 
   as.data.frame()
 
 # Set index as the patientID
 rownames(ydata.raw) <- ydata.raw$patientID
 
 # Get matches between survival and assay data
-xdata.raw <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% 
-                         rownames(ydata.raw),]
-xdata.raw <- xdata.raw %>% 
-  { (apply(., 2, sd) != 0) } %>% 
-  { xdata.raw[, .] } %>% 
-  scale
+xdata.raw <- xdata.raw[
+  TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw),
+]
+xdata.raw <- xdata.raw[, apply(xdata.raw, 2, sd) != 0] |> 
+  scale()
 
 # Order ydata the same as assay
 ydata.raw    <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
@@ -117,11 +116,11 @@ set.seed(params$seed)
 small.subset <- c('CD5', 'CSF2RB', 'IRGC', 'NEUROG2', 'NLRC4', 'PDE11A',  
                   'PTEN', 'TP53', 'BRAF',
                   'PIK3CB', 'QARS', 'RFC3', 'RPGRIP1L', 'SDC1', 'TMEM31', 
-                  'YME1L1', 'ZBTB11', sample(colnames(xdata.raw), 100)) %>% 
-  unique
+                  'YME1L1', 'ZBTB11', sample(colnames(xdata.raw), 100)) |>
+  unique()
 
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
-ydata <- ydata.raw %>% dplyr::select(time, status)
+ydata <- ydata.raw  |> dplyr::select(time, status)
 ```
 
 # Fit models
@@ -155,13 +154,12 @@ plot(fitted)
 Taking the best model described by `lambda.min`
 
 ```{r show_coefs, eval=!is.null(brca)}
-coefs.v <- coef(fitted, s = 'lambda.min')[,1] %>% { .[. != 0]}
-coefs.v %>% { 
-  data.frame(gene.name   = names(.),
-             coefficient = .,
-             stringsAsFactors = FALSE)
-  } %>%
-  arrange(gene.name) %>%
+coefs.v <- Filter(\(.x) .x != 0, coef(fitted, s = 'lambda.min')[, 1])
+data.frame(
+  gene.name = names(coefs.v), 
+  coefficient = coefs.v,
+  stringsAsFactors = FALSE) |>
+  arrange(gene.name) |>
   knitr::kable()
 ```
 

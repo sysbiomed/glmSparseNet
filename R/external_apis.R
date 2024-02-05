@@ -170,7 +170,7 @@ geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
       stringsAsFactors = FALSE
     ) |>
       dplyr::mutate(ensembl_gene_id = external_gene_name) |>
-      dplyr::bind_rows(results) |>
+      rbind(results) |>
       dplyr::arrange("external_gene_name")
 
   }, error = function(msg) {
@@ -214,7 +214,7 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
       stringsAsFactors = FALSE
     ) |>
       dplyr::mutate(ensembl_gene_id = external_gene_name) |>
-      dplyr::bind_rows(results) |>
+      rbind(results) |>
       dplyr::arrange("external_gene_name")
   }, error = function(msg) {
     warning(sprintf('Error when finding gene names:\n\t%s', msg))
