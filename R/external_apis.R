@@ -151,45 +151,36 @@ biomart.load <- function(
 #' @examples
 #' geneNames(c('ENSG00000114978','ENSG00000166211', 'ENSG00000183688'))
 geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
-
-    . <- NULL
-
-    tryCatch({
-        results <- biomart.load(
-            attributes = c("external_gene_name", "ensembl_gene_id"),
-            filters = "ensembl_gene_id",
-            values = ensembl.genes,
-            use.cache = use.cache,
-            verbose = verbose
-        )
-
-        #
-        # Check if any genes does not have an external_gene_name
-        #  and add them with same ensembl_id
-
-        results <- ensembl.genes[!ensembl.genes %in%
-                                     results$ensembl_gene_id] %>%
-            {
-                data.frame(
-                    external_gene_name = .,
-                    ensembl_gene_id    = .,
-                    stringsAsFactors   = FALSE
-                )
-            } %>% rbind(results)
-
-        return(
-            dplyr::arrange(results, !!(as.name('external_gene_name')))
-        )
-    }, error = function(msg) {
-        warning(sprintf('Error when finding gene names:\n\t%s', msg))
-    })
-    return(
-        data.frame(
-            ensembl_gene_id = ensembl.genes,
-            external_gene_name = ensembl.genes,
-            stringsAsFactors = FALSE
-        )
+  tryCatch({
+    results <- biomart.load(
+        attributes = c("external_gene_name", "ensembl_gene_id"),
+        filters = "ensembl_gene_id",
+        values = ensembl.genes,
+        use.cache = use.cache,
+        verbose = verbose
     )
+
+    #
+    # Check if any genes does not have an external_gene_name
+    #  and add them with same ensembl_id
+    data.frame(
+      external_gene_name = ensembl.genes[
+        !ensembl.genes %in% results$ensembl_gene_id
+      ],
+      stringsAsFactors = FALSE
+    ) |>
+      dplyr::mutate(ensembl_gene_id = external_gene_name) |>
+      dplyr::bind_rows(results) |>
+      dplyr::arrange("external_gene_name")
+
+  }, error = function(msg) {
+    warning(sprintf('Error when finding gene names:\n\t%s', msg))
+    data.frame(
+      ensembl_gene_id = ensembl.genes,
+      external_gene_name = ensembl.genes,
+      stringsAsFactors = FALSE
+    )
+  })
 }
 
 #' Retrieve ensembl gene names from biomaRt
@@ -205,44 +196,34 @@ geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
 #' @examples
 #' ensemblGeneNames(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
 ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
-
-    . <- NULL
-
-    tryCatch({
-        results <- biomart.load(
-            attributes = c("external_gene_name", "ensembl_gene_id"),
-            filters = "external_gene_name",
-            values = gene.id,
-            use.cache = use.cache,
-            verbose = verbose
-        )
-
-        #
-        # Check if any genes does not have an external_gene_name
-        #  and add them with same ensembl_id
-
-        results <- gene.id[!gene.id %in% results$external_gene_name] %>%
-            {
-                data.frame(
-                    external_gene_name = .,
-                    ensembl_gene_id    = .,
-                    stringsAsFactors   = FALSE
-                )
-            } %>% rbind(results)
-
-        return(
-            dplyr::arrange(results, !!(as.name('external_gene_name')))
-        )
-    }, error = function(msg) {
-        warning(sprintf('Error when finding gene names:\n\t%s', msg))
-    })
-    return(
-        data.frame(
-            ensembl_gene_id = gene.id,
-            external_gene_name = gene.id,
-            stringsAsFactors = FALSE
-        )
+  tryCatch({
+    results <- biomart.load(
+      attributes = c("external_gene_name", "ensembl_gene_id"),
+      filters = "external_gene_name",
+      values = gene.id,
+      use.cache = use.cache,
+      verbose = verbose
     )
+
+    #
+    # Check if any genes does not have an external_gene_name
+    #  and add them with same ensembl_id
+
+    data.frame(
+      external_gene_name = gene.id[!gene.id %in% results$external_gene_name],
+      stringsAsFactors = FALSE
+    ) |>
+      dplyr::mutate(ensembl_gene_id = external_gene_name) |>
+      dplyr::bind_rows(results) |>
+      dplyr::arrange("external_gene_name")
+  }, error = function(msg) {
+    warning(sprintf('Error when finding gene names:\n\t%s', msg))
+    data.frame(
+      ensembl_gene_id = gene.id,
+      external_gene_name = gene.id,
+      stringsAsFactors = FALSE
+    )
+  })
 }
 
 #' Retrieve hallmarks of cancer count for genes
@@ -279,9 +260,7 @@ hallmarks <- function(
     show.message = FALSE
 ) {
   lifecycle::deprecate_stop(
-    "1.21.0",
-    "hallmarks()",
-    details = "API is no longer available"
+    "1.21.0", "hallmarks()", details = "API is no longer available"
   )
 }
 
@@ -306,29 +285,23 @@ hallmarks <- function(
 protein2EnsemblGeneNames <- function(
     ensembl.proteins, use.cache = TRUE, verbose = FALSE
 ) {
-    #
-    tryCatch({
-        results <- biomart.load(
-            attributes = c("ensembl_peptide_id", "ensembl_gene_id"),
-            filters = "ensembl_peptide_id",
-            values = ensembl.proteins,
-            use.cache = use.cache,
-            verbose = verbose
-        )
-
-        #
-        return(
-            dplyr::arrange(results, !!(as.name('ensembl_peptide_id')))
-        )
-    }, error = function(msg) {
-        warning(sprintf('Error when finding gene names:\n\t%s', msg))
-    })
-    return(
-        data.frame(
-            ensembl_peptide_id = ensembl.proteins,
-            ensembl_gene_id    = ensembl.proteins,
-            external_gene_name = ensembl.proteins,
-            stringsAsFactors   = FALSE
-        )
+  #
+  tryCatch({
+    biomart.load(
+        attributes = c("ensembl_peptide_id", "ensembl_gene_id"),
+        filters = "ensembl_peptide_id",
+        values = ensembl.proteins,
+        use.cache = use.cache,
+        verbose = verbose
+    ) |>
+      dplyr::arrange("ensembl_peptide_id")
+  }, error = function(msg) {
+    warning(sprintf('Error when finding gene names:\n\t%s', msg))
+    data.frame(
+      ensembl_peptide_id = ensembl.proteins,
+      ensembl_gene_id    = ensembl.proteins,
+      external_gene_name = ensembl.proteins,
+      stringsAsFactors   = FALSE
     )
+  })
 }

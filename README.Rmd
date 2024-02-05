@@ -200,15 +200,6 @@ Kaplan-Meier plot
 separate2GroupsCox(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, ylim = c(0,1))
 ```
 
-
-### Heatmap with results retrived from the Cancer Hallmarks Analytics Tool *(CHAT)*
-
-Search the non-zero coefficients, i.e., the selected features/genes, and query CHAT for known hallmarks of cancer. Also plots the genes not found, useful for new hypotheses generation.s
-
-```{r hallmarks, fig.height=8}
-hallmarks(names(best.model.coef)[best.model.coef > 0])$heatmap
-```
-
 ```{r glmnet.classic, include=FALSE, eval=FALSE}
 # Comparing against a classical GLMNET call
 xdata.reduced <- as(xdata[,,'RNASeq2GeneNorm'], 'MatchedAssayExperiment')
@@ -217,8 +208,7 @@ ydata.reduced <- ydata[xdata.reduced$patientID,]
 ydata.surv    <- Surv(ydata.reduced$time, ydata.reduced$status)
 
 fit4 <- cv.glmnet(xdata.surv, ydata.surv, family = 'cox', alpha = .7, nlambda = 1000)
-best.model.coef.g <- coef(fit4, s = 'lambda.min')[,1] %>% .[. != 0]
-
+best.model.coef.g <- Filter(function(.x) .x != 0, coef(fit4, s = 'lambda.min')[,1])
 
 separate2groupsCox(best.model.coef.g, 
                    t(assay(xdata[['RNASeq2GeneNorm']]))[, names(best.model.coef.g)], 

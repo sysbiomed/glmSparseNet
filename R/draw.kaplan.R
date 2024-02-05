@@ -16,7 +16,7 @@
 #' @param legend.outside If TRUE legend will be outside plot, otherwise inside
 #' @param expand.yzero expand to y = 0
 #' @param stop.when.overlap when probs vector allows for overlapping of samples
-#' in both groups, then stop. Otherwise it will calculate with duplicate 
+#' in both groups, then stop. Otherwise it will calculate with duplicate
 #' samples, i.e. simply adding them to xdata and ydata (in a different group)
 #' @param ... additional parameters to survminer::ggsurvplot
 #'
@@ -33,7 +33,7 @@
 #' @examples
 #' data('cancer', package = 'survival')
 #' xdata <- survival::ovarian[,c('age', 'resid.ds')]
-#' ydata <- data.frame(time = survival::ovarian$futime, 
+#' ydata <- data.frame(time = survival::ovarian$futime,
 #'                     status = survival::ovarian$fustat)
 #' separate2GroupsCox(c(age = 1, 0), xdata, ydata)
 #' separate2GroupsCox(c(age = 1, 0.5), xdata, ydata)
@@ -107,7 +107,7 @@ separate2GroupsCox <- function(
     futile.logger::flog.debug('')
     futile.logger::flog.debug('prognostic.index', prognostic.index,
                               capture = TRUE)
-    prognostic.index.df <- 
+    prognostic.index.df <-
       data.frame(time = c(), status = c(), group = c(), index = c())
     # populate a data.frame with all patients (multiple rows per patients if has
     # multiple btas) already calculate high/low risk groups
@@ -136,33 +136,33 @@ separate2GroupsCox <- function(
       # high risk
       high.risk.ix <- prognostic.index[,ix] > pi.thres[2]
       temp.group[high.risk.ix] <- (2 * ix)
-      
+
       ydata.new <- ydata
       # xdata.new <- NULL
       if (
-        length(unique(prognostic.index)) > 1 && 
+        length(unique(prognostic.index)) > 1 &&
         sum(low.risk.ix) + sum(high.risk.ix) > length(prognostic.index)
         ) {
         str.message <- paste0(
           'The cutoff values given to the function allow for some over ',
-          'samples in both groups, with:\n  high risk size (', 
+          'samples in both groups, with:\n  high risk size (',
           sum(high.risk.ix), ') ',
           '+ low risk size (', sum(low.risk.ix),') not equal to ',
-          'xdata/ydata rows (', sum(high.risk.ix) + sum(low.risk.ix), 
+          'xdata/ydata rows (', sum(high.risk.ix) + sum(low.risk.ix),
           ' != ', length(prognostic.index), ')\n\n'
         )
-        
+
         if (stop.when.overlap) {
           stop(str.message, 'Stopping execution...')
-        } 
-        
+        }
+
         warning(
-          str.message, 
+          str.message,
           'We are continuing with execution as parameter stop.when.overlap ',
           'is FALSE.\n',
           '  note: This adds duplicate samples to ydata and xdata xdata'
         )
-        
+
         overlap.samples <- which(as.vector(high.risk.ix & low.risk.ix))
         #
         prognostic.index <-
@@ -198,11 +198,10 @@ separate2GroupsCox <- function(
     new.factor.str.l <- as.list(as.character(seq_len(2*length(chosen.btas))))
     names(new.factor.str.l) <- new.factor.str
 
-    . <- NULL # Satisfy R CMD CHECK
-    prognostic.index.df$group <- prognostic.index.df$group %>%
-        list %>%
-        c(new.factor.str.l) %>%
-        do.call(forcats::fct_collapse, .)
+    prognostic.index.df$group <- do.call(
+      forcats::fct_collapse,
+      c(list(prognostic.index.df$group), new.factor.str.l)
+    )
     #
     if (length(levels(prognostic.index.df$group)) == 1) {
         stop('separate2GroupsCox(): There is only one group, cannot create ',
@@ -271,7 +270,7 @@ separate2GroupsCox <- function(
         p1$plot <- p1$plot + ggplot2::ggtitle(paste0(gsub('_', ' ', plot.title),
                                            '\np_value = ',p_value))
     } else {
-        p1$plot <- p1$plot + 
+        p1$plot <- p1$plot +
           ggplot2::ggtitle(paste0(gsub('_', ' ', plot.title)))
     }
 
