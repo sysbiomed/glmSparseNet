@@ -110,7 +110,7 @@ build.function.digest <- function(fun) {
     # default to just fun
     fun
   }
-  
+
   return(digest.cache(digest.fun))
 }
 
@@ -121,11 +121,11 @@ build.function.digest <- function(fun) {
 #' @return the path to the file it has written
 #'
 #' @examples
-#' 
+#'
 #' glmSparseNet:::write.readme(tempdir())
 write.readme <- function(base.dir) {
   readme.path <- file.path(base.dir, "what_is_this_folder.txt")
-  
+
   readme.text <- c(
     "This directory was automatically created in R when function 'run.cache'",
     "was executed (from 'glmSparseNet' package). This might have been done by",
@@ -141,7 +141,7 @@ write.readme <- function(base.dir) {
     "",
     "Have a great day"
   )
-  
+
   if (!file.exists(readme.path)) {
     tryCatch({
       fileConn <- file(readme.path)
@@ -170,10 +170,10 @@ write.readme <- function(base.dir) {
 #'   )
 #' }
 create.directory.for.cache <- function (base.dir, parent.path) {
-  
+
   # create the directory to store cache
   dir.create(base.dir, showWarnings = FALSE)
-  
+
   if (!dir.exists(base.dir)) {
     warning(
       'Could not create cache base folder at ',
@@ -182,16 +182,16 @@ create.directory.for.cache <- function (base.dir, parent.path) {
     )
     base.dir      <- glmSparseNet.options('base.dir')
     dir.create(base.dir, showWarnings = FALSE)
-    
+
     if (!dir.exists(base.dir)) {
       base.dir <- file.path(getwd(), 'run-cache')
       dir.create(base.dir, showWarnings = FALSE)
     }
   }
-  
+
   parent.dir <- file.path(base.dir, parent.path)
   dir.create(parent.dir, showWarnings = FALSE)
-  
+
   if (!dir.exists(parent.dir)) {
     warning(
       'Could not create cache folder inside base.dir at ',
@@ -202,16 +202,16 @@ create.directory.for.cache <- function (base.dir, parent.path) {
     base.dir      <- glmSparseNet.options('base.dir')
     parent.dir    <- file.path(base.dir, parent.path)
     dir.create(parent.dir, showWarnings = FALSE, recursive = TRUE)
-    
+
     if (!dir.exists(parent.dir)) {
       base.dir      <- base.dir <- file.path(getwd(), 'run-cache')
       parent.dir    <- file.path(base.dir, parent.path)
       dir.create(parent.dir, showWarnings = FALSE, recursive = TRUE)
     }
   }
-  
+
   write.readme(base.dir)
-  
+
   return(list(base.dir = base.dir, parent.dir = parent.dir))
 }
 
@@ -271,17 +271,17 @@ methods::setMethod(
       show.message <- glmSparseNet.options('show.message')
     }
     compression <- glmSparseNet.options('compression')
-    
+
     #
     args <- list(...)
     if (!is.null(seed)) {
       args[['runCache.seed']] <- seed
-      set.seed(seed)
+      do.call(set.seed, list(seed))
     }
     if (!is.null(add.to.hash)) {
       args[['runCache.add.to.hash']] <- add.to.hash
     }
-    
+
     # Build digest of each of the arguments
     args <- lapply(seq_along(args), function(ix) {
       if (length(cache.digest) >= ix && !is.null(cache.digest[[ix]])) {
@@ -289,22 +289,22 @@ methods::setMethod(
       }
       digest.cache(args[[ix]])
     })
-    
+
     # Build digest of the function's code
     #  (if it changes, then cache is invalidated)
     args[['cache.fun']] <- build.function.digest(fun)
-    
+
     # digest all the arguments together
     my.digest <- digest.cache(args)
-    
+
     filename    <- sprintf('cache-%s-H_%s.RData', cache.prefix, my.digest)
     parent.path <- strtrim(my.digest, width = 4)
-    
+
     # create dir and update base.dir (in case it failed)
     cache.dir.paths <- create.directory.for.cache(base.dir, parent.path)
     parent.dir <- cache.dir.paths$parent.dir
     base.dir   <- cache.dir.paths$base.dir
-    
+
     # Calculate
     result <- if (dir.exists(parent.dir)) {
       path <- file.path(base.dir, parent.path, filename)

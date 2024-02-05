@@ -1,59 +1,68 @@
-Package: glmSparseNet
 Type: Package
+Package: glmSparseNet
 Title: Network Centrality Metrics for Elastic-Net Regularized Models
-Version: 1.20.0
-Authors@R: c(person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre")),
-             person("Susana", "Vinga", email = "susanavinga@tecnico.ulisboa.pt", role = "aut"),
-             person("Eunice", "Carrasquinha", email = "eunice.trigueirao@tecnico.ulisboa.pt", role = "ctb"),
-             person("Marta", "Lopes", email = "marta.lopes@tecnico.ulisboa.pt", role = "ctb"))
-Description: glmSparseNet is an R-package that generalizes sparse regression models when the features (e.g. genes)
-             have a graph structure (e.g. protein-protein interactions), by including network-based regularizers. 
-             glmSparseNet uses the glmnet R-package, by including centrality measures of the network as penalty 
-             weights in the regularization. The current version implements regularization based on node degree, 
-             i.e. the strength and/or number of its associated edges, either by promoting hubs in the solution or 
-             orphan genes in the solution. All the glmnet distribution families are supported, namely "gaussian", 
-             "poisson", "binomial", "multinomial", "cox", and "mgaussian".
+Version: 1.20.1
+Authors@R: c(
+    person("André", "Veríssimo", , "andre.verissimo@tecnico.ulisboa.pt", 
+           role = c("aut", "cre"), comment = c(ORCID = "0000-0002-2212-339X")),
+    person("Susana", "Vinga", , "susanavinga@tecnico.ulisboa.pt", role = "aut"),
+    person("Eunice", "Carrasquinha", , "eunice.trigueirao@tecnico.ulisboa.pt", 
+           role = "ctb"),
+    person("Marta", "Lopes", , "marta.lopes@tecnico.ulisboa.pt", role = "ctb")
+  )
+Description: glmSparseNet is an R-package that generalizes sparse
+    regression models when the features (e.g. genes) have a graph
+    structure (e.g. protein-protein interactions), by including
+    network-based regularizers.  glmSparseNet uses the glmnet R-package,
+    by including centrality measures of the network as penalty weights in
+    the regularization. The current version implements regularization
+    based on node degree, i.e. the strength and/or number of its
+    associated edges, either by promoting hubs in the solution or orphan
+    genes in the solution. All the glmnet distribution families are
+    supported, namely "gaussian", "poisson", "binomial", "multinomial",
+    "cox", and "mgaussian".
 License: GPL-3
+URL: https://www.github.com/sysbiomed/glmSparseNet
+BugReports: https://www.github.com/sysbiomed/glmSparseNet/issues
+Depends: 
+    glmnet,
+    Matrix,
+    MultiAssayExperiment,
+    R (>= 4.3.0)
+Imports: 
+    biomaRt,
+    digest,
+    dplyr,
+    forcats,
+    futile.logger,
+    futile.options,
+    ggplot2,
+    glue,
+    httr,
+    methods,
+    parallel,
+    readr,
+    reshape2,
+    stringr,
+    SummarizedExperiment,
+    survminer,
+    utils
+Suggests: 
+    BiocStyle,
+    curatedTCGAData,
+    knitr,
+    pROC,
+    rmarkdown,
+    survcomp,
+    survival,
+    TCGAutils,
+    testthat,
+    VennDiagram
+VignetteBuilder: 
+    knitr
+biocViews: Software, StatisticalMethod, DimensionReduction, Regression,
+    Classification, Survival, Network, GraphAndNetwork
 Encoding: UTF-8
 LazyData: false
 NeedsCompilation: no
-biocViews: Software, 
-  StatisticalMethod, 
-  DimensionReduction, 
-  Regression, 
-  Classification, 
-  Survival,
-  Network, 
-  GraphAndNetwork
-Depends: R (>= 4.1), Matrix, MultiAssayExperiment, glmnet
-Imports: SummarizedExperiment,
-  biomaRt,
-  futile.logger,
-  futile.options,
-  forcats,
-  utils,
-  dplyr,
-  glue,
-  readr,
-  digest,
-  httr,
-  ggplot2,
-  survminer,
-  reshape2,
-  stringr,
-  parallel,
-  methods
-Suggests: testthat,
-  knitr,
-  rmarkdown,
-  survival,
-  survcomp,
-  pROC,
-  VennDiagram,
-  BiocStyle,
-  curatedTCGAData,
-  TCGAutils
-VignetteBuilder: knitr
 RoxygenNote: 7.1.2
-BugReports: https://www.github.com/sysbiomed/glmSparseNet/issues
-URL: https://www.github.com/sysbiomed/glmSparseNet

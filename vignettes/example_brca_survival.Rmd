@@ -52,8 +52,16 @@ procedure to obtain the data manually is described in the following chunk.
 
 ```{r curated_data, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
-brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
-                        version = "1.1.38", dry.run = FALSE)
+brca <- tryCatch({
+  curatedTCGAData(
+    diseaseCode = "BRCA",
+    assays = "RNASeq2GeneNorm", 
+    version = "1.1.38",
+    dry.run = FALSE
+  )
+}, error = function(err) {
+  NULL
+})
 ```
 
 ```{r curated_data_non_eval, eval=FALSE}
@@ -61,7 +69,7 @@ brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
                         version = "1.1.38", dry.run = FALSE)
 ```
 
-```{r data, warning=FALSE, message=FALSE}
+```{r data, warning=FALSE, message=FALSE, eval=!is.null(brca)}
 # keep only solid tumour (code: 01)
 brca.primary.solid.tumor <- TCGAutils::TCGAsplitAssays(brca, '01')
 xdata.raw <- t(assay(brca.primary.solid.tumor[[1]]))
@@ -121,7 +129,7 @@ ydata <- ydata.raw %>% dplyr::select(time, status)
 Fit model model penalizing by the hubs using the cross-validation function by 
 `cv.glmHub`.
 
-```{r fit}
+```{r fit, eval=!is.null(brca)}
 set.seed(params$seed)
 fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status),
                     family  = 'cox',
@@ -138,7 +146,7 @@ in 10-fold cross-validation. The two vertical dotted lines represent the best
 model and a model with less variables selected *(genes)*, but within a standard 
 error distance from the best.
 
-```{r results}
+```{r results, eval=!is.null(brca)}
 plot(fitted)
 ```
 
@@ -146,7 +154,7 @@ plot(fitted)
 
 Taking the best model described by `lambda.min`
 
-```{r show_coefs}
+```{r show_coefs, eval=!is.null(brca)}
 coefs.v <- coef(fitted, s = 'lambda.min')[,1] %>% { .[. != 0]}
 coefs.v %>% { 
   data.frame(gene.name   = names(.),
@@ -157,15 +165,9 @@ coefs.v %>% {
   knitr::kable()
 ```
 
-## Hallmarks of Cancer
-
-```{r hallmarks}
-names(coefs.v) %>% { hallmarks(.)$heatmap }
-```
-
 ## Survival curves and Log rank test
 
-```{r}
+```{r, eval=!is.null(brca)}
 separate2GroupsCox(as.vector(coefs.v), 
                     xdata[, names(coefs.v)], 
                     ydata, 
