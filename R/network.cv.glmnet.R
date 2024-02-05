@@ -68,8 +68,8 @@ cv.glmSparseNet <- function(xdata, ydata, network,
                             network.options = networkOptions(),
                             experiment.name = NULL,
                             ...) {
-  return(.glmSparseNetPrivate(glmnet::cv.glmnet, xdata, ydata, network,
+  .glmSparseNetPrivate(glmnet::cv.glmnet, xdata, ydata, network,
     experiment.name = experiment.name,
     network.options = network.options, ...
-  ))
+  )
 }

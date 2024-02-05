@@ -16,6 +16,6 @@ a hash of the sha256
 Sets a default caching algorithm to use with run.cache
 }
 \examples{
-glmSparseNet:::digest.cache(c(1,2,3,4,5))
-glmSparseNet:::digest.cache('some example')
+glmSparseNet:::digest.cache(c(1, 2, 3, 4, 5))
+glmSparseNet:::digest.cache("some example")
 }

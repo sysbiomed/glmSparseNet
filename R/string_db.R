@@ -184,7 +184,7 @@ buildStringNetwork <- function(string.tbl, use.names = "protein") {
     new.string <- string.tbl |>
       dplyr::filter(
         !!(as.name("from")) %in% prot.map$ensembl_peptide_id &
-         !!(as.name("to")) %in% prot.map$ensembl_peptide_id
+          !!(as.name("to")) %in% prot.map$ensembl_peptide_id
       )
 
     # empty gene ids default to previous code

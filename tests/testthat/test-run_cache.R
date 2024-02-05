@@ -138,9 +138,13 @@ test_that("Test slight differences in code", {
   )
 
   # main code to compare
+  # nolint start: spaces_inside_linter
+  # styler: off
   fun.1.one.space <- function(val1) {
-    return(val1^2)
+    return( val1^2)
   }
+  # styler: on
+  # nolint end: spaces_inside_linter
 
   expect_failure(
     expect_identical(
@@ -150,9 +154,13 @@ test_that("Test slight differences in code", {
   )
 
   # changes in spaces
+  # nolint start: spaces_inside_linter
+  # styler: off
   fun.1.spaces <- function(val1) {
-    return(val1^2)
+    return(val1^2 )
   }
+  # styler: on
+  # nolint end: spaces_inside_linter
 
   expect_failure(
     expect_identical(
@@ -210,15 +218,15 @@ test_that("Test slight differences in code", {
 
 # Primitives have a very similar code
 test_that("Two primitives give different results", {
-  unique.tmp.dir <- file.path(tempdir(), "two_primitives-run.cache")
+  unique_tmp_dir <- file.path(tempdir(), "two_primitives-run.cache")
 
-  run.cache(sum, 1, 2, 3, 4, base.dir = unique.tmp.dir)
-  run.cache(c, 1, 2, 3, 4, base.dir = unique.tmp.dir)
+  run.cache(sum, 1, 2, 3, 4, base.dir = unique_tmp_dir)
+  run.cache(c, 1, 2, 3, 4, base.dir = unique_tmp_dir)
 
   expect_failure(
     expect_identical(
-      run.cache(sum, 1, 2, 3, 4, base.dir = unique.tmp.dir),
-      run.cache(c, 1, 2, 3, 4, base.dir = unique.tmp.dir)
+      run.cache(sum, 1, 2, 3, 4, base.dir = unique_tmp_dir),
+      run.cache(c, 1, 2, 3, 4, base.dir = unique_tmp_dir)
     )
   )
 })
@@ -226,7 +234,7 @@ test_that("Two primitives give different results", {
 # This tests the uniqueness of many different functions to see
 # if the code is correct
 test_that("builds different hash for different functions", {
-  list.of.fun <- c(
+  list_of_fun <- c(
     c, run.cache, expect_equal, expect_identical,
     tempdir, ISOdate, Sys.time, Sys.Date, Sys.timezone,
     abline, abs, aggregate, all, any, apply,
@@ -269,7 +277,7 @@ test_that("builds different hash for different functions", {
     write, xtfrm
   )
 
-  fun.from.packages <- c(
+  fun_from_packages <- c(
     dplyr::all_equal, dplyr::anti_join, dplyr::arrange,
     dplyr::as.tbl, dplyr::between, dplyr::bind_cols, dplyr::bind_rows,
     dplyr::case_when, dplyr::coalesce, dplyr::combine, dplyr::cumall,
@@ -286,19 +294,19 @@ test_that("builds different hash for different functions", {
     ggplot2::stat_qq_line, grid::unit, reshape2::melt
   )
 
-  all.funs <- c(list.of.fun, fun.from.packages)
+  all_funs <- c(list_of_fun, fun_from_packages)
 
-  list.of.fun.digest <- sapply(all.funs, glmSparseNet:::build.function.digest)
+  fun_digest <- sapply(all_funs, glmSparseNet:::build.function.digest)
 
-  for (digest.ix in unique(list.of.fun.digest[duplicated(list.of.fun.digest)])) {
-    print(all.funs[list.of.fun.digest == digest.ix])
+  for (digest_ix in unique(fun_digest[duplicated(fun_digest)])) {
+    print(all_funs[fun_digest == digest_ix])
     cat("----------------")
   }
 
 
   expect_identical(
-    length(unique(list.of.fun.digest)),
-    length(list.of.fun) + length(fun.from.packages)
+    length(unique(fun_digest)),
+    length(list_of_fun) + length(fun_from_packages)
   )
 })
 
@@ -391,6 +399,7 @@ test_that("run.cache with seed", {
   expect_false(rnorm10 == rnorm11)
 })
 
+# nolint start: commented_code_linter.
 # test_that("run.cache saves to local directory", {
 #   output <- capture_output(
 #     run.cache(
@@ -402,6 +411,7 @@ test_that("run.cache with seed", {
 #   )
 #   expect_true(grepl(file.path('.', 'run-cache'), output))
 # })
+# nolint end: commented_code_linter.
 
 test_that("run.cache uses cache", {
   run.cache(

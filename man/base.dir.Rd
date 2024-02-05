@@ -16,5 +16,5 @@ the new path
 change base.dir for run.cache
 }
 \examples{
-glmSparseNet:::base.dir('/tmp/cache')
+glmSparseNet:::base.dir("/tmp/cache")
 }

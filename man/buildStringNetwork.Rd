@@ -26,11 +26,12 @@ between peptide and gene id
 }
 \examples{
 \donttest{
-  all.interactions.700 <- stringDBhomoSapiens(score_threshold = 700)
-  string.network       <- buildStringNetwork(all.interactions.700,
-                                              use.names = 'external')
-  # number of edges
-  sum(string.network != 0)
+all.interactions.700 <- stringDBhomoSapiens(score_threshold = 700)
+string.network <- buildStringNetwork(all.interactions.700,
+  use.names = "external"
+)
+# number of edges
+sum(string.network != 0)
 }
 }
 \seealso{

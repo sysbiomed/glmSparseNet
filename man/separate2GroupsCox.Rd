@@ -61,16 +61,22 @@ Draws multiple kaplan meyer survival curves (or just 1) and calculates
 logrank test
 }
 \examples{
-data('cancer', package = 'survival')
-xdata <- survival::ovarian[,c('age', 'resid.ds')]
-ydata <- data.frame(time = survival::ovarian$futime,
-                    status = survival::ovarian$fustat)
+data("cancer", package = "survival")
+xdata <- survival::ovarian[, c("age", "resid.ds")]
+ydata <- data.frame(
+  time = survival::ovarian$futime,
+  status = survival::ovarian$fustat
+)
 separate2GroupsCox(c(age = 1, 0), xdata, ydata)
 separate2GroupsCox(c(age = 1, 0.5), xdata, ydata)
-separate2GroupsCox(c(age = 1), c(1,0,1,0,1,0),
-                   data.frame(time = runif(6), status = rbinom(6, 1, .5)))
-separate2GroupsCox(list(aa = c(age = 1, 0.5),
-                        bb = c(age = 0, 1.5)), xdata, ydata)
+separate2GroupsCox(
+  c(age = 1), c(1, 0, 1, 0, 1, 0),
+  data.frame(time = runif(6), status = rbinom(6, 1, .5))
+)
+separate2GroupsCox(list(
+  aa = c(age = 1, 0.5),
+  bb = c(age = 0, 1.5)
+), xdata, ydata)
 }
 \seealso{
 survminer::ggsurvplot

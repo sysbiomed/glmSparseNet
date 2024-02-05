@@ -19,10 +19,10 @@ a list of updated base.dir and parent.dir
 Create directories for cache
 }
 \examples{
-glmSparseNet:::create.directory.for.cache(tempdir(), 'abcd')
+glmSparseNet:::create.directory.for.cache(tempdir(), "abcd")
 \donttest{
-  glmSparseNet:::create.directory.for.cache(
-    file.path(getwd(), 'run-cache'), 'abcd'
-  )
+glmSparseNet:::create.directory.for.cache(
+  file.path(getwd(), "run-cache"), "abcd"
+)
 }
 }

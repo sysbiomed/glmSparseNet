@@ -122,7 +122,7 @@ rownames(ydata.raw) <- ydata.raw$patientID
 
 # keep only features that have standard deviation > 0
 xdata.raw <- xdata.raw[
-  TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw), 
+  TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw),
 ]
 xdata.raw <- xdata.raw[, apply(xdata.raw, 2, sd) != 0] |>
   scale()
@@ -175,7 +175,7 @@ plot(fitted)
 Taking the best model described by `lambda.min`
 
 ```{r show_coefs, eval=!is.null(skcm)}
-coefs.v <- Filter(\(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
+coefs.v <- Filter(function(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
 data.frame(
   ensembl.id = names(coefs.v),
   gene.name = geneNames(names(coefs.v))$external_gene_name,

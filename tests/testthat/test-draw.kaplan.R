@@ -3,7 +3,11 @@ context("separate2GroupsCox")
 library(survival)
 
 test_that("Calculates kaplan-meier data", {
-  result <- separate2GroupsCox(c(age = 1), ovarian$age, data.frame(time = ovarian$futime, status = ovarian$fustat))
+  result <- separate2GroupsCox(
+    c(age = 1),
+    ovarian$age,
+    data.frame(time = ovarian$futime, status = ovarian$fustat)
+  )
 
   expect_lt(result$pvalue - 0.0518148, 1e-2)
 })
@@ -43,7 +47,9 @@ test_that("Some bad arguments for separate2GroupsCox", {
   # list, data.frame, data.frame
   expect_error(separate2GroupsCox(list(c(1, 0), c(0, 1, 2)), xdata, ydata))
   # list, matrix, data.frame
-  expect_error(separate2GroupsCox(list(c(1, 0)), as.matrix(xdata), ydata[1:10, ]))
+  expect_error(
+    separate2GroupsCox(list(c(1, 0)), as.matrix(xdata), ydata[1:10, ])
+  )
 
   # list, numeric, data.frame
   expect_error(separate2GroupsCox(list(c(1, 0)), xdata$age, ydata))

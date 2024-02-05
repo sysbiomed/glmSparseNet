@@ -16,5 +16,5 @@ the new compression
 change cache.compression for run.cache
 }
 \examples{
-glmSparseNet:::cache.compression('bzip2')
+glmSparseNet:::cache.compression("bzip2")
 }

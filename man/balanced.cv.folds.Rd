@@ -21,6 +21,6 @@ Create balanced folds for cross validation
 \examples{
 glmSparseNet:::balanced.cv.folds(seq(10), seq(11, 15), nfolds = 2)
 # will give a warning
-glmSparseNet:::balanced.cv.folds(seq(10), seq(11, 13), nfolds = 10) 
+glmSparseNet:::balanced.cv.folds(seq(10), seq(11, 13), nfolds = 10)
 glmSparseNet:::balanced.cv.folds(seq(100), seq(101, 133), nfolds = 10)
 }

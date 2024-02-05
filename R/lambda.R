@@ -34,10 +34,10 @@ buildLambda <- function(lambda.largest = NULL,
       rep(1 / 10^seq(0, lambda.ncol - 1, 1), lambda.nrow),
       nrow = lambda.nrow, byrow = TRUE
     ) *
-    array(
-      lambda.first * seq(1 / lambda.nrow, 1, 1 / lambda.nrow),
-      dim = c(lambda.nrow, lambda.ncol)
-    )
+      array(
+        lambda.first * seq(1 / lambda.nrow, 1, 1 / lambda.nrow),
+        dim = c(lambda.nrow, lambda.ncol)
+      )
   ) |>
     as.vector() |>
     unique() |>

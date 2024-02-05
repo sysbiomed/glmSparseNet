@@ -131,7 +131,7 @@ plot(fitted)
 Taking the best model described by `lambda.min`
 
 ```{r show_coefs, eval=!is.null(brca)}
-coefs.v <- Filter(\(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
+coefs.v <- Filter(function(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
 data.frame(
   ensembl.id = names(coefs.v),
   gene.name = geneNames(names(coefs.v))$external_gene_name,

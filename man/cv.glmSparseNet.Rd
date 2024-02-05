@@ -39,14 +39,15 @@ network parameter accepts:
    glmnet)
 }
 \examples{
-
 \donttest{
-    # Gaussian model
-    xdata <- matrix(rnorm(500), ncol = 5)
-    cv.glmSparseNet(xdata, rnorm(nrow(xdata)), 'correlation',
-                    family = 'gaussian')
-    cv.glmSparseNet(xdata, rnorm(nrow(xdata)), 'covariance',
-                    family = 'gaussian')
+# Gaussian model
+xdata <- matrix(rnorm(500), ncol = 5)
+cv.glmSparseNet(xdata, rnorm(nrow(xdata)), "correlation",
+  family = "gaussian"
+)
+cv.glmSparseNet(xdata, rnorm(nrow(xdata)), "covariance",
+  family = "gaussian"
+)
 }
 
 #
@@ -56,7 +57,7 @@ network parameter accepts:
 
 #
 # load data
-data('miniACC', package="MultiAssayExperiment")
+data("miniACC", package = "MultiAssayExperiment")
 xdata <- miniACC
 
 #
@@ -70,17 +71,18 @@ xdata$surv_event_time[cens.ix] <- xdata$days_to_last_followup[cens.ix]
 #
 # Keep only valid individuals
 valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
-                      !is.na(xdata$vital_status) &
-                      xdata$surv_event_time > 0)
+  !is.na(xdata$vital_status) &
+  xdata$surv_event_time > 0)
 xdata.valid <- xdata[, rownames(colData(xdata))[valid.ix]]
-ydata.valid <- colData(xdata.valid)[,c('surv_event_time', 'vital_status')]
-colnames(ydata.valid) <- c('time', 'status')
+ydata.valid <- colData(xdata.valid)[, c("surv_event_time", "vital_status")]
+colnames(ydata.valid) <- c("time", "status")
 
 #
 cv.glmSparseNet(xdata.valid,
-                ydata.valid,
-                nfolds          = 5,
-                family          = 'cox',
-                network         = 'correlation',
-                experiment.name = 'RNASeq2GeneNorm')
+  ydata.valid,
+  nfolds          = 5,
+  family          = "cox",
+  network         = "correlation",
+  experiment.name = "RNASeq2GeneNorm"
+)
 }

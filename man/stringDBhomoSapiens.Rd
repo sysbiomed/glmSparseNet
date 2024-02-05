@@ -23,6 +23,6 @@ Download protein-protein interactions from STRING DB
 }
 \examples{
 \donttest{
-    stringDBhomoSapiens(score_threshold = 800)
+stringDBhomoSapiens(score_threshold = 800)
 }
 }

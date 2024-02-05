@@ -28,8 +28,8 @@ This is where the actual work is done
 }
 \examples{
 glmSparseNet:::calculate.result(
-  file.path(tempdir(),'calculate.result.Rdata'),
-  'gzip',
+  file.path(tempdir(), "calculate.result.Rdata"),
+  "gzip",
   FALSE,
   TRUE,
   sum,

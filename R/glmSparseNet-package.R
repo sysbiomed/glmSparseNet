@@ -1,4 +1,4 @@
-#' @importFrom rlang .data
+#' @importFrom rlang .data %||%
 #' @importFrom Matrix as.matrix sparseMatrix colSums rowSums
 #' @importFrom glmnet glmnet cv.glmnet
 #' @importFrom methods setGeneric is setMethod findMethods

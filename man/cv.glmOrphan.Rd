@@ -27,10 +27,11 @@ degree.
 }
 \examples{
 xdata <- matrix(rnorm(100), ncol = 5)
-cv.glmOrphan(xdata, rnorm(nrow(xdata)), 'correlation',
-             family = 'gaussian',
-             nfolds = 5,
-             network.options = networkOptions(min.degree = .2))
+cv.glmOrphan(xdata, rnorm(nrow(xdata)), "correlation",
+  family = "gaussian",
+  nfolds = 5,
+  network.options = networkOptions(min.degree = .2)
+)
 }
 \seealso{
 glmNetSparse

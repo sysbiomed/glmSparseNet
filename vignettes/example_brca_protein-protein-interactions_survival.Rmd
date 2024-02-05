@@ -118,8 +118,10 @@ flog.info(
 
 ```{r, echo=FALSE}
 string.network.binary <- (string.network.undirected != 0) * 1
-degree.network <- (Matrix::rowSums(string.network.binary) +
-  Matrix::colSums(string.network.binary)) / 2
+degree.network <- (
+  Matrix::rowSums(string.network.binary) +
+    Matrix::colSums(string.network.binary)
+) / 2
 
 flog.info("Summary of degree:", summary(degree.network), capture = TRUE)
 ```
@@ -128,9 +130,7 @@ flog.info("Summary of degree:", summary(degree.network), capture = TRUE)
 
 ```{r, warning=FALSE}
 qplot(
-  degree.network[degree.network <= quantile(degree.network,
-    probs = .99999
-  )],
+  degree.network[degree.network <= quantile(degree.network, probs = .99999)],
   geom = "histogram", fill = my.colors(2), bins = 100
 ) +
   theme(legend.position = "none") + xlab("Degree (up until 99.999% quantile)")
@@ -202,10 +202,12 @@ ydata.raw <- colData(brca.primary.solid.tumor) |>
 rownames(ydata.raw) <- ydata.raw$patientID
 
 # keep only features that are in degree.network and have standard deviation > 0
-valid.features <- colnames(xdata.raw)[colnames(xdata.raw) %in%
-  names(degree.network[degree.network > 0])]
-xdata.raw <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in%
-  rownames(ydata.raw), valid.features]
+valid.features <- colnames(xdata.raw)[
+  colnames(xdata.raw) %in% names(degree.network[degree.network > 0])
+]
+xdata.raw <- xdata.raw[
+  TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw), valid.features
+]
 xdata.raw <- scale(xdata.raw)
 
 # Order ydata the same as assay
@@ -301,7 +303,10 @@ glmSparseNet::separate2GroupsCox(as.vector(coef(cv.hub, s = "lambda.min")[, 1]),
   legend.outside = FALSE
 )
 
-selected.genes[["Hub"]] <- Filter(\(.x) .x != 0, coef(cv.hub, s = "lambda.min")[, 1]) |>
+selected.genes[["Hub"]] <- Filter(
+  function(.x) .x != 0,
+  coef(cv.hub, s = "lambda.min")[, 1]
+) |>
   names() |>
   geneNames() |>
   magrittr::extract2("external_gene_name")
@@ -333,7 +338,10 @@ glmSparseNet::separate2GroupsCox(
   legend.outside = FALSE
 )
 
-selected.genes[["Orphan"]] <- Filter(\(.x) .x != 0, coef(cv.orphan, s = "lambda.min")[, 1]) |>
+selected.genes[["Orphan"]] <- Filter(
+  function(.x) .x != 0,
+  coef(cv.orphan, s = "lambda.min")[, 1]
+) |>
   names() |>
   geneNames() |>
   magrittr::extract2("external_gene_name")
@@ -361,7 +369,10 @@ glmSparseNet::separate2GroupsCox(as.vector(coef(cv.glm, s = "lambda.min")[, 1]),
   legend.outside = FALSE
 )
 
-selected.genes[["GLMnet"]] <- Filter(\(.x) .x != 0, coef(cv.glm, s = "lambda.min")[, 1]) |>
+selected.genes[["GLMnet"]] <- Filter(
+  function(.x) .x != 0,
+  coef(cv.glm, s = "lambda.min")[, 1]
+) |>
   names() |>
   geneNames() |>
   magrittr::extract2("external_gene_name")

@@ -23,8 +23,8 @@ Retrieve ensembl gene ids from proteins
 }
 \examples{
 protein2EnsemblGeneNames(c(
-    'ENSP00000235382',
-    'ENSP00000233944',
-    'ENSP00000216911'
+  "ENSP00000235382",
+  "ENSP00000233944",
+  "ENSP00000216911"
 ))
 }
