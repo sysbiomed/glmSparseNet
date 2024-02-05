@@ -11,7 +11,9 @@ networkOptions(
   centrality = "degree",
   min.degree = 0,
   n.cores = 1,
-  trans.fun = function(x) {     x }
+  trans.fun = function(x) {
+     x
+ }
 )
 }
 \arguments{

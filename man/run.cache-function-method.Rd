@@ -4,7 +4,7 @@
 \alias{run.cache,function-method}
 \title{Run function and save cache}
 \usage{
-\S4method{run.cache}{`function`}(
+\S4method{run.cache}{function}(
   fun,
   ...,
   seed = NULL,

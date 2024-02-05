@@ -7,15 +7,15 @@
 biomart.load(attributes, filters, values, use.cache, verbose)
 }
 \arguments{
-\item{attributes}{Attributes you want to retrieve. A possible list of 
+\item{attributes}{Attributes you want to retrieve. A possible list of
 attributes can be retrieved using the function biomaRt::listAttributes.}
 
-\item{filters}{Filters (one or more) that should be used in the query. 
-A possible list of filters can be retrieved using the function 
+\item{filters}{Filters (one or more) that should be used in the query.
+A possible list of filters can be retrieved using the function
 biomaRt::listFilters.}
 
-\item{values}{Values of the filter, e.g. vector of affy IDs. If multiple 
-filters are specified then the argument should be a list of vectors of 
+\item{values}{Values of the filter, e.g. vector of affy IDs. If multiple
+filters are specified then the argument should be a list of vectors of
 which the position of each vector corresponds to the position of the filters
 in the filters argument}
 
@@ -32,8 +32,8 @@ Common call to biomaRt to avoid repetitive code
 }
 \examples{
 glmSparseNet:::biomart.load(
-    attributes = c("external_gene_name","ensembl_gene_id"), 
-    filters = "external_gene_name", 
+    attributes = c("external_gene_name","ensembl_gene_id"),
+    filters = "external_gene_name",
     values = c('MOB1A','RFLNB', 'SPIC', 'TP53'),
     use.cache = TRUE,
     verbose = FALSE

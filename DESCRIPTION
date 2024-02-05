@@ -66,4 +66,4 @@ biocViews: Software, StatisticalMethod, DimensionReduction, Regression,
 Encoding: UTF-8
 LazyData: false
 NeedsCompilation: no
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.1

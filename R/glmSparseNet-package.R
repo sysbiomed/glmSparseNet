@@ -8,4 +8,9 @@
 #' @import futile.options
 #' @importFrom SummarizedExperiment assay
 #' @importFrom MultiAssayExperiment assay
+#' @keywords internal
+"_PACKAGE"
+
+## usethis namespace: start
+## usethis namespace: end
 NULL

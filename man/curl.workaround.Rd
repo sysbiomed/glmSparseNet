@@ -19,7 +19,7 @@ Should be solved in issue #39, will test to remove it.
 \donttest{
 glmSparseNet:::curl.workaround({
     biomaRt::useEnsembl(
-        biomart = "genes", 
+        biomart = "genes",
         dataset = 'hsapiens_gene_ensembl')
 })
 }
