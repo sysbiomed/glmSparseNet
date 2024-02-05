@@ -50,10 +50,17 @@ To accelerate the process we use a very reduced dataset down to 107 variables
 only *(genes)*, which is stored as a data object in this package. However, the 
 procedure to obtain the data manually is described in the following chunk.
 
-```{r,include=TRUE,results="hide",message=FALSE,warning=FALSE}
-brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
-                        version = "1.1.38", dry.run = FALSE
-)
+```{r curated_data, include=TRUE, results="hide", message=FALSE, warning=FALSE}
+brca <- tryCatch({
+  curatedTCGAData(
+    diseaseCode = "BRCA",
+    assays = "RNASeq2GeneNorm",
+    version = "1.1.38", 
+    dry.run = FALSE
+  )
+}, error = function(err) {
+  NULL
+})
 ```
 
 ```{r curated_data_non_eval, eval=FALSE}
@@ -61,7 +68,7 @@ brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
                         version = "1.1.38", dry.run = FALSE)
 ```
 
-```{r data.show, warning=FALSE, error=FALSE}
+```{r data.show, warning=FALSE, error=FALSE, eval=!is.null(brca)}
 brca <- TCGAutils::TCGAsplitAssays(brca, c('01','11'))
 xdata.raw <- t(cbind(assay(brca[[1]]), assay(brca[[2]])))
 
@@ -73,7 +80,7 @@ names(class.v) <- rownames(xdata.raw)
 xdata.raw <- xdata.raw %>% 
   { (apply(., 2, sd) != 0) } %>% 
   { xdata.raw[, .] } %>%
-  scale
+  scale()
 
 set.seed(params$seed)
 small.subset <- c('CD5', 'CSF2RB', 'HSF1', 'IRGC', 'LRRC37A6P', 'NEUROG2', 
@@ -90,7 +97,7 @@ ydata <- class.v
 Fit model model penalizing by the hubs using the cross-validation function by 
 `cv.glmHub`.
 
-```{r fit.show}
+```{r fit.show, eval=!is.null(brca)}
 fitted <- cv.glmHub(xdata, ydata, 
                     family  = 'binomial',
                     network = 'correlation', 
@@ -106,7 +113,7 @@ in 10-fold cross-validation. The two vertical dotted lines represent the best
 model and a model with less variables selected *(genes)*, but within a standard 
 error distance from the best.
 
-```{r results}
+```{r results, eval=!is.null(brca)}
 plot(fitted)
 ```
 
@@ -114,7 +121,7 @@ plot(fitted)
 
 Taking the best model described by `lambda.min`
 
-```{r show_coefs}
+```{r show_coefs, eval=!is.null(brca)}
 coefs.v <- coef(fitted, s = 'lambda.min')[,1] %>% { .[. != 0]}
 coefs.v %>% { 
   data.frame(ensembl.id  = names(.), 
@@ -128,13 +135,13 @@ coefs.v %>% {
 
 ## Hallmarks of Cancer
 
-```{r hallmarks}
+```{r hallmarks, eval=!is.null(brca)}
 geneNames(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
 ```
 
 ## Accuracy
 
-```{r accuracy, echo=FALSE}
+```{r accuracy, echo=FALSE, eval=!is.null(brca)}
 resp <- predict(fitted, s = 'lambda.min', newx = xdata, type = 'class')
 flog.info('Misclassified (%d)', sum(ydata != resp))
 flog.info('  * False primary solid tumour: %d', 
@@ -145,14 +152,14 @@ flog.info('  * False normal              : %d',
 
 Histogram of predicted response
 
-```{r predict, echo=FALSE, warning=FALSE}
+```{r predict, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
 response <- predict(fitted, s = 'lambda.min', newx = xdata, type = 'response')
 qplot(response, bins = 100)
 ```
 
 ROC curve
 
-```{r roc, echo=FALSE}
+```{r roc, echo=FALSE, eval=!is.null(brca)}
 roc_obj <- pROC::roc(ydata, as.vector(response))
 
 data.frame(TPR = roc_obj$sensitivities, FPR = 1 - roc_obj$specificities) %>%

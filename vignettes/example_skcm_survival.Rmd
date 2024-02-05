@@ -52,8 +52,16 @@ procedure to obtain the data manually is described in the following chunk.
 
 ```{r curated_data, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
-skcm <- curatedTCGAData(diseaseCode = 'SKCM', assays = 'RNASeq2GeneNorm', 
-                        version = '1.1.38',  dry.run = FALSE)
+skcm <- tryCatch({
+  curatedTCGAData(
+    diseaseCode = "SKCM",
+    assays = "RNASeq2GeneNorm", 
+    version = "1.1.38",
+    dry.run = FALSE
+  )
+}, error = function(err) {
+  NULL
+})
 ```
 
 ```{r curated_data_non_eval, eval=FALSE}
@@ -68,7 +76,7 @@ Build the survival data from the clinical columns.
 are alive or dead.
 * Build two matrix objects that fit the data `xdata` and `ydata`
 
-```{r data.show, warning=FALSE, error=FALSE}
+```{r data.show, warning=FALSE, error=FALSE, eval=!is.null(skcm)}
 skcm.metastatic <- TCGAutils::TCGAsplitAssays(skcm, '06')
 xdata.raw <- t(assay(skcm.metastatic[[1]]))
 
@@ -126,7 +134,7 @@ ydata <- ydata.raw %>% dplyr::select(time, status)
 Fit model model penalizing by the hubs using the cross-validation function by 
 `cv.glmHub`.
 
-```{r fit}
+```{r fit, eval=!is.null(skcm)}
 fitted <- cv.glmHub(
   xdata, 
   Surv(ydata$time, ydata$status), 
@@ -145,7 +153,7 @@ in 10-fold cross-validation. The two vertical dotted lines represent the best
 model and a model with less variables selected *(genes)*, but within a standard
 error distance from the best.
 
-```{r results}
+```{r results, eval=!is.null(skcm)}
 plot(fitted)
 ```
 
@@ -153,7 +161,7 @@ plot(fitted)
 
 Taking the best model described by `lambda.min`
 
-```{r show_coefs}
+```{r show_coefs, eval=!is.null(skcm)}
 coefs.v <- coef(fitted, s = 'lambda.min')[,1] %>% { .[. != 0]}
 coefs.v %>% { 
   data.frame(ensembl.id  = names(.), 
@@ -165,15 +173,9 @@ coefs.v %>% {
   knitr::kable()
 ```
 
-## Hallmarks of Cancer
-
-```{r hallmarks}
-geneNames(names(coefs.v)) %>% { hallmarks(.$external_gene_name)$heatmap }
-```
-
 ## Survival curves and Log rank test
 
-```{r}
+```{r, eval=!is.null(skcm)}
 separate2GroupsCox(as.vector(coefs.v), 
                    xdata[, names(coefs.v)], 
                    ydata, 

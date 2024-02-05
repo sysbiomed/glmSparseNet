@@ -21,3 +21,5 @@ vignettes/VennDiagram.*.log
 tmp/
 doc
 Meta
+/doc/
+/Meta/

@@ -133,8 +133,16 @@ qplot(degree.network[degree.network <= quantile(degree.network,
 
 ```{r, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
-brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", 
-                        version = "1.1.38", dry.run = FALSE)
+brca <- tryCatch({
+  curatedTCGAData(
+    diseaseCode = "BRCA",
+    assays = "RNASeq2GeneNorm", 
+    version = "1.1.38",
+    dry.run = FALSE
+  )
+}, error = function(err) {
+  NULL
+})
 ```
 
 ```{r, eval=FALSE}
@@ -149,7 +157,7 @@ Build the survival data from the clinical columns.
 are alive or dead.
 * Build two matrix objects that fit the data `xdata` and `ydata`
 
-```{r data.show, warning=FALSE, error=FALSE}
+```{r data.show, warning=FALSE, error=FALSE, eval=!is.null(brca)}
 # keep only solid tumour (code: 01)
 brca.primary.solid.tumor <- TCGAutils::TCGAsplitAssays(brca, '01')
 xdata.raw                <- t(assay(brca.primary.solid.tumor[[1]]))
@@ -220,7 +228,7 @@ ydata <- ydata.raw %>%
 
 * Build dataset that overlaps with STRING data
 
-```{r}
+```{r, eval=!is.null(brca)}
 #
 # Add degree 0 to genes not in STRING network
 
@@ -230,20 +238,20 @@ my.string <- string.network.binary[small.subset, small.subset]
 
 Degree distribution for sample set of gene features *(in xdata)*.
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
 qplot(my.degree, bins = 100, fill = my.colors(3)) + 
   theme(legend.position = 'none')
 ```
 
 ## Select balanced folds for cross-validation
 
-```{r}
+```{r, eval=!is.null(brca)}
 set.seed(params$seed)
 foldid <- glmSparseNet:::balanced.cv.folds(!!ydata$status)$output
 ```
 
 
-```{r, include=FALSE}
+```{r, include=FALSE, eval=!is.null(brca)}
 # List that will store all selected genes
 selected.genes <- list()
 ```
@@ -253,7 +261,7 @@ selected.genes <- list()
 Penalizes using the Hub heuristics, see `hubHeuristic` function definition for 
 more details.
 
-```{r, warning=FALSE, error=FALSE}
+```{r, warning=FALSE, error=FALSE, eval=!is.null(brca)}
 cv.hub <- cv.glmHub(xdata, 
                     Surv(ydata$time, ydata$status), 
                     family  = 'cox',
@@ -265,7 +273,7 @@ cv.hub <- cv.glmHub(xdata,
 Kaplan-Meier estimator separating individuals by low and high risk *(based on 
 model's coefficients)*
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval=!is.null(brca)}
 glmSparseNet::separate2GroupsCox(as.vector(coef(cv.hub, s = 'lambda.min')[,1]), 
                                  xdata, ydata,
                                  plot.title = 'Full dataset', 
@@ -283,7 +291,7 @@ selected.genes[['Hub']] <- coef(cv.hub, s = 'lambda.min')[,1] %>%
 Penalizes using the Orphan heuristics, see `orphanHeuristic` function 
 definition for more details.
 
-```{r, warning=FALSE, error=FALSE}
+```{r, warning=FALSE, error=FALSE, eval=!is.null(brca)}
 cv.orphan <- cv.glmOrphan(xdata, 
                           Surv(ydata$time, ydata$status), 
                           family  = 'cox',
@@ -295,7 +303,7 @@ cv.orphan <- cv.glmOrphan(xdata,
 Kaplan-Meier estimator separating individuals by low and high risk 
 *(based on model's coefficients)*
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval=!is.null(brca)}
 glmSparseNet::separate2GroupsCox(as.vector(coef(cv.orphan, 
                                                 s = 'lambda.min')[,1]), 
                                  xdata, ydata,
@@ -313,7 +321,7 @@ selected.genes[['Orphan']] <- coef(cv.orphan, s = 'lambda.min')[,1] %>%
 
 Uses regular glmnet model as simple baseline
 
-```{r, warning=FALSE, error=FALSE}
+```{r, warning=FALSE, error=FALSE, eval=!is.null(brca)}
 cv.glm <- cv.glmnet(xdata, 
                     Surv(ydata$time, ydata$status), 
                     family = 'cox', 
@@ -323,7 +331,7 @@ cv.glm <- cv.glmnet(xdata,
 Kaplan-Meier estimator separating individuals by low and high risk 
 *(based on model's coefficients)*
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval=!is.null(brca)}
 glmSparseNet::separate2GroupsCox(as.vector(coef(cv.glm, s = 'lambda.min')[,1]), 
                                  xdata, ydata, 
                                  plot.title = 'Full dataset', 
@@ -340,7 +348,7 @@ selected.genes[['GLMnet']] <- coef(cv.glm, s = 'lambda.min')[,1] %>%
 
 Venn diagram of overlapping genes.
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
 venn.plot <- venn.diagram(selected.genes , 
                           NULL, 
                           fill           = c(my.colors(5), my.colors(3), 
@@ -360,7 +368,7 @@ accuracy.
 
 *note*: size of circles represent the degree of that gene in network.
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
 melt(selected.genes) %>% 
   mutate(Degree = my.degree[value], 
          value  = factor(value), 
