@@ -9,5 +9,4 @@
 #' @references \url{https://string-db.org/}
 #' @keywords data
 #' @usage data('string.network.700.cache', package = 'glmSparseNet')
-'string.network.700.cache'
-
+"string.network.700.cache"

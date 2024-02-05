@@ -17,8 +17,9 @@ params:
 # Instalation
 
 ```{r, eval=FALSE}
-if (!require("BiocManager"))
+if (!require("BiocManager")) {
   install.packages("BiocManager")
+}
 BiocManager::install("glmSparseNet")
 ```
 
@@ -41,7 +42,7 @@ library(glmSparseNet)
 
 #
 # Some general options for futile.logger the debugging package
-.Last.value <- flog.layout(layout.format('[~l] ~m'))
+.Last.value <- flog.layout(layout.format("[~l] ~m"))
 .Last.value <- glmSparseNet:::show.message(FALSE)
 
 # Setting ggplot2 default theme as minimal
@@ -72,12 +73,13 @@ For this vignette, we use a cached version of all interaction with
 ```{r, eval=FALSE}
 # Not evaluated in vignette as it takes too long to download and process
 all.interactions.700 <- stringDBhomoSapiens(score_threshold = 700)
-string.network       <- buildStringNetwork(all.interactions.700, 
-                                           use.names = 'external')
+string.network <- buildStringNetwork(all.interactions.700,
+  use.names = "external"
+)
 ```
 
 ```{r, include=FALSE}
-data('string.network.700.cache', package = 'glmSparseNet')
+data("string.network.700.cache", package = "glmSparseNet")
 string.network <- string.network.700.cache
 ```
 
@@ -95,36 +97,43 @@ string.network.undirected <- (string.network.undirected != 0) * 1
 ## Graph information
 
 ```{r, echo=FALSE, collapse=TRUE}
-flog.info('Directed graph (score_threshold = %d)', 700)
-flog.info('  *       total edges: %d', sum(string.network != 0))
-flog.info('  *    unique protein: %d', nrow(string.network))
-flog.info('  * edges per protein: %f', 
-          sum(string.network != 0) / nrow(string.network) )
-flog.info('')
-flog.info('Undirected graph (score_threshold = %d)', 700)
-flog.info('  *       total edges: %d', sum(string.network.undirected != 0) / 2)
-flog.info('  *    unique protein: %d', nrow(string.network.undirected))
-flog.info('  * edges per protein: %f', 
-          sum(string.network.undirected != 0)/2/nrow(string.network.undirected))
+flog.info("Directed graph (score_threshold = %d)", 700)
+flog.info("  *       total edges: %d", sum(string.network != 0))
+flog.info("  *    unique protein: %d", nrow(string.network))
+flog.info(
+  "  * edges per protein: %f",
+  sum(string.network != 0) / nrow(string.network)
+)
+flog.info("")
+flog.info("Undirected graph (score_threshold = %d)", 700)
+flog.info("  *       total edges: %d", sum(string.network.undirected != 0) / 2)
+flog.info("  *    unique protein: %d", nrow(string.network.undirected))
+flog.info(
+  "  * edges per protein: %f",
+  sum(string.network.undirected != 0) / 2 / nrow(string.network.undirected)
+)
 ```
 
 ## Summary of degree *(indegree + outdegree)*
 
 ```{r, echo=FALSE}
 string.network.binary <- (string.network.undirected != 0) * 1
-degree.network        <- (Matrix::rowSums(string.network.binary) + 
-                            Matrix::colSums(string.network.binary)) / 2
+degree.network <- (Matrix::rowSums(string.network.binary) +
+  Matrix::colSums(string.network.binary)) / 2
 
-flog.info('Summary of degree:', summary(degree.network), capture = TRUE)
+flog.info("Summary of degree:", summary(degree.network), capture = TRUE)
 ```
 
 ## Histogram of degree *(up until 99.999% quantile)*
 
 ```{r, warning=FALSE}
-qplot(degree.network[degree.network <= quantile(degree.network, 
-                                                probs = .99999)], 
-      geom = 'histogram', fill = my.colors(2), bins = 100) + 
-  theme(legend.position = 'none') + xlab('Degree (up until 99.999% quantile)')
+qplot(
+  degree.network[degree.network <= quantile(degree.network,
+    probs = .99999
+  )],
+  geom = "histogram", fill = my.colors(2), bins = 100
+) +
+  theme(legend.position = "none") + xlab("Degree (up until 99.999% quantile)")
 ```
 
 # `glmSparseNet`
@@ -133,21 +142,26 @@ qplot(degree.network[degree.network <= quantile(degree.network,
 
 ```{r, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
-brca <- tryCatch({
-  curatedTCGAData(
-    diseaseCode = "BRCA",
-    assays = "RNASeq2GeneNorm", 
-    version = "1.1.38",
-    dry.run = FALSE
-  )
-}, error = function(err) {
-  NULL
-})
+brca <- tryCatch(
+  {
+    curatedTCGAData(
+      diseaseCode = "BRCA",
+      assays = "RNASeq2GeneNorm",
+      version = "1.1.38",
+      dry.run = FALSE
+    )
+  },
+  error = function(err) {
+    NULL
+  }
+)
 ```
 
 ```{r, eval=FALSE}
-brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm", 
-                        version = "1.1.38", dry.run = FALSE)
+brca <- curatedTCGAData(
+  diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
+  version = "1.1.38", dry.run = FALSE
+)
 ```
 
 Build the survival data from the clinical columns.
@@ -159,61 +173,67 @@ are alive or dead.
 
 ```{r data.show, warning=FALSE, error=FALSE, eval=!is.null(brca)}
 # keep only solid tumour (code: 01)
-brca.primary.solid.tumor <- TCGAutils::TCGAsplitAssays(brca, '01')
-xdata.raw                <- t(assay(brca.primary.solid.tumor[[1]]))
+brca.primary.solid.tumor <- TCGAutils::TCGAsplitAssays(brca, "01")
+xdata.raw <- t(assay(brca.primary.solid.tumor[[1]]))
 
 # Get survival information
-ydata.raw <- colData(brca.primary.solid.tumor) |> as.data.frame() |>
+ydata.raw <- colData(brca.primary.solid.tumor) |>
+  as.data.frame() |>
   # Convert days to integer
   dplyr::mutate(
     Days.to.date.of.Death = as.integer(Days.to.date.of.Death),
     Days.to.Last.Contact  = as.integer(Days.to.Date.of.Last.Contact)
-  ) |> 
+  ) |>
   # Find max time between all days (ignoring missings)
-  dplyr::rowwise() |> 
+  dplyr::rowwise() |>
   dplyr::mutate(
-    time = max(days_to_last_followup, Days.to.date.of.Death, 
-    Days.to.Last.Contact, days_to_death, na.rm = TRUE)
-  ) |> 
+    time = max(days_to_last_followup, Days.to.date.of.Death,
+      Days.to.Last.Contact, days_to_death,
+      na.rm = TRUE
+    )
+  ) |>
   # Keep only survival variables and codes
-  dplyr::select(patientID, status = vital_status, time) |> 
+  dplyr::select(patientID, status = vital_status, time) |>
   # Discard individuals with survival time less or equal to 0
-  dplyr::filter(!is.na(time) & time > 0) |> 
+  dplyr::filter(!is.na(time) & time > 0) |>
   as.data.frame()
 
 # Set index as the patientID
 rownames(ydata.raw) <- ydata.raw$patientID
 
 # keep only features that are in degree.network and have standard deviation > 0
-valid.features <- colnames(xdata.raw)[colnames(xdata.raw) %in% 
-                                      names(degree.network[degree.network > 0])]
-xdata.raw      <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% 
-                              rownames(ydata.raw), valid.features]
-xdata.raw      <- scale(xdata.raw)
+valid.features <- colnames(xdata.raw)[colnames(xdata.raw) %in%
+  names(degree.network[degree.network > 0])]
+xdata.raw <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in%
+  rownames(ydata.raw), valid.features]
+xdata.raw <- scale(xdata.raw)
 
 # Order ydata the same as assay
-ydata.raw    <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
+ydata.raw <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
 
 # Using only a subset of genes previously selected to keep this short example.
 set.seed(params$seed)
-small.subset <- c('AAK1', 'ADRB1', 'AK7', 'ALK', 'APOBEC3F', 'ARID1B', 'BAMBI', 
-                  'BRAF', 'BTG1', 'CACNG8', 'CASP12', 'CD5',  'CDA', 'CEP72', 
-                  'CPD', 'CSF2RB', 'CSN3', 'DCT', 'DLG3',  'DLL3', 'DPP4', 
-                  'DSG1', 'EDA2R', 'ERP27', 'EXD1', 'GABBR2',  'GADD45A', 
-                  'GBP1', 'HTR1F', 'IFNK', 'IRF2', 'IYD', 'KCNJ11',  'KRTAP5-6',
-                  'MAFA', 'MAGEB4', 'MAP2K6', 'MCTS1', 'MMP15', 'MMP9',  
-                  'NFKBIA', 'NLRC4', 'NT5C1A', 'OPN4', 'OR13C5', 'OR13C8', 
-                  'OR2T6', 'OR4K2', 'OR52E6', 'OR5D14', 'OR5H1', 'OR6C4', 
-                  'OR7A17', 'OR8J3',  'OSBPL1A', 'PAK6', 'PDE11A', 'PELO', 
-                  'PGK1', 'PIK3CB', 'PMAIP1',  'POLR2B', 'POP1', 'PPFIA3', 
-                  'PSME1', 'PSME2', 'PTEN', 'PTGES3',  'QARS', 'RABGAP1', 
-                  'RBM3', 'RFC3', 'RGPD8', 'RPGRIP1L', 'SAV1',  'SDC1', 'SDC3',
-                  'SEC16B', 'SFPQ', 'SFRP5', 'SIPA1L1', 'SLC2A14', 'SLC6A9',
-                  'SPATA5L1', 'SPINT1', 'STAR', 'STXBP5', 'SUN3', 'TACC2',
-                  'TACR1', 'TAGLN2', 'THPO', 'TNIP1', 'TP53', 'TRMT2B', 'TUBB1',
-                  'VDAC1', 'VSIG8', 'WNT3A', 'WWOX', 'XRCC4', 'YME1L1', 
-                  'ZBTB11',  'ZSCAN21') |>
-  sample(size  = 50) |> sort()
+small.subset <- c(
+  "AAK1", "ADRB1", "AK7", "ALK", "APOBEC3F", "ARID1B", "BAMBI",
+  "BRAF", "BTG1", "CACNG8", "CASP12", "CD5", "CDA", "CEP72",
+  "CPD", "CSF2RB", "CSN3", "DCT", "DLG3", "DLL3", "DPP4",
+  "DSG1", "EDA2R", "ERP27", "EXD1", "GABBR2", "GADD45A",
+  "GBP1", "HTR1F", "IFNK", "IRF2", "IYD", "KCNJ11", "KRTAP5-6",
+  "MAFA", "MAGEB4", "MAP2K6", "MCTS1", "MMP15", "MMP9",
+  "NFKBIA", "NLRC4", "NT5C1A", "OPN4", "OR13C5", "OR13C8",
+  "OR2T6", "OR4K2", "OR52E6", "OR5D14", "OR5H1", "OR6C4",
+  "OR7A17", "OR8J3", "OSBPL1A", "PAK6", "PDE11A", "PELO",
+  "PGK1", "PIK3CB", "PMAIP1", "POLR2B", "POP1", "PPFIA3",
+  "PSME1", "PSME2", "PTEN", "PTGES3", "QARS", "RABGAP1",
+  "RBM3", "RFC3", "RGPD8", "RPGRIP1L", "SAV1", "SDC1", "SDC3",
+  "SEC16B", "SFPQ", "SFRP5", "SIPA1L1", "SLC2A14", "SLC6A9",
+  "SPATA5L1", "SPINT1", "STAR", "STXBP5", "SUN3", "TACC2",
+  "TACR1", "TAGLN2", "THPO", "TNIP1", "TP53", "TRMT2B", "TUBB1",
+  "VDAC1", "VSIG8", "WNT3A", "WWOX", "XRCC4", "YME1L1",
+  "ZBTB11", "ZSCAN21"
+) |>
+  sample(size = 50) |>
+  sort()
 
 # make sure we have 100 genes
 small.subset <- c(small.subset, sample(colnames(xdata.raw), 51)) |>
@@ -239,8 +259,8 @@ my.string <- string.network.binary[small.subset, small.subset]
 Degree distribution for sample set of gene features *(in xdata)*.
 
 ```{r, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
-qplot(my.degree, bins = 100, fill = my.colors(3)) + 
-  theme(legend.position = 'none')
+qplot(my.degree, bins = 100, fill = my.colors(3)) +
+  theme(legend.position = "none")
 ```
 
 ## Select balanced folds for cross-validation
@@ -262,27 +282,29 @@ Penalizes using the Hub heuristics, see `hubHeuristic` function definition for
 more details.
 
 ```{r, warning=FALSE, error=FALSE, eval=!is.null(brca)}
-cv.hub <- cv.glmHub(xdata, 
-                    Surv(ydata$time, ydata$status), 
-                    family  = 'cox',
-                    foldid  = foldid,
-                    network = my.string, 
-                    network.options = networkOptions(min.degree = 0.2))
+cv.hub <- cv.glmHub(xdata,
+  Surv(ydata$time, ydata$status),
+  family = "cox",
+  foldid = foldid,
+  network = my.string,
+  network.options = networkOptions(min.degree = 0.2)
+)
 ```
 
 Kaplan-Meier estimator separating individuals by low and high risk *(based on 
 model's coefficients)*
 
 ```{r, echo=FALSE, eval=!is.null(brca)}
-glmSparseNet::separate2GroupsCox(as.vector(coef(cv.hub, s = 'lambda.min')[,1]), 
-                                 xdata, ydata,
-                                 plot.title = 'Full dataset', 
-                                 legend.outside = FALSE)
+glmSparseNet::separate2GroupsCox(as.vector(coef(cv.hub, s = "lambda.min")[, 1]),
+  xdata, ydata,
+  plot.title = "Full dataset",
+  legend.outside = FALSE
+)
 
-selected.genes[['Hub']] <- Filter(\(.x) .x != 0, coef(cv.hub, s = 'lambda.min')[, 1]) |> 
-  names() |> 
+selected.genes[["Hub"]] <- Filter(\(.x) .x != 0, coef(cv.hub, s = "lambda.min")[, 1]) |>
+  names() |>
   geneNames() |>
-  `[[`("external_gene_name")
+  magrittr::extract2("external_gene_name")
 ```
 
 ## glmOrphan model
@@ -291,28 +313,32 @@ Penalizes using the Orphan heuristics, see `orphanHeuristic` function
 definition for more details.
 
 ```{r, warning=FALSE, error=FALSE, eval=!is.null(brca)}
-cv.orphan <- cv.glmOrphan(xdata, 
-                          Surv(ydata$time, ydata$status), 
-                          family  = 'cox',
-                          foldid  = foldid,
-                          network = my.string, 
-                          network.options = networkOptions(min.degree = 0.2))
+cv.orphan <- cv.glmOrphan(xdata,
+  Surv(ydata$time, ydata$status),
+  family = "cox",
+  foldid = foldid,
+  network = my.string,
+  network.options = networkOptions(min.degree = 0.2)
+)
 ```
 
 Kaplan-Meier estimator separating individuals by low and high risk 
 *(based on model's coefficients)*
 
 ```{r, echo=FALSE, eval=!is.null(brca)}
-glmSparseNet::separate2GroupsCox(as.vector(coef(cv.orphan, 
-                                                s = 'lambda.min')[,1]), 
-                                 xdata, ydata,
-                                 plot.title = 'Full dataset',
-                                 legend.outside = FALSE)
+glmSparseNet::separate2GroupsCox(
+  as.vector(coef(cv.orphan,
+    s = "lambda.min"
+  )[, 1]),
+  xdata, ydata,
+  plot.title = "Full dataset",
+  legend.outside = FALSE
+)
 
-selected.genes[['Orphan']] <- Filter(\(.x) .x != 0, coef(cv.orphan, s = 'lambda.min')[, 1]) |> 
-  names() |> 
+selected.genes[["Orphan"]] <- Filter(\(.x) .x != 0, coef(cv.orphan, s = "lambda.min")[, 1]) |>
+  names() |>
   geneNames() |>
-  `[[`("external_gene_name")
+  magrittr::extract2("external_gene_name")
 ```
 
 ## Elastic Net model *(without network-penalization)*
@@ -320,25 +346,27 @@ selected.genes[['Orphan']] <- Filter(\(.x) .x != 0, coef(cv.orphan, s = 'lambda.
 Uses regular glmnet model as simple baseline
 
 ```{r, warning=FALSE, error=FALSE, eval=!is.null(brca)}
-cv.glm <- cv.glmnet(xdata, 
-                    Surv(ydata$time, ydata$status), 
-                    family = 'cox', 
-                    foldid = foldid)
+cv.glm <- cv.glmnet(xdata,
+  Surv(ydata$time, ydata$status),
+  family = "cox",
+  foldid = foldid
+)
 ```
 
 Kaplan-Meier estimator separating individuals by low and high risk 
 *(based on model's coefficients)*
 
 ```{r, echo=FALSE, eval=!is.null(brca)}
-glmSparseNet::separate2GroupsCox(as.vector(coef(cv.glm, s = 'lambda.min')[,1]), 
-                                 xdata, ydata, 
-                                 plot.title = 'Full dataset', 
-                                 legend.outside = FALSE)
+glmSparseNet::separate2GroupsCox(as.vector(coef(cv.glm, s = "lambda.min")[, 1]),
+  xdata, ydata,
+  plot.title = "Full dataset",
+  legend.outside = FALSE
+)
 
-selected.genes[['GLMnet']] <- Filter(\(.x) .x != 0, coef(cv.glm, s = 'lambda.min')[, 1]) |> 
-  names() |> 
+selected.genes[["GLMnet"]] <- Filter(\(.x) .x != 0, coef(cv.glm, s = "lambda.min")[, 1]) |>
+  names() |>
   geneNames() |>
-  `[[`("external_gene_name")
+  magrittr::extract2("external_gene_name")
 ```
 
 ## Selected genes
@@ -346,14 +374,17 @@ selected.genes[['GLMnet']] <- Filter(\(.x) .x != 0, coef(cv.glm, s = 'lambda.min
 Venn diagram of overlapping genes.
 
 ```{r, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
-venn.plot <- venn.diagram(selected.genes , 
-                          NULL, 
-                          fill           = c(my.colors(5), my.colors(3), 
-                                             my.colors(4)), 
-                          alpha          = c(0.3,0.3, .3), 
-                          cex            = 2, 
-                          cat.fontface   = 4, 
-                          category.names = names(selected.genes))
+venn.plot <- venn.diagram(selected.genes,
+  NULL,
+  fill = c(
+    my.colors(5), my.colors(3),
+    my.colors(4)
+  ),
+  alpha = c(0.3, 0.3, .3),
+  cex = 2,
+  cat.fontface = 4,
+  category.names = names(selected.genes)
+)
 grid.draw(venn.plot)
 ```
 
@@ -367,22 +398,25 @@ accuracy.
 
 ```{r, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
 melt(selected.genes) |>
-  mutate(Degree = my.degree[value], 
-         value  = factor(value), 
-         L1     = factor(L1)) |>
+  mutate(
+    Degree = my.degree[value],
+    value = factor(value),
+    L1 = factor(L1)
+  ) |>
   mutate(value = fct_reorder(value, Degree)) |>
   as.data.frame() |>
   ggplot() +
-    geom_point(
-      aes(value, L1, size = Degree), shape = my.symbols(3), color = my.colors(3)
-    ) +
-    theme(
-      axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0), 
-      legend.position = 'top'
-    ) +
-    ylab('Model') + 
-    xlab('Gene') + 
-    scale_size_continuous(trans = 'log10')
+  geom_point(
+    aes(value, L1, size = Degree),
+    shape = my.symbols(3), color = my.colors(3)
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0),
+    legend.position = "top"
+  ) +
+  ylab("Model") +
+  xlab("Gene") +
+  scale_size_continuous(trans = "log10")
 ```
 
 

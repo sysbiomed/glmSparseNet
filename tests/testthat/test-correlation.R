@@ -9,66 +9,82 @@ glmSparseNet:::base.dir(tempdir())
 test_that("Default methods", {
   mat.non.diag <- cor(xdata)
   diag(mat.non.diag) <- 0
-  test.mat <- networkCorParallel(xdata, n.cores = 1, build.output = 'matrix',
-                                 #
-                                 force.recalc = TRUE)
+  test.mat <- networkCorParallel(xdata,
+    n.cores = 1, build.output = "matrix",
+    #
+    force.recalc = TRUE
+  )
 
   expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
   #
-  test.mat <- networkCorParallel(xdata, n.cores = 1, build.output = 'matrix',
-                                 #
-                                 force.recalc = FALSE)
+  test.mat <- networkCorParallel(xdata,
+    n.cores = 1, build.output = "matrix",
+    #
+    force.recalc = FALSE
+  )
   expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
 })
 
 test_that("Spearman correlation", {
-  my.method <- 'spearman'
+  my.method <- "spearman"
   mat.non.diag <- cor(xdata, method = my.method)
   diag(mat.non.diag) <- 0
-  test.mat <- networkCorParallel(xdata, method = my.method, n.cores = 1, build.output = 'matrix',
-                                   #
-                                   force.recalc = TRUE)
+  test.mat <- networkCorParallel(xdata,
+    method = my.method, n.cores = 1, build.output = "matrix",
+    #
+    force.recalc = TRUE
+  )
 
   expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
   #
-  test.mat <- networkCorParallel(xdata, method = my.method, n.cores = 1, build.output = 'matrix',
-                           #
-                           force.recalc = FALSE)
+  test.mat <- networkCorParallel(xdata,
+    method = my.method, n.cores = 1, build.output = "matrix",
+    #
+    force.recalc = FALSE
+  )
   expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
 })
 
 test_that("Pearson correlation", {
-  my.method <- 'pearson'
+  my.method <- "pearson"
   mat.non.diag <- cor(xdata, method = my.method)
   diag(mat.non.diag) <- 0
   #
-  test.mat <- networkCorParallel(xdata, method = my.method, n.cores = 1, build.output = 'matrix',
-                           #
-                           force.recalc = TRUE)
+  test.mat <- networkCorParallel(xdata,
+    method = my.method, n.cores = 1, build.output = "matrix",
+    #
+    force.recalc = TRUE
+  )
 
   expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
   #
-  test.mat <- networkCorParallel(xdata, method = my.method, n.cores = 1,
-                                 build.output = 'matrix',
-                                 #
-                                 force.recalc = FALSE)
+  test.mat <- networkCorParallel(xdata,
+    method = my.method, n.cores = 1,
+    build.output = "matrix",
+    #
+    force.recalc = FALSE
+  )
   expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
 })
 
 test_that("Multiple cores", {
-  my.method <- 'pearson'
+  my.method <- "pearson"
   mat.non.diag <- cor(xdata, method = my.method)
   diag(mat.non.diag) <- 0
   #
-  test.mat <- networkCorParallel(xdata, method = my.method, n.cores = 2,
-                                 build.output = 'matrix',
-                                 #
-                                 force.recalc = TRUE)
+  test.mat <- networkCorParallel(xdata,
+    method = my.method, n.cores = 2,
+    build.output = "matrix",
+    #
+    force.recalc = TRUE
+  )
 
   expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
   #
-  test.mat <- networkCorParallel(xdata, method = my.method, n.cores = 2, build.output = 'matrix',
-                           #
-                           force.recalc = FALSE)
+  test.mat <- networkCorParallel(xdata,
+    method = my.method, n.cores = 2, build.output = "matrix",
+    #
+    force.recalc = FALSE
+  )
   expect_lt(sum(Matrix::norm(test.mat - mat.non.diag, type = "1")), 5e-10)
 })

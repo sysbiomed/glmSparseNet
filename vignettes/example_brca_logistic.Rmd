@@ -17,8 +17,9 @@ params:
 ## Instalation
 
 ```{r, eval=FALSE}
-if (!require("BiocManager"))
+if (!require("BiocManager")) {
   install.packages("BiocManager")
+}
 BiocManager::install("glmSparseNet")
 ```
 
@@ -35,7 +36,7 @@ library(TCGAutils)
 library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
-.Last.value <- flog.layout(layout.format('[~l] ~m'))
+.Last.value <- flog.layout(layout.format("[~l] ~m"))
 .Last.value <- glmSparseNet:::show.message(FALSE)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
@@ -51,40 +52,47 @@ only *(genes)*, which is stored as a data object in this package. However, the
 procedure to obtain the data manually is described in the following chunk.
 
 ```{r curated_data, include=TRUE, results="hide", message=FALSE, warning=FALSE}
-brca <- tryCatch({
-  curatedTCGAData(
-    diseaseCode = "BRCA",
-    assays = "RNASeq2GeneNorm",
-    version = "1.1.38", 
-    dry.run = FALSE
-  )
-}, error = function(err) {
-  NULL
-})
+brca <- tryCatch(
+  {
+    curatedTCGAData(
+      diseaseCode = "BRCA",
+      assays = "RNASeq2GeneNorm",
+      version = "1.1.38",
+      dry.run = FALSE
+    )
+  },
+  error = function(err) {
+    NULL
+  }
+)
 ```
 
 ```{r curated_data_non_eval, eval=FALSE}
-brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
-                        version = "1.1.38", dry.run = FALSE)
+brca <- curatedTCGAData(
+  diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
+  version = "1.1.38", dry.run = FALSE
+)
 ```
 
 ```{r data.show, warning=FALSE, error=FALSE, eval=!is.null(brca)}
-brca <- TCGAutils::TCGAsplitAssays(brca, c('01','11'))
+brca <- TCGAutils::TCGAsplitAssays(brca, c("01", "11"))
 xdata.raw <- t(cbind(assay(brca[[1]]), assay(brca[[2]])))
 
 # Get matches between survival and assay data
-class.v        <- TCGAbiospec(rownames(xdata.raw))$sample_definition |> factor()
+class.v <- TCGAbiospec(rownames(xdata.raw))$sample_definition |> factor()
 names(class.v) <- rownames(xdata.raw)
 
 # keep features with standard deviation > 0
-xdata.raw <-  xdata.raw[, apply(xdata.raw, 2, sd) != 0] |>
+xdata.raw <- xdata.raw[, apply(xdata.raw, 2, sd) != 0] |>
   scale()
 
 set.seed(params$seed)
-small.subset <- c('CD5', 'CSF2RB', 'HSF1', 'IRGC', 'LRRC37A6P', 'NEUROG2', 
-                  'NLRC4', 'PDE11A', 'PIK3CB', 'QARS', 'RPGRIP1L', 'SDC1', 
-                  'TMEM31', 'YME1L1', 'ZBTB11', 
-                  sample(colnames(xdata.raw), 100))
+small.subset <- c(
+  "CD5", "CSF2RB", "HSF1", "IRGC", "LRRC37A6P", "NEUROG2",
+  "NLRC4", "PDE11A", "PIK3CB", "QARS", "RPGRIP1L", "SDC1",
+  "TMEM31", "YME1L1", "ZBTB11",
+  sample(colnames(xdata.raw), 100)
+)
 
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
 ydata <- class.v
@@ -96,12 +104,15 @@ Fit model model penalizing by the hubs using the cross-validation function by
 `cv.glmHub`.
 
 ```{r fit.show, eval=!is.null(brca)}
-fitted <- cv.glmHub(xdata, ydata, 
-                    family  = 'binomial',
-                    network = 'correlation', 
-                    nlambda = 1000,
-                    network.options = networkOptions(cutoff = .6, 
-                                                     min.degree = .2))
+fitted <- cv.glmHub(xdata, ydata,
+  family = "binomial",
+  network = "correlation",
+  nlambda = 1000,
+  network.options = networkOptions(
+    cutoff = .6,
+    min.degree = .2
+  )
+)
 ```
 
 # Results of Cross Validation
@@ -120,12 +131,13 @@ plot(fitted)
 Taking the best model described by `lambda.min`
 
 ```{r show_coefs, eval=!is.null(brca)}
-coefs.v <- Filter(\(.x) .x != 0, coef(fitted, s = 'lambda.min')[, 1])
+coefs.v <- Filter(\(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
 data.frame(
-  ensembl.id = names(coefs.v), 
-  gene.name = geneNames(names(coefs.v))$external_gene_name, 
+  ensembl.id = names(coefs.v),
+  gene.name = geneNames(names(coefs.v))$external_gene_name,
   coefficient = coefs.v,
-  stringsAsFactors = FALSE) |>
+  stringsAsFactors = FALSE
+) |>
   arrange(gene.name) |>
   knitr::kable()
 ```
@@ -133,18 +145,22 @@ data.frame(
 ## Accuracy
 
 ```{r accuracy, echo=FALSE, eval=!is.null(brca)}
-resp <- predict(fitted, s = 'lambda.min', newx = xdata, type = 'class')
-flog.info('Misclassified (%d)', sum(ydata != resp))
-flog.info('  * False primary solid tumour: %d', 
-          sum(resp != ydata & resp == 'Primary Solid Tumor'))
-flog.info('  * False normal              : %d', 
-          sum(resp != ydata & resp == 'Solid Tissue Normal'))
+resp <- predict(fitted, s = "lambda.min", newx = xdata, type = "class")
+flog.info("Misclassified (%d)", sum(ydata != resp))
+flog.info(
+  "  * False primary solid tumour: %d",
+  sum(resp != ydata & resp == "Primary Solid Tumor")
+)
+flog.info(
+  "  * False normal              : %d",
+  sum(resp != ydata & resp == "Solid Tissue Normal")
+)
 ```
 
 Histogram of predicted response
 
 ```{r predict, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
-response <- predict(fitted, s = 'lambda.min', newx = xdata, type = 'response')
+response <- predict(fitted, s = "lambda.min", newx = xdata, type = "response")
 qplot(response, bins = 100)
 ```
 
@@ -154,10 +170,13 @@ ROC curve
 roc_obj <- pROC::roc(ydata, as.vector(response))
 
 data.frame(TPR = roc_obj$sensitivities, FPR = 1 - roc_obj$specificities) |>
-  ggplot() +geom_line(aes(FPR,TPR), color = 2, size = 1, alpha = 0.7)+
-      labs(title= sprintf("ROC curve (AUC = %f)", pROC::auc(roc_obj)), 
-           x = "False Positive Rate (1-Specificity)", 
-           y = "True Positive Rate (Sensitivity)")
+  ggplot() +
+  geom_line(aes(FPR, TPR), color = 2, size = 1, alpha = 0.7) +
+  labs(
+    title = sprintf("ROC curve (AUC = %f)", pROC::auc(roc_obj)),
+    x = "False Positive Rate (1-Specificity)",
+    y = "True Positive Rate (Sensitivity)"
+  )
 ```
 
 # Session Info

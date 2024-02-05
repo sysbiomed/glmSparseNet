@@ -1,48 +1,51 @@
 context("run.cache")
 
-base.dir(file.path(tempdir(), 'base.dir'))
+base.dir(file.path(tempdir(), "base.dir"))
 
-cache0 <- file.path(tempdir(), 'run-cache')
-cache1 <- file.path(tempdir(),'run-cache-changed1')
-cache2 <- file.path(tempdir(), 'run-cache-changed2')
+cache0 <- file.path(tempdir(), "run-cache")
+cache1 <- file.path(tempdir(), "run-cache-changed1")
+cache2 <- file.path(tempdir(), "run-cache-changed2")
 
 # Function to make sure we have correct platform
 get_os <- tryCatch({
   get_os.fun <- function() {
     sysinf <- Sys.info()
-    if (!is.null(sysinf)){
-      os <- sysinf['sysname']
-      if (os == 'Darwin')
+    if (!is.null(sysinf)) {
+      os <- sysinf["sysname"]
+      if (os == "Darwin") {
         os <- "osx"
+      }
     } else { ## mystery machine
       os <- .Platform$OS.type
-      if (grepl("^darwin", R.version$os))
+      if (grepl("^darwin", R.version$os)) {
         os <- "osx"
-      if (grepl("linux-gnu", R.version$os))
+      }
+      if (grepl("linux-gnu", R.version$os)) {
         os <- "linux"
+      }
     }
     tolower(os)
   }
   get_os.fun()
 })
 
-test_that('folder can be created in tempdir', {
-  result <- create.directory.for.cache(tempdir(), 'abcd')
+test_that("folder can be created in tempdir", {
+  result <- create.directory.for.cache(tempdir(), "abcd")
   expect_true(dir.exists(result$parent.dir))
 })
 
-test_that('digest cache is consistent', {
-  word <- '1234567'
-  expect_equal(digest.cache(word), digest::digest(word, algo = 'sha256'))
+test_that("digest cache is consistent", {
+  word <- "1234567"
+  expect_equal(digest.cache(word), digest::digest(word, algo = "sha256"))
   # taken manually at 2018.04.27
   expect_equal(
     digest.cache(word),
-    '300a4687518d6e58377f814df9eb8a40f5befd3634de48c0fe893e47e127dbb3'
+    "300a4687518d6e58377f814df9eb8a40f5befd3634de48c0fe893e47e127dbb3"
   )
 })
 
-test_that('tempdir is correct', {
-  expect_equal(glmSparseNet:::tempdir.cache(), file.path(getwd(), 'run-cache'))
+test_that("tempdir is correct", {
+  expect_equal(glmSparseNet:::tempdir.cache(), file.path(getwd(), "run-cache"))
 })
 
 test_that("run.cache fails with arguments", {
@@ -55,7 +58,7 @@ test_that("run.cache fails with arguments", {
 })
 
 test_that("run.cache base.dir in folder that does not have access", {
-  if (grepl('windows', get_os, ignore.case = TRUE)) {
+  if (grepl("windows", get_os, ignore.case = TRUE)) {
     # CRAN automated tests allow to write in c:/Windows
     # expect_warning(
     #   run.cache(
@@ -64,21 +67,21 @@ test_that("run.cache base.dir in folder that does not have access", {
     #   ),
     #   'Could not create cache folder inside base.dir'
     # )
-  } else if (grepl('darwin', get_os, ignore.case = TRUE)) {
+  } else if (grepl("darwin", get_os, ignore.case = TRUE)) {
     # Do nothing, the same test for linux fails
-  } else if (grepl('linux', get_os, ignore.case = TRUE)) {
+  } else if (grepl("linux", get_os, ignore.case = TRUE)) {
     expect_warning(
       run.cache(
         sum, 1, 2, 3, 4, 5,
-        show.message = FALSE, base.dir = '/'
+        show.message = FALSE, base.dir = "/"
       ),
-      'Could not create cache folder inside base.dir'
+      "Could not create cache folder inside base.dir"
     )
   }
 })
 
 test_that("run.cache base.dir in folder that does not have access", {
-  if (grepl('windows', get_os, ignore.case = TRUE)) {
+  if (grepl("windows", get_os, ignore.case = TRUE)) {
     # CRAN automated tests allow to write in c:/Windows
     # expect_warning(
     #   run.cache(
@@ -86,15 +89,15 @@ test_that("run.cache base.dir in folder that does not have access", {
     #     show.message = FALSE, base.dir = file.path('c:', 'windows', 'caca')),
     #   'Could not create cache base folder'
     # )
-  } else if (grepl('darwin', get_os, ignore.case = TRUE)) {
+  } else if (grepl("darwin", get_os, ignore.case = TRUE)) {
     # Do nothing, the same test for linux fails
-  } else if (grepl('linux', get_os, ignore.case = TRUE)) {
+  } else if (grepl("linux", get_os, ignore.case = TRUE)) {
     expect_warning(
       run.cache(
         sum, 1, 2, 3, 4, 5,
-        show.message = FALSE, base.dir = '/daca'
+        show.message = FALSE, base.dir = "/daca"
       ),
-      'Could not create cache base folder'
+      "Could not create cache base folder"
     )
   } else {
     # do nothing (only perform tests on platforms above)
@@ -135,7 +138,7 @@ test_that("Test slight differences in code", {
   )
 
   # main code to compare
-  fun.1.one.space <- function( val1) {
+  fun.1.one.space <- function(val1) {
     return(val1^2)
   }
 
@@ -147,7 +150,9 @@ test_that("Test slight differences in code", {
   )
 
   # changes in spaces
-  fun.1.spaces <- function(val1) { return(val1^2) }
+  fun.1.spaces <- function(val1) {
+    return(val1^2)
+  }
 
   expect_failure(
     expect_identical(
@@ -205,7 +210,7 @@ test_that("Test slight differences in code", {
 
 # Primitives have a very similar code
 test_that("Two primitives give different results", {
-  unique.tmp.dir <- file.path(tempdir(), 'two_primitives-run.cache')
+  unique.tmp.dir <- file.path(tempdir(), "two_primitives-run.cache")
 
   run.cache(sum, 1, 2, 3, 4, base.dir = unique.tmp.dir)
   run.cache(c, 1, 2, 3, 4, base.dir = unique.tmp.dir)
@@ -293,7 +298,8 @@ test_that("builds different hash for different functions", {
 
   expect_identical(
     length(unique(list.of.fun.digest)),
-    length(list.of.fun) + length(fun.from.packages))
+    length(list.of.fun) + length(fun.from.packages)
+  )
 })
 
 # See if the add.to.hash argument really changes the signature
@@ -304,9 +310,9 @@ test_that("run.cache add to hash", {
       base.dir = tempdir(),
       force.recalc = TRUE,
       show.message = TRUE,
-      add.to.hash = 'something'
+      add.to.hash = "something"
     ),
-    'Saving in cache'
+    "Saving in cache"
   )
   expect_message(
     run.cache(
@@ -314,9 +320,9 @@ test_that("run.cache add to hash", {
       base.dir = tempdir(),
       force.recalc = TRUE,
       show.message = TRUE,
-      add.to.hash = 'other'
+      add.to.hash = "other"
     ),
-    'Saving in cache'
+    "Saving in cache"
   )
 
   one <- capture_messages(
@@ -325,7 +331,7 @@ test_that("run.cache add to hash", {
       base.dir = tempdir(),
       force.recalc = FALSE,
       show.message = TRUE,
-      add.to.hash = 'something'
+      add.to.hash = "something"
     )
   )
   two <- capture_messages(
@@ -334,7 +340,7 @@ test_that("run.cache add to hash", {
       base.dir = tempdir(),
       force.recalc = FALSE,
       show.message = TRUE,
-      add.to.hash = 'other'
+      add.to.hash = "other"
     )
   )
   expect_false(all(one == two))
@@ -349,7 +355,7 @@ test_that("run.cache with seed", {
       force.recalc = TRUE,
       show.message = TRUE
     ),
-    'Saving in cache'
+    "Saving in cache"
   )
   expect_message(
     run.cache(
@@ -359,7 +365,7 @@ test_that("run.cache with seed", {
       force.recalc = TRUE,
       show.message = TRUE
     ),
-    'Saving in cache'
+    "Saving in cache"
   )
   expect_message(
     rnorm10 <- run.cache(
@@ -369,7 +375,7 @@ test_that("run.cache with seed", {
       force.recalc = FALSE,
       show.message = TRUE
     ),
-    'Loading from cache'
+    "Loading from cache"
   )
   expect_message(
     rnorm11 <- run.cache(
@@ -379,7 +385,7 @@ test_that("run.cache with seed", {
       force.recalc = FALSE,
       show.message = TRUE
     ),
-    'Loading from cache'
+    "Loading from cache"
   )
 
   expect_false(rnorm10 == rnorm11)
@@ -408,7 +414,7 @@ test_that("run.cache uses cache", {
       sum, 1, 2, 3, 4, 5,
       base.dir = tempdir(), force.recalc = FALSE, show.message = TRUE
     ),
-    'Loading from cache'
+    "Loading from cache"
   )
 })
 
@@ -416,9 +422,10 @@ test_that("run.cache show.message option works", {
   show.message(TRUE)
   expect_message(
     run.cache(
-      sum, 1, 2, 3, 4, 5, base.dir = tempdir(), force.recalc = TRUE
+      sum, 1, 2, 3, 4, 5,
+      base.dir = tempdir(), force.recalc = TRUE
     ),
-    'Saving in cache'
+    "Saving in cache"
   )
 
   expect_message(
@@ -432,7 +439,8 @@ test_that("run.cache show.message option works", {
   show.message(FALSE)
   expect_message(
     run.cache(
-      sum, 1, 2, 3, 4, 5, base.dir = tempdir(), force.recalc = TRUE
+      sum, 1, 2, 3, 4, 5,
+      base.dir = tempdir(), force.recalc = TRUE
     ),
     NA
   )
@@ -442,15 +450,15 @@ test_that("run.cache show.message option works", {
       sum, 1, 2, 3, 4, 5,
       base.dir = tempdir(), force.recalc = TRUE, show.message = TRUE
     ),
-    'Saving in cache'
+    "Saving in cache"
   )
 })
 
 test_that("run.cache base.dir option works", {
-  if (.Platform$OS.type == 'windows') {
-    cache0.os <- gsub('\\\\', '\\\\\\\\', cache0)
-    cache1.os <- gsub('\\\\', '\\\\\\\\', cache0)
-    cache2.os <- gsub('\\\\', '\\\\\\\\', cache0)
+  if (.Platform$OS.type == "windows") {
+    cache0.os <- gsub("\\\\", "\\\\\\\\", cache0)
+    cache1.os <- gsub("\\\\", "\\\\\\\\", cache0)
+    cache2.os <- gsub("\\\\", "\\\\\\\\", cache0)
   } else {
     cache0.os <- cache0
     cache1.os <- cache1
@@ -485,8 +493,8 @@ test_that("run.cache base.dir option works", {
   expect_message(
     run.cache(
       sum, 1, 2, 3, 4, 5,
-      force.recalc = FALSE, show.message = TRUE),
+      force.recalc = FALSE, show.message = TRUE
+    ),
     cache2.os
   )
 })
-

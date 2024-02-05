@@ -14,14 +14,14 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
 ```
 
 ## Instalation
 
 ```{r, eval=FALSE}
-if (!require("BiocManager"))
+if (!require("BiocManager")) {
   install.packages("BiocManager")
+}
 BiocManager::install("glmSparseNet")
 ```
 
@@ -34,7 +34,7 @@ library(glmSparseNet)
 library(survival)
 
 # Some general options for futile.logger the debugging package
-.Last.value <- flog.layout(layout.format('[~l] ~m'))
+.Last.value <- flog.layout(layout.format("[~l] ~m"))
 .Last.value <- glmSparseNet:::show.message(FALSE)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
@@ -43,8 +43,8 @@ theme_set(ggplot2::theme_minimal())
 ## Prepare data
 
 ```{r}
-data('cancer', package = 'survival')
-xdata <- survival::ovarian[,c('age', 'resid.ds')]
+data("cancer", package = "survival")
+xdata <- survival::ovarian[, c("age", "resid.ds")]
 ydata <- data.frame(
   time = survival::ovarian$futime,
   status = survival::ovarian$fustat
@@ -80,11 +80,11 @@ res.age$plot
 ## Separate using age as co-variate _(group cutoff is 40% - 60%)_
 
 ```{r}
-res.age.40.60 <- 
-  separate2GroupsCox(c(age = 1, 0), 
-                     xdata, 
-                     ydata, 
-                     probs = c(.4, .6)
+res.age.40.60 <-
+  separate2GroupsCox(c(age = 1, 0),
+    xdata,
+    ydata,
+    probs = c(.4, .6)
   )
 ```
 
@@ -113,9 +113,9 @@ some sample on both high and low risks groups.
 
 ```{r}
 res.age.60.40 <- separate2GroupsCox(
-  chosen.btas = c(age = 1, 0), 
-  xdata, 
-  ydata, 
+  chosen.btas = c(age = 1, 0),
+  xdata,
+  ydata,
   probs = c(.6, .4),
   stop.when.overlap = FALSE
 )
@@ -124,7 +124,7 @@ res.age.60.40 <- separate2GroupsCox(
 ### Kaplan-Meier survival results
 
 ```{r, echo=FALSE}
-cat('Kaplan-Meier results','\n')
+cat("Kaplan-Meier results", "\n")
 res.age.60.40$km
 ```
 

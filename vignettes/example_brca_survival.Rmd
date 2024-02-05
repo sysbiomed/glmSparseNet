@@ -17,8 +17,9 @@ params:
 ## Instalation
 
 ```{r, eval=FALSE}
-if (!require("BiocManager"))
+if (!require("BiocManager")) {
   install.packages("BiocManager")
+}
 BiocManager::install("glmSparseNet")
 ```
 
@@ -35,7 +36,7 @@ library(TCGAutils)
 library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
-.Last.value <- flog.layout(layout.format('[~l] ~m'))
+.Last.value <- flog.layout(layout.format("[~l] ~m"))
 .Last.value <- glmSparseNet:::show.message(FALSE)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
@@ -52,50 +53,60 @@ procedure to obtain the data manually is described in the following chunk.
 
 ```{r curated_data, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
-brca <- tryCatch({
-  curatedTCGAData(
-    diseaseCode = "BRCA",
-    assays = "RNASeq2GeneNorm", 
-    version = "1.1.38",
-    dry.run = FALSE
-  )
-}, error = function(err) {
-  NULL
-})
+brca <- tryCatch(
+  {
+    curatedTCGAData(
+      diseaseCode = "BRCA",
+      assays = "RNASeq2GeneNorm",
+      version = "1.1.38",
+      dry.run = FALSE
+    )
+  },
+  error = function(err) {
+    NULL
+  }
+)
 ```
 
 ```{r curated_data_non_eval, eval=FALSE}
-brca <- curatedTCGAData(diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
-                        version = "1.1.38", dry.run = FALSE)
+brca <- curatedTCGAData(
+  diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
+  version = "1.1.38", dry.run = FALSE
+)
 ```
 
 ```{r data, warning=FALSE, message=FALSE, eval=!is.null(brca)}
 # keep only solid tumour (code: 01)
-brca.primary.solid.tumor <- TCGAutils::TCGAsplitAssays(brca, '01')
+brca.primary.solid.tumor <- TCGAutils::TCGAsplitAssays(brca, "01")
 xdata.raw <- t(assay(brca.primary.solid.tumor[[1]]))
 
 # Get survival information
-ydata.raw <- colData(brca.primary.solid.tumor) |> as.data.frame() |> 
+ydata.raw <- colData(brca.primary.solid.tumor) |>
+  as.data.frame() |>
   # Keep only data relative to survival or samples
-  dplyr::select(patientID, vital_status, 
-         Days.to.date.of.Death, Days.to.Date.of.Last.Contact, 
-         days_to_death,         days_to_last_followup,
-         Vital.Status) |> 
+  dplyr::select(
+    patientID, vital_status,
+    Days.to.date.of.Death, Days.to.Date.of.Last.Contact,
+    days_to_death, days_to_last_followup,
+    Vital.Status
+  ) |>
   # Convert days to integer
-  dplyr::mutate(Days.to.date.of.Death = as.integer(Days.to.date.of.Death)) |> 
+  dplyr::mutate(Days.to.date.of.Death = as.integer(Days.to.date.of.Death)) |>
   dplyr::mutate(
-    Days.to.Last.Contact  = as.integer(Days.to.Date.of.Last.Contact)
-  ) |> 
+    Days.to.Last.Contact = as.integer(Days.to.Date.of.Last.Contact)
+  ) |>
   # Find max time between all days (ignoring missings)
-  dplyr::rowwise() |> 
+  dplyr::rowwise() |>
   dplyr::mutate(
-    time = max(days_to_last_followup, Days.to.date.of.Death, 
-               Days.to.Last.Contact, days_to_death, na.rm = TRUE)
-  ) |> 
+    time = max(days_to_last_followup, Days.to.date.of.Death,
+      Days.to.Last.Contact, days_to_death,
+      na.rm = TRUE
+    )
+  ) |>
   # Keep only survival variables and codes
-  dplyr::select(patientID, status = vital_status, time) |> 
+  dplyr::select(patientID, status = vital_status, time) |>
   # Discard individuals with survival time less or equal to 0
-  dplyr::filter(!is.na(time) & time > 0) |> 
+  dplyr::filter(!is.na(time) & time > 0) |>
   as.data.frame()
 
 # Set index as the patientID
@@ -105,22 +116,24 @@ rownames(ydata.raw) <- ydata.raw$patientID
 xdata.raw <- xdata.raw[
   TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw),
 ]
-xdata.raw <- xdata.raw[, apply(xdata.raw, 2, sd) != 0] |> 
+xdata.raw <- xdata.raw[, apply(xdata.raw, 2, sd) != 0] |>
   scale()
 
 # Order ydata the same as assay
-ydata.raw    <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
+ydata.raw <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
 
 # Using only a subset of genes previously selected to keep this short example.
 set.seed(params$seed)
-small.subset <- c('CD5', 'CSF2RB', 'IRGC', 'NEUROG2', 'NLRC4', 'PDE11A',  
-                  'PTEN', 'TP53', 'BRAF',
-                  'PIK3CB', 'QARS', 'RFC3', 'RPGRIP1L', 'SDC1', 'TMEM31', 
-                  'YME1L1', 'ZBTB11', sample(colnames(xdata.raw), 100)) |>
+small.subset <- c(
+  "CD5", "CSF2RB", "IRGC", "NEUROG2", "NLRC4", "PDE11A",
+  "PTEN", "TP53", "BRAF",
+  "PIK3CB", "QARS", "RFC3", "RPGRIP1L", "SDC1", "TMEM31",
+  "YME1L1", "ZBTB11", sample(colnames(xdata.raw), 100)
+) |>
   unique()
 
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
-ydata <- ydata.raw  |> dplyr::select(time, status)
+ydata <- ydata.raw |> dplyr::select(time, status)
 ```
 
 # Fit models
@@ -131,11 +144,14 @@ Fit model model penalizing by the hubs using the cross-validation function by
 ```{r fit, eval=!is.null(brca)}
 set.seed(params$seed)
 fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status),
-                    family  = 'cox',
-                    lambda = buildLambda(1),
-                    network = 'correlation', 
-                    network.options = networkOptions(cutoff = .6, 
-                                                     min.degree = .2))
+  family = "cox",
+  lambda = buildLambda(1),
+  network = "correlation",
+  network.options = networkOptions(
+    cutoff = .6,
+    min.degree = .2
+  )
+)
 ```
 
 # Results of Cross Validation
@@ -154,11 +170,12 @@ plot(fitted)
 Taking the best model described by `lambda.min`
 
 ```{r show_coefs, eval=!is.null(brca)}
-coefs.v <- Filter(\(.x) .x != 0, coef(fitted, s = 'lambda.min')[, 1])
+coefs.v <- Filter(\(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
 data.frame(
-  gene.name = names(coefs.v), 
+  gene.name = names(coefs.v),
   coefficient = coefs.v,
-  stringsAsFactors = FALSE) |>
+  stringsAsFactors = FALSE
+) |>
   arrange(gene.name) |>
   knitr::kable()
 ```
@@ -166,10 +183,11 @@ data.frame(
 ## Survival curves and Log rank test
 
 ```{r, eval=!is.null(brca)}
-separate2GroupsCox(as.vector(coefs.v), 
-                    xdata[, names(coefs.v)], 
-                    ydata, 
-                    plot.title = 'Full dataset', legend.outside = FALSE)
+separate2GroupsCox(as.vector(coefs.v),
+  xdata[, names(coefs.v)],
+  ydata,
+  plot.title = "Full dataset", legend.outside = FALSE
+)
 ```
 
 # Session Info

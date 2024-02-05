@@ -7,10 +7,10 @@
 #' @return a hash of the sha256
 #'
 #' @examples
-#' glmSparseNet:::digest.cache(c(1,2,3,4,5))
-#' glmSparseNet:::digest.cache('some example')
+#' glmSparseNet:::digest.cache(c(1, 2, 3, 4, 5))
+#' glmSparseNet:::digest.cache("some example")
 digest.cache <- function(val) {
-  digest::digest(val, algo = 'sha256')
+  digest::digest(val, algo = "sha256")
 }
 
 #' Temporary directory for runCache
@@ -18,7 +18,7 @@ digest.cache <- function(val) {
 #' @return a path to a temporary directory used by runCache
 tempdir.cache <- function() {
   base.dir <- getwd()
-  return(file.path(base.dir, 'run-cache'))
+  return(file.path(base.dir, "run-cache"))
 }
 
 #' Run function and save cache
@@ -49,7 +49,7 @@ tempdir.cache <- function() {
 #' #  calculated
 #' #   for the first argument
 #' glmSparseNet:::run.cache(c, 1, 2, 3, 4)
-#' glmSparseNet:::run.cache(c, a=1, 2, c= 3, 4)
+#' glmSparseNet:::run.cache(c, a = 1, 2, c = 3, 4)
 #' \donttest{
 #' # Using a local folder
 #' # glmSparseNet:::run.cache(c, 1, 2, 3, 4, base.dir = "runcache")
@@ -58,20 +58,20 @@ methods::setGeneric("run.cache", function(fun,
                                           ...,
                                           seed = NULL,
                                           base.dir = NULL,
-                                          cache.prefix = 'generic_cache',
+                                          cache.prefix = "generic_cache",
                                           cache.digest = list(),
                                           show.message = NULL,
                                           force.recalc = FALSE,
                                           add.to.hash = NULL) {
   message(
-    'Wrong arguments, first argument must be a path and second a function!'
+    "Wrong arguments, first argument must be a path and second a function!"
   )
-  message('  Usage: run(tmpBaseDir, functionName, 1, 2, 3, 4, 5)')
+  message("  Usage: run(tmpBaseDir, functionName, 1, 2, 3, 4, 5)")
   message(
-    '  Usage: run(tmpBaseDir, functionName, 1, 2, 3, 4, 5, ',
-    'cache.prefix = \'someFileName\', force.recalc = TRUE)'
+    "  Usage: run(tmpBaseDir, functionName, 1, 2, 3, 4, 5, ",
+    "cache.prefix = 'someFileName', force.recalc = TRUE)"
   )
-  stop('Arguments not supported.')
+  stop("Arguments not supported.")
 })
 
 #' Build digest of function from the actual code
@@ -84,7 +84,7 @@ methods::setGeneric("run.cache", function(fun,
 #' glmSparseNet:::build.function.digest(sum)
 #' glmSparseNet:::build.function.digest(c)
 build.function.digest <- function(fun) {
-  digest.fun <- if (methods::is(fun, 'standardGeneric')) {
+  digest.fun <- if (methods::is(fun, "standardGeneric")) {
     # if it is a generic, then use code for all methods
     methods.found <- methods::findMethods(fun)
     vapply(
@@ -96,13 +96,13 @@ build.function.digest <- function(fun) {
           return(digest.cache(toString(attributes(methods.found[[ix]])$srcref)))
         }
       },
-      'string'
+      "string"
     )
   } else if (is.primitive(fun)) {
     fun
   } else if (
-    methods::is(fun, 'function') &&
-    !is.null(attributes(fun)$srcref)) {
+    methods::is(fun, "function") &&
+      !is.null(attributes(fun)$srcref)) {
     toString(attributes(fun)$srcref)
   } else if (!is.null(body(fun))) {
     body(fun)
@@ -143,13 +143,16 @@ write.readme <- function(base.dir) {
   )
 
   if (!file.exists(readme.path)) {
-    tryCatch({
-      fileConn <- file(readme.path)
-      writeLines(readme.text, con = fileConn)
-      close(fileConn)
-    }, error = function(err) {
-      # do nothing as an error here should not block the main process
-    })
+    tryCatch(
+      {
+        fileConn <- file(readme.path)
+        writeLines(readme.text, con = fileConn)
+        close(fileConn)
+      },
+      error = function(err) {
+        # do nothing as an error here should not block the main process
+      }
+    )
   }
   return(readme.path)
 }
@@ -163,28 +166,27 @@ write.readme <- function(base.dir) {
 #' @return a list of updated base.dir and parent.dir
 #'
 #' @examples
-#' glmSparseNet:::create.directory.for.cache(tempdir(), 'abcd')
+#' glmSparseNet:::create.directory.for.cache(tempdir(), "abcd")
 #' \donttest{
-#'   glmSparseNet:::create.directory.for.cache(
-#'     file.path(getwd(), 'run-cache'), 'abcd'
-#'   )
+#' glmSparseNet:::create.directory.for.cache(
+#'   file.path(getwd(), "run-cache"), "abcd"
+#' )
 #' }
-create.directory.for.cache <- function (base.dir, parent.path) {
-
+create.directory.for.cache <- function(base.dir, parent.path) {
   # create the directory to store cache
   dir.create(base.dir, showWarnings = FALSE)
 
   if (!dir.exists(base.dir)) {
     warning(
-      'Could not create cache base folder at ',
-      '\'', base.dir, '\'',
-      '... trying to use current working directory'
+      "Could not create cache base folder at ",
+      "'", base.dir, "'",
+      "... trying to use current working directory"
     )
-    base.dir      <- glmSparseNet.options('base.dir')
+    base.dir <- glmSparseNet.options("base.dir")
     dir.create(base.dir, showWarnings = FALSE)
 
     if (!dir.exists(base.dir)) {
-      base.dir <- file.path(getwd(), 'run-cache')
+      base.dir <- file.path(getwd(), "run-cache")
       dir.create(base.dir, showWarnings = FALSE)
     }
   }
@@ -194,18 +196,18 @@ create.directory.for.cache <- function (base.dir, parent.path) {
 
   if (!dir.exists(parent.dir)) {
     warning(
-      'Could not create cache folder inside base.dir at ',
+      "Could not create cache folder inside base.dir at ",
       base.dir,
-      '.. trying to use globally defined base.dir or ',
-      'if it fails current directory'
+      ".. trying to use globally defined base.dir or ",
+      "if it fails current directory"
     )
-    base.dir      <- glmSparseNet.options('base.dir')
-    parent.dir    <- file.path(base.dir, parent.path)
+    base.dir <- glmSparseNet.options("base.dir")
+    parent.dir <- file.path(base.dir, parent.path)
     dir.create(parent.dir, showWarnings = FALSE, recursive = TRUE)
 
     if (!dir.exists(parent.dir)) {
-      base.dir      <- base.dir <- file.path(getwd(), 'run-cache')
-      parent.dir    <- file.path(base.dir, parent.path)
+      base.dir <- base.dir <- file.path(getwd(), "run-cache")
+      parent.dir <- file.path(base.dir, parent.path)
       dir.create(parent.dir, showWarnings = FALSE, recursive = TRUE)
     }
   }
@@ -226,29 +228,40 @@ create.directory.for.cache <- function (base.dir, parent.path) {
 #'
 #' @examples
 #' glmSparseNet:::save.run.cache(
-#'   35, file.path(tempdir(), 'save.run.cache.Rdata'), FALSE, TRUE
+#'   35, file.path(tempdir(), "save.run.cache.Rdata"), FALSE, TRUE
 #' )
 save.run.cache <- function(result, path, compression, show.message) {
   #
-  tryCatch({
-    spec <- tryCatch({.__NAMESPACE__.$spec}, error = function() {})
-    epochMilliseconds <- as.double(Sys.time()) * 1000 # seconds
-    #
-    if (show.message) { message('Saving in cache:  ', path) }
-    save(
-      result,
-      epochMilliseconds,
-      spec,
-      file = path,
-      compress = compression,
-      version = NULL
-    )
-  }, error = function(err) {
-    warning(
-      'Problem when saving cache. Attempting to deliver results...\n\n',
-      '  What happened: ', err)
-    NULL
-  })
+  tryCatch(
+    {
+      spec <- tryCatch(
+        {
+          .__NAMESPACE__.$spec
+        },
+        error = function() {}
+      )
+      epochMilliseconds <- as.double(Sys.time()) * 1000 # seconds
+      #
+      if (show.message) {
+        message("Saving in cache:  ", path)
+      }
+      save(
+        result,
+        epochMilliseconds,
+        spec,
+        file = path,
+        compress = compression,
+        version = NULL
+      )
+    },
+    error = function(err) {
+      warning(
+        "Problem when saving cache. Attempting to deliver results...\n\n",
+        "  What happened: ", err
+      )
+      NULL
+    }
+  )
 }
 
 #' Run function and save cache
@@ -256,30 +269,32 @@ save.run.cache <- function(result, path, compression, show.message) {
 #' @inheritParams run.cache
 #' @inherit run.cache return examples details
 methods::setMethod(
-  'run.cache',
-  signature('function'),
+  "run.cache",
+  signature("function"),
   function(
-    fun, ...,
-    # run.cache options
-    seed         = NULL,   base.dir     = NULL, cache.prefix  = 'generic_cache',
-    cache.digest = list(), show.message = NULL, force.recalc  = FALSE,
-    add.to.hash   = NULL) {
+      fun, ...,
+      # run.cache options
+      seed = NULL, base.dir = NULL, cache.prefix = "generic_cache",
+      cache.digest = list(), show.message = NULL, force.recalc = FALSE,
+      add.to.hash = NULL) {
     #
     # base.dir
-    if (is.null(base.dir)) { base.dir <- glmSparseNet.options('base.dir') }
-    if (is.null(show.message)) {
-      show.message <- glmSparseNet.options('show.message')
+    if (is.null(base.dir)) {
+      base.dir <- glmSparseNet.options("base.dir")
     }
-    compression <- glmSparseNet.options('compression')
+    if (is.null(show.message)) {
+      show.message <- glmSparseNet.options("show.message")
+    }
+    compression <- glmSparseNet.options("compression")
 
     #
     args <- list(...)
     if (!is.null(seed)) {
-      args[['runCache.seed']] <- seed
+      args[["runCache.seed"]] <- seed
       do.call(set.seed, list(seed))
     }
     if (!is.null(add.to.hash)) {
-      args[['runCache.add.to.hash']] <- add.to.hash
+      args[["runCache.add.to.hash"]] <- add.to.hash
     }
 
     # Build digest of each of the arguments
@@ -292,39 +307,42 @@ methods::setMethod(
 
     # Build digest of the function's code
     #  (if it changes, then cache is invalidated)
-    args[['cache.fun']] <- build.function.digest(fun)
+    args[["cache.fun"]] <- build.function.digest(fun)
 
     # digest all the arguments together
     my.digest <- digest.cache(args)
 
-    filename    <- sprintf('cache-%s-H_%s.RData', cache.prefix, my.digest)
+    filename <- sprintf("cache-%s-H_%s.RData", cache.prefix, my.digest)
     parent.path <- strtrim(my.digest, width = 4)
 
     # create dir and update base.dir (in case it failed)
     cache.dir.paths <- create.directory.for.cache(base.dir, parent.path)
     parent.dir <- cache.dir.paths$parent.dir
-    base.dir   <- cache.dir.paths$base.dir
+    base.dir <- cache.dir.paths$base.dir
 
     # Calculate
     result <- if (dir.exists(parent.dir)) {
       path <- file.path(base.dir, parent.path, filename)
-      calculate.result(path = path,
-                       compression = compression,
-                       force.recalc = force.recalc,
-                       show.message = show.message,
-                       fun = fun,
-                       ...)
+      calculate.result(
+        path = path,
+        compression = compression,
+        force.recalc = force.recalc,
+        show.message = show.message,
+        fun = fun,
+        ...
+      )
     } else {
       warning(
-        'Could not save cache, possibly cannot create directory: ',
-        base.dir, ' or ', file.path(base.dir, parent.path),
-        sep = ''
+        "Could not save cache, possibly cannot create directory: ",
+        base.dir, " or ", file.path(base.dir, parent.path),
+        sep = ""
       )
       # just calculate
       fun(...)
     }
     return(result)
-  })
+  }
+)
 
 
 #' Calculate/load result and save if necessary
@@ -337,26 +355,25 @@ methods::setMethod(
 #' @param show.message boolean to show messages
 #' @param fun function to be called
 #' @param ... arguments to said function
-#',
+#' ,
 #' @return result of fun(...)
 #'
 #' @examples
 #' glmSparseNet:::calculate.result(
-#'   file.path(tempdir(),'calculate.result.Rdata'),
-#'   'gzip',
+#'   file.path(tempdir(), "calculate.result.Rdata"),
+#'   "gzip",
 #'   FALSE,
 #'   TRUE,
 #'   sum,
 #'   1, 2, 3
 #' )
 calculate.result <- function(
-  path, compression, force.recalc, show.message, fun, ...
-) {
+    path, compression, force.recalc, show.message, fun, ...) {
   #
   result <- NULL
   if (file.exists(path) && !force.recalc) {
     if (show.message) {
-      message('Loading from cache (not calculating):\n  ', path)
+      message("Loading from cache (not calculating):\n  ", path)
     }
     result <- tryCatch(
       {
@@ -364,23 +381,23 @@ calculate.result <- function(
         load(path, envir = tmp.env)
         if (
           show.message &&
-          !is.null(tmp.env$epochMilliseconds) &&
-          is.double(tmp.env$epochMilliseconds)
+            !is.null(tmp.env$epochMilliseconds) &&
+            is.double(tmp.env$epochMilliseconds)
         ) {
           my.msg <- paste0(
-            'Cache was created at ', .POSIXct(tmp.env$epochMilliseconds/1000)
+            "Cache was created at ", .POSIXct(tmp.env$epochMilliseconds / 1000)
           )
-          if (!is.null(tmp.env$spec) && !is.na(tmp.env$spec['version'])) {
-            message(my.msg, ' using glmSparseNet v', tmp.env$spec['version'])
+          if (!is.null(tmp.env$spec) && !is.na(tmp.env$spec["version"])) {
+            message(my.msg, " using glmSparseNet v", tmp.env$spec["version"])
           } else {
-            message(my.msg, ' using glmSparseNet before v1.0.16 or before')
+            message(my.msg, " using glmSparseNet before v1.0.16 or before")
           }
         }
         tmp.env$result
       },
       error = function(err) {
         warning(
-          'WARN:: ', err, ' -- file: ', path, '.\n  -> Calculating again.\n'
+          "WARN:: ", err, " -- file: ", path, ".\n  -> Calculating again.\n"
         )
         result.tmp <- fun(...)
         save.run.cache(result.tmp, path, compression, show.message)

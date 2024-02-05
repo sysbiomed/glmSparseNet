@@ -16,9 +16,9 @@
 #'
 #' @seealso \code{futile.options}
 glmSparseNet.options <- futile.options::OptionsManager(
-  'glmSparseNet',
+  "glmSparseNet",
   default = list(
-    compression = 'gzip',
+    compression = "gzip",
     base.dir = tempdir.cache(),
     show.message = TRUE
   )
@@ -31,11 +31,12 @@ glmSparseNet.options <- futile.options::OptionsManager(
 #' @return the new compression
 #'
 #' @examples
-#' glmSparseNet:::cache.compression('bzip2')
+#' glmSparseNet:::cache.compression("bzip2")
 cache.compression <- function(compression = NULL) {
-  if (!is.null(compression))
-    glmSparseNet.options(update = list('compression', compression))
-  return(glmSparseNet.options('compression'))
+  if (!is.null(compression)) {
+    glmSparseNet.options(update = list("compression", compression))
+  }
+  return(glmSparseNet.options("compression"))
 }
 
 #' change base.dir for run.cache
@@ -45,11 +46,12 @@ cache.compression <- function(compression = NULL) {
 #' @return the new path
 #'
 #' @examples
-#' glmSparseNet:::base.dir('/tmp/cache')
+#' glmSparseNet:::base.dir("/tmp/cache")
 base.dir <- function(path = NULL) {
-  if (!is.null(path))
-    glmSparseNet.options(update = list('base.dir', path))
-  return(glmSparseNet.options('base.dir'))
+  if (!is.null(path)) {
+    glmSparseNet.options(update = list("base.dir", path))
+  }
+  return(glmSparseNet.options("base.dir"))
 }
 
 #' Show messages option in run.cache
@@ -61,7 +63,8 @@ base.dir <- function(path = NULL) {
 #' @examples
 #' glmSparseNet:::show.message(FALSE)
 show.message <- function(show.message = NULL) {
-  if (!is.null(show.message))
-    glmSparseNet.options(update = list('show.message', show.message))
-  return(glmSparseNet.options('show.message'))
+  if (!is.null(show.message)) {
+    glmSparseNet.options(update = list("show.message", show.message))
+  }
+  return(glmSparseNet.options("show.message"))
 }

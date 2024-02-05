@@ -17,8 +17,9 @@ params:
 # Instalation
 
 ```{r, eval=FALSE}
-if (!require("BiocManager"))
+if (!require("BiocManager")) {
   install.packages("BiocManager")
+}
 BiocManager::install("glmSparseNet")
 ```
 
@@ -35,7 +36,7 @@ library(TCGAutils)
 library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
-.Last.value <- flog.layout(layout.format('[~l] ~m'))
+.Last.value <- flog.layout(layout.format("[~l] ~m"))
 .Last.value <- glmSparseNet:::show.message(FALSE)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
@@ -53,21 +54,26 @@ following chunk.
 
 ```{r curated_data, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
-prad <- tryCatch({
-  curatedTCGAData(
-    diseaseCode = "PRAD",
-    assays = "RNASeq2GeneNorm", 
-    version = "1.1.38",
-    dry.run = FALSE
-  )
-}, error = function(err) {
-  NULL
-})
+prad <- tryCatch(
+  {
+    curatedTCGAData(
+      diseaseCode = "PRAD",
+      assays = "RNASeq2GeneNorm",
+      version = "1.1.38",
+      dry.run = FALSE
+    )
+  },
+  error = function(err) {
+    NULL
+  }
+)
 ```
 
 ```{r curated_data_non_eval, eval=FALSE}
-prad <- curatedTCGAData(diseaseCode = "PRAD", assays = "RNASeq2GeneNorm",
-                        version = '1.1.38', dry.run = FALSE))
+prad <- curatedTCGAData(
+  diseaseCode = "PRAD", assays = "RNASeq2GeneNorm",
+  version = "1.1.38", dry.run = FALSE
+)
 ```
 
 Build the survival data from the clinical columns.
@@ -79,40 +85,47 @@ are alive or dead.
 
 ```{r data.show, warning=FALSE, error=FALSE, eval=!is.null(prad)}
 # keep only solid tumour (code: 01)
-prad.primary.solid.tumor <- TCGAutils::TCGAsplitAssays(prad, '01')
+prad.primary.solid.tumor <- TCGAutils::TCGAsplitAssays(prad, "01")
 xdata.raw <- t(assay(prad.primary.solid.tumor[[1]]))
 
 # Get survival information
-ydata.raw <- colData(prad.primary.solid.tumor) |> as.data.frame() |> 
+ydata.raw <- colData(prad.primary.solid.tumor) |>
+  as.data.frame() |>
   # Find max time between all days (ignoring missings)
-  dplyr::rowwise() |> 
+  dplyr::rowwise() |>
   dplyr::mutate(
     time = max(days_to_last_followup, days_to_death, na.rm = TRUE)
-  ) |> 
+  ) |>
   # Keep only survival variables and codes
-  dplyr::select(patientID, status = vital_status, time) |> 
+  dplyr::select(patientID, status = vital_status, time) |>
   # Discard individuals with survival time less or equal to 0
-  dplyr::filter(!is.na(time) & time > 0) |> 
+  dplyr::filter(!is.na(time) & time > 0) |>
   as.data.frame()
 
 # Set index as the patientID
 rownames(ydata.raw) <- ydata.raw$patientID
 
 # keep only features that have standard deviation > 0
-xdata.raw  <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in% 
-                          rownames(ydata.raw),]
-xdata.raw  <- xdata.raw[, apply(xdata.raw, 2, sd) != 0] |> 
+xdata.raw <- xdata.raw[TCGAbarcode(rownames(xdata.raw)) %in%
+  rownames(ydata.raw), ]
+xdata.raw <- xdata.raw[, apply(xdata.raw, 2, sd) != 0] |>
   scale()
 
 # Order ydata the same as assay
-ydata.raw    <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
+ydata.raw <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
 
 set.seed(params$seed)
-small.subset <- c(geneNames(c('ENSG00000103091', 'ENSG00000064787', 
-                              'ENSG00000119915', 'ENSG00000120158', 
-                              'ENSG00000114491', 'ENSG00000204176', 
-                              'ENSG00000138399'))$external_gene_name, 
-                  sample(colnames(xdata.raw), 100)) |> unique() |> sort()
+small.subset <- c(
+  geneNames(c(
+    "ENSG00000103091", "ENSG00000064787",
+    "ENSG00000119915", "ENSG00000120158",
+    "ENSG00000114491", "ENSG00000204176",
+    "ENSG00000138399"
+  ))$external_gene_name,
+  sample(colnames(xdata.raw), 100)
+) |>
+  unique() |>
+  sort()
 
 xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
 ydata <- ydata.raw |> dplyr::select(time, status)
@@ -126,11 +139,14 @@ Fit model model penalizing by the hubs using the cross-validation function by
 ```{r fit, eval=!is.null(prad)}
 set.seed(params$seed)
 fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status),
-                    family  = 'cox',
-                    nlambda = 1000,
-                    network = 'correlation', 
-                    network.options = networkOptions(cutoff = .6, 
-                                                     min.degree = .2))
+  family = "cox",
+  nlambda = 1000,
+  network = "correlation",
+  network.options = networkOptions(
+    cutoff = .6,
+    min.degree = .2
+  )
+)
 ```
 
 # Results of Cross Validation
@@ -149,12 +165,13 @@ plot(fitted)
 Taking the best model described by `lambda.min`
 
 ```{r show_coefs, eval=!is.null(prad)}
-coefs.v <- Filter(\(.x) .x != 0, coef(fitted, s = 'lambda.min')[, 1])
+coefs.v <- Filter(\(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
 data.frame(
-  ensembl.id = names(coefs.v), 
-  gene.name = geneNames(names(coefs.v))$external_gene_name, 
+  ensembl.id = names(coefs.v),
+  gene.name = geneNames(names(coefs.v))$external_gene_name,
   coefficient = coefs.v,
-  stringsAsFactors = FALSE) |>
+  stringsAsFactors = FALSE
+) |>
   arrange(gene.name) |>
   knitr::kable()
 ```
@@ -162,10 +179,11 @@ data.frame(
 ## Survival curves and Log rank test
 
 ```{r, eval=!is.null(prad)}
-separate2GroupsCox(as.vector(coefs.v), 
-                   xdata[, names(coefs.v)], 
-                   ydata, 
-                   plot.title = 'Full dataset', legend.outside = FALSE)
+separate2GroupsCox(as.vector(coefs.v),
+  xdata[, names(coefs.v)],
+  ydata,
+  plot.title = "Full dataset", legend.outside = FALSE
+)
 ```
 
 # Session Info

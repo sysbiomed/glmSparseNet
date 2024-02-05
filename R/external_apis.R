@@ -9,39 +9,46 @@
 #' @examples
 #' \donttest{
 #' glmSparseNet:::curl.workaround({
-#'     biomaRt::useEnsembl(
-#'         biomart = "genes",
-#'         dataset = 'hsapiens_gene_ensembl')
+#'   biomaRt::useEnsembl(
+#'     biomart = "genes",
+#'     dataset = "hsapiens_gene_ensembl"
+#'   )
 #' })
 #' }
 curl.workaround <- function(expr) {
-    result <- tryCatch(
-        {expr},
-        error = function(err) {
-        err
-    })
-
-    if (inherits(result, 'error') || is.null(result)) {
-        warning(
-            "There was an problem, calling the function with ",
-            "ssl_verifypeer to FALSE", "\n\n\t error: ", result$message)
-        # httr::set_config(httr::config(
-        #    ssl_verifypeer = 0L,
-        #    ssl_verifyhost = 0L,
-        #    verbose = 0L))
-        result <- httr::with_config(
-            config = httr::config(
-                ssl_verifypeer = 0L,
-                ssl_verifyhost = 0L,
-                verbose = 1L
-            ),
-            {expr},
-            override = FALSE
-        )
-        # httr::reset_config()
+  result <- tryCatch(
+    {
+      expr
+    },
+    error = function(err) {
+      err
     }
+  )
 
-    return(result)
+  if (inherits(result, "error") || is.null(result)) {
+    warning(
+      "There was an problem, calling the function with ",
+      "ssl_verifypeer to FALSE", "\n\n\t error: ", result$message
+    )
+    # httr::set_config(httr::config(
+    #    ssl_verifypeer = 0L,
+    #    ssl_verifyhost = 0L,
+    #    verbose = 0L))
+    result <- httr::with_config(
+      config = httr::config(
+        ssl_verifypeer = 0L,
+        ssl_verifyhost = 0L,
+        verbose = 1L
+      ),
+      {
+        expr
+      },
+      override = FALSE
+    )
+    # httr::reset_config()
+  }
+
+  return(result)
 }
 
 #' Common call to biomaRt to avoid repetitive code
@@ -69,72 +76,72 @@ curl.workaround <- function(expr) {
 #'
 #' @examples
 #' glmSparseNet:::biomart.load(
-#'     attributes = c("external_gene_name","ensembl_gene_id"),
-#'     filters = "external_gene_name",
-#'     values = c('MOB1A','RFLNB', 'SPIC', 'TP53'),
-#'     use.cache = TRUE,
-#'     verbose = FALSE
+#'   attributes = c("external_gene_name", "ensembl_gene_id"),
+#'   filters = "external_gene_name",
+#'   values = c("MOB1A", "RFLNB", "SPIC", "TP53"),
+#'   use.cache = TRUE,
+#'   verbose = FALSE
 #' )
 biomart.load <- function(
-    attributes, filters, values, use.cache, verbose
-) {
+    attributes, filters, values, use.cache, verbose) {
+  # local function that's used twice due to bug with curl
 
 
-    # local function that's used twice due to bug with curl
+  mart <- curl.workaround({
+    run.cache(
+      biomaRt::useEnsembl,
+      biomart = "genes",
+      dataset = "hsapiens_gene_ensembl",
+      host = "https://www.ensembl.org",
+      verbose = verbose,
+      # glmSparseNet:::run.cache arguments
+      cache.prefix = "biomart.useEnsembl",
+      show.message = FALSE
+    )
+  })
 
-
-    mart <- curl.workaround({
-      run.cache(
-            biomaRt::useEnsembl,
-            biomart = "genes",
-            dataset = 'hsapiens_gene_ensembl',
-            host = 'https://www.ensembl.org',
-            verbose = verbose,
-            # glmSparseNet:::run.cache arguments
-            cache.prefix = 'biomart.useEnsembl',
-            show.message = FALSE
+  #
+  results <- tryCatch(
+    {
+      curl.workaround(
+        biomaRt::getBM(
+          attributes = attributes,
+          filters = filters,
+          values = values,
+          useCache = use.cache,
+          verbose = verbose,
+          mart = mart
         )
-    })
-
-    #
-    results <- tryCatch({
-        curl.workaround(
-            biomaRt::getBM(
-                attributes = attributes,
-                filters = filters,
-                values = values,
-                useCache = use.cache,
-                verbose = verbose,
-                mart = mart
-            )
+      )
+    },
+    error = function(error) {
+      if (use.cache) {
+        warning(
+          "There was a problem getting the genes,",
+          " trying without a cache.",
+          "\n\t",
+          error
         )
-    }, error = function(error) {
-        if (use.cache) {
-            warning(
-                'There was a problem getting the genes,',
-                ' trying without a cache.',
-                '\n\t',
-                error
-            )
-        } else {
-            stop('There was a problem with biomaRt::getBM()', '\n\t', error)
-        }
-        warning(error)
-    })
-
-    if ((inherits(results, 'error') || is.null(results)) && use.cache) {
-        # retrying without cache
-        return(
-            biomart.load(
-                attributes = attributes,
-                filters = filters,
-                values = values,
-                use.cache = FALSE,
-                verbose = verbose
-            )
-        )
+      } else {
+        stop("There was a problem with biomaRt::getBM()", "\n\t", error)
+      }
+      warning(error)
     }
-    return(results)
+  )
+
+  if ((inherits(results, "error") || is.null(results)) && use.cache) {
+    # retrying without cache
+    return(
+      biomart.load(
+        attributes = attributes,
+        filters = filters,
+        values = values,
+        use.cache = FALSE,
+        verbose = verbose
+      )
+    )
+  }
+  return(results)
 }
 
 
@@ -149,38 +156,40 @@ biomart.load <- function(
 #' @export
 #'
 #' @examples
-#' geneNames(c('ENSG00000114978','ENSG00000166211', 'ENSG00000183688'))
+#' geneNames(c("ENSG00000114978", "ENSG00000166211", "ENSG00000183688"))
 geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
-  tryCatch({
-    results <- biomart.load(
+  tryCatch(
+    {
+      results <- biomart.load(
         attributes = c("external_gene_name", "ensembl_gene_id"),
         filters = "ensembl_gene_id",
         values = ensembl.genes,
         use.cache = use.cache,
         verbose = verbose
-    )
+      )
 
-    #
-    # Check if any genes does not have an external_gene_name
-    #  and add them with same ensembl_id
-    data.frame(
-      external_gene_name = ensembl.genes[
-        !ensembl.genes %in% results$ensembl_gene_id
-      ],
-      stringsAsFactors = FALSE
-    ) |>
-      dplyr::mutate(ensembl_gene_id = external_gene_name) |>
-      rbind(results) |>
-      dplyr::arrange("external_gene_name")
-
-  }, error = function(msg) {
-    warning(sprintf('Error when finding gene names:\n\t%s', msg))
-    data.frame(
-      ensembl_gene_id = ensembl.genes,
-      external_gene_name = ensembl.genes,
-      stringsAsFactors = FALSE
-    )
-  })
+      #
+      # Check if any genes does not have an external_gene_name
+      #  and add them with same ensembl_id
+      data.frame(
+        external_gene_name = ensembl.genes[
+          !ensembl.genes %in% results$ensembl_gene_id
+        ],
+        stringsAsFactors = FALSE
+      ) |>
+        dplyr::mutate(ensembl_gene_id = external_gene_name) |>
+        rbind(results) |>
+        dplyr::arrange("external_gene_name")
+    },
+    error = function(msg) {
+      warning(sprintf("Error when finding gene names:\n\t%s", msg))
+      data.frame(
+        ensembl_gene_id = ensembl.genes,
+        external_gene_name = ensembl.genes,
+        stringsAsFactors = FALSE
+      )
+    }
+  )
 }
 
 #' Retrieve ensembl gene names from biomaRt
@@ -194,36 +203,39 @@ geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
 #' @export
 #'
 #' @examples
-#' ensemblGeneNames(c('MOB1A','RFLNB', 'SPIC', 'TP53'))
+#' ensemblGeneNames(c("MOB1A", "RFLNB", "SPIC", "TP53"))
 ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
-  tryCatch({
-    results <- biomart.load(
-      attributes = c("external_gene_name", "ensembl_gene_id"),
-      filters = "external_gene_name",
-      values = gene.id,
-      use.cache = use.cache,
-      verbose = verbose
-    )
+  tryCatch(
+    {
+      results <- biomart.load(
+        attributes = c("external_gene_name", "ensembl_gene_id"),
+        filters = "external_gene_name",
+        values = gene.id,
+        use.cache = use.cache,
+        verbose = verbose
+      )
 
-    #
-    # Check if any genes does not have an external_gene_name
-    #  and add them with same ensembl_id
+      #
+      # Check if any genes does not have an external_gene_name
+      #  and add them with same ensembl_id
 
-    data.frame(
-      external_gene_name = gene.id[!gene.id %in% results$external_gene_name],
-      stringsAsFactors = FALSE
-    ) |>
-      dplyr::mutate(ensembl_gene_id = external_gene_name) |>
-      rbind(results) |>
-      dplyr::arrange("external_gene_name")
-  }, error = function(msg) {
-    warning(sprintf('Error when finding gene names:\n\t%s', msg))
-    data.frame(
-      ensembl_gene_id = gene.id,
-      external_gene_name = gene.id,
-      stringsAsFactors = FALSE
-    )
-  })
+      data.frame(
+        external_gene_name = gene.id[!gene.id %in% results$external_gene_name],
+        stringsAsFactors = FALSE
+      ) |>
+        dplyr::mutate(ensembl_gene_id = external_gene_name) |>
+        rbind(results) |>
+        dplyr::arrange("external_gene_name")
+    },
+    error = function(msg) {
+      warning(sprintf("Error when finding gene names:\n\t%s", msg))
+      data.frame(
+        ensembl_gene_id = gene.id,
+        external_gene_name = gene.id,
+        stringsAsFactors = FALSE
+      )
+    }
+  )
 }
 
 #' Retrieve hallmarks of cancer count for genes
@@ -248,19 +260,19 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
 #' @export
 #'
 #' @examples
-#' hallmarks(c('MOB1A', 'RFLNB', 'SPIC'))
+#' hallmarks(c("MOB1A", "RFLNB", "SPIC"))
 #' \donttest{
-#'     hallmarks(c('MOB1A', 'RFLNB', 'SPIC'), metric = 'cprob')
+#' hallmarks(c("MOB1A", "RFLNB", "SPIC"), metric = "cprob")
 #' }
 hallmarks <- function(
     genes,
-    metric = 'count',
-    hierarchy = 'full',
+    metric = "count",
+    hierarchy = "full",
     generate.plot = TRUE,
-    show.message = FALSE
-) {
+    show.message = FALSE) {
   lifecycle::deprecate_stop(
-    "1.21.0", "hallmarks()", details = "API is no longer available"
+    "1.21.0", "hallmarks()",
+    details = "API is no longer available"
   )
 }
 
@@ -278,30 +290,32 @@ hallmarks <- function(
 #'
 #' @examples
 #' protein2EnsemblGeneNames(c(
-#'     'ENSP00000235382',
-#'     'ENSP00000233944',
-#'     'ENSP00000216911'
+#'   "ENSP00000235382",
+#'   "ENSP00000233944",
+#'   "ENSP00000216911"
 #' ))
 protein2EnsemblGeneNames <- function(
-    ensembl.proteins, use.cache = TRUE, verbose = FALSE
-) {
+    ensembl.proteins, use.cache = TRUE, verbose = FALSE) {
   #
-  tryCatch({
-    biomart.load(
+  tryCatch(
+    {
+      biomart.load(
         attributes = c("ensembl_peptide_id", "ensembl_gene_id"),
         filters = "ensembl_peptide_id",
         values = ensembl.proteins,
         use.cache = use.cache,
         verbose = verbose
-    ) |>
-      dplyr::arrange("ensembl_peptide_id")
-  }, error = function(msg) {
-    warning(sprintf('Error when finding gene names:\n\t%s', msg))
-    data.frame(
-      ensembl_peptide_id = ensembl.proteins,
-      ensembl_gene_id    = ensembl.proteins,
-      external_gene_name = ensembl.proteins,
-      stringsAsFactors   = FALSE
-    )
-  })
+      ) |>
+        dplyr::arrange("ensembl_peptide_id")
+    },
+    error = function(msg) {
+      warning(sprintf("Error when finding gene names:\n\t%s", msg))
+      data.frame(
+        ensembl_peptide_id = ensembl.proteins,
+        ensembl_gene_id    = ensembl.proteins,
+        external_gene_name = ensembl.proteins,
+        stringsAsFactors   = FALSE
+      )
+    }
+  )
 }

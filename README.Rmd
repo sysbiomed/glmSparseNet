@@ -14,20 +14,22 @@ vignette: >
 <!-- README.md and README.html are generated from README.Rmd. Please edit that file -->
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,
-                      fig.width = 7,
-                      fig.height = 6)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.width = 7,
+  fig.height = 6
+)
 
 library(futile.logger)
 library(ggplot2)
 
-.Last.value <- flog.layout(layout.format('[~l] ~m'))
-.Last.value <- flog.appender(appender.tee('logger.txt'))
+.Last.value <- flog.layout(layout.format("[~l] ~m"))
+.Last.value <- flog.appender(appender.tee("logger.txt"))
 theme_set(theme_minimal())
 ```
 
 ```{r generate_md, eval=FALSE, include=FALSE}
-rmarkdown::render('README.Rmd', output_format = 'all')
+rmarkdown::render("README.Rmd", output_format = "all")
 ```
 
 > Elastic-Net models with additional regularization based on network centrality metrics
@@ -59,8 +61,9 @@ This package was developed by André Veríssimo, Eunice Carrasquinha, Marta B. L
 Bioconductor is necessary for the installation of this package.
 
 ```{r install, eval=FALSE}
-if (!require("BiocManager"))
-    install.packages("BiocManager")
+if (!require("BiocManager")) {
+  install.packages("BiocManager")
+}
 BiocManager::install("glmSparseNet")
 ```
 
@@ -92,12 +95,15 @@ The main functions from this packages are the `glmSparseNet` and `cv.glmSparseNe
 *note:* These functions can take any additional arguments that `glmnet` or `cv.glmnet` accept (e.g. number of folds in cross validation)
 
 ```{r, eval=FALSE}
-cv.glmSparseNet(xdata, 
-                ydata, 
-                family = 'cox', 
-                network = 'correlation', 
-                network.options = networkOptions(cutoff = .6, 
-                                                 min.degree = 0.2))
+cv.glmSparseNet(xdata,
+  ydata,
+  family = "cox",
+  network = "correlation",
+  network.options = networkOptions(
+    cutoff = .6,
+    min.degree = 0.2
+  )
+)
 ```
 
 
@@ -136,15 +142,15 @@ There is some pre-processing needed to remove patients with invalid follow-up da
 
 ```{r multi.assay}
 # load data
-data('miniACC', package="MultiAssayExperiment")
+data("miniACC", package = "MultiAssayExperiment")
 xdata <- miniACC
 
 # build valid data with days of last follow up or to event
 event.ix <- which(!is.na(xdata$days_to_death))
-cens.ix  <- which(!is.na(xdata$days_to_last_followup))
+cens.ix <- which(!is.na(xdata$days_to_last_followup))
 surv_event_time <- array(NA, nrow(xdata@colData))
 surv_event_time[event.ix] <- xdata$days_to_death[event.ix]
-surv_event_time[cens.ix]  <- xdata$days_to_last_followup[cens.ix]
+surv_event_time[cens.ix] <- xdata$days_to_last_followup[cens.ix]
 
 # Keep only valid individuals
 #
@@ -153,26 +159,29 @@ surv_event_time[cens.ix]  <- xdata$days_to_last_followup[cens.ix]
 #  - a valid vital_status (i.e. not missing)
 #  - folloup_time or event_time > 0
 valid.ix <- as.vector(!is.na(surv_event_time) & !is.na(xdata$vital_status) & surv_event_time > 0)
-ydata <- data.frame(time      = surv_event_time[valid.ix], 
-                    status    = xdata$vital_status[valid.ix], 
-                    row.names = xdata$patientID[valid.ix])
-
+ydata <- data.frame(
+  time = surv_event_time[valid.ix],
+  status = xdata$vital_status[valid.ix],
+  row.names = xdata$patientID[valid.ix]
+)
 ```
 
 The function `cv.glmSparseNet` fits the survival data using 10-fold cross validation and using a cutoff value of 0.6 to reduce the size of the network.
 
 ```{r fit.surv}
 # build response object for glmnet
-fit3 <- cv.glmSparseNet(xdata, ydata, family = 'cox', 
-                        network = 'correlation', 
-                        experiment.name = 'RNASeq2GeneNorm', 
-                        alpha = .7,
-                        nlambda = 1000,
-                        network.options = networkOptions(
-                            cutoff = .6, 
-                            min.degree = 0.2,
-                            trans.fun = hubHeuristic)
-                        )
+fit3 <- cv.glmSparseNet(xdata, ydata,
+  family = "cox",
+  network = "correlation",
+  experiment.name = "RNASeq2GeneNorm",
+  alpha = .7,
+  nlambda = 1000,
+  network.options = networkOptions(
+    cutoff = .6,
+    min.degree = 0.2,
+    trans.fun = hubHeuristic
+  )
+)
 plot(fit3)
 ```
 
@@ -189,31 +198,32 @@ This function generates Kaplan-Meier survival model based on the estimated coeff
 #  * it takes the input data, response and coefficients
 #  * calculates the relative risk
 #  * separates individuals based on relative risk into High/Low risk groups
-xdata.reduced   <- as(xdata[,,'RNASeq2GeneNorm'], 'MatchedAssayExperiment')
-ydata.km        <- ydata[rownames(xdata.reduced@colData),]
-best.model.coef <- coef(fit3, s = 'lambda.min')[,1]
+xdata.reduced <- as(xdata[, , "RNASeq2GeneNorm"], "MatchedAssayExperiment")
+ydata.km <- ydata[rownames(xdata.reduced@colData), ]
+best.model.coef <- coef(fit3, s = "lambda.min")[, 1]
 ```
 
 Kaplan-Meier plot
 
 ```{r call.kaplan}
-separate2GroupsCox(best.model.coef, t(assay(xdata[['RNASeq2GeneNorm']])), ydata.km, ylim = c(0,1))
+separate2GroupsCox(best.model.coef, t(assay(xdata[["RNASeq2GeneNorm"]])), ydata.km, ylim = c(0, 1))
 ```
 
 ```{r glmnet.classic, include=FALSE, eval=FALSE}
 # Comparing against a classical GLMNET call
-xdata.reduced <- as(xdata[,,'RNASeq2GeneNorm'], 'MatchedAssayExperiment')
-xdata.surv    <- t(assay(xdata.reduced[['RNASeq2GeneNorm']]))
-ydata.reduced <- ydata[xdata.reduced$patientID,]
-ydata.surv    <- Surv(ydata.reduced$time, ydata.reduced$status)
+xdata.reduced <- as(xdata[, , "RNASeq2GeneNorm"], "MatchedAssayExperiment")
+xdata.surv <- t(assay(xdata.reduced[["RNASeq2GeneNorm"]]))
+ydata.reduced <- ydata[xdata.reduced$patientID, ]
+ydata.surv <- Surv(ydata.reduced$time, ydata.reduced$status)
 
-fit4 <- cv.glmnet(xdata.surv, ydata.surv, family = 'cox', alpha = .7, nlambda = 1000)
-best.model.coef.g <- Filter(function(.x) .x != 0, coef(fit4, s = 'lambda.min')[,1])
+fit4 <- cv.glmnet(xdata.surv, ydata.surv, family = "cox", alpha = .7, nlambda = 1000)
+best.model.coef.g <- Filter(function(.x) .x != 0, coef(fit4, s = "lambda.min")[, 1])
 
-separate2groupsCox(best.model.coef.g, 
-                   t(assay(xdata[['RNASeq2GeneNorm']]))[, names(best.model.coef.g)], 
-                   ydata.km,
-                   ylim = c(0,1))$plot
+separate2groupsCox(best.model.coef.g,
+  t(assay(xdata[["RNASeq2GeneNorm"]]))[, names(best.model.coef.g)],
+  ydata.km,
+  ylim = c(0, 1)
+)$plot
 
 # hallmarks(names(best.model.coef.g))$heatmap
 ```
