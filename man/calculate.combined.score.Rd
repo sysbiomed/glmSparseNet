@@ -18,9 +18,9 @@ table with combined score
 }
 \description{
 Please note that all the interactions have duplicates as it's
- a two way interaction (score(ProteinA-Protein) == score(ProteinB, PorteinA))
+a two way interaction (score(ProteinA-Protein) == score(ProteinB, PorteinA))
 }
 \details{
 To better understand how the score is calculated, please see:
- https://string-db.org/help/faq/#how-are-the-scores-computed
+https://string-db.org/help/faq/#how-are-the-scores-computed
 }

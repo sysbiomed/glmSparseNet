@@ -36,7 +36,8 @@ scale_fill_gradientn(limits=c(0,1), colours=topo.colors(3)) to
 limit between 0 and 1 for cprob and -1 and 1 for npmi
 }
 \description{
-Retrieve hallmarks of cancer count for genes
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#defunct}{\figure{lifecycle-defunct.svg}{options: alt='[Defunct]'}}}{\strong{[Defunct]}}
+The API has been removed and this function is no longer available.
 }
 \examples{
 hallmarks(c("MOB1A", "RFLNB", "SPIC"))

@@ -1,6 +1,20 @@
 # glmSparseNet
 ----------------------------------------------------------------
 
+## Changes in 1.21.0
+
+### Breaking changes
+
+- Changing in hashing function to use `rlang::hash` that reduces a dependency.
+- Deprecates `hallmarks` function as API has been shutdown.
+
+### Miscellaneous
+
+- Use of native pipe instead of magritrr's `%>%`
+- Corrects styling and linter issues for better code quality and readability
+- Start to deprecate some functions that have dots in the name in favor of
+underscore (`_`)
+
 ## Changes in 1.14.3
 
 - Corrects bug when calculating the penalty.factor from a matrix (as it was not applying the transformation function)

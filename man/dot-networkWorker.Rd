@@ -16,7 +16,7 @@
 \item{...}{extra parameters for fun}
 }
 \value{
-a vector with size `ncol(xdata) - ix.i`
+a vector with size \code{ncol(xdata) - ix.i}
 }
 \description{
 Note that it assumes it does not calculate for index below and equal to ix.i

@@ -40,7 +40,7 @@ a list of options
 }
 \description{
 Setup network options, such as using weighted or unweighted degree,
- which centrality measure to use
+which centrality measure to use
 }
 \examples{
 networkOptions(unweighted = FALSE)

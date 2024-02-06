@@ -2,18 +2,20 @@
 % Please edit documentation in R/network.generic.R
 \name{normalize_xdata}
 \alias{normalize_xdata}
-\title{Normalize `xdata` argument}
+\title{Normalize \code{xdata} argument}
 \usage{
 normalize_xdata(xdata, experiment_name)
 }
 \description{
 Sequential check of xdata argument
-  1. Checks if xdata is MultiAssayExperiment, if it is then transforms
-     xdata in SummarizedExperiment
-  2. Checks if xdata is SummarizedExperiment and extract data to Matrix
-     form
-  3. Checks if xdata is matrix, if it is transform to Matrix
- note: this needs to be sequential instead of if () else (), as one
-  transformation will pipe to another
+\enumerate{
+\item Checks if xdata is MultiAssayExperiment, if it is then transforms
+xdata in SummarizedExperiment
+\item Checks if xdata is SummarizedExperiment and extract data to Matrix
+form
+\item Checks if xdata is matrix, if it is transform to Matrix
+note: this needs to be sequential instead of if () else (), as one
+transformation will pipe to another
+}
 }
 \keyword{internal}

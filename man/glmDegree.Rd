@@ -21,7 +21,7 @@ glmDegree(xdata, ydata, network, network.options = networkOptions(), ...)
 see glmNetSparse
 }
 \description{
-This function overrides the `trans.fun` options in `network.options` with the
+This function overrides the \code{trans.fun} options in \code{network.options} with the
 inverse of a degree described in Veríssimo et al. (2015) that penalizes
 nodes with small degree.
 }

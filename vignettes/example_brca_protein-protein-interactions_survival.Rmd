@@ -269,13 +269,13 @@ qplot(my.degree, bins = 100, fill = my.colors(3)) +
 
 ```{r, eval=!is.null(brca)}
 set.seed(params$seed)
-foldid <- glmSparseNet:::balanced.cv.folds(!!ydata$status)$output
+foldid <- glmSparseNet:::balanced_cv_folds(!!ydata$status)$output
 ```
 
 
 ```{r, include=FALSE, eval=!is.null(brca)}
 # List that will store all selected genes
-selected.genes <- list()
+selected_genes <- list()
 ```
 
 ## glmHub model
@@ -303,7 +303,7 @@ glmSparseNet::separate2GroupsCox(as.vector(coef(cv.hub, s = "lambda.min")[, 1]),
   legend.outside = FALSE
 )
 
-selected.genes[["Hub"]] <- Filter(
+selected_genes[["Hub"]] <- Filter(
   function(.x) .x != 0,
   coef(cv.hub, s = "lambda.min")[, 1]
 ) |>
@@ -338,7 +338,7 @@ glmSparseNet::separate2GroupsCox(
   legend.outside = FALSE
 )
 
-selected.genes[["Orphan"]] <- Filter(
+selected_genes[["Orphan"]] <- Filter(
   function(.x) .x != 0,
   coef(cv.orphan, s = "lambda.min")[, 1]
 ) |>
@@ -369,7 +369,7 @@ glmSparseNet::separate2GroupsCox(as.vector(coef(cv.glm, s = "lambda.min")[, 1]),
   legend.outside = FALSE
 )
 
-selected.genes[["GLMnet"]] <- Filter(
+selected_genes[["GLMnet"]] <- Filter(
   function(.x) .x != 0,
   coef(cv.glm, s = "lambda.min")[, 1]
 ) |>
@@ -383,18 +383,18 @@ selected.genes[["GLMnet"]] <- Filter(
 Venn diagram of overlapping genes.
 
 ```{r, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
-venn.plot <- venn.diagram(selected.genes,
+venn_plot <- venn.diagram(selected_genes,
   NULL,
   fill = c(
-    my.colors(5), my.colors(3),
-    my.colors(4)
+    my_colors(5), my_colors(3),
+    my_colors(4)
   ),
   alpha = c(0.3, 0.3, .3),
   cex = 2,
   cat.fontface = 4,
-  category.names = names(selected.genes)
+  category.names = names(selected_genes)
 )
-grid.draw(venn.plot)
+grid.draw(venn_plot)
 ```
 
 Descriptive table showing which genes are selected in each model
@@ -406,7 +406,7 @@ accuracy.
 *note*: size of circles represent the degree of that gene in network.
 
 ```{r, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
-melt(selected.genes) |>
+melt(selected_genes) |>
   mutate(
     Degree = my.degree[value],
     value = factor(value),
@@ -417,7 +417,7 @@ melt(selected.genes) |>
   ggplot() +
   geom_point(
     aes(value, L1, size = Degree),
-    shape = my.symbols(3), color = my.colors(3)
+    shape = my_symbols(3), color = my_colors(3)
   ) +
   theme(
     axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0),

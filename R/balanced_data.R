@@ -1,4 +1,4 @@
-#' Create balanced folds for cross validation
+#' Create balanced folds for cross validation using stratified sampling
 #'
 #' @param ... vectors representing data
 #' @param nfolds number of folds to be created
@@ -7,11 +7,11 @@
 #' matching the input with foldid attributed to each position.
 #'
 #' @examples
-#' glmSparseNet:::balanced.cv.folds(seq(10), seq(11, 15), nfolds = 2)
+#' glmSparseNet:::balanced_cv_folds(seq(10), seq(11, 15), nfolds = 2)
 #' # will give a warning
-#' glmSparseNet:::balanced.cv.folds(seq(10), seq(11, 13), nfolds = 10)
-#' glmSparseNet:::balanced.cv.folds(seq(100), seq(101, 133), nfolds = 10)
-balanced.cv.folds <- function(..., nfolds = 10) {
+#' glmSparseNet:::balanced_cv_folds(seq(10), seq(11, 13), nfolds = 10)
+#' glmSparseNet:::balanced_cv_folds(seq(100), seq(101, 133), nfolds = 10)
+balanced_cv_folds <- function(..., nfolds = 10) {
   input.list <- list(...)
   output.list <- list()
   if (any(vapply(input.list, function(vec) {
@@ -49,4 +49,12 @@ balanced.cv.folds <- function(..., nfolds = 10) {
     input.list <- input.list[[1]]
   }
   return(list(input = input.list, output = output.list, nfolds = nfolds))
+}
+
+#' @rdname balanced_cv_folds
+#' @usage # deprecated, please use balanced_cv_folds()
+#' balanced.cv.folds(..., nfolds = 10)
+balanced.cv.folds <- function(..., nfolds = 10) {
+  lifecycle::deprecate_soft("1.21.0", "balanced.cv.folds()", "balanced_cv_folds()")
+  balanced_cv_folds(..., nfolds = nfolds)
 }

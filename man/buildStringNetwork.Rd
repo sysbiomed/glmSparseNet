@@ -16,7 +16,7 @@ gene id or 'external' for external gene names}
 }
 \value{
 a new matrix with gene ids instead of peptide ids. The size of matrix
- can be different as
+can be different as
 there may not be a mapping or a peptide mapping can have multiple genes.
 }
 \description{

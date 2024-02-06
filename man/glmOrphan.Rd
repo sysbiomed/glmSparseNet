@@ -21,7 +21,7 @@ glmOrphan(xdata, ydata, network, network.options = networkOptions(), ...)
 see glmNetSparse
 }
 \description{
-This function overrides the `trans.fun` options in `network.options` with
+This function overrides the \code{trans.fun} options in \code{network.options} with
 an heuristic described in Veríssimo et al. that penalizes nodes with high
 degree.
 }

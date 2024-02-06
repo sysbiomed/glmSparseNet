@@ -24,7 +24,8 @@ buildLambda(
   ydata = NULL,
   family = NULL,
   orders_of_magnitude_smaller = 3,
-  lambda_per_order_magnitude = 150)
+  lambda_per_order_magnitude = 150
+)
 }
 \arguments{
 \item{xdata}{X parameter for glmnet function}

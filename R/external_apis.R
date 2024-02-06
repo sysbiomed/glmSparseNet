@@ -235,6 +235,9 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
 
 #' Retrieve hallmarks of cancer count for genes
 #'
+#' `r lifecycle::badge("defunct")`
+#' The API has been removed and this function is no longer available.
+#'
 #' @param genes gene names
 #' @param metric see below
 #' @param hierarchy see below

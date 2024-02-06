@@ -150,7 +150,7 @@ fitted <- cv.glmHub(
   xdata,
   Surv(ydata$time, ydata$status),
   family = "cox",
-  foldid = glmSparseNet:::balanced.cv.folds(!!ydata$status)$output,
+  foldid = glmSparseNet:::balanced_cv_folds(!!ydata$status)$output,
   network = "correlation",
   network.options = networkOptions(
     min.degree = .2,

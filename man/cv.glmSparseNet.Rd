@@ -33,10 +33,12 @@ an object just as cv.glmnet
 network parameter accepts:
 }
 \details{
-* string to calculate network based on data (correlation, covariance)
- * matrix representing the network
- * vector with already calculated penalty weights (can also be used directly
-   glmnet)
+\itemize{
+\item string to calculate network based on data (correlation, covariance)
+\item matrix representing the network
+\item vector with already calculated penalty weights (can also be used directly
+glmnet)
+}
 }
 \examples{
 \donttest{

@@ -4,20 +4,23 @@
 #' logrank test
 #'
 #' @param chosen.btas list of testing coefficients to calculate prognostic
-#' indexes, for example ``list(Age = some_vector)``
-#' @param xdata n x m matrix with n observations and m variables
-#' @param ydata Survival object
-#' @param probs How to separate high and low risk patients 50\%-50\% is the
-#' default, but for top and bottom 40\% -> c(.4,.6)
-#' @param no.plot Only calculate p-value and do not generate survival curve plot
-#' @param plot.title Name of file if
-#' @param xlim Optional argument to limit the x-axis view
-#' @param ylim Optional argument to limit the y-axis view
-#' @param legend.outside If TRUE legend will be outside plot, otherwise inside
-#' @param expand.yzero expand to y = 0
+#' indexes, for example `list(Age = some_vector)`.
+#' @param xdata n x m matrix with n observations and m variables.
+#' @param ydata Survival object.
+#' @param probs How to separate high and low risk patients `50%-50%` is the
+#' default, but for top and bottom `40%` -> `c(.4,.6)`.
+#' @param no.plot Only calculate p-value and do not generate survival curve
+#' plot.
+#' @param plot.title Name of file if.
+#' @param xlim Optional argument to limit the x-axis view.
+#' @param ylim Optional argument to limit the y-axis view.
+#' @param legend.outside If TRUE legend will be outside plot, otherwise inside.
+#' @param expand.yzero expand to y = 0.
 #' @param stop.when.overlap when probs vector allows for overlapping of samples
-#' in both groups, then stop. Otherwise it will calculate with duplicate
-#' samples, i.e. simply adding them to xdata and ydata (in a different group)
+#' in both groups, then stop.
+#'
+#' Otherwise it will calculate with duplicate samples, i.e. simply adding them
+#' to xdata and ydata (in a different group).
 #' @param ... additional parameters to survminer::ggsurvplot
 #'
 #' @return object with logrank test and kaplan-meier survival plot
@@ -29,7 +32,7 @@
 #'
 #' @export
 #'
-#' @seealso survminer::ggsurvplot
+#' @seealso [survminer::ggsurvplot()]
 #' @examples
 #' data("cancer", package = "survival")
 #' xdata <- survival::ovarian[, c("age", "resid.ds")]
@@ -48,10 +51,15 @@
 #'   bb = c(age = 0, 1.5)
 #' ), xdata, ydata)
 separate2GroupsCox <- function(
-    chosen.btas, xdata, ydata,
-    probs = c(.5, .5), no.plot = FALSE,
+    chosen.btas,
+    xdata,
+    ydata,
+    probs = c(.5, .5),
+    no.plot = FALSE,
     plot.title = "SurvivalCurves",
-    xlim = NULL, ylim = NULL, expand.yzero = FALSE,
+    xlim = NULL,
+    ylim = NULL,
+    expand.yzero = FALSE,
     legend.outside = FALSE,
     stop.when.overlap = TRUE,
     ...) {

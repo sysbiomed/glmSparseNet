@@ -21,30 +21,33 @@ separate2GroupsCox(
 }
 \arguments{
 \item{chosen.btas}{list of testing coefficients to calculate prognostic
-indexes, for example ``list(Age = some_vector)``}
+indexes, for example \code{list(Age = some_vector)}.}
 
-\item{xdata}{n x m matrix with n observations and m variables}
+\item{xdata}{n x m matrix with n observations and m variables.}
 
-\item{ydata}{Survival object}
+\item{ydata}{Survival object.}
 
-\item{probs}{How to separate high and low risk patients 50\%-50\% is the
-default, but for top and bottom 40\% -> c(.4,.6)}
+\item{probs}{How to separate high and low risk patients \verb{50\%-50\%} is the
+default, but for top and bottom \verb{40\%} -> \code{c(.4,.6)}.}
 
-\item{no.plot}{Only calculate p-value and do not generate survival curve plot}
+\item{no.plot}{Only calculate p-value and do not generate survival curve
+plot.}
 
-\item{plot.title}{Name of file if}
+\item{plot.title}{Name of file if.}
 
-\item{xlim}{Optional argument to limit the x-axis view}
+\item{xlim}{Optional argument to limit the x-axis view.}
 
-\item{ylim}{Optional argument to limit the y-axis view}
+\item{ylim}{Optional argument to limit the y-axis view.}
 
-\item{expand.yzero}{expand to y = 0}
+\item{expand.yzero}{expand to y = 0.}
 
-\item{legend.outside}{If TRUE legend will be outside plot, otherwise inside}
+\item{legend.outside}{If TRUE legend will be outside plot, otherwise inside.}
 
 \item{stop.when.overlap}{when probs vector allows for overlapping of samples
-in both groups, then stop. Otherwise it will calculate with duplicate
-samples, i.e. simply adding them to xdata and ydata (in a different group)}
+in both groups, then stop.
+
+Otherwise it will calculate with duplicate samples, i.e. simply adding them
+to xdata and ydata (in a different group).}
 
 \item{...}{additional parameters to survminer::ggsurvplot}
 }
@@ -79,5 +82,5 @@ separate2GroupsCox(list(
 ), xdata, ydata)
 }
 \seealso{
-survminer::ggsurvplot
+\code{\link[survminer:ggsurvplot]{survminer::ggsurvplot()}}
 }

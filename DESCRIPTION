@@ -62,9 +62,13 @@ Suggests:
     VennDiagram
 VignetteBuilder: 
     knitr
+RdMacros:
+    lifecycle
 biocViews: Software, StatisticalMethod, DimensionReduction, Regression,
     Classification, Survival, Network, GraphAndNetwork
 Encoding: UTF-8
+Language: en-US
 LazyData: false
 NeedsCompilation: no
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
