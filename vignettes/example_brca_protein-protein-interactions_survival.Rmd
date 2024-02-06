@@ -269,7 +269,7 @@ qplot(my.degree, bins = 100, fill = my.colors(3)) +
 
 ```{r, eval=!is.null(brca)}
 set.seed(params$seed)
-foldid <- glmSparseNet:::balanced_cv_folds(!!ydata$status)$output
+foldid <- glmSparseNet:::balancedCvFolds(!!ydata$status)$output
 ```
 
 
@@ -386,8 +386,8 @@ Venn diagram of overlapping genes.
 venn_plot <- venn.diagram(selected_genes,
   NULL,
   fill = c(
-    my_colors(5), my_colors(3),
-    my_colors(4)
+    myColors(5), myColors(3),
+    myColors(4)
   ),
   alpha = c(0.3, 0.3, .3),
   cex = 2,
@@ -417,7 +417,7 @@ melt(selected_genes) |>
   ggplot() +
   geom_point(
     aes(value, L1, size = Degree),
-    shape = my_symbols(3), color = my_colors(3)
+    shape = myColors(3), color = myColors(3)
   ) +
   theme(
     axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0),

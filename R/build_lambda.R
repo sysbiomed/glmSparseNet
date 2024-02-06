@@ -14,40 +14,28 @@
 #' @export
 #'
 #' @examples
-#' build_lambda(5.4)
-build_lambda <- function(
-    lambda_largest = NULL,
+#' buildLambda(5.4)
+buildLambda <- function(
+    lambdaLargest = NULL,
     xdata = NULL,
     ydata = NULL,
     family = NULL,
-    orders_of_magnitude_smaller = 3,
-    lambda_per_order_magnitude = 150,
+    ordersOfMagnitudeSmaller = 3,
+    lambdaPerOrderMagnitude = 150,
     # Deprecated arguments with dots in name
     lambda.largest = deprecated(),
     orders.of.magnitude.smaller = deprecated(),
     lambda.per.order.magnitude = deprecated()) {
   if (lifecycle::is_present(lambda.largest)) {
-    lifecycle::deprecate_warn(
-      "1.21.0",
-      "glmSparseNet::build_lambda(lambda.largest = )",
-      "glmSparseNet::build_lambda(lambda_largest = )"
-    )
+    .deprecated_dot_param("buildLambda", "lambda.largest")
     lambda_largest <- lambda.largest
   }
   if (lifecycle::is_present(orders.of.magnitude.smaller)) {
-    lifecycle::deprecate_warn(
-      "1.21.0",
-      "glmSparseNet::build_lambda(orders.of.magnitude.smaller = )",
-      "glmSparseNet::build_lambda(orders_of_magnitude_smaller = )"
-    )
+    .deprecated_dot_param("buildLambda", "orders.of.magnitude.smaller")
     orders_of_magnitude_smaller <- orders.of.magnitude.smaller
   }
   if (lifecycle::is_present(lambda.per.order.magnitude)) {
-    lifecycle::deprecate_warn(
-      "1.21.0",
-      "glmSparseNet::build_lambda(lambda.per.order.magnitude = )",
-      "glmSparseNet::build_lambda(lambda_per_order_magnitude = )"
-    )
+    .deprecated_dot_param("buildLambda", "lambda.per.order.magnitude")
     lambda_per_order_magnitude <- lambda.per.order.magnitude
   }
 
@@ -76,32 +64,4 @@ build_lambda <- function(
     sort(decreasing = TRUE)
 
   return(lambda)
-}
-
-#' @rdname build_lambda
-#' @usage # deprecated since 1.21.0, please use build_lambda()
-#' buildLambda(
-#'   lambda_largest = NULL,
-#'   xdata = NULL,
-#'   ydata = NULL,
-#'   family = NULL,
-#'   orders_of_magnitude_smaller = 3,
-#'   lambda_per_order_magnitude = 150
-#' )
-buildLambda <- function(
-    lambda.largest = NULL,
-    xdata = NULL,
-    ydata = NULL,
-    family = NULL,
-    orders.of.magnitude.smaller = 3,
-    lambda.per.order.magnitude = 150) {
-  lifecycle::deprecate_soft("buildLambda", "1.21.0", "build_lambda()")
-  build_lambda(
-    lambda.largest,
-    xdata,
-    ydata,
-    family,
-    orders.of.magnitude.smaller,
-    lambda.per.order.magnitude
-  )
 }

@@ -4,7 +4,7 @@
 \alias{normalize_xdata}
 \title{Normalize \code{xdata} argument}
 \usage{
-normalize_xdata(xdata, experiment_name)
+normalize_xdata(xdata, experiment)
 }
 \description{
 Sequential check of xdata argument

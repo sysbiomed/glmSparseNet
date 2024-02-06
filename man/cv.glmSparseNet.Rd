@@ -8,8 +8,10 @@ cv.glmSparseNet(
   xdata,
   ydata,
   network,
-  network.options = networkOptions(),
-  experiment.name = NULL,
+  options = networkOptions(),
+  experiment = NULL,
+  network.options = deprecated(),
+  experiment.name = deprecated(),
   ...
 )
 }
@@ -20,10 +22,14 @@ cv.glmSparseNet(
 
 \item{network}{type of network, see below.}
 
-\item{network.options}{options to calculate network.}
+\item{options}{options to calculate network.}
 
-\item{experiment.name}{name of experiment to use as input in
+\item{experiment}{name of experiment to use as input in
 MultiAssayExperiment object (only if xdata is an object of this class).}
+
+\item{network.options}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{experiment.name}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 
 \item{...}{parameters that \code{\link[glmnet:cv.glmnet]{glmnet::cv.glmnet()}} accepts.}
 }

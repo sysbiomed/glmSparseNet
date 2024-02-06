@@ -9,8 +9,8 @@
   xdata,
   ydata,
   network,
-  experiment.name = NULL,
-  network.options = networkOptions(),
+  experiment = NULL,
+  options = networkOptions(),
   ...
 )
 }
@@ -23,10 +23,10 @@
 
 \item{network}{type of network, see below}
 
-\item{experiment.name}{when xdata is a MultiAssayExperiment object this
+\item{experiment}{when xdata is a MultiAssayExperiment object this
 parameter is required}
 
-\item{network.options}{options to calculate network}
+\item{options}{options to calculate network}
 
 \item{...}{parameters that glmnet accepts}
 }

@@ -6,12 +6,15 @@
 #' * vector with already calculated penalty weights (can also be used directly
 #' with glmnet)
 #'
+#' @order 0
 #' @param xdata input data, can be a matrix or MultiAssayExperiment.
 #' @param ydata response data compatible with glmnet.
 #' @param network type of network, see below.
-#' @param network.options options to calculate network.
-#' @param experiment.name name of experiment to use as input in
+#' @param options options to calculate network.
+#' @param experiment name of experiment to use as input in
 #' MultiAssayExperiment object (only if xdata is an object of this class).
+#' @param network.options `r lifecycle::badge("deprecated")`
+#' @param experiment.name `r lifecycle::badge("deprecated")`
 #' @param ... parameters that [glmnet::glmnet()] accepts.
 #'
 #' @return an object just as glmnet
@@ -57,13 +60,29 @@ glmSparseNet <- function(
     xdata,
     ydata,
     network,
-    network.options = networkOptions(),
-    experiment.name = NULL,
+    options = networkOptions(),
+    experiment = NULL,
+    network.options = deprecated(),
+    experiment.name = deprecated(),
     ...) {
-  .glmSparseNetPrivate(glmnet::glmnet, xdata, ydata,
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(network.options)) {
+    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    options <- network.options
+  }
+  if (lifecycle::is_present(experiment.name)) {
+    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    experiment <- experiment.name
+  }
+  # Lifecycle management: end
+
+  .glmSparseNetPrivate(
+    glmnet::glmnet,
+    xdata,
+    ydata,
     network = network,
-    network.options = network.options,
-    experiment.name = experiment.name,
+    options = options,
+    experiment = experiment,
     ...
   )
 }
@@ -138,11 +157,29 @@ cv.glmSparseNet <- function(
     xdata,
     ydata,
     network,
-    network.options = networkOptions(),
-    experiment.name = NULL,
+    options = networkOptions(),
+    experiment = NULL,
+    network.options = deprecated(),
+    experiment.name = deprecated(),
     ...) {
-  .glmSparseNetPrivate(glmnet::cv.glmnet, xdata, ydata, network,
-    experiment.name = experiment.name,
-    network.options = network.options, ...
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(network.options)) {
+    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    options <- network.options
+  }
+  if (lifecycle::is_present(experiment.name)) {
+    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    experiment <- experiment.name
+  }
+  # Lifecycle management: end
+
+  .glmSparseNetPrivate(
+    glmnet::cv.glmnet,
+    xdata,
+    ydata,
+    network,
+    experiment = experiment,
+    options = options,
+    ...
   )
 }

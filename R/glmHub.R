@@ -1,11 +1,5 @@
-#' GLMNET model penalizing nodes with small degree
+#' @describeIn glmSparseNet Penalizes nodes with small degree
 #'
-#' This function overrides the `trans.fun` options in `network.options` with
-#' an heuristic described in Veríssimo et al. that penalizes nodes with small
-#' degree.
-#'
-#' @inheritParams glmSparseNet
-#' @inherit glmSparseNet return
 #' @export
 #'
 #' @seealso Generic function without pre-defined penalization: [glmNetSparse()].
@@ -15,23 +9,42 @@
 #' xdata <- matrix(rnorm(100), ncol = 5)
 #' glmHub(xdata, rnorm(nrow(xdata)), "correlation",
 #'   family = "gaussian",
-#'   network.options = networkOptions(min.degree = .2)
+#'   options = networkOptions(min.degree = .2)
 #' )
 glmHub <- function(
     xdata,
     ydata,
     network,
-    network.options = networkOptions(),
+    options = networkOptions(),
+    experiment = NULL,
+    network.options = deprecated(),
+    experiment.name = deprecated(),
     ...) {
-  network.options$trans.fun <- hubHeuristic
-  glmSparseNet(xdata, ydata, network,
-    network.options = network.options, ...
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(network.options)) {
+    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    options <- network.options
+  }
+  if (lifecycle::is_present(experiment.name)) {
+    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    experiment <- experiment.name
+  }
+  # Lifecycle management: end
+
+  options$trans.fun <- hubHeuristic
+  glmSparseNet(
+    xdata,
+    ydata,
+    network,
+    options = options,
+    experiment = experiment,
+    ...
   )
 }
 
 #' GLMNET cross-validation model penalizing nodes with small degree
 #'
-#' This function overrides the `trans.fun` options in `network.options` with
+#' This function overrides the `trans.fun` options in `options` with
 #' an heuristic described in Veríssimo et al. that penalizes nodes with small
 #' degree.
 #'
@@ -47,16 +60,35 @@ glmHub <- function(
 #' cv.glmHub(xdata, rnorm(nrow(xdata)), "correlation",
 #'   family = "gaussian",
 #'   nfolds = 5,
-#'   network.options = networkOptions(min.degree = .2)
+#'   options = networkOptions(min.degree = .2)
 #' )
 cv.glmHub <- function(
     xdata,
     ydata,
     network,
-    network.options = networkOptions(),
+    options = networkOptions(),
+    experiment = NULL,
+    network.options = deprecated(),
+    experiment.name = deprecated(),
     ...) {
-  network.options$trans.fun <- hubHeuristic
-  cv.glmSparseNet(xdata, ydata, network,
-    network.options = network.options, ...
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(network.options)) {
+    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    options <- network.options
+  }
+  if (lifecycle::is_present(experiment.name)) {
+    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    experiment <- experiment.name
+  }
+  # Lifecycle management: end
+
+  options$trans.fun <- hubHeuristic
+  cv.glmSparseNet(
+    xdata,
+    ydata,
+    network,
+    options = options,
+    experiment = experiment,
+    ...
   )
 }

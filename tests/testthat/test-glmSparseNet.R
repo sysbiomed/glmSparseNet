@@ -31,7 +31,7 @@ test_that("glmSparseNet: simple call with MultiAssayExperiment", {
     ydata_valid,
     family = "cox",
     network = "correlation",
-    experiment.name = "RNASeq2GeneNorm"
+    experiment = "RNASeq2GeneNorm"
   ) |>
     expect_warning("'experiments' dropped;") |>
     expect_s3_class("glmnet")
@@ -73,10 +73,10 @@ test_that("cv.glmSparseNet: simple call", {
   #
   cv.glmSparseNet(xdata.valid,
     ydata.valid,
-    nfolds          = 5,
-    family          = "cox",
-    network         = "correlation",
-    experiment.name = "RNASeq2GeneNorm"
+    nfolds = 5,
+    family = "cox",
+    network = "correlation",
+    experiment = "RNASeq2GeneNorm"
   ) |>
     expect_warning("'experiments' dropped;") |>
     expect_s3_class("cv.glmnet")

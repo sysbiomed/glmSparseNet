@@ -4,7 +4,16 @@
 \alias{cv.glmOrphan}
 \title{GLMNET cross-validation model penalizing nodes with high degree}
 \usage{
-cv.glmOrphan(xdata, ydata, network, network.options = networkOptions(), ...)
+cv.glmOrphan(
+  xdata,
+  ydata,
+  network,
+  options = networkOptions(),
+  experiment = NULL,
+  network.options = deprecated(),
+  experiment.name = deprecated(),
+  ...
+)
 }
 \arguments{
 \item{xdata}{input data, can be a matrix or MultiAssayExperiment.}
@@ -13,7 +22,14 @@ cv.glmOrphan(xdata, ydata, network, network.options = networkOptions(), ...)
 
 \item{network}{type of network, see below.}
 
-\item{network.options}{options to calculate network.}
+\item{options}{options to calculate network.}
+
+\item{experiment}{name of experiment to use as input in
+MultiAssayExperiment object (only if xdata is an object of this class).}
+
+\item{network.options}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{experiment.name}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 
 \item{...}{parameters that \code{\link[glmnet:cv.glmnet]{glmnet::cv.glmnet()}} accepts.}
 }
@@ -21,7 +37,7 @@ cv.glmOrphan(xdata, ydata, network, network.options = networkOptions(), ...)
 an object just as \code{cv.glmnet}
 }
 \description{
-This function overrides the \code{trans.fun} options in \code{network.options} with
+This function overrides the \code{trans.fun} options in \code{options} with
 an heuristic described in Veríssimo et al. that penalizes nodes with high
 degree.
 }

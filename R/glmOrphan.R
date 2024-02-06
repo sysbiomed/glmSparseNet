@@ -1,37 +1,50 @@
-#' GLMNET model penalizing nodes with high degree
+#' @describeIn glmSparseNet Penalizes nodes with high degree
+#' _(normalized heuristic that promotes nodes with few edges)_.
 #'
-#' This function overrides the `trans.fun` options in `network.options` with
-#' an heuristic described in Veríssimo et al. that penalizes nodes with high
-#' degree.
-#'
-#' @inheritParams glmSparseNet
-#' @inherit glmSparseNet return
 #' @export
-#'
-#' @seealso Generic function without pre-defined penalization: [glmNetSparse()].
-#' Other penalizations: [glmDegree()] and [glmHub()].
-#' Cross-validation with the same penalization: [cv.glmOrphan()].
+#' @seealso [orphanHeuristic()]
 #' @examples
+#' # Orphan penalization
+#'
 #' xdata <- matrix(rnorm(100), ncol = 5)
 #' glmOrphan(xdata, rnorm(nrow(xdata)), "correlation",
 #'   family = "gaussian",
-#'   network.options = networkOptions(min.degree = .2)
+#'   options = networkOptions(min.degree = .2)
 #' )
 glmOrphan <- function(
     xdata,
     ydata,
     network,
-    network.options = networkOptions(),
+    options = networkOptions(),
+    experiment = NULL,
+    network.options = deprecated(),
+    experiment.name = deprecated(),
     ...) {
-  network.options$trans.fun <- orphanHeuristic
-  glmSparseNet(xdata, ydata, network,
-    network.options = networkOptions(), ...
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(network.options)) {
+    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    options <- network.options
+  }
+  if (lifecycle::is_present(experiment.name)) {
+    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    experiment <- experiment.name
+  }
+  # Lifecycle management: end
+
+  options$trans.fun <- orphanHeuristic
+  glmSparseNet(
+    xdata,
+    ydata,
+    network,
+    options = options,
+    experiment = experiment,
+    ...
   )
 }
 
 #' GLMNET cross-validation model penalizing nodes with high degree
 #'
-#' This function overrides the `trans.fun` options in `network.options` with
+#' This function overrides the `trans.fun` options in `options` with
 #' an heuristic described in Veríssimo et al. that penalizes nodes with high
 #' degree.
 #'
@@ -53,10 +66,29 @@ cv.glmOrphan <- function(
     xdata,
     ydata,
     network,
-    network.options = networkOptions(),
+    options = networkOptions(),
+    experiment = NULL,
+    network.options = deprecated(),
+    experiment.name = deprecated(),
     ...) {
-  network.options$trans.fun <- orphanHeuristic
-  cv.glmSparseNet(xdata, ydata, network,
-    network.options = network.options, ...
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(network.options)) {
+    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    options <- network.options
+  }
+  if (lifecycle::is_present(experiment.name)) {
+    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    experiment <- experiment.name
+  }
+  # Lifecycle management: end
+
+  options$trans.fun <- orphanHeuristic
+  cv.glmSparseNet(
+    xdata,
+    ydata,
+    network,
+    options = options,
+    experiment = experiment,
+    ...
   )
 }

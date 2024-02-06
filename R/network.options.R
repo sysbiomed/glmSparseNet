@@ -42,7 +42,6 @@ networkOptions <- function(method = "pearson",
   ))
 }
 
-
 #' Calculate penalty based on data
 #'
 #' Internal method to calculate the network using data-dependant methods
@@ -98,7 +97,6 @@ networkOptions <- function(method = "pearson",
   return(network.options$trans.fun(penalty.factor))
 }
 
-
 #' Heuristic function to penalize nodes with low degree
 #'
 #' @param x single value of vector
@@ -110,7 +108,7 @@ networkOptions <- function(method = "pearson",
 #' hubHeuristic(rnorm(1:10))
 hubHeuristic <- function(x) {
   x <- x / max(x)
-  return(heuristicScale(1 - x))
+  return(heuristic_scale(1 - x))
 }
 
 #' Heuristic function to penalize nodes with high degree

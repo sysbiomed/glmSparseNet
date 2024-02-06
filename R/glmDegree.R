@@ -1,39 +1,53 @@
-#' GLMNET model penalizing nodes with small degree
+#' @describeIn glmSparseNet penalizes nodes with small degree
+#' _(inversion penalization `h(x) = 1 / x`)_.
 #'
-#' This function overrides the `trans.fun` options in `network.options` with the
-#' inverse of a degree described in Veríssimo et al. (2015) that penalizes
-#' nodes with small degree.
-#'
-#' @inheritParams glmSparseNet
-#' @inherit glmSparseNet return
 #' @export
 #'
-#' @seealso Generic function without pre-defined penalization: [glmNetSparse()].
-#' Other penalizations: [glmHub()] and [glmOrphan()].
-#' Cross-validation with the same penalization: [cv.glmDegree()].
 #' @examples
+#' # Degree penalization
+#'
 #' xdata <- matrix(rnorm(100), ncol = 5)
-#' glmDegree(xdata, rnorm(nrow(xdata)), "correlation",
+#' glmDegree(
+#'   xdata,
+#'   rnorm(nrow(xdata)),
+#'   "correlation",
 #'   family = "gaussian",
-#'   network.options = networkOptions(min.degree = .2)
+#'   options = networkOptions(min.degree = .2)
 #' )
 glmDegree <- function(
     xdata,
     ydata,
     network,
-    network.options = networkOptions(),
+    options = networkOptions(),
+    experiment = NULL,
+    network.options = deprecated(),
+    experiment.name = deprecated(),
     ...) {
-  network.options$trans.fun <- function(x) {
-    return(1 / x)
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(network.options)) {
+    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    options <- network.options
   }
-  glmSparseNet(xdata, ydata, network,
-    network.options = network.options, ...
+  if (lifecycle::is_present(experiment.name)) {
+    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    experiment <- experiment.name
+  }
+  # Lifecycle management: end
+
+  options$trans.fun <- function(x) 1 / x
+  glmSparseNet(
+    xdata,
+    ydata,
+    network,
+    options = options,
+    experiment = experiment,
+    ...
   )
 }
 
 #' GLMNET cross-validation model penalizing nodes with small degree
 #'
-#' This function overrides the `trans.fun` options in `network.options` with the
+#' This function overrides the `trans.fun` options in `networkOptions` with the
 #' inverse of a degree described in Veríssimo et al. (2015) that penalizes
 #' nodes with small degree.
 #'
@@ -46,21 +60,41 @@ glmDegree <- function(
 #' Model with the same penalization: [glmDegree()].
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 5)
-#' cv.glmDegree(xdata, rnorm(nrow(xdata)), "correlation",
+#' cv.glmDegree(
+#'   xdata,
+#'   rnorm(nrow(xdata)),
+#'   "correlation",
 #'   family = "gaussian",
 #'   nfolds = 5,
-#'   network.options = networkOptions(min.degree = .2)
+#'   network_options = networkOptions(min.degree = .2)
 #' )
 cv.glmDegree <- function(
     xdata,
     ydata,
     network,
-    network.options = networkOptions(),
+    options = networkOptions(),
+    experiment = NULL,
+    network.options = deprecated(),
+    experiment.name = deprecated(),
     ...) {
-  network.options$trans.fun <- function(x) {
-    1 / x
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(network.options)) {
+    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    options <- network.options
   }
-  cv.glmSparseNet(xdata, ydata, network,
-    network.options = network.options, ...
+  if (lifecycle::is_present(experiment)) {
+    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    experiment <- experiment.name
+  }
+  # Lifecycle management: end
+
+  options$trans.fun <- function(x) 1 / x
+  cv.glmSparseNet(
+    xdata,
+    ydata,
+    network,
+    options = options,
+    experiment = experiment,
+    ...
   )
 }
