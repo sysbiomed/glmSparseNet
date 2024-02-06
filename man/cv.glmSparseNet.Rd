@@ -14,20 +14,21 @@ cv.glmSparseNet(
 )
 }
 \arguments{
-\item{xdata}{input data, can be a matrix or MultiAssayExperiment}
+\item{xdata}{input data, can be a matrix or MultiAssayExperiment.}
 
-\item{ydata}{response data compatible with glmnet}
+\item{ydata}{response data compatible with glmnet.}
 
-\item{network}{type of network, see below}
+\item{network}{type of network, see below.}
 
-\item{network.options}{options to calculate network}
+\item{network.options}{options to calculate network.}
 
-\item{experiment.name}{Name of experiment in MultiAssayExperiment}
+\item{experiment.name}{name of experiment to use as input in
+MultiAssayExperiment object (only if xdata is an object of this class).}
 
-\item{...}{parameters that cv.glmnet accepts}
+\item{...}{parameters that \code{\link[glmnet:cv.glmnet]{glmnet::cv.glmnet()}} accepts.}
 }
 \value{
-an object just as cv.glmnet
+an object just as \code{cv.glmnet}
 }
 \description{
 network parameter accepts:
@@ -80,11 +81,16 @@ ydata.valid <- colData(xdata.valid)[, c("surv_event_time", "vital_status")]
 colnames(ydata.valid) <- c("time", "status")
 
 #
-cv.glmSparseNet(xdata.valid,
+cv.glmSparseNet(
+  xdata.valid,
   ydata.valid,
   nfolds          = 5,
   family          = "cox",
   network         = "correlation",
   experiment.name = "RNASeq2GeneNorm"
 )
+}
+\seealso{
+Other cross-validation functions: \code{\link[=cv.glmDegree]{cv.glmDegree()}}, \code{\link[=cv.glmHub]{cv.glmHub()}} and \code{\link[=cv.glmOrphan]{cv.glmOrphan()}}.
+Model with the same penalization: \code{\link[=glmSparseNet]{glmSparseNet()}}.
 }

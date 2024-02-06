@@ -7,18 +7,18 @@
 cv.glmHub(xdata, ydata, network, network.options = networkOptions(), ...)
 }
 \arguments{
-\item{xdata}{input data, can be a matrix or MultiAssayExperiment}
+\item{xdata}{input data, can be a matrix or MultiAssayExperiment.}
 
-\item{ydata}{response data compatible with glmnet}
+\item{ydata}{response data compatible with glmnet.}
 
-\item{network}{type of network, see below}
+\item{network}{type of network, see below.}
 
-\item{network.options}{options to calculate network}
+\item{network.options}{options to calculate network.}
 
-\item{...}{parameters that glmnet accepts}
+\item{...}{parameters that \code{\link[glmnet:cv.glmnet]{glmnet::cv.glmnet()}} accepts.}
 }
 \value{
-see cv.glmSparseNet
+an object just as \code{cv.glmnet}
 }
 \description{
 This function overrides the \code{trans.fun} options in \code{network.options} with
@@ -34,5 +34,7 @@ cv.glmHub(xdata, rnorm(nrow(xdata)), "correlation",
 )
 }
 \seealso{
-glmNetSparse
+Generic function without pre-defined penalization: \code{\link[=cv.glmNetSparse]{cv.glmNetSparse()}}.
+Other penalizations: \code{\link[=cv.glmDegree]{cv.glmDegree()}} and \code{\link[=cv.glmOrphan]{cv.glmOrphan()}}.
+Model with the same penalization: \code{\link[=glmHub]{glmHub()}}.
 }

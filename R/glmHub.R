@@ -4,27 +4,28 @@
 #' an heuristic described in Veríssimo et al. that penalizes nodes with small
 #' degree.
 #'
-#' @param xdata input data, can be a matrix or MultiAssayExperiment
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that glmnet accepts
-#'
-#' @return see glmNetSparse
+#' @inheritParams glmSparseNet
+#' @inherit glmSparseNet return
 #' @export
 #'
-#' @seealso glmNetSparse
+#' @seealso Generic function without pre-defined penalization: [glmNetSparse()].
+#' Other penalizations: [glmDegree()] and [glmOrphan()].
+#' Cross-validation with the same penalization: [cv.glmHub()].
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 5)
 #' glmHub(xdata, rnorm(nrow(xdata)), "correlation",
 #'   family = "gaussian",
 #'   network.options = networkOptions(min.degree = .2)
 #' )
-glmHub <- function(xdata, ydata, network,
-                   network.options = networkOptions(), ...) {
+glmHub <- function(
+    xdata,
+    ydata,
+    network,
+    network.options = networkOptions(),
+    ...) {
   network.options$trans.fun <- hubHeuristic
   glmSparseNet(xdata, ydata, network,
-               network.options = network.options, ...
+    network.options = network.options, ...
   )
 }
 
@@ -34,16 +35,13 @@ glmHub <- function(xdata, ydata, network,
 #' an heuristic described in Veríssimo et al. that penalizes nodes with small
 #' degree.
 #'
-#' @param xdata input data, can be a matrix or MultiAssayExperiment
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that glmnet accepts
-#'
-#' @return see cv.glmSparseNet
+#' @inheritParams cv.glmSparseNet
+#' @inherit cv.glmSparseNet return
 #' @export
 #'
-#' @seealso glmNetSparse
+#' @seealso Generic function without pre-defined penalization: [cv.glmNetSparse()].
+#' Other penalizations: [cv.glmDegree()] and [cv.glmOrphan()].
+#' Model with the same penalization: [glmHub()].
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 5)
 #' cv.glmHub(xdata, rnorm(nrow(xdata)), "correlation",
@@ -51,10 +49,14 @@ glmHub <- function(xdata, ydata, network,
 #'   nfolds = 5,
 #'   network.options = networkOptions(min.degree = .2)
 #' )
-cv.glmHub <- function(xdata, ydata, network,
-                      network.options = networkOptions(), ...) {
+cv.glmHub <- function(
+    xdata,
+    ydata,
+    network,
+    network.options = networkOptions(),
+    ...) {
   network.options$trans.fun <- hubHeuristic
   cv.glmSparseNet(xdata, ydata, network,
-                  network.options = network.options, ...
+    network.options = network.options, ...
   )
 }

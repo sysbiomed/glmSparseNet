@@ -64,19 +64,19 @@ test_that("cv.glmSparseNet: simple call", {
   #
   # Keep only valid individuals
   valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
-                          !is.na(xdata$vital_status) &
-                          xdata$surv_event_time > 0)
+    !is.na(xdata$vital_status) &
+    xdata$surv_event_time > 0)
   xdata.valid <- xdata[, rownames(colData(xdata))[valid.ix]]
   ydata.valid <- colData(xdata.valid)[, c("surv_event_time", "vital_status")]
   colnames(ydata.valid) <- c("time", "status")
 
   #
   cv.glmSparseNet(xdata.valid,
-                  ydata.valid,
-                  nfolds          = 5,
-                  family          = "cox",
-                  network         = "correlation",
-                  experiment.name = "RNASeq2GeneNorm"
+    ydata.valid,
+    nfolds          = 5,
+    family          = "cox",
+    network         = "correlation",
+    experiment.name = "RNASeq2GeneNorm"
   ) |>
     expect_warning("'experiments' dropped;") |>
     expect_s3_class("cv.glmnet")

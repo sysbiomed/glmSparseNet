@@ -4,33 +4,32 @@
 #' inverse of a degree described in Veríssimo et al. (2015) that penalizes
 #' nodes with small degree.
 #'
-#' @param xdata input data, can be a matrix or MultiAssayExperiment
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that glmnet accepts
-#'
-#' @return see glmNetSparse
+#' @inheritParams glmSparseNet
+#' @inherit glmSparseNet return
 #' @export
 #'
-#' @seealso glmNetSparse
+#' @seealso Generic function without pre-defined penalization: [glmNetSparse()].
+#' Other penalizations: [glmHub()] and [glmOrphan()].
+#' Cross-validation with the same penalization: [cv.glmDegree()].
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 5)
 #' glmDegree(xdata, rnorm(nrow(xdata)), "correlation",
 #'   family = "gaussian",
 #'   network.options = networkOptions(min.degree = .2)
 #' )
-glmDegree <- function(xdata, ydata, network,
-                      network.options = networkOptions(), ...) {
+glmDegree <- function(
+    xdata,
+    ydata,
+    network,
+    network.options = networkOptions(),
+    ...) {
   network.options$trans.fun <- function(x) {
     return(1 / x)
   }
   glmSparseNet(xdata, ydata, network,
-               network.options = network.options, ...
+    network.options = network.options, ...
   )
 }
-
-
 
 #' GLMNET cross-validation model penalizing nodes with small degree
 #'
@@ -38,16 +37,13 @@ glmDegree <- function(xdata, ydata, network,
 #' inverse of a degree described in Veríssimo et al. (2015) that penalizes
 #' nodes with small degree.
 #'
-#' @param xdata input data, can be a matrix or MultiAssayExperiment
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param ... parameters that glmnet accepts
-#'
-#' @return see cv.glmSparseNet
+#' @inheritParams cv.glmSparseNet
+#' @inherit cv.glmSparseNet return
 #' @export
 #'
-#' @seealso glmNetSparse
+#' @seealso Generic function without pre-defined penalization: [cv.glmNetSparse()].
+#' Other penalizations: [cv.glmHub()] and [cv.glmOrphan()].
+#' Model with the same penalization: [glmDegree()].
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 5)
 #' cv.glmDegree(xdata, rnorm(nrow(xdata)), "correlation",
@@ -55,12 +51,16 @@ glmDegree <- function(xdata, ydata, network,
 #'   nfolds = 5,
 #'   network.options = networkOptions(min.degree = .2)
 #' )
-cv.glmDegree <- function(xdata, ydata, network,
-                         network.options = networkOptions(), ...) {
+cv.glmDegree <- function(
+    xdata,
+    ydata,
+    network,
+    network.options = networkOptions(),
+    ...) {
   network.options$trans.fun <- function(x) {
     1 / x
   }
   cv.glmSparseNet(xdata, ydata, network,
-                  network.options = network.options, ...
+    network.options = network.options, ...
   )
 }

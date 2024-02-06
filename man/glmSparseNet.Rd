@@ -14,26 +14,24 @@ glmSparseNet(
 )
 }
 \arguments{
-\item{xdata}{input data, can be a matrix or MultiAssayExperiment}
+\item{xdata}{input data, can be a matrix or MultiAssayExperiment.}
 
-\item{ydata}{response data compatible with glmnet}
+\item{ydata}{response data compatible with glmnet.}
 
-\item{network}{type of network, see below}
+\item{network}{type of network, see below.}
 
-\item{network.options}{options to calculate network}
+\item{network.options}{options to calculate network.}
 
 \item{experiment.name}{name of experiment to use as input in
-MultiAssayExperiment object (only if xdata is an object of this class)}
+MultiAssayExperiment object (only if xdata is an object of this class).}
 
-\item{...}{parameters that glmnet accepts}
+\item{...}{parameters that \code{\link[glmnet:glmnet]{glmnet::glmnet()}} accepts.}
 }
 \value{
 an object just as glmnet
 }
 \description{
 network parameter accepts:
-}
-\details{
 \itemize{
 \item string to calculate network based on data (correlation, covariance)
 \item matrix representing the network
@@ -66,10 +64,16 @@ valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
 xdata.valid <- xdata[, rownames(colData(xdata))[valid.ix]]
 ydata.valid <- colData(xdata.valid)[, c("surv_event_time", "vital_status")]
 colnames(ydata.valid) <- c("time", "status")
-glmSparseNet(xdata.valid,
+glmSparseNet(
+  xdata.valid,
   ydata.valid,
   family          = "cox",
   network         = "correlation",
   experiment.name = "RNASeq2GeneNorm"
 )
+}
+\seealso{
+Other model functions with pre-defined penalization:
+\code{\link[=glmDegree]{glmDegree()}}, \code{\link[=glmHub]{glmHub()}} and \code{\link[=glmOrphan]{glmOrphan()}}.
+Cross-validation with the same penalization: \code{\link[=cv.glmSparseNet]{cv.glmSparseNet()}}.
 }

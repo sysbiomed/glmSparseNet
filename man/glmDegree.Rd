@@ -7,18 +7,18 @@
 glmDegree(xdata, ydata, network, network.options = networkOptions(), ...)
 }
 \arguments{
-\item{xdata}{input data, can be a matrix or MultiAssayExperiment}
+\item{xdata}{input data, can be a matrix or MultiAssayExperiment.}
 
-\item{ydata}{response data compatible with glmnet}
+\item{ydata}{response data compatible with glmnet.}
 
-\item{network}{type of network, see below}
+\item{network}{type of network, see below.}
 
-\item{network.options}{options to calculate network}
+\item{network.options}{options to calculate network.}
 
-\item{...}{parameters that glmnet accepts}
+\item{...}{parameters that \code{\link[glmnet:glmnet]{glmnet::glmnet()}} accepts.}
 }
 \value{
-see glmNetSparse
+an object just as glmnet
 }
 \description{
 This function overrides the \code{trans.fun} options in \code{network.options} with the
@@ -33,5 +33,7 @@ glmDegree(xdata, rnorm(nrow(xdata)), "correlation",
 )
 }
 \seealso{
-glmNetSparse
+Generic function without pre-defined penalization: \code{\link[=glmNetSparse]{glmNetSparse()}}.
+Other penalizations: \code{\link[=glmHub]{glmHub()}} and \code{\link[=glmOrphan]{glmOrphan()}}.
+Cross-validation with the same penalization: \code{\link[=cv.glmDegree]{cv.glmDegree()}}.
 }

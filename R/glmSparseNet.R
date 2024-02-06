@@ -1,22 +1,25 @@
 #' Calculate GLM model with network-based regularization
 #'
 #' network parameter accepts:
+#' * string to calculate network based on data (correlation, covariance)
+#' * matrix representing the network
+#' * vector with already calculated penalty weights (can also be used directly
+#' with glmnet)
 #'
-#'  * string to calculate network based on data (correlation, covariance)
-#'  * matrix representing the network
-#'  * vector with already calculated penalty weights (can also be used directly
-#'    with glmnet)
-#'
-#' @param xdata input data, can be a matrix or MultiAssayExperiment
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
+#' @param xdata input data, can be a matrix or MultiAssayExperiment.
+#' @param ydata response data compatible with glmnet.
+#' @param network type of network, see below.
+#' @param network.options options to calculate network.
 #' @param experiment.name name of experiment to use as input in
-#' MultiAssayExperiment object (only if xdata is an object of this class)
-#' @param ... parameters that glmnet accepts
+#' MultiAssayExperiment object (only if xdata is an object of this class).
+#' @param ... parameters that [glmnet::glmnet()] accepts.
 #'
 #' @return an object just as glmnet
 #' @export
+#'
+#' @seealso Other model functions with pre-defined penalization:
+#' [glmDegree()], [glmHub()] and [glmOrphan()].
+#' Cross-validation with the same penalization: [cv.glmSparseNet()].
 #'
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 20)
@@ -43,20 +46,25 @@
 #' xdata.valid <- xdata[, rownames(colData(xdata))[valid.ix]]
 #' ydata.valid <- colData(xdata.valid)[, c("surv_event_time", "vital_status")]
 #' colnames(ydata.valid) <- c("time", "status")
-#' glmSparseNet(xdata.valid,
+#' glmSparseNet(
+#'   xdata.valid,
 #'   ydata.valid,
 #'   family          = "cox",
 #'   network         = "correlation",
 #'   experiment.name = "RNASeq2GeneNorm"
 #' )
-glmSparseNet <- function(xdata, ydata, network,
-                         network.options = networkOptions(),
-                         experiment.name = NULL, ...) {
+glmSparseNet <- function(
+    xdata,
+    ydata,
+    network,
+    network.options = networkOptions(),
+    experiment.name = NULL,
+    ...) {
   .glmSparseNetPrivate(glmnet::glmnet, xdata, ydata,
-                       network = network,
-                       network.options = network.options,
-                       experiment.name = experiment.name,
-                       ...
+    network = network,
+    network.options = network.options,
+    experiment.name = experiment.name,
+    ...
   )
 }
 
@@ -69,15 +77,14 @@ glmSparseNet <- function(xdata, ydata, network,
 #'  * vector with already calculated penalty weights (can also be used directly
 #'    glmnet)
 #'
-#' @param xdata input data, can be a matrix or MultiAssayExperiment
-#' @param ydata response data compatible with glmnet
-#' @param network type of network, see below
-#' @param network.options options to calculate network
-#' @param experiment.name Name of experiment in MultiAssayExperiment
-#' @param ... parameters that cv.glmnet accepts
+#' @inheritParams glmSparseNet
+#' @param ... parameters that [glmnet::cv.glmnet()] accepts.
 #'
-#' @return an object just as cv.glmnet
+#' @return an object just as `cv.glmnet`
 #' @export
+#'
+#' @seealso Other cross-validation functions: [cv.glmDegree()], [cv.glmHub()] and [cv.glmOrphan()].
+#' Model with the same penalization: [glmSparseNet()].
 #'
 #' @examples
 #' \donttest{
@@ -119,19 +126,23 @@ glmSparseNet <- function(xdata, ydata, network,
 #' colnames(ydata.valid) <- c("time", "status")
 #'
 #' #
-#' cv.glmSparseNet(xdata.valid,
+#' cv.glmSparseNet(
+#'   xdata.valid,
 #'   ydata.valid,
 #'   nfolds          = 5,
 #'   family          = "cox",
 #'   network         = "correlation",
 #'   experiment.name = "RNASeq2GeneNorm"
 #' )
-cv.glmSparseNet <- function(xdata, ydata, network,
-                            network.options = networkOptions(),
-                            experiment.name = NULL,
-                            ...) {
+cv.glmSparseNet <- function(
+    xdata,
+    ydata,
+    network,
+    network.options = networkOptions(),
+    experiment.name = NULL,
+    ...) {
   .glmSparseNetPrivate(glmnet::cv.glmnet, xdata, ydata, network,
-                       experiment.name = experiment.name,
-                       network.options = network.options, ...
+    experiment.name = experiment.name,
+    network.options = network.options, ...
   )
 }
