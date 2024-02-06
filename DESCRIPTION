@@ -32,7 +32,6 @@ Depends:
 Imports: 
     biomaRt,
     checkmate,
-    digest,
     dplyr,
     forcats,
     futile.logger,
@@ -44,21 +43,21 @@ Imports:
     methods,
     parallel,
     readr,
-    reshape2,
     rlang,
     stringr,
     SummarizedExperiment,
     survminer,
+    TCGAutils,
     utils
 Suggests: 
     BiocStyle,
     curatedTCGAData,
     knitr,
+    reshape2,
     pROC,
     rmarkdown,
     survcomp,
     survival,
-    TCGAutils,
     testthat,
     VennDiagram
 VignetteBuilder: 

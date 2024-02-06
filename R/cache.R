@@ -10,7 +10,7 @@
 #' glmSparseNet:::digest.cache(c(1, 2, 3, 4, 5))
 #' glmSparseNet:::digest.cache("some example")
 digest.cache <- function(val) {
-  digest::digest(val, algo = "sha256")
+  rlang::hash(val)
 }
 
 #' Temporary directory for runCache

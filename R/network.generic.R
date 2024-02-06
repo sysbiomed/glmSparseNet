@@ -17,6 +17,7 @@
 #'  * vector with already calculated penalty weights (can also be used directly
 #'  with glmnet)
 #'
+#' @keywords internal
 .glmSparseNetPrivate <- function(fun, xdata, ydata, network,
                                  experiment.name = NULL,
                                  network.options = networkOptions(),
@@ -25,45 +26,37 @@
     xdata, c("MultiAssayExperiment", "SummarizedExperiment", "matrix", "Matrix")
   )
   checkmate::assert_multi_class(
-    ydata, c("matrix", "data.frame", "Matrix", "Data.Frame")
+    ydata, c("DataFrame", "data.frame", "matrix", "Matrix", "numeric")
   )
 
-  #
-  # Sequential check of xdata argument
-  #   1. Checks if xdata is MultiAssayExperiment, if it is then transforms
-  #      xdata in SummarizedExperiment
-  #   2. Checks if xdata is SummarizedExperiment and extract data to Matrix
-  #      form
-  #   3. Checks if xdata is matrix, if it is transform to Matrix
-  #  note: this needs to be sequential instead of if () else (), as one
-  #   transformation will pipe to another
-  xdata <- normalize_xdata(xdata, experiment.name)
-  ydata <- normalize_ydata(ydata)
+  xdata <- normalize_xdata_mae(xdata, experiment.name)
+  xdata_norm <- normalize_xdata(xdata, experiment.name)
+  ydata_norm <- normalize_ydata(xdata, ydata, experiment.name)
 
-  penalty.factor <- if (is.character(network)) {
-    .calcPenalty(xdata, network, network.options)
+  penalty_factor <- if (is.character(network)) {
+    .calcPenalty(xdata_norm, network, network.options)
   } else if (is.matrix(network) || inherits(network, "Matrix")) {
-    (Matrix::colSums(network) + Matrix::rowSums(network)) |>
-      network.options$trans.fun()
+    network.options$trans.fun(
+      Matrix::colSums(network) + Matrix::rowSums(network)
+    )
   } else if (is.vector(network)) {
-    length(network) != ncol(xdata) &&
+    length(network) != ncol(xdata_norm) &&
       stop("Network vector size does not match xdata input")
-    network |>
-      network.options$trans.fun()
+    network.options$trans.fun(network)
   } else {
     stop("There was an error with network argumnent")
   }
 
   penalty_factor <- penalty_factor + network.options$min.degree
 
-  if (all(penalty.factor <= 0)) {
+  if (all(penalty_factor <= 0)) {
     warning(
       "The `penalty.factor` calculated from network (or given) has ",
       "all 0 values, this might lead to convergence problems. Try",
       " changing some of the network options."
     )
     # penalty.factor <- rep(1, length(penalty.factor)) # nolint: commented_code_linter
-  } else if (any(penalty.factor == 0)) {
+  } else if (any(penalty_factor == 0)) {
     warning(
       "The `penalty.factor` calculated from network (or given) has ",
       "some 0 values, this might lead to convergence problems. Try ",
@@ -71,14 +64,14 @@
     )
   }
 
-  obj <- fun(xdata, ydata, penalty.factor = penalty.factor, ...)
-  obj$penalty.factor <- penalty.factor
+  obj <- fun(xdata_norm, ydata_norm, penalty.factor = penalty_factor, ...)
+  obj$penalty.factor <- penalty_factor
 
   obj
 }
 
 #' @keywords internal
-normalize_ydata <- function(ydata) {
+normalize_ydata <- function(xdata, ydata, experiment_name) {
   if (inherits(xdata, "MultiAssayExperiment")) {
     # if ydata has rownames then it uses it to match with valid experiences
     #  this is done to avoid missorted objects
@@ -86,24 +79,24 @@ normalize_ydata <- function(ydata) {
       is.matrix(ydata) || is.data.frame(ydata) || inherits(ydata, "DataFrame")
     ) {
       if (!is.null(rownames(ydata))) {
-        ydata <- as.matrix(ydata[rownames(xdata@colData), ])
+        return(as.matrix(ydata[rownames(xdata@colData), ]))
       }
     } else if (is.array(ydata) && !is.null(names(ydata))) {
-      ydata <- ydata[rownames(xdata@colData)]
+      return(ydata[rownames(xdata@colData)])
     }
   }
   ydata
 }
 
 #' @keywords internal
-normalize_xdata <- function(xdata, experiment.name) {
+normalize_xdata_mae <- function(xdata, experiment_name) {
   if (inherits(xdata, "MultiAssayExperiment")) {
-    experiment.name %||%
+    experiment_name %||%
       stop("`experiment.name` argument must be passed, see documentation.")
 
     # filter the MultiAssayExperiment keeping only individuals with data in
     #  specific experiment
-    xdata <- as(xdata[, , experiment.name], "MatchedAssayExperiment")
+    xdata <- as(xdata[, , experiment_name], "MatchedAssayExperiment")
 
     # stop if output xdata has no rows (should not happen)
     nrow(xdata@colData) == 0L &&
@@ -111,12 +104,31 @@ normalize_xdata <- function(xdata, experiment.name) {
         "Experiment has no observations or the MultiAssayExperiment object",
         " is corrupt."
       )
+  }
+  xdata
+}
 
-    xdata <- xdata[[experiment.name]]
+#' Normalize `xdata` argument
+#'
+#' @description
+#'
+#' Sequential check of xdata argument
+#'   1. Checks if xdata is MultiAssayExperiment, if it is then transforms
+#'      xdata in SummarizedExperiment
+#'   2. Checks if xdata is SummarizedExperiment and extract data to Matrix
+#'      form
+#'   3. Checks if xdata is matrix, if it is transform to Matrix
+#'  note: this needs to be sequential instead of if () else (), as one
+#'   transformation will pipe to another
+#' @keywords internal
+normalize_xdata <- function(xdata, experiment_name) {
+  if (inherits(xdata, "MultiAssayExperiment")) {
+    xdata <- xdata[[experiment_name]]
   }
 
   if (inherits(xdata, "SummarizedExperiment")) {
     xdata <- t(SummarizedExperiment::assay(xdata))
+    rownames(xdata) <- TCGAutils::TCGAbarcode(rownames(xdata))
   }
 
   if (inherits(xdata, "Matrix")) {

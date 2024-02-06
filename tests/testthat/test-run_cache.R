@@ -36,11 +36,11 @@ test_that("folder can be created in tempdir", {
 
 test_that("digest cache is consistent", {
   word <- "1234567"
-  expect_equal(digest.cache(word), digest::digest(word, algo = "sha256"))
+  expect_equal(digest.cache(word), rlang::hash(word))
   # taken manually at 2018.04.27
   expect_equal(
     digest.cache(word),
-    "300a4687518d6e58377f814df9eb8a40f5befd3634de48c0fe893e47e127dbb3"
+    "cd165630c0265b736b679ae63f597218"
   )
 })
 

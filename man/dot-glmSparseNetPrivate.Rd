@@ -42,3 +42,4 @@ network parameter accepts:
 \description{
 Calculate GLM model with network-based regularization
 }
+\keyword{internal}
