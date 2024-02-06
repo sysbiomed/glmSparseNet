@@ -4,7 +4,8 @@ set.seed(1985)
 xdata <- matrix(rnorm(30000), nrow = 500)
 
 # use a temporary directory that can be written
-glmSparseNet:::base.dir(tempdir())
+withr::local_tempdir(pattern = "base.dir") |>
+  .baseDir()
 
 test_that("Default methods", {
   mat.non.diag <- cov(xdata)

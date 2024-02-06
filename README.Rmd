@@ -210,6 +210,7 @@ separate2GroupsCox(best.model.coef, t(assay(xdata[["RNASeq2GeneNorm"]])), ydata.
 ```
 
 ```{r glmnet.classic, include=FALSE, eval=FALSE}
+library(glmnet)
 # Comparing against a classical GLMNET call
 xdata.reduced <- as(xdata[, , "RNASeq2GeneNorm"], "MatchedAssayExperiment")
 xdata.surv <- t(assay(xdata.reduced[["RNASeq2GeneNorm"]]))
@@ -224,7 +225,5 @@ separate2groupsCox(best.model.coef.g,
   ydata.km,
   ylim = c(0, 1)
 )$plot
-
-# hallmarks(names(best.model.coef.g))$heatmap
 ```
 

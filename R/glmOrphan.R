@@ -7,7 +7,10 @@
 #' # Orphan penalization
 #'
 #' xdata <- matrix(rnorm(100), ncol = 5)
-#' glmOrphan(xdata, rnorm(nrow(xdata)), "correlation",
+#' glmOrphan(
+#'   xdata,
+#'   rnorm(nrow(xdata)),
+#'   "correlation",
 #'   family = "gaussian",
 #'   options = networkOptions(min.degree = .2)
 #' )
@@ -22,11 +25,11 @@ glmOrphan <- function(
     ...) {
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(network.options)) {
-    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    .deprecatedDotParam("cv.glmSparseNet", "network.options")
     options <- network.options
   }
   if (lifecycle::is_present(experiment.name)) {
-    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    .deprecatedDotParam("cv.glmSparseNet", "experiment.name")
     experiment <- experiment.name
   }
   # Lifecycle management: end
@@ -57,10 +60,13 @@ glmOrphan <- function(
 #' Model with the same penalization: [glmOrphan()].
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 5)
-#' cv.glmOrphan(xdata, rnorm(nrow(xdata)), "correlation",
+#' cv.glmOrphan(
+#'   xdata,
+#'   rnorm(nrow(xdata)),
+#'   "correlation",
 #'   family = "gaussian",
 #'   nfolds = 5,
-#'   network.options = networkOptions(min.degree = .2)
+#'   options = networkOptions(min.degree = .2)
 #' )
 cv.glmOrphan <- function(
     xdata,
@@ -73,11 +79,11 @@ cv.glmOrphan <- function(
     ...) {
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(network.options)) {
-    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    .deprecatedDotParam("cv.glmSparseNet", "network.options")
     options <- network.options
   }
   if (lifecycle::is_present(experiment.name)) {
-    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    .deprecatedDotParam("cv.glmSparseNet", "experiment.name")
     experiment <- experiment.name
   }
   # Lifecycle management: end

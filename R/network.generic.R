@@ -81,7 +81,7 @@ normalize_ydata <- function(xdata, ydata, experiment) {
       is.matrix(ydata) || is.data.frame(ydata) || inherits(ydata, "DataFrame")
     ) {
       if (!is.null(rownames(ydata))) {
-        return(as.matrix(ydata[rownames(xdata@colData), ]))
+        return(Matrix::as.matrix(ydata[rownames(xdata@colData), ]))
       }
     } else if (is.array(ydata) && !is.null(names(ydata))) {
       return(ydata[rownames(xdata@colData)])
@@ -98,7 +98,7 @@ normalize_xdata_mae <- function(xdata, experiment) {
 
     # filter the MultiAssayExperiment keeping only individuals with data in
     #  specific experiment
-    xdata <- as(xdata[, , experiment], "MatchedAssayExperiment")
+    xdata <- methods::as(xdata[, , experiment], "MatchedAssayExperiment")
 
     # stop if output xdata has no rows (should not happen)
     nrow(xdata@colData) == 0L &&

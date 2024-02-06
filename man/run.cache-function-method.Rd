@@ -45,7 +45,7 @@ Run function and save cache
 \examples{
 # [optional] save cache in a temporary directory
 #
-glmSparseNet:::base.dir(tempdir())
+glmSparseNet:::.baseDir(tempdir())
 glmSparseNet:::run.cache(c, 1, 2, 3, 4)
 #
 # next three should use the same cache

@@ -1,14 +1,21 @@
 #' @noRd
 #' @keywords internal
 #' @examples
-#' .deprecatedDotParam("1.21", "test_me()", "n.folds")
+#' .deprecatedDotParam("test_me", "n.folds", "1.21")
 #'
-.deprecatedDotParam <- function(fun_name, argument_name, version = "1.21.0") {
+.deprecatedDotParam <- function(
+    fun_name,
+    argument_name,
+    version = "1.21.0",
+    env = rlang::caller_env(),
+    user_env = rlang::caller_env(2)) {
   new_argument <- gsub("\\.(\\w)", "\\U\\1", argument_name, perl = TRUE)
   lifecycle::deprecate_warn(
     version,
     paste0(fun_name, "(", argument_name, " = )"),
-    paste0(fun_name, "(", new_argument, " = )")
+    paste0(fun_name, "(", new_argument, " = )"),
+    env = env,
+    user_env = user_env
   )
 }
 
@@ -21,12 +28,12 @@ balanced.cv.folds <- function(..., nfolds = 10) {
 }
 
 #' @rdname myColors
-#' @usage # deprecated, please use my_colors()
+#' @usage # deprecated, please use myColors()
 #' my.colors(ix = NULL)
 #' @export
 my.colors <- function(ix = NULL) { # nolint: object_name_linter.
   lifecycle::deprecate_soft("1.21.0", "my.colors()", "myColors()")
-  my_colors(ix)
+  myColors(ix)
 }
 
 #' @rdname mySymbols
@@ -61,12 +68,6 @@ my.symbols <- function(ix = NULL) { # nolint: object_name_linter.
 #' limit between 0 and 1 for cprob and -1 and 1 for npmi
 #'
 #' @export
-#'
-#' @examples
-#' hallmarks(c("MOB1A", "RFLNB", "SPIC"))
-#' \donttest{
-#' hallmarks(c("MOB1A", "RFLNB", "SPIC"), metric = "cprob")
-#' }
 hallmarks <- function(
     genes,
     metric = "count",

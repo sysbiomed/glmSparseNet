@@ -36,14 +36,15 @@ library(survival)
 library(VennDiagram)
 library(futile.logger)
 library(curatedTCGAData)
+library(MultiAssayExperiment)
 library(TCGAutils)
-
+#
 library(glmSparseNet)
-
+#
 #
 # Some general options for futile.logger the debugging package
 .Last.value <- flog.layout(layout.format("[~l] ~m"))
-.Last.value <- glmSparseNet:::show.message(FALSE)
+.Last.value <- glmSparseNet:::.showMessage(FALSE)
 
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
@@ -352,6 +353,7 @@ selected_genes[["Orphan"]] <- Filter(
 Uses regular glmnet model as simple baseline
 
 ```{r, warning=FALSE, error=FALSE, eval=!is.null(brca)}
+library(glmnet)
 cv.glm <- cv.glmnet(xdata,
   Surv(ydata$time, ydata$status),
   family = "cox",

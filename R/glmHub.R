@@ -7,7 +7,10 @@
 #' Cross-validation with the same penalization: [cv.glmHub()].
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 5)
-#' glmHub(xdata, rnorm(nrow(xdata)), "correlation",
+#' glmHub(
+#'   xdata,
+#'   rnorm(nrow(xdata)),
+#'   "correlation",
 #'   family = "gaussian",
 #'   options = networkOptions(min.degree = .2)
 #' )
@@ -22,11 +25,11 @@ glmHub <- function(
     ...) {
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(network.options)) {
-    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    .deprecatedDotParam("cv.glmSparseNet", "network.options")
     options <- network.options
   }
   if (lifecycle::is_present(experiment.name)) {
-    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    .deprecatedDotParam("cv.glmSparseNet", "experiment")
     experiment <- experiment.name
   }
   # Lifecycle management: end
@@ -73,11 +76,11 @@ cv.glmHub <- function(
     ...) {
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(network.options)) {
-    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    .deprecatedDotParam("cv.glmSparseNet", "network.options")
     options <- network.options
   }
   if (lifecycle::is_present(experiment.name)) {
-    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    .deprecatedDotParam("cv.glmSparseNet", "experiment.name")
     experiment <- experiment.name
   }
   # Lifecycle management: end

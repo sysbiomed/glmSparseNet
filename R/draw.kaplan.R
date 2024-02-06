@@ -90,7 +90,7 @@ separate2GroupsCox <- function(
   if (inherits(chosen.btas, "numeric")) chosen.btas <- list(chosen.btas)
 
   # convert between compatible formats
-  xdata <- as.matrix(xdata)
+  xdata <- Matrix::as.matrix(xdata)
 
   if (nrow(xdata) != nrow(ydata)) {
     rlang::abort(

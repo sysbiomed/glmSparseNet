@@ -23,7 +23,7 @@ calculate.combined.score <- function(all.interactions,
   }
 
   # normalize between 0 and 1
-  mat <- as.matrix(
+  mat <- Matrix::as.matrix(
     dplyr::select(all.interactions, -dplyr::starts_with("protein"))
   ) / 1000
   non_homology.ixs <- which(colnames(mat) != "homology")

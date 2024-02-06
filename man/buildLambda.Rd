@@ -17,20 +17,26 @@ buildLambda(
 )
 }
 \arguments{
+\item{lambdaLargest}{numeric value for largest number of lambda to consider
+(usually with a target of 1 selected variable)}
+
 \item{xdata}{X parameter for glmnet function}
 
 \item{ydata}{Y parameter for glmnet function}
 
 \item{family}{family parameter to glmnet function}
 
-\item{lambda.largest}{numeric value for largest number of lambda to consider
-(usually with a target of 1 selected variable)}
-
-\item{orders.of.magnitude.smaller}{minimum value for lambda
+\item{ordersOfMagnitudeSmaller}{minimum value for lambda
 (lambda.largest / 10^orders.of.magnitude.smaller)}
 
-\item{lambda.per.order.magnitude}{how many lambdas to create for each order
+\item{lambdaPerOrderMagnitude}{how many lambdas to create for each order
 of magnitude}
+
+\item{lambda.largest}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{orders.of.magnitude.smaller}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{lambda.per.order.magnitude}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 }
 \value{
 a numeric vector with suitable lambdas

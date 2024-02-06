@@ -25,11 +25,11 @@ glmDegree <- function(
     ...) {
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(network.options)) {
-    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    .deprecatedDotParam("cv.glmSparseNet", "network.options")
     options <- network.options
   }
   if (lifecycle::is_present(experiment.name)) {
-    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    .deprecatedDotParam("cv.glmSparseNet", "experiment.name")
     experiment <- experiment.name
   }
   # Lifecycle management: end
@@ -79,11 +79,11 @@ cv.glmDegree <- function(
     ...) {
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(network.options)) {
-    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    .deprecatedDotParam("cv.glmSparseNet", "network.options")
     options <- network.options
   }
   if (lifecycle::is_present(experiment)) {
-    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    .deprecatedDotParam("cv.glmSparseNet", "experiment.name")
     experiment <- experiment.name
   }
   # Lifecycle management: end

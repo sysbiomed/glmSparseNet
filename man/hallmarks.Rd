@@ -39,9 +39,3 @@ limit between 0 and 1 for cprob and -1 and 1 for npmi
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#defunct}{\figure{lifecycle-defunct.svg}{options: alt='[Defunct]'}}}{\strong{[Defunct]}}
 The API has been removed and this function is no longer available.
 }
-\examples{
-hallmarks(c("MOB1A", "RFLNB", "SPIC"))
-\donttest{
-hallmarks(c("MOB1A", "RFLNB", "SPIC"), metric = "cprob")
-}
-}

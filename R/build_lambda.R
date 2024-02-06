@@ -1,14 +1,17 @@
 #' Auxiliary function to generate suitable lambda parameters
 #'
-#' @param lambda.largest numeric value for largest number of lambda to consider
+#' @param lambdaLargest numeric value for largest number of lambda to consider
 #' (usually with a target of 1 selected variable)
 #' @param xdata X parameter for glmnet function
 #' @param ydata Y parameter for glmnet function
 #' @param family family parameter to glmnet function
-#' @param orders.of.magnitude.smaller minimum value for lambda
+#' @param ordersOfMagnitudeSmaller minimum value for lambda
 #' (lambda.largest / 10^orders.of.magnitude.smaller)
-#' @param lambda.per.order.magnitude how many lambdas to create for each order
+#' @param lambdaPerOrderMagnitude how many lambdas to create for each order
 #' of magnitude
+#' @param lambda.largest `r lifecycle::badge("deprecated")`
+#' @param orders.of.magnitude.smaller `r lifecycle::badge("deprecated")`
+#' @param lambda.per.order.magnitude `r lifecycle::badge("deprecated")`
 #'
 #' @return a numeric vector with suitable lambdas
 #' @export
@@ -26,28 +29,30 @@ buildLambda <- function(
     lambda.largest = deprecated(),
     orders.of.magnitude.smaller = deprecated(),
     lambda.per.order.magnitude = deprecated()) {
+  # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(lambda.largest)) {
-    .deprecated_dot_param("buildLambda", "lambda.largest")
-    lambda_largest <- lambda.largest
+    .deprecatedDotParam("buildLambda", "lambda.largest")
+    lambdaLargest <- lambda.largest
   }
   if (lifecycle::is_present(orders.of.magnitude.smaller)) {
-    .deprecated_dot_param("buildLambda", "orders.of.magnitude.smaller")
-    orders_of_magnitude_smaller <- orders.of.magnitude.smaller
+    .deprecatedDotParam("buildLambda", "orders.of.magnitude.smaller")
+    ordersOfMagnitudeSmaller <- orders.of.magnitude.smaller
   }
   if (lifecycle::is_present(lambda.per.order.magnitude)) {
-    .deprecated_dot_param("buildLambda", "lambda.per.order.magnitude")
-    lambda_per_order_magnitude <- lambda.per.order.magnitude
+    .deprecatedDotParam("buildLambda", "lambda.per.order.magnitude")
+    lambdaPerOrderMagnitude <- lambda.per.order.magnitude
   }
+  # Lifecycle management: end
 
-  if (!is.null(lambda_largest)) {
-    lambda_first <- lambda_largest
+  if (!is.null(lambdaLargest)) {
+    lambda_first <- lambdaLargest
   } else if (!is.null(xdata) && !is.null(ydata) && !is.null(family)) {
     fitted <- glmnet::glmnet(xdata, ydata, family = family)
     lambda_first <- fitted$lambda[1]
   }
 
-  lambda_nrow <- lambda_per_order_magnitude
-  lambda_ncol <- orders_of_magnitude_smaller
+  lambda_nrow <- lambdaPerOrderMagnitude
+  lambda_ncol <- ordersOfMagnitudeSmaller
 
   lambda <- (
     matrix(

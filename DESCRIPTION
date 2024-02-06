@@ -35,7 +35,6 @@ Imports:
     dplyr,
     forcats,
     futile.logger,
-    futile.options,
     ggplot2,
     glue,
     httr,
@@ -59,7 +58,8 @@ Suggests:
     survcomp,
     survival,
     testthat,
-    VennDiagram
+    VennDiagram,
+    withr
 VignetteBuilder: 
     knitr
 RdMacros:

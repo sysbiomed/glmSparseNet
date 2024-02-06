@@ -67,11 +67,11 @@ glmSparseNet <- function(
     ...) {
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(network.options)) {
-    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    .deprecatedDotParam("cv.glmSparseNet", "network.options")
     options <- network.options
   }
   if (lifecycle::is_present(experiment.name)) {
-    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    .deprecatedDotParam("cv.glmSparseNet", "experiment.name")
     experiment <- experiment.name
   }
   # Lifecycle management: end
@@ -91,10 +91,10 @@ glmSparseNet <- function(
 #'
 #' network parameter accepts:
 #'
-#'  * string to calculate network based on data (correlation, covariance)
-#'  * matrix representing the network
-#'  * vector with already calculated penalty weights (can also be used directly
-#'    glmnet)
+#' * string to calculate network based on data (correlation, covariance)
+#' * matrix representing the network
+#' * vector with already calculated penalty weights (can also be used directly
+#' glmnet)
 #'
 #' @inheritParams glmSparseNet
 #' @param ... parameters that [glmnet::cv.glmnet()] accepts.
@@ -164,11 +164,11 @@ cv.glmSparseNet <- function(
     ...) {
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(network.options)) {
-    .deprecated_dot_param("cv.glmSparseNet", "network.options")
+    .deprecatedDotParam("cv.glmSparseNet", "network.options")
     options <- network.options
   }
   if (lifecycle::is_present(experiment.name)) {
-    .deprecated_dot_param("cv.glmSparseNet", "experiment.name")
+    .deprecatedDotParam("cv.glmSparseNet", "experiment.name")
     experiment <- experiment.name
   }
   # Lifecycle management: end

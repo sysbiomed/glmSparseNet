@@ -16,10 +16,7 @@ digest.cache <- function(val) {
 #' Temporary directory for runCache
 #'
 #' @return a path to a temporary directory used by runCache
-tempdir.cache <- function() {
-  base.dir <- getwd()
-  return(file.path(base.dir, "run-cache"))
-}
+tempdir.cache <- function() file.path(getwd(), "run-cache")
 
 #' Run function and save cache
 #'
@@ -41,7 +38,7 @@ tempdir.cache <- function() {
 #' @examples
 #' # [optional] save cache in a temporary directory
 #' #
-#' glmSparseNet:::base.dir(tempdir())
+#' glmSparseNet:::.baseDir(tempdir())
 #' glmSparseNet:::run.cache(c, 1, 2, 3, 4)
 #' #
 #' # next three should use the same cache
@@ -54,15 +51,16 @@ tempdir.cache <- function() {
 #' # Using a local folder
 #' # glmSparseNet:::run.cache(c, 1, 2, 3, 4, base.dir = "runcache")
 #' }
-methods::setGeneric("run.cache", function(fun,
-                                          ...,
-                                          seed = NULL,
-                                          base.dir = NULL,
-                                          cache.prefix = "generic_cache",
-                                          cache.digest = list(),
-                                          show.message = NULL,
-                                          force.recalc = FALSE,
-                                          add.to.hash = NULL) {
+methods::setGeneric("run.cache", function(
+    fun,
+    ...,
+    seed = NULL,
+    base.dir = NULL,
+    cache.prefix = "generic_cache",
+    cache.digest = list(),
+    show.message = NULL,
+    force.recalc = FALSE,
+    add.to.hash = NULL) {
   message(
     "Wrong arguments, first argument must be a path and second a function!"
   )
@@ -182,7 +180,7 @@ create.directory.for.cache <- function(base.dir, parent.path) {
       "'", base.dir, "'",
       "... trying to use current working directory"
     )
-    base.dir <- glmSparseNet.options("base.dir")
+    base.dir <- getOption("glmSparseNet.base_dir")
     dir.create(base.dir, showWarnings = FALSE)
 
     if (!dir.exists(base.dir)) {
@@ -201,7 +199,7 @@ create.directory.for.cache <- function(base.dir, parent.path) {
       ".. trying to use globally defined base.dir or ",
       "if it fails current directory"
     )
-    base.dir <- glmSparseNet.options("base.dir")
+    base.dir <- getOption("glmSparseNet.base_dir")
     parent.dir <- file.path(base.dir, parent.path)
     dir.create(parent.dir, showWarnings = FALSE, recursive = TRUE)
 
@@ -280,12 +278,12 @@ methods::setMethod(
     #
     # base.dir
     if (is.null(base.dir)) {
-      base.dir <- glmSparseNet.options("base.dir")
+      base.dir <- getOption("glmSparseNet.base_dir")
     }
     if (is.null(show.message)) {
-      show.message <- glmSparseNet.options("show.message")
+      show.message <- getOption("glmSparseNet.show_message")
     }
-    compression <- glmSparseNet.options("compression")
+    compression <- getOption("glmSparseNet.compression")
 
     #
     args <- list(...)

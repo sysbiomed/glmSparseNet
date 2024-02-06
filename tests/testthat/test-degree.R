@@ -5,7 +5,8 @@ cor.p <- abs(cor(xdata, method = "pearson")) - diag(ncol(xdata))
 cor.s <- abs(cor(xdata, method = "spearman")) - diag(ncol(xdata))
 
 # use a temporary directory that can be written
-glmSparseNet:::base.dir(tempdir())
+withr::local_tempdir(pattern = "base.dir") |>
+  .baseDir()
 
 context("Degree - Correlation - Pearson")
 
@@ -20,7 +21,7 @@ test_that("Degree with cutoff", {
     n.cores = 2,
     force.recalc.degree = TRUE,
     force.recalc.network = TRUE
-  ) - colSums(cor.p.0.5)
+  ) - Matrix::colSums(cor.p.0.5)
   expect_lt(sum(abs(diff.degree)), 5e-14)
 })
 
@@ -33,7 +34,7 @@ test_that("Degree forcing recalculation", {
     n.cores = 2,
     force.recalc.degree = TRUE,
     force.recalc.network = TRUE
-  ) - colSums(cor.p)
+  ) - Matrix::colSums(cor.p)
   expect_lt(sum(abs(diff.degree)), 5e-14)
 })
 
@@ -45,7 +46,7 @@ test_that("Degree forcing recalculation of degree only", {
     chunks = 10,
     n.cores = 2,
     force.recalc.degree = TRUE
-  ) - colSums(cor.p)
+  ) - Matrix::colSums(cor.p)
   expect_lt(sum(abs(diff.degree)), 5e-14)
 })
 
@@ -57,7 +58,7 @@ test_that("Degree using cache", {
     chunks = 10,
     n.cores = 2,
     force.recalc.degree = FALSE
-  ) - colSums(cor.p)
+  ) - Matrix::colSums(cor.p)
   diff.degree <- degreeCor(
     xdata,
     method = "pearson",
@@ -65,7 +66,7 @@ test_that("Degree using cache", {
     chunks = 10,
     n.cores = 2,
     force.recalc.degree = FALSE
-  ) - colSums(cor.p)
+  ) - Matrix::colSums(cor.p)
   expect_lt(sum(abs(diff.degree)), 5e-14)
 })
 
@@ -82,7 +83,7 @@ test_that("Degree with cutoff", {
     n.cores = 2,
     force.recalc.degree = TRUE,
     force.recalc.network = TRUE
-  ) - colSums(cor.s.0.5)
+  ) - Matrix::colSums(cor.s.0.5)
   expect_lt(sum(abs(diff.degree)), 5e-14)
 })
 
@@ -95,7 +96,7 @@ test_that("Degree forcing recalculation of all", {
     n.cores = 2,
     force.recalc.degree = TRUE,
     force.recalc.network = TRUE
-  ) - colSums(cor.s)
+  ) - Matrix::colSums(cor.s)
   expect_lt(sum(abs(diff.degree)), 5e-14)
 })
 
@@ -108,7 +109,7 @@ test_that("Degree forcing recalculation of degree", {
     n.cores = 2,
     force.recalc.degree = TRUE,
     force.recalc.network = TRUE
-  ) - colSums(cor.s)
+  ) - Matrix::colSums(cor.s)
   diff.degree <- degreeCor(
     xdata,
     method = "spearman",
@@ -116,7 +117,7 @@ test_that("Degree forcing recalculation of degree", {
     chunks = 10,
     n.cores = 2,
     force.recalc.degree = TRUE
-  ) - colSums(cor.s)
+  ) - Matrix::colSums(cor.s)
   expect_lt(sum(abs(diff.degree)), 5e-14)
 })
 
@@ -130,7 +131,7 @@ test_that("Degree using cache", {
     n.cores = 2,
     force.recalc.degree = TRUE,
     force.recalc.network = TRUE
-  ) - colSums(cor.s)
+  ) - Matrix::colSums(cor.s)
   # actual call to get from cache
   diff.degree <- degreeCor(
     xdata,
@@ -139,6 +140,6 @@ test_that("Degree using cache", {
     chunks = 10,
     n.cores = 2,
     force.recalc.degree = FALSE
-  ) - colSums(cor.s)
+  ) - Matrix::colSums(cor.s)
   expect_lt(sum(abs(diff.degree)), 5e-14)
 })

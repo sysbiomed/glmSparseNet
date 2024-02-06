@@ -7,7 +7,7 @@
 \usage{
 myColors(ix = NULL)
 
-# deprecated, please use my_colors()
+# deprecated, please use myColors()
 my.colors(ix = NULL)
 }
 \arguments{

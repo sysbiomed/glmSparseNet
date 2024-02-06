@@ -27,7 +27,7 @@ test_that("All combinations of parameters possible for draw.kapan", {
   # list, data.frame, data.frame
   expect_silent(separate2GroupsCox(list(c(1, 0)), xdata, ydata))
   # list, matrix, data.frame
-  expect_silent(separate2GroupsCox(list(c(1, 0)), as.matrix(xdata), ydata))
+  expect_silent(separate2GroupsCox(list(c(1, 0)), Matrix::as.matrix(xdata), ydata))
 
   # list, numeric, data.frame
   expect_silent(separate2GroupsCox(list(c(1)), xdata$age, ydata))
@@ -37,7 +37,7 @@ test_that("All combinations of parameters possible for draw.kapan", {
   # numeric, data.frame, data.frame
   expect_silent(separate2GroupsCox(c(1, 0), xdata, ydata))
   # numeric, matrix, data.frame
-  expect_silent(separate2GroupsCox(c(1, 0), as.matrix(xdata), ydata))
+  expect_silent(separate2GroupsCox(c(1, 0), Matrix::as.matrix(xdata), ydata))
 })
 
 test_that("Some bad arguments for separate2GroupsCox", {
@@ -48,7 +48,7 @@ test_that("Some bad arguments for separate2GroupsCox", {
   expect_error(separate2GroupsCox(list(c(1, 0), c(0, 1, 2)), xdata, ydata))
   # list, matrix, data.frame
   expect_error(
-    separate2GroupsCox(list(c(1, 0)), as.matrix(xdata), ydata[1:10, ])
+    separate2GroupsCox(list(c(1, 0)), Matrix::as.matrix(xdata), ydata[1:10, ])
   )
 
   # list, numeric, data.frame
@@ -59,5 +59,5 @@ test_that("Some bad arguments for separate2GroupsCox", {
   # numeric, data.frame, data.frame
   expect_error(separate2GroupsCox(c(1, 0, 1), xdata, ydata))
   # numeric, matrix, data.frame
-  expect_error(separate2GroupsCox(c(1, 0), t(as.matrix(xdata)), ydata))
+  expect_error(separate2GroupsCox(c(1, 0), t(Matrix::as.matrix(xdata)), ydata))
 })

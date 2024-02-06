@@ -108,7 +108,7 @@ networkOptions <- function(method = "pearson",
 #' hubHeuristic(rnorm(1:10))
 hubHeuristic <- function(x) {
   x <- x / max(x)
-  return(heuristic_scale(1 - x))
+  heuristicScale(1 - x)
 }
 
 #' Heuristic function to penalize nodes with high degree
@@ -122,7 +122,7 @@ hubHeuristic <- function(x) {
 #' orphanHeuristic(rnorm(1:10))
 orphanHeuristic <- function(x) {
   x <- x / max(x)
-  return(heuristicScale(x))
+  heuristicScale(x)
 }
 
 #' Heuristic function to use in high dimensions
@@ -140,6 +140,28 @@ orphanHeuristic <- function(x) {
 #'
 #' @examples
 #' heuristicScale(rnorm(1:10))
-heuristicScale <- function(x, sub.exp10 = -1, exp.mult = -1, sub.exp = -1) {
-  return(sub.exp10 + 10^(-exp.mult * (exp(x) + sub.exp)))
+heuristicScale <- function(
+    x,
+    subExp10 = -1,
+    expMult = -1,
+    subExp = -1,
+    sub.exp10 = deprecated(),
+    exp.mult = deprecated(),
+    sub.exp = deprecated()) {
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(sub.exp10)) {
+    .deprecatedDotParam("heuristicScale", "sub.exp10")
+    subExp10 <- sub.exp10
+  }
+  if (lifecycle::is_present(exp.mult)) {
+    .deprecatedDotParam("heuristicScale", "exp.mult")
+    expMult <- exp.mult
+  }
+  if (lifecycle::is_present(sub.exp)) {
+    .deprecatedDotParam("heuristicScale", "sub.exp")
+    subExp <- sub.exp
+  }
+  # Lifecycle management: end
+
+  subExp10 + 10^(-expMult * (exp(x) + subExp))
 }

@@ -4,7 +4,15 @@
 \alias{heuristicScale}
 \title{Heuristic function to use in high dimensions}
 \usage{
-heuristicScale(x, sub.exp10 = -1, exp.mult = -1, sub.exp = -1)
+heuristicScale(
+  x,
+  subExp10 = -1,
+  expMult = -1,
+  subExp = -1,
+  sub.exp10 = deprecated(),
+  exp.mult = deprecated(),
+  sub.exp = deprecated()
+)
 }
 \arguments{
 \item{x}{vector of values to scale}
