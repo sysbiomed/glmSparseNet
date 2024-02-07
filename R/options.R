@@ -1,5 +1,5 @@
 
-#' Change cache.compression for run.cache
+#' Change cache.compression for run_cache
 #'
 #' @param compression see compression parameter in save function
 #'
@@ -13,7 +13,7 @@
   getOption("glmSparseNet.compression")
 }
 
-#' Change base.dir for run.cache
+#' Change base dir for `.runCache
 #'
 #' @param path to base directory where cache is saved
 #'
@@ -24,10 +24,10 @@
 .baseDir <- function(path = NULL) {
   checkmate::assert_string(path, null.ok = TRUE)
   if (!is.null(path)) options("glmSparseNet.base_dir" = path)
-  getOption("glmSparseNet.base.dir")
+  getOption("glmSparseNet.base_dir")
 }
 
-#' Show messages option in run.cache
+#' Show messages option in .runCache
 #'
 #' @param show.message boolean indicating to show messages or not
 #'

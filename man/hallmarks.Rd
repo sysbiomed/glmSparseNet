@@ -21,7 +21,7 @@ hallmarks(
 
 \item{generate.plot}{flag to indicate if return object has a ggplot2 object}
 
-\item{show.message}{flag to indicate if run.cache method shows messages}
+\item{show.message}{flag to indicate if run_cache method shows messages}
 }
 \value{
 data.frame with choosen metric and hierarchy

@@ -2,9 +2,9 @@
 % Please edit documentation in R/options.R
 \name{.showMessage}
 \alias{.showMessage}
-\title{Show messages option in run.cache}
+\title{Show messages option in .runCache}
 \usage{
-.showMessage(show.message = NULL)
+.showMessage(showMessage = NULL)
 }
 \arguments{
 \item{show.message}{boolean indicating to show messages or not}
@@ -13,7 +13,7 @@
 the show.message option
 }
 \description{
-Show messages option in run.cache
+Show messages option in .runCache
 }
 \examples{
 glmSparseNet:::.showMessage(FALSE)

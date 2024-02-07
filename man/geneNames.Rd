@@ -4,12 +4,18 @@
 \alias{geneNames}
 \title{Retrieve gene names from biomaRt}
 \usage{
-geneNames(ensembl.genes, use.cache = TRUE, verbose = FALSE)
+geneNames(
+  ensemblGenes,
+  useCache = TRUE,
+  verbose = FALSE,
+  ensembl.genes = deprecated(),
+  use.cache = deprecated()
+)
 }
 \arguments{
-\item{ensembl.genes}{character vector with gene names in ensembl_id format}
+\item{ensemblGenes}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 
-\item{use.cache}{Boolean indicating if biomaRt cache should be used}
+\item{useCache}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 
 \item{verbose}{When using biomaRt in webservice mode and setting verbose to
 TRUE, the XML query to the webservice will be printed.}

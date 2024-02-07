@@ -4,14 +4,14 @@
 \alias{.calcPenalty}
 \title{Calculate penalty based on data}
 \usage{
-.calcPenalty(xdata, penalty.type, network.options = networkOptions())
+.calcPenalty(xdata, penaltyType, options = networkOptions())
 }
 \arguments{
 \item{xdata}{input data}
 
-\item{penalty.type}{which method to use}
+\item{penaltyType}{which method to use}
 
-\item{network.options}{options to be used}
+\item{options}{options to be used}
 }
 \value{
 vector with penalty weights

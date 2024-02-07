@@ -3,19 +3,22 @@
 #' Setup network options, such as using weighted or unweighted degree,
 #'  which centrality measure to use
 #'
-#' @param trans.fun see below
-#' @param min.degree minimum value that individual penalty weight can take
-#' @param method in case of correlation and covariance, which method to use
-#' @param unweighted calculate degree using unweighted network
-#' @param cutoff cuttoff value in network edges to trim the network
-#' @param centrality centrality measure to use, currently only supports degree
-#' @param n.cores number of cores to use, default to 1
+#' @param method in case of correlation and covariance, which method to use.
+#' @param unweighted calculate degree using unweighted network.
+#' @param cutoff cuttoff value in network edges to trim the network.
+#' @param centrality centrality measure to use, currently only supports degree.
+#' @param minDegree minimum value that individual penalty weight can take.
+#' @param nCores number of cores to use, default to 1.
+#' @param transFun See details below.
+#' @param min.degree `r lifecycle::badge("deprecated")`
+#' @param n.cores `r lifecycle::badge("deprecated")`
+#' @param trans.fun `r lifecycle::badge("deprecated")`
 #'
 #' The trans.fun argument takes a function definition that will apply a
 #' transformation to the penalty vector calculated from the degree. This
 #' transformation allows to change how the penalty is applied.
 #'
-#' @seealso glmOrphan glmDegree
+#' @seealso [glmOrphan()] and [glmDegree()]
 #'
 #' @return a list of options
 #' @export
@@ -27,17 +30,37 @@ networkOptions <- function(
     unweighted = TRUE,
     cutoff = 0,
     centrality = "degree",
-    min.degree = 0,
-    n.cores = 1,
-    trans.fun = function(x) x) {
+    minDegree = 0,
+    nCores = 1,
+    transFun = function(x) x,
+    # deprecated arguments
+    min.degree = deprecated(), # nolint: object_name_linter.
+    n.cores = deprecated(), # nolint: object_name_linter.
+    trans.fun = deprecated()) { # nolint: object_name_linter.
+
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(min.degree)) {
+    .deprecatedDotParam("networkOptions", "min.degree")
+    minDegree <- min.degree
+  }
+  if (lifecycle::is_present(n.cores)) {
+    .deprecatedDotParam("networkOptions", "n.cores")
+    nCores <- n.cores
+  }
+  if (lifecycle::is_present(trans.fun)) {
+    .deprecatedDotParam("networkOptions", "trans.fun")
+    transFun <- trans.fun
+  }
+  # Lifecycle management: end
+
   list(
     method = method,
     unweighted = unweighted,
     cutoff = cutoff,
     centrality = centrality,
-    n.cores = n.cores,
-    min.degree = min.degree,
-    trans.fun = trans.fun
+    n.cores = nCores,
+    min.degree = minDegree,
+    trans.fun = transFun
   )
 }
 
@@ -46,8 +69,8 @@ networkOptions <- function(
 #' Internal method to calculate the network using data-dependant methods
 #'
 #' @param xdata input data
-#' @param penalty.type which method to use
-#' @param network.options options to be used
+#' @param penaltyType which method to use
+#' @param options options to be used
 #'
 #' @return vector with penalty weights
 #'
@@ -64,25 +87,24 @@ networkOptions <- function(
 #'   networkOptions(cutoff = .6)
 #' )
 #' glmSparseNet:::.calcPenalty(xdata, "covariance")
-.calcPenalty <- function(xdata, penalty.type,
-                         network.options = networkOptions()) {
-  if (network.options$centrality == "degree") {
-    penalty.factor <- switch(penalty.type,
+.calcPenalty <- function(xdata, penaltyType, options = networkOptions()) {
+  if (options$centrality == "degree") {
+    penaltyFactor <- switch(penaltyType,
       correlation = degreeCor(
         xdata,
-        method = network.options$method,
-        consider.unweighted = network.options$unweighted,
-        cutoff = network.options$cutoff,
+        method = options$method,
+        consider.unweighted = options$unweighted,
+        cutoff = options$cutoff,
         #
-        n.cores = network.options$n.cores
+        n.cores = options$n.cores
       ),
       covariance = degreeCov(
         xdata,
-        method = network.options$method,
-        consider.unweighted = network.options$unweighted,
-        cutoff = network.options$cutoff,
+        method = options$method,
+        consider.unweighted = options$unweighted,
+        cutoff = options$cutoff,
         #
-        n.cores = network.options$n.cores
+        n.cores = options$n.cores
       ),
       none = rep(1, ncol(xdata)),
       stop("Unkown network type, see documentation of glmSparseNet")
@@ -90,10 +112,10 @@ networkOptions <- function(
   } else {
     stop(sprintf(
       "Centrality method not recognised: %d",
-      network.options$centrality
+      options$centrality
     ))
   }
-  return(network.options$trans.fun(penalty.factor))
+  options$trans.fun(penaltyFactor)
 }
 
 #' Heuristic function to penalize nodes with low degree
@@ -147,9 +169,9 @@ heuristicScale <- function(
     subExp10 = -1,
     expMult = -1,
     subExp = -1,
-    sub.exp10 = deprecated(),
-    exp.mult = deprecated(),
-    sub.exp = deprecated()) {
+    sub.exp10 = deprecated(), # nolint: object_name_linter.
+    exp.mult = deprecated(), # nolint: object_name_linter.
+    sub.exp = deprecated()) { # nolint: object_name_linter.
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(sub.exp10)) {
     .deprecatedDotParam("heuristicScale", "sub.exp10")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/options.R
 \name{.cacheCompression}
 \alias{.cacheCompression}
-\title{Change cache.compression for run.cache}
+\title{Change cache.compression for run_cache}
 \usage{
 .cacheCompression(compression = NULL)
 }
@@ -13,7 +13,7 @@
 the new compression
 }
 \description{
-Change cache.compression for run.cache
+Change cache.compression for run_cache
 }
 \examples{
 glmSparseNet:::.cacheCompression("bzip2")

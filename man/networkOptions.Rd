@@ -9,31 +9,38 @@ networkOptions(
   unweighted = TRUE,
   cutoff = 0,
   centrality = "degree",
-  min.degree = 0,
-  n.cores = 1,
-  trans.fun = function(x) {
-     x
- }
+  minDegree = 0,
+  nCores = 1,
+  transFun = function(x) x,
+  min.degree = deprecated(),
+  n.cores = deprecated(),
+  trans.fun = deprecated()
 )
 }
 \arguments{
-\item{method}{in case of correlation and covariance, which method to use}
+\item{method}{in case of correlation and covariance, which method to use.}
 
-\item{unweighted}{calculate degree using unweighted network}
+\item{unweighted}{calculate degree using unweighted network.}
 
-\item{cutoff}{cuttoff value in network edges to trim the network}
+\item{cutoff}{cuttoff value in network edges to trim the network.}
 
-\item{centrality}{centrality measure to use, currently only supports degree}
+\item{centrality}{centrality measure to use, currently only supports degree.}
 
-\item{min.degree}{minimum value that individual penalty weight can take}
+\item{minDegree}{minimum value that individual penalty weight can take.}
 
-\item{n.cores}{number of cores to use, default to 1
+\item{nCores}{number of cores to use, default to 1.}
+
+\item{transFun}{See details below.}
+
+\item{min.degree}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{n.cores}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{trans.fun}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
 
 The trans.fun argument takes a function definition that will apply a
 transformation to the penalty vector calculated from the degree. This
 transformation allows to change how the penalty is applied.}
-
-\item{trans.fun}{see below}
 }
 \value{
 a list of options
@@ -46,5 +53,5 @@ which centrality measure to use
 networkOptions(unweighted = FALSE)
 }
 \seealso{
-glmOrphan glmDegree
+\code{\link[=glmOrphan]{glmOrphan()}} and \code{\link[=glmDegree]{glmDegree()}}
 }

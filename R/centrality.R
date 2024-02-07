@@ -96,14 +96,16 @@ networkCovParallel <- function(xdata,
       function(ix.i) {
         tryCatch(
           {
-            result <- run.cache(
-              .networkWorker, fun,
-              xdata, ix.i,
-              #
-              cache.digest = list(xdata.sha256),
-              cache.prefix = fun.prefix,
-              show.message = show.message,
-              force.recalc = force.recalc.network,
+            result <- .runCache(
+              .networkWorker,
+              fun,
+              xdata,
+              ix.i,
+              # run_cache arguments
+              cache_digest = list(xdata.sha256),
+              cache_prefix = fun.prefix,
+              show_message = show.message,
+              force_recalc = force.recalc.network,
               ...
             )
           },
@@ -124,12 +126,14 @@ networkCovParallel <- function(xdata,
     )
     return(result)
   }
-  result <- run.cache(fun.aux, xdata,
-    #
-    cache.prefix = "fun.aux",
-    cache.digest = list(xdata.sha256),
-    force.recalc = force.recalc.network,
-    show.message = show.message,
+  result <- .runCache(
+    fun.aux,
+    xdata,
+    # run_cache arguments
+    cache_prefix = "fun.aux",
+    cache_digest = list(xdata.sha256),
+    force_recalc = force.recalc.network,
+    show_message = show.message,
     ...
   )
   if (build.output == "vector") {
@@ -182,16 +186,32 @@ networkCovParallel <- function(xdata,
 #' degreeCor(xdata)
 #' degreeCor(xdata, cutoff = .5)
 #' degreeCor(xdata, cutoff = .5, consider.unweighted = TRUE)
-degreeCor <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
-                      force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                      n.cores = 1, ...) {
-  return(.degreeGeneric(stats::cor, "correlation", xdata,
+degreeCor <- function(
+    xdata,
+    cutoff = 0,
+    consider.unweighted = FALSE,
+    force.recalc.degree = FALSE,
+    force.recalc.network = FALSE,
+    n.cores = 1,
+    ...) {
+  checkmate::assert_matrix(xdata)
+  checkmate::assert_double(cutoff, len = 1)
+  checkmate::assert_integerish(n.cores, lower = 1)
+  checkmate::assert_flag(consider.unweighted)
+  checkmate::assert_flag(force.recalc.degree)
+  checkmate::assert_flag(force.recalc.network)
+
+  .degreeGeneric(
+    stats::cor,
+    "correlation",
+    xdata,
     cutoff = cutoff,
     consider.unweighted = consider.unweighted,
     force.recalc.degree = force.recalc.degree,
     force.recalc.network = force.recalc.network,
-    n.cores = n.cores, ...
-  ))
+    n.cores = n.cores,
+    ...
+  )
 }
 
 #' Calculate the degree of the covariance network based on xdata
@@ -317,14 +337,20 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
     degree <- array(0, ncol(xdata))
     for (ix.outer in seq(1, ncol(xdata) - 1, chunks)) {
       max.ix <- min(ix.outer + chunks - 1, ncol(xdata) - 1)
-      res.chunks <- run.cache(
-        chunk.function, xdata, max.ix,
-        ix.outer, n.cores, cutoff,
-        consider.unweighted, ...,
-        cache.digest = list(xdata.sha256),
-        cache.prefix = fun.prefix,
-        show.message = FALSE,
-        force.recalc = force.recalc.network
+      res.chunks <- .runCache(
+        chunk.function,
+        xdata,
+        max.ix,
+        ix.outer,
+        n.cores,
+        cutoff,
+        consider.unweighted,
+        ...,
+        # run_cache arguments
+        cache_digest = list(xdata.sha256),
+        cache_prefix = fun.prefix,
+        show_message = FALSE,
+        force_recalc = force.recalc.network
       )
       #
       res.chunks <- matrix(unlist(res.chunks),
@@ -338,12 +364,16 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
   #
   xdata.sha256 <- .digestCache(xdata)
 
-  val <- run.cache(
-    weigthed.aux, xdata, cutoff, consider.unweighted,
-    cache.digest = list(xdata.sha256),
-    cache.prefix = sprintf("degree.%s", fun.prefix),
-    show.message = FALSE,
-    force.recalc = force.recalc.degree, ...
+  val <- .runCache(
+    weigthed.aux,
+    xdata,
+    cutoff,
+    consider.unweighted,
+    # run_cache arguments
+    cache_digest = list(xdata.sha256),
+    cache_prefix = sprintf("degree.%s", fun.prefix),
+    show_message = FALSE,
+    force_recalc = force.recalc.degree, ...
   )
   return(val)
 }

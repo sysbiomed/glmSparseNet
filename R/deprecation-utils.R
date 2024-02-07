@@ -56,7 +56,7 @@ my.symbols <- function(ix = NULL) { # nolint: object_name_linter.
 #' @param metric see below
 #' @param hierarchy see below
 #' @param generate.plot flag to indicate if return object has a ggplot2 object
-#' @param show.message flag to indicate if run.cache method shows messages
+#' @param show.message flag to indicate if run_cache method shows messages
 #'
 #' @return data.frame with choosen metric and hierarchy
 #' It also returns a vector with genes that do not have any

@@ -2,7 +2,7 @@
 % Please edit documentation in R/options.R
 \name{.baseDir}
 \alias{.baseDir}
-\title{Change base.dir for run.cache}
+\title{Change base dir for `.runCache}
 \usage{
 .baseDir(path = NULL)
 }
@@ -13,7 +13,7 @@
 the new path
 }
 \description{
-Change base.dir for run.cache
+Change base dir for `.runCache
 }
 \examples{
 glmSparseNet:::.baseDir("/tmp/cache")

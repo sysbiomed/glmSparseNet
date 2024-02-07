@@ -8,14 +8,14 @@
 #'
 #' @examples
 #' \donttest{
-#' glmSparseNet:::curl.workaround({
+#' glmSparseNet:::.curl_workaround({
 #'   biomaRt::useEnsembl(
 #'     biomart = "genes",
 #'     dataset = "hsapiens_gene_ensembl"
 #'   )
 #' })
 #' }
-curl.workaround <- function(expr) {
+.curl_workaround <- function(expr) {
   result <- tryCatch(
     {
       expr
@@ -64,53 +64,53 @@ curl.workaround <- function(expr) {
 #' filters are specified then the argument should be a list of vectors of
 #' which the position of each vector corresponds to the position of the filters
 #' in the filters argument
-#' @param use.cache Boolean indicating if biomaRt cache should be used
+#' @param useCache Boolean indicating if biomaRt cache should be used
 #' @param verbose When using biomaRt in webservice mode and setting verbose to
 #' TRUE, the XML query to the webservice will be printed.
 #'
 #' @return data.frame with attributes as columns and values translated to them
 #'
 #' @examples
-#' glmSparseNet:::biomart.load(
+#' glmSparseNet:::.biomart_load(
 #'   attributes = c("external_gene_name", "ensembl_gene_id"),
 #'   filters = "external_gene_name",
 #'   values = c("MOB1A", "RFLNB", "SPIC", "TP53"),
-#'   use.cache = TRUE,
+#'   useCache = TRUE,
 #'   verbose = FALSE
 #' )
-biomart.load <- function(
-    attributes, filters, values, use.cache, verbose) {
+.biomart_load <- function(
+    attributes, filters, values, useCache, verbose) {
   # local function that's used twice due to bug with curl
 
-  mart <- curl.workaround({
-    run.cache(
+  mart <- .curl_workaround({
+    .runCache(
       biomaRt::useEnsembl,
       biomart = "genes",
       dataset = "hsapiens_gene_ensembl",
       host = "https://www.ensembl.org",
       verbose = verbose,
-      # run.cache arguments
-      cache.prefix = "biomart.useEnsembl",
-      show.message = FALSE
+      # run_cache arguments
+      cache_prefix = "biomart.useEnsembl",
+      show_message = FALSE
     )
   })
 
   #
   results <- tryCatch(
     {
-      curl.workaround(
+      .curl_workaround(
         biomaRt::getBM(
           attributes = attributes,
           filters = filters,
           values = values,
-          useCache = use.cache,
+          useCache = useCache,
           verbose = verbose,
           mart = mart
         )
       )
     },
     error = function(error) {
-      if (use.cache) {
+      if (useCache) {
         warning(
           "There was a problem getting the genes,",
           " trying without a cache.",
@@ -124,14 +124,14 @@ biomart.load <- function(
     }
   )
 
-  if ((inherits(results, "error") || is.null(results)) && use.cache) {
+  if ((inherits(results, "error") || is.null(results)) && useCache) {
     # retrying without cache
     return(
-      biomart.load(
+      .biomart_load(
         attributes = attributes,
         filters = filters,
         values = values,
-        use.cache = FALSE,
+        useCache = FALSE,
         verbose = verbose
       )
     )
@@ -142,24 +142,42 @@ biomart.load <- function(
 
 #' Retrieve gene names from biomaRt
 #'
-#' @param ensembl.genes character vector with gene names in ensembl_id format
-#' @param use.cache Boolean indicating if biomaRt cache should be used
+#' @param ensemblGenes character vector with gene names in ensembl_id format
+#' @param useCache Boolean indicating if biomaRt cache should be used
 #' @param verbose When using biomaRt in webservice mode and setting verbose to
 #' TRUE, the XML query to the webservice will be printed.
+#' @param ensemblGenes `r lifecycle::badge("deprecated")`
+#' @param useCache `r lifecycle::badge("deprecated")`
 #'
 #' @return a dataframe with external gene names, ensembl_id
 #' @export
 #'
 #' @examples
 #' geneNames(c("ENSG00000114978", "ENSG00000166211", "ENSG00000183688"))
-geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
+geneNames <- function(
+    ensemblGenes,
+    useCache = TRUE,
+    verbose = FALSE,
+    ensembl.genes = deprecated(), # nolint: object_name_linter.
+    use.cache = deprecated()) { # nolint: object_name_linter.
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(ensembl.genes)) {
+    .deprecatedDotParam("cv.glmSparseNet", "ensembl.genes")
+    ensemblGenes <- ensembl.genes
+  }
+  if (lifecycle::is_present(use.cache)) {
+    .deprecatedDotParam("cv.glmSparseNet", "use.cache")
+    useCache <- use.cache
+  }
+  # Lifecycle management: end
+
   tryCatch(
     {
-      results <- biomart.load(
+      results <- .biomart_load(
         attributes = c("external_gene_name", "ensembl_gene_id"),
         filters = "ensembl_gene_id",
-        values = ensembl.genes,
-        use.cache = use.cache,
+        values = ensemblGenes,
+        useCache = useCache,
         verbose = verbose
       )
 
@@ -167,8 +185,8 @@ geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
       # Check if any genes does not have an external_gene_name
       #  and add them with same ensembl_id
       data.frame(
-        external_gene_name = ensembl.genes[
-          !ensembl.genes %in% results$ensembl_gene_id
+        external_gene_name = ensemblGenes[
+          !ensemblGenes %in% results$ensembl_gene_id
         ],
         stringsAsFactors = FALSE
       ) |>
@@ -179,8 +197,8 @@ geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
     error = function(msg) {
       warning(sprintf("Error when finding gene names:\n\t%s", msg))
       data.frame(
-        ensembl_gene_id = ensembl.genes,
-        external_gene_name = ensembl.genes,
+        ensembl_gene_id = ensemblGenes,
+        external_gene_name = ensemblGenes,
         stringsAsFactors = FALSE
       )
     }
@@ -202,7 +220,7 @@ geneNames <- function(ensembl.genes, use.cache = TRUE, verbose = FALSE) {
 ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
   tryCatch(
     {
-      results <- biomart.load(
+      results <- .biomart_load(
         attributes = c("external_gene_name", "ensembl_gene_id"),
         filters = "external_gene_name",
         values = gene.id,
@@ -237,7 +255,7 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
 #'
 #' @param ensembl.proteins character vector with gene names in
 #' ensembl_peptide_id format
-#' @param use.cache Boolean indicating if biomaRt cache should be used
+#' @param useCache Boolean indicating if biomaRt cache should be used
 #' @param verbose When using biomaRt in webservice mode and setting verbose to
 #' TRUE, the XML query to the webservice will be printed.
 #'
@@ -251,15 +269,17 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
 #'   "ENSP00000216911"
 #' ))
 protein2EnsemblGeneNames <- function(
-    ensembl.proteins, use.cache = TRUE, verbose = FALSE) {
+    ensembl.proteins,
+    useCache = TRUE,
+    verbose = FALSE) {
   #
   tryCatch(
     {
-      biomart.load(
+      .biomart_load(
         attributes = c("ensembl_peptide_id", "ensembl_gene_id"),
         filters = "ensembl_peptide_id",
         values = ensembl.proteins,
-        use.cache = use.cache,
+        useCache = useCache,
         verbose = verbose
       ) |>
         dplyr::arrange("ensembl_peptide_id")
