@@ -25,19 +25,25 @@ test_that("All combinations of parameters possible for draw.kapan", {
   ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
 
   # list, data.frame, data.frame
-  expect_silent(separate2GroupsCox(list(c(1, 0)), xdata, ydata))
+  separate2GroupsCox(list(c(1, 0)), xdata, ydata) |>
+    expect_silent()
   # list, matrix, data.frame
-  expect_silent(separate2GroupsCox(list(c(1, 0)), Matrix::as.matrix(xdata), ydata))
+  separate2GroupsCox(list(c(1, 0)), Matrix::as.matrix(xdata), ydata) |>
+    expect_silent()
 
   # list, numeric, data.frame
-  expect_silent(separate2GroupsCox(list(c(1)), xdata$age, ydata))
+  separate2GroupsCox(list(c(1)), xdata$age, ydata) |>
+    expect_silent()
   # list, numeric, data.frame
-  expect_silent(separate2GroupsCox(1, xdata$age, ydata))
+  separate2GroupsCox(1, xdata$age, ydata) |>
+    expect_silent()
 
   # numeric, data.frame, data.frame
-  expect_silent(separate2GroupsCox(c(1, 0), xdata, ydata))
+  separate2GroupsCox(c(1, 0), xdata, ydata) |>
+    expect_silent()
   # numeric, matrix, data.frame
-  expect_silent(separate2GroupsCox(c(1, 0), Matrix::as.matrix(xdata), ydata))
+  separate2GroupsCox(c(1, 0), Matrix::as.matrix(xdata), ydata) |>
+    expect_silent()
 })
 
 test_that("Some bad arguments for separate2GroupsCox", {

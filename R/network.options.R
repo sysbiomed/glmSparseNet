@@ -22,16 +22,15 @@
 #'
 #' @examples
 #' networkOptions(unweighted = FALSE)
-networkOptions <- function(method = "pearson",
-                           unweighted = TRUE,
-                           cutoff = 0,
-                           centrality = "degree",
-                           min.degree = 0,
-                           n.cores = 1,
-                           trans.fun = function(x) {
-                             x
-                           }) {
-  return(list(
+networkOptions <- function(
+    method = "pearson",
+    unweighted = TRUE,
+    cutoff = 0,
+    centrality = "degree",
+    min.degree = 0,
+    n.cores = 1,
+    trans.fun = function(x) x) {
+  list(
     method = method,
     unweighted = unweighted,
     cutoff = cutoff,
@@ -39,7 +38,7 @@ networkOptions <- function(method = "pearson",
     n.cores = n.cores,
     min.degree = min.degree,
     trans.fun = trans.fun
-  ))
+  )
 }
 
 #' Calculate penalty based on data

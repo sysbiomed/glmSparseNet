@@ -33,9 +33,9 @@
     ydata, c("DataFrame", "data.frame", "matrix", "Matrix", "numeric")
   )
 
-  xdata <- normalizeXdataMAE(xdata, experiment)
-  xdata_norm <- normalizeXdata(xdata, experiment)
-  ydata_norm <- normalizeYdata(xdata, ydata, experiment)
+  xdata <- .normalizeXdataMAE(xdata, experiment)
+  xdata_norm <- .normalizeXdata(xdata, experiment)
+  ydata_norm <- .normalizeYdata(xdata, ydata, experiment)
 
   penalty_factor <- if (is.character(network)) {
     .calcPenalty(xdata_norm, network, options)

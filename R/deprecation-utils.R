@@ -22,8 +22,10 @@
 #' @rdname balancedCvFolds
 #' @usage # deprecated, please use balancedCvFolds()
 #' balanced.cv.folds(..., nfolds = 10)
-balanced.cv.folds <- function(..., nfolds = 10) {
-  lifecycle::deprecate_soft("1.21.0", "balanced.cv.folds()", "balanced_cv_folds()")
+balanced.cv.folds <- function(..., nfolds = 10) { # nolint: object_name_linter.
+  lifecycle::deprecate_soft(
+    "1.21.0", "balanced.cv.folds()", "balanced_cv_folds()"
+  )
   balancedCvFolds(..., nfolds = nfolds)
 }
 
@@ -72,8 +74,8 @@ hallmarks <- function(
     genes,
     metric = "count",
     hierarchy = "full",
-    generate.plot = TRUE,
-    show.message = FALSE) {
+    generate.plot = TRUE, # nolint: object_name_linter.
+    show.message = FALSE) { # nolint: object_name_linter.
   lifecycle::deprecate_stop(
     "1.21.0", "hallmarks()",
     details = "API is no longer available"

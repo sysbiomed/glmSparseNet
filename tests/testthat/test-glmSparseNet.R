@@ -61,30 +61,33 @@ test_that("cv.glmSparseNet: simple call", {
 
   #
   # build valid data with days of last follow up or to event
-  event.ix <- which(!is.na(xdata$days_to_death))
-  cens.ix <- which(!is.na(xdata$days_to_last_followup))
+  eventIx <- which(!is.na(xdata$days_to_death))
+  censIx <- which(!is.na(xdata$days_to_last_followup))
   xdata$surv_event_time <- array(
     NA_integer_, nrow(MultiAssayExperiment::colData(xdata))
   )
-  xdata$surv_event_time[event.ix] <- xdata$days_to_death[event.ix]
-  xdata$surv_event_time[cens.ix] <- xdata$days_to_last_followup[cens.ix]
+  xdata$surv_event_time[eventIx] <- xdata$days_to_death[eventIx]
+  xdata$surv_event_time[censIx] <- xdata$days_to_last_followup[censIx]
 
   #
   # Keep only valid individuals
-  valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
-    !is.na(xdata$vital_status) &
-    xdata$surv_event_time > 0)
-  xdata.valid <- xdata[
-    , rownames(MultiAssayExperiment::colData(xdata))[valid.ix]
+  validIx <- as.vector(
+    !is.na(xdata$surv_event_time) &
+      !is.na(xdata$vital_status) &
+      xdata$surv_event_time > 0
+  )
+  xdataValid <- xdata[
+    , rownames(MultiAssayExperiment::colData(xdata))[validIx]
   ]
-  ydata.valid <- MultiAssayExperiment::colData(
-    xdata.valid
+  ydataValid <- MultiAssayExperiment::colData(
+    xdataValid
   )[, c("surv_event_time", "vital_status")]
-  colnames(ydata.valid) <- c("time", "status")
+  colnames(ydataValid) <- c("time", "status")
 
   #
-  cv.glmSparseNet(xdata.valid,
-    ydata.valid,
+  cv.glmSparseNet(
+    xdataValid,
+    ydataValid,
     nfolds = 5,
     family = "cox",
     network = "correlation",

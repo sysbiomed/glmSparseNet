@@ -25,15 +25,15 @@ downloadFileLocal <- function(urlStr, oD = tempdir()) {
     } else {
       "auto"
     }
-    old.timeout <- getOption("timeout")
-    options(timeout = old.timeout * 4) # add a bit as it can take a while
+    oldTimeout <- getOption("timeout")
+    options(timeout = oldTimeout * 4) # add a bit as it can take a while
 
     utils::download.file(urlStr,
       destfile = temp, method = method,
-      quiet = FALSE, timeout = old.timeout * 4
+      quiet = FALSE, timeout = oldTimeout * 4
     )
 
-    options(timeout = old.timeout)
+    options(timeout = oldTimeout)
   }
   if (file.info(temp)$size == 0) {
     unlink(temp)

@@ -1,6 +1,5 @@
 context("Balanced cv folds")
 
-
 test_that("Only one set", {
   set1 <- c(
     TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE,
@@ -8,31 +7,31 @@ test_that("Only one set", {
   )
   result <- balancedCvFolds(set1, nfolds = 10)
 
-  expect_false(is.list(result$train))
-  expect_false(is.list(result$test))
+  result$train |> checkmate::expect_list() |> expect_failure()
+  result$test |> checkmate::expect_list() |> expect_failure()
 })
 
 test_that("Creates nice cv folds", {
   result <- balancedCvFolds(seq(10), 1:3, nfolds = 2)
   #
-  result.c <- table(result$output[[1]])
-  expect_equal(length(result.c), 2)
-  expect_equal(as.vector(result.c), c(5, 5))
+  resultC <- table(result$output[[1]])
+  expect_equal(length(resultC), 2)
+  expect_equal(as.vector(resultC), c(5, 5))
   #
-  result.c <- table(result$output[[2]])
-  expect_equal(length(result.c), 2)
-  expect_equal(as.vector(result.c), c(2, 1))
+  resultC <- table(result$output[[2]])
+  expect_equal(length(resultC), 2)
+  expect_equal(as.vector(resultC), c(2, 1))
   #
   #
   result <- balancedCvFolds(seq(10), 1:3, nfolds = 3)
   #
-  result.c <- table(result$output[[1]])
-  expect_equal(length(result.c), 3)
-  expect_equal(as.vector(result.c), c(4, 3, 3))
+  resultC <- table(result$output[[1]])
+  expect_equal(length(resultC), 3)
+  expect_equal(as.vector(resultC), c(4, 3, 3))
   #
-  result.c <- table(result$output[[2]])
-  expect_equal(length(result.c), 3)
-  expect_equal(as.vector(result.c), c(1, 1, 1))
+  resultC <- table(result$output[[2]])
+  expect_equal(length(resultC), 3)
+  expect_equal(as.vector(resultC), c(1, 1, 1))
   #
   expect_warning(
     balancedCvFolds(seq(10), 1:3, nfolds = 10),

@@ -66,8 +66,8 @@ glmSparseNet <- function(
     network,
     options = networkOptions(),
     experiment = NULL,
-    network.options = deprecated(),
-    experiment.name = deprecated(),
+    network.options = deprecated(), # nolint: object_name_linter.
+    experiment.name = deprecated(), # nolint: object_name_linter.
     ...) {
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(network.options)) {
@@ -160,8 +160,8 @@ cv.glmSparseNet <- function(
     network,
     options = networkOptions(),
     experiment = NULL,
-    network.options = deprecated(),
-    experiment.name = deprecated(),
+    network.options = deprecated(), # nolint: object_name_linter.
+    experiment.name = deprecated(), # nolint: object_name_linter.
     ...) {
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(network.options)) {

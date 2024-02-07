@@ -10,10 +10,10 @@ test_that("folder can be created in tempdir", {
 
 test_that("digest cache is consistent", {
   word <- "1234567"
-  expect_equal(digest.cache(word), rlang::hash(word))
+  expect_equal(.digestCache(word), rlang::hash(word))
   # taken manually at 2018.04.27
   expect_equal(
-    digest.cache(word),
+    .digestCache(word),
     "cd165630c0265b736b679ae63f597218"
   )
 })
@@ -83,7 +83,7 @@ test_that("run.cache base.dir in folder that does have access", {
     run.cache(
       sum, 1, 2, 3, 4, 5,
       base.dir = withr::local_tempdir(),
-      cache.digest = list(digest.cache(1)),
+      cache.digest = list(.digestCache(1)),
       show.message = FALSE
     ),
     15
@@ -93,7 +93,7 @@ test_that("run.cache base.dir in folder that does have access", {
     run.cache(
       c, 1, 2, 3, 4, 5,
       base.dir = withr::local_tempdir(),
-      cache.digest = list(digest.cache(1)),
+      cache.digest = list(.digestCache(1)),
       show.message = FALSE
     ),
     c(1, 2, 3, 4, 5)
@@ -192,7 +192,7 @@ test_that("Test slight differences in code", {
 
 # Primitives have a very similar code
 test_that("Two primitives give different results", {
-  unique_tmp_dir <- file.path(withr::local_tempdir(), "two_primitives-run.cache")
+  unique_tmp_dir <- withr::local_tempdir(pattern = "two_primitives-run.cache")
 
   run.cache(sum, 1, 2, 3, 4, base.dir = unique_tmp_dir)
   run.cache(c, 1, 2, 3, 4, base.dir = unique_tmp_dir)
@@ -274,7 +274,7 @@ test_that("builds different hash for different functions", {
 
   for (digest_ix in unique(fun_digest[duplicated(fun_digest)])) {
     print(all_funs[fun_digest == digest_ix])
-    print("----------------")
+    futile.logger::flog.info("----------------")
   }
 
 

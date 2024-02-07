@@ -8,6 +8,7 @@
 #' @examples
 #' glmSparseNet:::.cacheCompression("bzip2")
 .cacheCompression <- function(compression = NULL) {
+  checkmate::assert_string(compression, null.ok = TRUE)
   if (!is.null(compression)) options("glmSparseNet.compression" = compression)
   getOption("glmSparseNet.compression")
 }
@@ -21,6 +22,7 @@
 #' @examples
 #' glmSparseNet:::.baseDir("/tmp/cache")
 .baseDir <- function(path = NULL) {
+  checkmate::assert_string(path, null.ok = TRUE)
   if (!is.null(path)) options("glmSparseNet.base_dir" = path)
   getOption("glmSparseNet.base.dir")
 }
@@ -33,9 +35,10 @@
 #'
 #' @examples
 #' glmSparseNet:::.showMessage(FALSE)
-.showMessage <- function(show.message = NULL) {
-  if (!is.null(show.message)) {
-    options("glmSparseNet.show_message" = show.message)
+.showMessage <- function(showMessage = NULL) {
+  checkmate::assert_logical(showMessage, null.ok = TRUE)
+  if (!is.null(showMessage)) {
+    options("glmSparseNet.show_message" = showMessage)
   }
   getOption("glmSparseNet.show_message")
 }

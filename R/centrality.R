@@ -89,7 +89,7 @@ networkCovParallel <- function(xdata,
   }
 
   #
-  xdata.sha256 <- digest.cache(xdata)
+  xdata.sha256 <- .digestCache(xdata)
   #
   fun.aux <- function(xdata, ...) {
     result <- parallel::mclapply(as.numeric(seq_len(ncol(xdata) - 1)),
@@ -336,7 +336,7 @@ degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
     return(degree)
   }
   #
-  xdata.sha256 <- digest.cache(xdata)
+  xdata.sha256 <- .digestCache(xdata)
 
   val <- run.cache(
     weigthed.aux, xdata, cutoff, consider.unweighted,

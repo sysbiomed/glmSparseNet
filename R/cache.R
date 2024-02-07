@@ -7,9 +7,9 @@
 #' @return a hash of the sha256
 #'
 #' @examples
-#' glmSparseNet:::digest.cache(c(1, 2, 3, 4, 5))
-#' glmSparseNet:::digest.cache("some example")
-digest.cache <- function(val) {
+#' glmSparseNet:::.digestCache(c(1, 2, 3, 4, 5))
+#' glmSparseNet:::.digestCache("some example")
+.digestCache <- function(val) {
   rlang::hash(val)
 }
 
@@ -89,9 +89,9 @@ build.function.digest <- function(fun) {
       names(methods.found),
       function(ix) {
         if (is.null(attributes(methods.found[[ix]])$srcref)) {
-          return(digest.cache(toString(body(methods.found[[ix]]))))
+          return(.digestCache(toString(body(methods.found[[ix]]))))
         } else {
-          return(digest.cache(toString(attributes(methods.found[[ix]])$srcref)))
+          return(.digestCache(toString(attributes(methods.found[[ix]])$srcref)))
         }
       },
       "string"
@@ -109,7 +109,7 @@ build.function.digest <- function(fun) {
     fun
   }
 
-  return(digest.cache(digest.fun))
+  return(.digestCache(digest.fun))
 }
 
 #' Write a file in run-cache directory to explain the origin
@@ -300,7 +300,7 @@ methods::setMethod(
       if (length(cache.digest) >= ix && !is.null(cache.digest[[ix]])) {
         return(cache.digest[[ix]])
       }
-      digest.cache(args[[ix]])
+      .digestCache(args[[ix]])
     })
 
     # Build digest of the function's code
@@ -308,7 +308,7 @@ methods::setMethod(
     args[["cache.fun"]] <- build.function.digest(fun)
 
     # digest all the arguments together
-    my.digest <- digest.cache(args)
+    my.digest <- .digestCache(args)
 
     filename <- sprintf("cache-%s-H_%s.RData", cache.prefix, my.digest)
     parent.path <- strtrim(my.digest, width = 4)
