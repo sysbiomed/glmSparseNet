@@ -1,10 +1,8 @@
 #' @describeIn glmSparseNet Penalizes nodes with small degree
+#' _(normalized heuristic that promotes nodes with many edges)_.
 #'
 #' @export
 #'
-#' @seealso Generic function without pre-defined penalization: [glmNetSparse()].
-#' Other penalizations: [glmDegree()] and [glmOrphan()].
-#' Cross-validation with the same penalization: [cv.glmHub()].
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 5)
 #' glmHub(
@@ -45,22 +43,19 @@ glmHub <- function(
   )
 }
 
-#' GLMNET cross-validation model penalizing nodes with small degree
+#' @describeIn cv.glmSparseNet penalizes nodes with small degree
+#' _(normalized heuristic that promotes nodes with many edges)_.
 #'
-#' This function overrides the `trans.fun` options in `options` with
-#' an heuristic described in Veríssimo et al. that penalizes nodes with small
-#' degree.
-#'
-#' @inheritParams cv.glmSparseNet
-#' @inherit cv.glmSparseNet return
 #' @export
 #'
-#' @seealso Generic function without pre-defined penalization: [cv.glmNetSparse()].
-#' Other penalizations: [cv.glmDegree()] and [cv.glmOrphan()].
-#' Model with the same penalization: [glmHub()].
 #' @examples
+#' # Hub penalization
+#'
 #' xdata <- matrix(rnorm(100), ncol = 5)
-#' cv.glmHub(xdata, rnorm(nrow(xdata)), "correlation",
+#' cv.glmHub(
+#'   xdata,
+#'   rnorm(nrow(xdata)),
+#'   "correlation",
 #'   family = "gaussian",
 #'   nfolds = 5,
 #'   options = networkOptions(min.degree = .2)

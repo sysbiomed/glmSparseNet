@@ -38,13 +38,16 @@ downloadFileLocal <- function(urlStr, oD = tempdir()) {
   if (file.info(temp)$size == 0) {
     unlink(temp)
     temp <- NULL
-    cat(paste("ERROR: failed to download ", fileName,
-      ".\nPlease check your internet connection ",
-      "and/or try again. ",
-      "\nThen, if you still display this error message ",
-      "please contact us.",
-      sep = ""
-    ))
+    futile.logger::flog.info(
+      paste(
+        "ERROR: failed to download ",
+        fileName,
+        ".\n",
+        "Please check your internet connection and/or try again.\n",
+        "Then, if you still display this error message please contact us.",
+        sep = ""
+      )
+    )
   }
   return(temp)
 }

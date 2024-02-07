@@ -228,7 +228,7 @@ separate2GroupsCox <- function(
   # factor the group
   prognostic.index.df$group <- factor(prognostic.index.df$group)
   # rename the factor to low / high risk
-  new.factor.str <- generate_legend(chosen.btas)
+  new.factor.str <- .generateLegend(chosen.btas)
 
   new.factor.str.l <- as.list(as.character(seq_len(2 * length(chosen.btas))))
   names(new.factor.str.l) <- new.factor.str
@@ -267,7 +267,7 @@ separate2GroupsCox <- function(
   futile.logger::flog.debug("")
   futile.logger::flog.debug("pvalue: %g\n", p_value)
 
-  plot_survival(
+  .plotSurvival(
     no.plot,
     km,
     p_value,
@@ -283,7 +283,7 @@ separate2GroupsCox <- function(
 }
 
 #' @keywords internal
-plot_survival <- function(
+.plotSurvival <- function(
     no_plot,
     km,
     p_value,
@@ -368,7 +368,7 @@ plot_survival <- function(
 }
 
 #' @keywords internal
-generate_legend <- function(chosen.btas) {
+.generateLegend <- function(chosen.btas) {
   as.vector(vapply(seq_along(chosen.btas), function(ix) {
     if (!is.null(names(chosen.btas)) && length(names(chosen.btas)) >= ix) {
       e <- names(chosen.btas)[ix]

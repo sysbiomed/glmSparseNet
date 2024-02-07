@@ -33,9 +33,9 @@
     ydata, c("DataFrame", "data.frame", "matrix", "Matrix", "numeric")
   )
 
-  xdata <- normalize_xdata_mae(xdata, experiment)
-  xdata_norm <- normalize_xdata(xdata, experiment)
-  ydata_norm <- normalize_ydata(xdata, ydata, experiment)
+  xdata <- normalizeXdataMAE(xdata, experiment)
+  xdata_norm <- normalizeXdata(xdata, experiment)
+  ydata_norm <- normalizeYdata(xdata, ydata, experiment)
 
   penalty_factor <- if (is.character(network)) {
     .calcPenalty(xdata_norm, network, options)
@@ -73,7 +73,7 @@
 }
 
 #' @keywords internal
-normalize_ydata <- function(xdata, ydata, experiment) {
+.normalizeYdata <- function(xdata, ydata, experiment) {
   if (inherits(xdata, "MultiAssayExperiment")) {
     # if ydata has rownames then it uses it to match with valid experiences
     #  this is done to avoid missorted objects
@@ -81,17 +81,19 @@ normalize_ydata <- function(xdata, ydata, experiment) {
       is.matrix(ydata) || is.data.frame(ydata) || inherits(ydata, "DataFrame")
     ) {
       if (!is.null(rownames(ydata))) {
-        return(Matrix::as.matrix(ydata[rownames(xdata@colData), ]))
+        return(Matrix::as.matrix(ydata[
+          rownames(MultiAssayExperiment::colData(xdata)),
+        ]))
       }
     } else if (is.array(ydata) && !is.null(names(ydata))) {
-      return(ydata[rownames(xdata@colData)])
+      return(ydata[rownames(MultiAssayExperiment::colData(xdata))])
     }
   }
   ydata
 }
 
 #' @keywords internal
-normalize_xdata_mae <- function(xdata, experiment) {
+.normalizeXdataMAE <- function(xdata, experiment) {
   if (inherits(xdata, "MultiAssayExperiment")) {
     experiment %||%
       stop("`experiment` argument must be passed, see documentation.")
@@ -101,7 +103,7 @@ normalize_xdata_mae <- function(xdata, experiment) {
     xdata <- methods::as(xdata[, , experiment], "MatchedAssayExperiment")
 
     # stop if output xdata has no rows (should not happen)
-    nrow(xdata@colData) == 0L &&
+    nrow(MultiAssayExperiment::colData(xdata)) == 0L &&
       stop(
         "Experiment has no observations or the MultiAssayExperiment object",
         " is corrupt."
@@ -123,7 +125,7 @@ normalize_xdata_mae <- function(xdata, experiment) {
 #'  note: this needs to be sequential instead of if () else (), as one
 #'   transformation will pipe to another
 #' @keywords internal
-normalize_xdata <- function(xdata, experiment) {
+.normalizeXdata <- function(xdata, experiment) {
   if (inherits(xdata, "MultiAssayExperiment")) {
     xdata <- xdata[[experiment]]
   }

@@ -45,20 +45,14 @@ glmDegree <- function(
   )
 }
 
-#' GLMNET cross-validation model penalizing nodes with small degree
+#' @describeIn cv.glmSparseNet penalizes nodes with small degree
+#' _(inversion penalization `h(x) = 1 / x`)_.
 #'
-#' This function overrides the `trans.fun` options in `networkOptions` with the
-#' inverse of a degree described in Veríssimo et al. (2015) that penalizes
-#' nodes with small degree.
-#'
-#' @inheritParams cv.glmSparseNet
-#' @inherit cv.glmSparseNet return
 #' @export
 #'
-#' @seealso Generic function without pre-defined penalization: [cv.glmNetSparse()].
-#' Other penalizations: [cv.glmHub()] and [cv.glmOrphan()].
-#' Model with the same penalization: [glmDegree()].
 #' @examples
+#' # Degree penalization
+#'
 #' xdata <- matrix(rnorm(100), ncol = 5)
 #' cv.glmDegree(
 #'   xdata,
@@ -66,7 +60,7 @@ glmDegree <- function(
 #'   "correlation",
 #'   family = "gaussian",
 #'   nfolds = 5,
-#'   network_options = networkOptions(min.degree = .2)
+#'   options = networkOptions(min.degree = .2)
 #' )
 cv.glmDegree <- function(
     xdata,

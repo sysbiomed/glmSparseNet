@@ -88,6 +88,7 @@ with glmnet)
 \emph{(inversion penalization \code{h(x) = 1 / x})}.
 
 \item \code{glmHub()}: Penalizes nodes with small degree
+\emph{(normalized heuristic that promotes nodes with many edges)}.
 
 \item \code{glmOrphan()}: Penalizes nodes with high degree
 \emph{(normalized heuristic that promotes nodes with few edges)}.
@@ -98,19 +99,24 @@ xdata <- matrix(rnorm(100), ncol = 20)
 glmSparseNet(xdata, rnorm(nrow(xdata)), "correlation", family = "gaussian")
 glmSparseNet(xdata, rnorm(nrow(xdata)), "covariance", family = "gaussian")
 
+\dontshow{if (requireNamespace("MultiAssayExperiment", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 #
 #
 # Using MultiAssayExperiment
 # load data
+library(MultiAssayExperiment)
 data("miniACC", package = "MultiAssayExperiment")
+
 xdata <- miniACC
 # TODO aking out x individuals missing values
 # build valid data with days of last follow up or to event
 event.ix <- which(!is.na(xdata$days_to_death))
 cens.ix <- which(!is.na(xdata$days_to_last_followup))
+
 xdata$surv_event_time <- array(NA, nrow(colData(xdata)))
 xdata$surv_event_time[event.ix] <- xdata$days_to_death[event.ix]
 xdata$surv_event_time[cens.ix] <- xdata$days_to_last_followup[cens.ix]
+
 # Keep only valid individuals
 valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
   !is.na(xdata$vital_status) &
@@ -118,13 +124,15 @@ valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
 xdata.valid <- xdata[, rownames(colData(xdata))[valid.ix]]
 ydata.valid <- colData(xdata.valid)[, c("surv_event_time", "vital_status")]
 colnames(ydata.valid) <- c("time", "status")
+
 glmSparseNet(
   xdata.valid,
   ydata.valid,
-  family          = "cox",
-  network         = "correlation",
-  experiment.name = "RNASeq2GeneNorm"
+  family = "cox",
+  network = "correlation",
+  experiment = "RNASeq2GeneNorm"
 )
+\dontshow{\}) # examplesIf}
 # Degree penalization
 
 xdata <- matrix(rnorm(100), ncol = 5)
@@ -155,13 +163,5 @@ glmOrphan(
 )
 }
 \seealso{
-Other model functions with pre-defined penalization:
-\code{\link[=glmDegree]{glmDegree()}}, \code{\link[=glmHub]{glmHub()}} and \code{\link[=glmOrphan]{glmOrphan()}}.
-Cross-validation with the same penalization: \code{\link[=cv.glmSparseNet]{cv.glmSparseNet()}}.
-
-Generic function without pre-defined penalization: \code{\link[=glmNetSparse]{glmNetSparse()}}.
-Other penalizations: \code{\link[=glmDegree]{glmDegree()}} and \code{\link[=glmOrphan]{glmOrphan()}}.
-Cross-validation with the same penalization: \code{\link[=cv.glmHub]{cv.glmHub()}}.
-
-\code{\link[=orphanHeuristic]{orphanHeuristic()}}
+Cross-validation functions \code{\link[=cv.glmSparseNet]{cv.glmSparseNet()}}.
 }

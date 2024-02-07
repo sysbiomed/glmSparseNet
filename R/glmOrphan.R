@@ -2,7 +2,6 @@
 #' _(normalized heuristic that promotes nodes with few edges)_.
 #'
 #' @export
-#' @seealso [orphanHeuristic()]
 #' @examples
 #' # Orphan penalization
 #'
@@ -45,20 +44,14 @@ glmOrphan <- function(
   )
 }
 
-#' GLMNET cross-validation model penalizing nodes with high degree
+#' @describeIn cv.glmSparseNet penalizes nodes with high degree
+#' _(normalized heuristic that promotes nodes with few edges)_.
 #'
-#' This function overrides the `trans.fun` options in `options` with
-#' an heuristic described in Veríssimo et al. that penalizes nodes with high
-#' degree.
-#'
-#' @inheritParams cv.glmSparseNet
-#' @inherit cv.glmSparseNet return
 #' @export
 #'
-#' @seealso Generic function without pre-defined penalization: [cv.glmNetSparse()].
-#' Other penalizations: [cv.glmDegree()] and [cv.glmHub()].
-#' Model with the same penalization: [glmOrphan()].
 #' @examples
+#' # Orphan penalization
+#'
 #' xdata <- matrix(rnorm(100), ncol = 5)
 #' cv.glmOrphan(
 #'   xdata,

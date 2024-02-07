@@ -25,9 +25,6 @@ License: GPL-3
 URL: https://www.github.com/sysbiomed/glmSparseNet
 BugReports: https://www.github.com/sysbiomed/glmSparseNet/issues
 Depends: 
-    glmnet,
-    Matrix,
-    MultiAssayExperiment,
     R (>= 4.3.0)
 Imports: 
     biomaRt,
@@ -43,7 +40,9 @@ Imports:
     parallel,
     readr,
     rlang,
-    stringr,
+    glmnet,
+    Matrix,
+    MultiAssayExperiment,
     SummarizedExperiment,
     survminer,
     TCGAutils,
@@ -55,7 +54,6 @@ Suggests:
     reshape2,
     pROC,
     rmarkdown,
-    survcomp,
     survival,
     testthat,
     VennDiagram,

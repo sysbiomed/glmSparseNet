@@ -20,28 +20,31 @@
 #' @return an object just as glmnet
 #' @export
 #'
-#' @seealso Other model functions with pre-defined penalization:
-#' [glmDegree()], [glmHub()] and [glmOrphan()].
-#' Cross-validation with the same penalization: [cv.glmSparseNet()].
+#' @seealso Cross-validation functions [cv.glmSparseNet()].
 #'
 #' @examples
 #' xdata <- matrix(rnorm(100), ncol = 20)
 #' glmSparseNet(xdata, rnorm(nrow(xdata)), "correlation", family = "gaussian")
 #' glmSparseNet(xdata, rnorm(nrow(xdata)), "covariance", family = "gaussian")
 #'
+#' @examplesIf requireNamespace("MultiAssayExperiment", quietly = TRUE)
 #' #
 #' #
 #' # Using MultiAssayExperiment
 #' # load data
+#' library(MultiAssayExperiment)
 #' data("miniACC", package = "MultiAssayExperiment")
+#'
 #' xdata <- miniACC
 #' # TODO aking out x individuals missing values
 #' # build valid data with days of last follow up or to event
 #' event.ix <- which(!is.na(xdata$days_to_death))
 #' cens.ix <- which(!is.na(xdata$days_to_last_followup))
+#'
 #' xdata$surv_event_time <- array(NA, nrow(colData(xdata)))
 #' xdata$surv_event_time[event.ix] <- xdata$days_to_death[event.ix]
 #' xdata$surv_event_time[cens.ix] <- xdata$days_to_last_followup[cens.ix]
+#'
 #' # Keep only valid individuals
 #' valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
 #'   !is.na(xdata$vital_status) &
@@ -49,12 +52,13 @@
 #' xdata.valid <- xdata[, rownames(colData(xdata))[valid.ix]]
 #' ydata.valid <- colData(xdata.valid)[, c("surv_event_time", "vital_status")]
 #' colnames(ydata.valid) <- c("time", "status")
+#'
 #' glmSparseNet(
 #'   xdata.valid,
 #'   ydata.valid,
-#'   family          = "cox",
-#'   network         = "correlation",
-#'   experiment.name = "RNASeq2GeneNorm"
+#'   family = "cox",
+#'   network = "correlation",
+#'   experiment = "RNASeq2GeneNorm"
 #' )
 glmSparseNet <- function(
     xdata,
@@ -102,29 +106,26 @@ glmSparseNet <- function(
 #' @return an object just as `cv.glmnet`
 #' @export
 #'
-#' @seealso Other cross-validation functions: [cv.glmDegree()], [cv.glmHub()] and [cv.glmOrphan()].
-#' Model with the same penalization: [glmSparseNet()].
+#' @seealso Model with the same penalizations [glmSparseNet()].
 #'
 #' @examples
 #' \donttest{
 #' # Gaussian model
 #' xdata <- matrix(rnorm(500), ncol = 5)
-#' cv.glmSparseNet(xdata, rnorm(nrow(xdata)), "correlation",
-#'   family = "gaussian"
+#' cv.glmSparseNet(
+#'   xdata, rnorm(nrow(xdata)), "correlation", family = "gaussian"
 #' )
-#' cv.glmSparseNet(xdata, rnorm(nrow(xdata)), "covariance",
-#'   family = "gaussian"
+#' cv.glmSparseNet(
+#'   xdata, rnorm(nrow(xdata)), "covariance", family = "gaussian"
 #' )
 #' }
-#'
+#' @examplesIf requireNamespace("MultiAssayExperiment", quietly = TRUE)
 #' #
 #' #
 #' # Using MultiAssayExperiment with survival model
-#'
-#'
-#' #
-#' # load data
+#' library(MultiAssayExperiment)
 #' data("miniACC", package = "MultiAssayExperiment")
+#'
 #' xdata <- miniACC
 #'
 #' #
@@ -148,10 +149,10 @@ glmSparseNet <- function(
 #' cv.glmSparseNet(
 #'   xdata.valid,
 #'   ydata.valid,
-#'   nfolds          = 5,
-#'   family          = "cox",
-#'   network         = "correlation",
-#'   experiment.name = "RNASeq2GeneNorm"
+#'   nfolds     = 5,
+#'   family     = "cox",
+#'   network    = "correlation",
+#'   experiment = "RNASeq2GeneNorm"
 #' )
 cv.glmSparseNet <- function(
     xdata,

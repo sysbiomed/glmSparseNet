@@ -274,7 +274,7 @@ test_that("builds different hash for different functions", {
 
   for (digest_ix in unique(fun_digest[duplicated(fun_digest)])) {
     print(all_funs[fun_digest == digest_ix])
-    cat("----------------")
+    print("----------------")
   }
 
 

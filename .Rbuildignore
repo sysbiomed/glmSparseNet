@@ -41,9 +41,9 @@ inst/images
 #    Local caches
 # ------------------
 
-^run-cache
-^vignettes/run-cache
-^runcache
+^run-cache$
+^vignettes/run-cache$
+^runcache$
 ^vignettes/VennDiagram
 
 # ------------------
@@ -74,3 +74,4 @@ vignettes/_stringdb_.*
 ^\.github$
 ^doc$
 ^Meta$
+^\.lintr$

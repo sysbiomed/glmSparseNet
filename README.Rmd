@@ -148,7 +148,7 @@ xdata <- miniACC
 # build valid data with days of last follow up or to event
 event.ix <- which(!is.na(xdata$days_to_death))
 cens.ix <- which(!is.na(xdata$days_to_last_followup))
-surv_event_time <- array(NA, nrow(xdata@colData))
+surv_event_time <- array(NA, nrow(colData(xdata)))
 surv_event_time[event.ix] <- xdata$days_to_death[event.ix]
 surv_event_time[cens.ix] <- xdata$days_to_last_followup[cens.ix]
 
@@ -199,7 +199,7 @@ This function generates Kaplan-Meier survival model based on the estimated coeff
 #  * calculates the relative risk
 #  * separates individuals based on relative risk into High/Low risk groups
 xdata.reduced <- as(xdata[, , "RNASeq2GeneNorm"], "MatchedAssayExperiment")
-ydata.km <- ydata[rownames(xdata.reduced@colData), ]
+ydata.km <- ydata[rownames(colData(xdata.reduced)), ]
 best.model.coef <- coef(fit3, s = "lambda.min")[, 1]
 ```
 

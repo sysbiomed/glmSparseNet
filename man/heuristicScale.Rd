@@ -17,14 +17,20 @@ heuristicScale(
 \arguments{
 \item{x}{vector of values to scale}
 
-\item{sub.exp10}{value to subtract to base 10 exponential, for example:
-\code{10^0 - sub.exp10 = 1 - sub.exp10}}
+\item{subExp10}{value to subtract to base 10 exponential, for example:
+\code{10^0 - subExp10 = 1 - subExp10}}
 
-\item{exp.mult}{parameter to multiply exponential, i.e. to have a negative
+\item{expMult}{parameter to multiply exponential, i.e. to have a negative
 exponential or positive}
 
-\item{sub.exp}{value to subtract for exponentional, for example if x = 0,
+\item{subExp}{value to subtract for exponentional, for example if x = 0,
 \code{exp(0) - sub.exp = 1 - sub.exp}}
+
+\item{sub.exp10}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{exp.mult}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{sub.exp}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 }
 \value{
 a vector of scaled values

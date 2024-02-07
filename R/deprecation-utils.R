@@ -42,7 +42,7 @@ my.colors <- function(ix = NULL) { # nolint: object_name_linter.
 #' @export
 my.symbols <- function(ix = NULL) { # nolint: object_name_linter.
   lifecycle::deprecate_soft("1.21.0", "my.symbols()", "mySymbols()")
-  my_symbols(ix)
+  mySymbols(ix)
 }
 
 #' Retrieve hallmarks of cancer count for genes

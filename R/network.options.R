@@ -128,12 +128,15 @@ orphanHeuristic <- function(x) {
 #' Heuristic function to use in high dimensions
 #'
 #' @param x vector of values to scale
-#' @param sub.exp10 value to subtract to base 10 exponential, for example:
-#' `10^0 - sub.exp10 = 1 - sub.exp10`
-#' @param exp.mult parameter to multiply exponential, i.e. to have a negative
+#' @param subExp10 value to subtract to base 10 exponential, for example:
+#' `10^0 - subExp10 = 1 - subExp10`
+#' @param expMult parameter to multiply exponential, i.e. to have a negative
 #' exponential or positive
-#' @param sub.exp value to subtract for exponentional, for example if x = 0,
+#' @param subExp value to subtract for exponentional, for example if x = 0,
 #' `exp(0) - sub.exp = 1 - sub.exp`
+#' @param sub.exp10 `r lifecycle::badge("deprecated")`
+#' @param exp.mult `r lifecycle::badge("deprecated")`
+#' @param sub.exp `r lifecycle::badge("deprecated")`
 #'
 #' @return a vector of scaled values
 #' @export
