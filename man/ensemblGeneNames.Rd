@@ -4,15 +4,25 @@
 \alias{ensemblGeneNames}
 \title{Retrieve ensembl gene names from biomaRt}
 \usage{
-ensemblGeneNames(gene.id, use.cache = TRUE, verbose = FALSE)
+ensemblGeneNames(
+  geneId,
+  useCache = TRUE,
+  verbose = FALSE,
+  gene.id = deprecated(),
+  use.cache = deprecated()
+)
 }
 \arguments{
-\item{gene.id}{character vector with gene names}
+\item{geneId}{character vector with gene names}
 
-\item{use.cache}{Boolean indicating if biomaRt cache should be used}
+\item{useCache}{Boolean indicating if biomaRt cache should be used}
 
 \item{verbose}{When using biomaRt in webservice mode and setting verbose to
 TRUE, the XML query to the webservice will be printed.}
+
+\item{gene.id}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{use.cache}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 }
 \value{
 a dataframe with external gene names, ensembl_id

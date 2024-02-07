@@ -72,8 +72,8 @@ The main functions from this packages are the `glmSparseNet` and `cv.glmSparseNe
 -   `experiment.name`: Optional parameter used with a "MultiAssayExperiment" object as input
 -   `network.options`: Optional parameter defining the options to process the network, such as:
 -   `cutoff`: A real number to use to remove edges from the network
--   `min.degree`: Minimum value that the weight should have, this is useful as when the weight is 0, there is no regularization on that feature, which may lead to convergence problems
--   `trans.fun`: Transformation function to the vector of penalty weights after these are calculated from the network
+-   `minDegree`: Minimum value that the weight should have, this is useful as when the weight is 0, there is no regularization on that feature, which may lead to convergence problems
+-   `transFun`: Transformation function to the vector of penalty weights after these are calculated from the network
 
 *note:* These functions can take any additional arguments that `glmnet` or `cv.glmnet` accept (e.g. number of folds in cross validation)
 
@@ -83,7 +83,7 @@ cv.glmSparseNet(xdata,
                 family = 'cox', 
                 network = 'correlation', 
                 network.options = networkOptions(cutoff = .6, 
-                                                 min.degree = 0.2))
+                                                 minDegree = 0.2))
 ```
 
 Example for survival analysis using RNA-seq data
@@ -138,13 +138,13 @@ The function `cv.glmSparseNet` fits the survival data using 10-fold cross valida
 # build response object for glmnet
 fit3 <- cv.glmSparseNet(xdata, ydata, family = 'cox', 
                         network = 'correlation', 
-                        experiment.name = 'RNASeq2GeneNorm', 
+                        experimentName = 'RNASeq2GeneNorm', 
                         alpha = .7,
                         nlambda = 1000,
                         network.options = networkOptions(
                             cutoff = .6, 
-                            min.degree = 0.2,
-                            trans.fun = hubHeuristic)
+                            minDegree = 0.2,
+                            transFun = hubHeuristic)
                         )
 ```
 

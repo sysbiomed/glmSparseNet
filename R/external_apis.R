@@ -8,14 +8,14 @@
 #'
 #' @examples
 #' \donttest{
-#' glmSparseNet:::.curl_workaround({
+#' glmSparseNet:::.curlWorkaround({
 #'   biomaRt::useEnsembl(
 #'     biomart = "genes",
 #'     dataset = "hsapiens_gene_ensembl"
 #'   )
 #' })
 #' }
-.curl_workaround <- function(expr) {
+.curlWorkaround <- function(expr) {
   result <- tryCatch(
     {
       expr
@@ -71,18 +71,18 @@
 #' @return data.frame with attributes as columns and values translated to them
 #'
 #' @examples
-#' glmSparseNet:::.biomart_load(
+#' glmSparseNet:::.biomartLoad(
 #'   attributes = c("external_gene_name", "ensembl_gene_id"),
 #'   filters = "external_gene_name",
 #'   values = c("MOB1A", "RFLNB", "SPIC", "TP53"),
 #'   useCache = TRUE,
 #'   verbose = FALSE
 #' )
-.biomart_load <- function(
+.biomartLoad <- function(
     attributes, filters, values, useCache, verbose) {
   # local function that's used twice due to bug with curl
 
-  mart <- .curl_workaround({
+  mart <- .curlWorkaround({
     .runCache(
       biomaRt::useEnsembl,
       biomart = "genes",
@@ -98,7 +98,7 @@
   #
   results <- tryCatch(
     {
-      .curl_workaround(
+      .curlWorkaround(
         biomaRt::getBM(
           attributes = attributes,
           filters = filters,
@@ -127,7 +127,7 @@
   if ((inherits(results, "error") || is.null(results)) && useCache) {
     # retrying without cache
     return(
-      .biomart_load(
+      .biomartLoad(
         attributes = attributes,
         filters = filters,
         values = values,
@@ -173,7 +173,7 @@ geneNames <- function(
 
   tryCatch(
     {
-      results <- .biomart_load(
+      results <- .biomartLoad(
         attributes = c("external_gene_name", "ensembl_gene_id"),
         filters = "ensembl_gene_id",
         values = ensemblGenes,
@@ -207,24 +207,42 @@ geneNames <- function(
 
 #' Retrieve ensembl gene names from biomaRt
 #'
-#' @param gene.id character vector with gene names
-#' @param use.cache Boolean indicating if biomaRt cache should be used
+#' @param geneId character vector with gene names
+#' @param useCache Boolean indicating if biomaRt cache should be used
 #' @param verbose When using biomaRt in webservice mode and setting verbose to
 #' TRUE, the XML query to the webservice will be printed.
+#' @param gene.id `r lifecycle::badge("deprecated")`
+#' @param use.cache `r lifecycle::badge("deprecated")`
 #'
 #' @return a dataframe with external gene names, ensembl_id
 #' @export
 #'
 #' @examples
 #' ensemblGeneNames(c("MOB1A", "RFLNB", "SPIC", "TP53"))
-ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
+ensemblGeneNames <- function(
+    geneId,
+    useCache = TRUE,
+    verbose = FALSE,
+    gene.id = deprecated(), # nolint: object_name_linter.
+    use.cache =  deprecated()) { # nolint: object_name_linter.
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(gene.id)) {
+    .deprecatedDotParam("cv.glmSparseNet", "gene.id")
+    geneId <- gene.id
+  }
+  if (lifecycle::is_present(use.cache)) {
+    .deprecatedDotParam("cv.glmSparseNet", "use.cache")
+    useCache <- use.cache
+  }
+  # Lifecycle management: end
+
   tryCatch(
     {
-      results <- .biomart_load(
+      results <- .biomartLoad(
         attributes = c("external_gene_name", "ensembl_gene_id"),
         filters = "external_gene_name",
-        values = gene.id,
-        use.cache = use.cache,
+        values = geneId,
+        useCache = useCache,
         verbose = verbose
       )
 
@@ -233,7 +251,7 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
       #  and add them with same ensembl_id
 
       data.frame(
-        external_gene_name = gene.id[!gene.id %in% results$external_gene_name],
+        external_gene_name = geneId[!geneId %in% results$external_gene_name],
         stringsAsFactors = FALSE
       ) |>
         dplyr::mutate(ensembl_gene_id = .data$external_gene_name) |>
@@ -243,8 +261,8 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
     error = function(msg) {
       warning(sprintf("Error when finding gene names:\n\t%s", msg))
       data.frame(
-        ensembl_gene_id = gene.id,
-        external_gene_name = gene.id,
+        ensembl_gene_id = geneId,
+        external_gene_name = geneId,
         stringsAsFactors = FALSE
       )
     }
@@ -253,7 +271,7 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
 
 #' Retrieve ensembl gene ids from proteins
 #'
-#' @param ensembl.proteins character vector with gene names in
+#' @param ensemblProteins character vector with gene names in
 #' ensembl_peptide_id format
 #' @param useCache Boolean indicating if biomaRt cache should be used
 #' @param verbose When using biomaRt in webservice mode and setting verbose to
@@ -269,16 +287,23 @@ ensemblGeneNames <- function(gene.id, use.cache = TRUE, verbose = FALSE) {
 #'   "ENSP00000216911"
 #' ))
 protein2EnsemblGeneNames <- function(
-    ensembl.proteins,
+    ensemblProteins,
     useCache = TRUE,
-    verbose = FALSE) {
-  #
+    verbose = FALSE,
+    ensembl.proteins = deprecated()) { # nolint: object_name_linter.
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(ensembl.proteins)) {
+    .deprecatedDotParam("cv.glmSparseNet", "ensembl.proteins")
+    ensemblProteins <- ensembl.proteins
+  }
+  # Lifecycle management: end
+
   tryCatch(
     {
-      .biomart_load(
+      .biomartLoad(
         attributes = c("ensembl_peptide_id", "ensembl_gene_id"),
         filters = "ensembl_peptide_id",
-        values = ensembl.proteins,
+        values = ensemblProteins,
         useCache = useCache,
         verbose = verbose
       ) |>
@@ -287,9 +312,9 @@ protein2EnsemblGeneNames <- function(
     error = function(msg) {
       warning(sprintf("Error when finding gene names:\n\t%s", msg))
       data.frame(
-        ensembl_peptide_id = ensembl.proteins,
-        ensembl_gene_id    = ensembl.proteins,
-        external_gene_name = ensembl.proteins,
+        ensembl_peptide_id = ensemblProteins,
+        ensembl_gene_id    = ensemblProteins,
+        external_gene_name = ensemblProteins,
         stringsAsFactors   = FALSE
       )
     }

@@ -141,7 +141,7 @@ glmDegree(
   rnorm(nrow(xdata)),
   "correlation",
   family = "gaussian",
-  options = networkOptions(min.degree = .2)
+  options = networkOptions(minDegree = .2)
 )
 xdata <- matrix(rnorm(100), ncol = 5)
 glmHub(
@@ -149,7 +149,7 @@ glmHub(
   rnorm(nrow(xdata)),
   "correlation",
   family = "gaussian",
-  options = networkOptions(min.degree = .2)
+  options = networkOptions(minDegree = .2)
 )
 # Orphan penalization
 
@@ -159,7 +159,7 @@ glmOrphan(
   rnorm(nrow(xdata)),
   "correlation",
   family = "gaussian",
-  options = networkOptions(min.degree = .2)
+  options = networkOptions(minDegree = .2)
 )
 }
 \seealso{

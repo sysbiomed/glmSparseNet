@@ -40,16 +40,16 @@
   penalty_factor <- if (is.character(network)) {
     .calcPenalty(xdata_norm, network, options)
   } else if (is.matrix(network) || inherits(network, "Matrix")) {
-    options$trans.fun(Matrix::colSums(network) + Matrix::rowSums(network))
+    options$transFun(Matrix::colSums(network) + Matrix::rowSums(network))
   } else if (is.vector(network)) {
     length(network) != ncol(xdata_norm) &&
       stop("Network vector size does not match xdata input")
-    options$trans.fun(network)
+    options$transFun(network)
   } else {
     stop("There was an error with network argumnent")
   }
 
-  penalty_factor <- penalty_factor + options$min.degree
+  penalty_factor <- penalty_factor + options$minDegree
 
   if (all(penalty_factor <= 0)) {
     warning(
@@ -62,7 +62,7 @@
     warning(
       "The `penalty.factor` calculated from network (or given) has ",
       "some 0 values, this might lead to convergence problems. Try ",
-      "using min.degree in options to tweak a minimum value."
+      "using minDegree in options to tweak a minimum value."
     )
   }
 

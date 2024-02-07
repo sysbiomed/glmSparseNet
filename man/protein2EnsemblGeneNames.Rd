@@ -4,13 +4,18 @@
 \alias{protein2EnsemblGeneNames}
 \title{Retrieve ensembl gene ids from proteins}
 \usage{
-protein2EnsemblGeneNames(ensembl.proteins, use.cache = TRUE, verbose = FALSE)
+protein2EnsemblGeneNames(
+  ensemblProteins,
+  useCache = TRUE,
+  verbose = FALSE,
+  ensembl.proteins = deprecated()
+)
 }
 \arguments{
-\item{ensembl.proteins}{character vector with gene names in
+\item{ensemblProteins}{character vector with gene names in
 ensembl_peptide_id format}
 
-\item{use.cache}{Boolean indicating if biomaRt cache should be used}
+\item{useCache}{Boolean indicating if biomaRt cache should be used}
 
 \item{verbose}{When using biomaRt in webservice mode and setting verbose to
 TRUE, the XML query to the webservice will be printed.}

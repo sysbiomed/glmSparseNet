@@ -146,7 +146,7 @@ fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status),
   network = "correlation",
   network.options = networkOptions(
     cutoff = .6,
-    min.degree = .2
+    minDegree = .2
   )
 )
 ```

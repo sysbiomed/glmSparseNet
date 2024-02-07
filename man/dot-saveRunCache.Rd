@@ -4,7 +4,7 @@
 \alias{.saveRunCache}
 \title{Saving the cache}
 \usage{
-.saveRunCache(result, path, compression, show.message)
+.saveRunCache(result, path, compression, show_message)
 }
 \arguments{
 \item{result}{main result to save}

@@ -82,19 +82,19 @@ methods::setGeneric(".runCache", function(
 #' glmSparseNet:::.buildFunctionDigest(sum)
 #' glmSparseNet:::.buildFunctionDigest(c)
 .buildFunctionDigest <- function(fun) {
-  digest.fun <- if (methods::is(fun, "standardGeneric")) {
+  digest_fun <- if (methods::is(fun, "standardGeneric")) {
     # if it is a generic, then use code for all methods
-    methods.found <- methods::findMethods(fun)
+    methods_found <- methods::findMethods(fun)
     vapply(
-      names(methods.found),
+      names(methods_found),
       function(ix) {
-        if (is.null(attributes(methods.found[[ix]])$srcref)) {
-          return(.digestCache(toString(body(methods.found[[ix]]))))
+        if (is.null(attributes(methods_found[[ix]])$srcref)) {
+          return(.digestCache(toString(body(methods_found[[ix]]))))
         } else {
-          return(.digestCache(toString(attributes(methods.found[[ix]])$srcref)))
+          return(.digestCache(toString(attributes(methods_found[[ix]])$srcref)))
         }
       },
-      "string"
+      character(1L)
     )
   } else if (is.primitive(fun)) {
     fun
@@ -109,7 +109,7 @@ methods::setGeneric(".runCache", function(
     fun
   }
 
-  return(.digestCache(digest.fun))
+  return(.digestCache(digest_fun))
 }
 
 #' Write a file in run-cache directory to explain the origin
@@ -231,7 +231,7 @@ methods::setGeneric(".runCache", function(
 #' glmSparseNet:::.saveRunCache(
 #'   35, file.path(tempdir(), "save_run_cache.Rdata"), FALSE, TRUE
 #' )
-.saveRunCache <- function(result, path, compression, show.message) {
+.saveRunCache <- function(result, path, compression, show_message) {
   #
   tryCatch(
     {
@@ -243,9 +243,7 @@ methods::setGeneric(".runCache", function(
       )
       epochMilliseconds <- as.double(Sys.time()) * 1000 # seconds
       #
-      if (show.message) {
-        message("Saving in cache:  ", path)
-      }
+      if (show_message) message("Saving in cache:  ", path)
       save(
         result,
         epochMilliseconds,
@@ -337,7 +335,7 @@ methods::setMethod(
     } else {
       warning(
         "Could not save cache, possibly cannot create directory: ",
-        base.dir, " or ", file.path(base_dir, parent_path),
+        base_dir, " or ", file.path(base_dir, parent_path),
         sep = ""
       )
       # just calculate

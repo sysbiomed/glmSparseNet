@@ -106,7 +106,7 @@ cv.glmDegree(
   "correlation",
   family = "gaussian",
   nfolds = 5,
-  options = networkOptions(min.degree = .2)
+  options = networkOptions(minDegree = .2)
 )
 # Hub penalization
 
@@ -117,7 +117,7 @@ cv.glmHub(
   "correlation",
   family = "gaussian",
   nfolds = 5,
-  options = networkOptions(min.degree = .2)
+  options = networkOptions(minDegree = .2)
 )
 # Orphan penalization
 
@@ -128,7 +128,7 @@ cv.glmOrphan(
   "correlation",
   family = "gaussian",
   nfolds = 5,
-  options = networkOptions(min.degree = .2)
+  options = networkOptions(minDegree = .2)
 )
 \donttest{
 # Gaussian model

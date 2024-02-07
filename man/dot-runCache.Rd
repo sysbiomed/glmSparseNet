@@ -74,6 +74,6 @@ glmSparseNet:::.runCache(c, 1, 2, 3, 4)
 glmSparseNet:::.runCache(c, a = 1, 2, c = 3, 4)
 \donttest{
 # Using a local folder
-# glmSparseNet:::.runCache(c, 1, 2, 3, 4, base.dir = "runcache")
+# glmSparseNet:::.runCache(c, 1, 2, 3, 4, base_dir = "runcache")
 }
 }

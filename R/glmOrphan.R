@@ -11,7 +11,7 @@
 #'   rnorm(nrow(xdata)),
 #'   "correlation",
 #'   family = "gaussian",
-#'   options = networkOptions(min.degree = .2)
+#'   options = networkOptions(minDegree = .2)
 #' )
 glmOrphan <- function(
     xdata,
@@ -33,7 +33,7 @@ glmOrphan <- function(
   }
   # Lifecycle management: end
 
-  options$trans.fun <- orphanHeuristic
+  options$transFun <- orphanHeuristic
   glmSparseNet(
     xdata,
     ydata,
@@ -59,7 +59,7 @@ glmOrphan <- function(
 #'   "correlation",
 #'   family = "gaussian",
 #'   nfolds = 5,
-#'   options = networkOptions(min.degree = .2)
+#'   options = networkOptions(minDegree = .2)
 #' )
 cv.glmOrphan <- function(
     xdata,
@@ -81,7 +81,7 @@ cv.glmOrphan <- function(
   }
   # Lifecycle management: end
 
-  options$trans.fun <- orphanHeuristic
+  options$transFun <- orphanHeuristic
   cv.glmSparseNet(
     xdata,
     ydata,

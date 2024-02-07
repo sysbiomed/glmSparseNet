@@ -290,7 +290,7 @@ cv.hub <- cv.glmHub(xdata,
   family = "cox",
   foldid = foldid,
   network = my.string,
-  network.options = networkOptions(min.degree = 0.2)
+  network.options = networkOptions(minDegree = 0.2)
 )
 ```
 
@@ -324,7 +324,7 @@ cv.orphan <- cv.glmOrphan(xdata,
   family = "cox",
   foldid = foldid,
   network = my.string,
-  network.options = networkOptions(min.degree = 0.2)
+  network.options = networkOptions(minDegree = 0.2)
 )
 ```
 

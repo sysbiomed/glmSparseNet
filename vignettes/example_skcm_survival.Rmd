@@ -154,8 +154,8 @@ fitted <- cv.glmHub(
   foldid = glmSparseNet:::balancedCvFolds(!!ydata$status)$output,
   network = "correlation",
   network.options = networkOptions(
-    min.degree = .2,
-    cutoff = .6
+    cutoff = .6,
+    minDegree = .2
   )
 )
 ```

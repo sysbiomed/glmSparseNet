@@ -38,7 +38,7 @@ networkOptions(
 
 \item{trans.fun}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
 
-The trans.fun argument takes a function definition that will apply a
+The \code{transFun} argument takes a function definition that will apply a
 transformation to the penalty vector calculated from the degree. This
 transformation allows to change how the penalty is applied.}
 }

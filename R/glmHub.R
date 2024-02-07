@@ -10,7 +10,7 @@
 #'   rnorm(nrow(xdata)),
 #'   "correlation",
 #'   family = "gaussian",
-#'   options = networkOptions(min.degree = .2)
+#'   options = networkOptions(minDegree = .2)
 #' )
 glmHub <- function(
     xdata,
@@ -32,7 +32,7 @@ glmHub <- function(
   }
   # Lifecycle management: end
 
-  options$trans.fun <- hubHeuristic
+  options$transFun <- hubHeuristic
   glmSparseNet(
     xdata,
     ydata,
@@ -58,7 +58,7 @@ glmHub <- function(
 #'   "correlation",
 #'   family = "gaussian",
 #'   nfolds = 5,
-#'   options = networkOptions(min.degree = .2)
+#'   options = networkOptions(minDegree = .2)
 #' )
 cv.glmHub <- function(
     xdata,
@@ -80,7 +80,7 @@ cv.glmHub <- function(
   }
   # Lifecycle management: end
 
-  options$trans.fun <- hubHeuristic
+  options$transFun <- hubHeuristic
   cv.glmSparseNet(
     xdata,
     ydata,

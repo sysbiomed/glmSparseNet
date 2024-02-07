@@ -14,7 +14,7 @@
 #' @param n.cores `r lifecycle::badge("deprecated")`
 #' @param trans.fun `r lifecycle::badge("deprecated")`
 #'
-#' The trans.fun argument takes a function definition that will apply a
+#' The `transFun` argument takes a function definition that will apply a
 #' transformation to the penalty vector calculated from the degree. This
 #' transformation allows to change how the penalty is applied.
 #'
@@ -58,9 +58,9 @@ networkOptions <- function(
     unweighted = unweighted,
     cutoff = cutoff,
     centrality = centrality,
-    n.cores = nCores,
-    min.degree = minDegree,
-    trans.fun = transFun
+    nCores = nCores,
+    minDegree = minDegree,
+    transFun = transFun
   )
 }
 
@@ -96,7 +96,7 @@ networkOptions <- function(
         consider.unweighted = options$unweighted,
         cutoff = options$cutoff,
         #
-        n.cores = options$n.cores
+        n.cores = options$nCores
       ),
       covariance = degreeCov(
         xdata,
@@ -104,7 +104,7 @@ networkOptions <- function(
         consider.unweighted = options$unweighted,
         cutoff = options$cutoff,
         #
-        n.cores = options$n.cores
+        n.cores = options$nCores
       ),
       none = rep(1, ncol(xdata)),
       stop("Unkown network type, see documentation of glmSparseNet")
@@ -115,7 +115,7 @@ networkOptions <- function(
       options$centrality
     ))
   }
-  options$trans.fun(penaltyFactor)
+  options$transFun(penaltyFactor)
 }
 
 #' Heuristic function to penalize nodes with low degree

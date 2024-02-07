@@ -12,7 +12,7 @@
 #'   rnorm(nrow(xdata)),
 #'   "correlation",
 #'   family = "gaussian",
-#'   options = networkOptions(min.degree = .2)
+#'   options = networkOptions(minDegree = .2)
 #' )
 glmDegree <- function(
     xdata,
@@ -34,7 +34,7 @@ glmDegree <- function(
   }
   # Lifecycle management: end
 
-  options$trans.fun <- function(x) 1 / x
+  options$transFun <- function(x) 1 / x
   glmSparseNet(
     xdata,
     ydata,
@@ -60,7 +60,7 @@ glmDegree <- function(
 #'   "correlation",
 #'   family = "gaussian",
 #'   nfolds = 5,
-#'   options = networkOptions(min.degree = .2)
+#'   options = networkOptions(minDegree = .2)
 #' )
 cv.glmDegree <- function(
     xdata,
@@ -76,13 +76,13 @@ cv.glmDegree <- function(
     .deprecatedDotParam("cv.glmSparseNet", "network.options")
     options <- network.options
   }
-  if (lifecycle::is_present(experiment)) {
+  if (lifecycle::is_present(experiment.name)) {
     .deprecatedDotParam("cv.glmSparseNet", "experiment.name")
     experiment <- experiment.name
   }
   # Lifecycle management: end
 
-  options$trans.fun <- function(x) 1 / x
+  options$transFun <- function(x) 1 / x
   cv.glmSparseNet(
     xdata,
     ydata,
