@@ -9,8 +9,12 @@ test_that("glmSparseNet: simple call with MultiAssayExperiment", {
 
   xdata <- miniACC
 
-  event_ix <- which(!is.na(xdata$days_to_death))
-  cens_ix <- which(!is.na(xdata$days_to_last_followup))
+  event_ix <- which(!is.na(
+    MultiAssayExperiment::colData(xdata)$days_to_death
+  ))
+  cens_ix <- which(!is.na(
+    MultiAssayExperiment::colData(xdata)$days_to_last_followup
+  ))
 
   xdata$surv_event_time <- array(
     NA_integer_, nrow(MultiAssayExperiment::colData(xdata))

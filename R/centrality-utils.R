@@ -1,68 +1,3 @@
-#' Calculates the correlation network
-#'
-#' @param xdata base data to calculate network
-#' @param build.output if output returns a 'matrix', 'vector' of the upper triu
-#' without the diagonal or NULL with any other argument
-#' @param n.cores number of cores to be used
-#' @param force.recalc.network force recalculation, instead of going to cache
-#' @param show.message shows cache operation messages
-#' @param ... extra parameters for fun
-#'
-#' @return depends on build.output parameter
-#' @export
-#'
-#' @examples
-#' n.col <- 6
-#' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' networkCorParallel(xdata)
-networkCorParallel <- function(
-    xdata,
-    build.output = "matrix",
-    n.cores = 1,
-    force.recalc.network = FALSE,
-    show.message = FALSE,
-    ...) {
-  .networkGenericParallel(
-    stats::cor,
-    "correlation",
-    xdata,
-    build.output = build.output,
-    n.cores = n.cores,
-    force.recalc.network = force.recalc.network,
-    show.message = show.message,
-    ...
-  )
-}
-
-#' Calculates the covariance network
-#'
-#' @param xdata base data to calculate network
-#' @param build.output if output returns a 'matrix', 'vector' of the upper triu
-#' without the diagonal or NULL with any other argument
-#' @param n.cores number of cores to be used
-#' @param force.recalc.network force recalculation, instead of going to cache
-#' @param show.message shows cache operation messages
-#' @param ... extra parameters for fun
-#'
-#' @return depends on build.output parameter
-#' @export
-#'
-#' @examples
-#' n.col <- 6
-#' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' networkCovParallel(xdata)
-networkCovParallel <- function(xdata,
-                               build.output = "matrix",
-                               n.cores = 1,
-                               force.recalc.network = FALSE,
-                               show.message = FALSE, ...) {
-  .networkGenericParallel(stats::cov, "covariance", xdata,
-    build.output = build.output, n.cores = n.cores,
-    force.recalc.network = force.recalc.network,
-    show.message = show.message, ...
-  )
-}
-
 #' Calculate the upper triu of the matrix
 #'
 #' @param fun function that will calculate the edge weight between 2 nodes
@@ -85,6 +20,7 @@ networkCovParallel <- function(xdata,
                                     show.message = FALSE, ...) {
   # Windows only support 1 core
   if (.Platform$OS.type == "windows") {
+    browser()
     n.cores <- 1
   }
 
@@ -164,90 +100,6 @@ networkCovParallel <- function(xdata,
     return(NULL)
   }
 }
-
-#' Calculate the degree of the correlation network based on xdata
-#'
-#' @param xdata calculate correlation matrix on each column
-#' @param cutoff positive value that determines a cutoff value
-#' @param consider.unweighted consider all edges as 1 if they are greater than 0
-#' @param n.cores number of cores to be used
-#' @param force.recalc.degree force recalculation of penalty weights (but not
-#' the network), instead of going to cache
-#' @param force.recalc.network force recalculation of network and penalty
-#' weights, instead of going to cache
-#' @param ... extra parameters for cor function
-#'
-#' @return a vector of the degrees
-#' @export
-#'
-#' @examples
-#' n.col <- 6
-#' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degreeCor(xdata)
-#' degreeCor(xdata, cutoff = .5)
-#' degreeCor(xdata, cutoff = .5, consider.unweighted = TRUE)
-degreeCor <- function(
-    xdata,
-    cutoff = 0,
-    consider.unweighted = FALSE,
-    force.recalc.degree = FALSE,
-    force.recalc.network = FALSE,
-    n.cores = 1,
-    ...) {
-  checkmate::assert_matrix(xdata)
-  checkmate::assert_double(cutoff, len = 1)
-  checkmate::assert_integerish(n.cores, lower = 1)
-  checkmate::assert_flag(consider.unweighted)
-  checkmate::assert_flag(force.recalc.degree)
-  checkmate::assert_flag(force.recalc.network)
-
-  .degreeGeneric(
-    stats::cor,
-    "correlation",
-    xdata,
-    cutoff = cutoff,
-    consider.unweighted = consider.unweighted,
-    force.recalc.degree = force.recalc.degree,
-    force.recalc.network = force.recalc.network,
-    n.cores = n.cores,
-    ...
-  )
-}
-
-#' Calculate the degree of the covariance network based on xdata
-#'
-#' @param xdata calculate correlation matrix on each column
-#' @param cutoff positive value that determines a cutoff value
-#' @param consider.unweighted consider all edges as 1 if they are greater than 0
-#' @param n.cores number of cores to be used
-#' @param force.recalc.degree force recalculation of penalty weights (but not
-#' the network), instead of going to cache
-#' @param force.recalc.network force recalculation of network and penalty
-#' weights, instead of going to cache
-#' @param ... extra parameters for cov function
-#'
-#' @return a vector of the degrees
-#' @export
-#'
-#' @examples
-#' n.col <- 6
-#' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
-#' degreeCov(xdata)
-#' degreeCov(xdata, cutoff = .5)
-#' degreeCov(xdata, cutoff = .5, consider.unweighted = TRUE)
-degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
-                      force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                      n.cores = 1, ...) {
-  return(.degreeGeneric(stats::cov, "correlation", xdata,
-    cutoff = cutoff,
-    consider.unweighted = consider.unweighted,
-    force.recalc.degree = force.recalc.degree,
-    force.recalc.network = force.recalc.network,
-    n.cores = n.cores, ...
-  ))
-}
-
-
 
 #' Worker to calculate edge weight for each pair of ix.i node and following
 #'
