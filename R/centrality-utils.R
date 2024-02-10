@@ -1,33 +1,29 @@
 #' Calculate the upper triu of the matrix
 #'
 #' @param fun function that will calculate the edge weight between 2 nodes
-#' @param fun.prefix used to store low-level information on network as it can
+#' @param funPrefix used to store low-level information on network as it can
 #' become to large to be stored in memory
-#' @param xdata base data to calculate network
-#' @param build.output if output returns a 'matrix', 'vector' of the upper triu
-#' without the diagonal or NULL with any other argument
-#' @param n.cores number of cores to be used
-#' @param force.recalc.network force recalculation, instead of going to cache
-#' @param show.message shows cache operation messages
-#' @param ... extra parameters for fun
+#' @inheritParams networkCorParallel
 #'
-#' @return depends on build.output parameter
-.networkGenericParallel <- function(fun, fun.prefix,
-                                    xdata,
-                                    build.output = "matrix",
-                                    n.cores = 1,
-                                    force.recalc.network = FALSE,
-                                    show.message = FALSE, ...) {
+#' @return depends on buildOutput parameter
+.networkGenericParallel <- function(
+    fun,
+    funPrefix,
+    xdata,
+    buildOutput = "matrix",
+    nCores = 1,
+    forceRecalcNetwork = FALSE,
+    showMessage = FALSE,
+    ...) {
   # Windows only support 1 core
   if (.Platform$OS.type == "windows") {
-    browser()
-    n.cores <- 1
+    nCores <- 1
   }
 
   #
-  xdata.sha256 <- .digestCache(xdata)
+  xdataSha256 <- .digestCache(xdata)
   #
-  fun.aux <- function(xdata, ...) {
+  fun_aux <- function(xdata, ...) {
     result <- parallel::mclapply(as.numeric(seq_len(ncol(xdata) - 1)),
       function(ix.i) {
         tryCatch(
@@ -38,10 +34,10 @@
               xdata,
               ix.i,
               # run_cache arguments
-              cache_digest = list(xdata.sha256),
-              cache_prefix = fun.prefix,
-              show_message = show.message,
-              force_recalc = force.recalc.network,
+              cache_digest = list(xdataSha256),
+              cache_prefix = funPrefix,
+              show_message = showMessage,
+              force_recalc = forceRecalcNetwork,
               ...
             )
           },
@@ -52,29 +48,30 @@
             )
           }
         )
-        if (build.output == "vector" || build.output == "matrix") {
+        if (buildOutput == "vector" || buildOutput == "matrix") {
           return(result)
         } else {
           return(TRUE)
         }
       },
-      mc.cores = n.cores, mc.silent = FALSE, mc.preschedule = TRUE
+      mc.cores = nCores, mc.silent = FALSE, mc.preschedule = TRUE
     )
     return(result)
   }
+
   result <- .runCache(
-    fun.aux,
+    fun_aux,
     xdata,
     # run_cache arguments
-    cache_prefix = "fun.aux",
-    cache_digest = list(xdata.sha256),
-    force_recalc = force.recalc.network,
-    show_message = show.message,
+    cache_prefix = "fun_aux",
+    cache_digest = list(xdataSha256),
+    force_recalc = forceRecalcNetwork,
+    show_message = showMessage,
     ...
   )
-  if (build.output == "vector") {
+  if (buildOutput == "vector") {
     return(unlist(result))
-  } else if (build.output == "matrix") {
+  } else if (buildOutput == "matrix") {
     sparse.data <- data.frame(i = c(), j = c(), p = c())
     for (ix in rev(seq_along(result))) {
       line <- result[[ix]]
@@ -127,32 +124,32 @@
 #' any connection the node and itself.
 #'
 #' @param fun function that will calculate the edge weight between 2 nodes
-#' @param fun.prefix used to store low-level information on network as it can
+#' @param funPrefix used to store low-level information on network as it can
 #' become to large to be stored in memory
 #' @param xdata calculate correlation matrix on each column
 #' @param cutoff positive value that determines a cutoff value
-#' @param consider.unweighted consider all edges as 1 if they are greater than 0
+#' @param considerUnweighted consider all edges as 1 if they are greater than 0
 #' @param chunks calculate function at batches of this value (default is 1000)
-#' @param n.cores number of cores to be used
-#' @param force.recalc.degree force recalculation of penalty weights (but not
+#' @param nCores number of cores to be used
+#' @param forceRecalcDegree force recalculation of penalty weights (but not
 #' the network), instead of going to cache
-#' @param force.recalc.network force recalculation of network and penalty
+#' @param forceRecalcNetwork force recalculation of network and penalty
 #' weights, instead of going to cache
 #' @param ... extra parameters for fun
 #'
 #' @return a vector of the degrees
-.degreeGeneric <- function(fun = stats::cor, fun.prefix = "operator", xdata,
-                           cutoff = 0, consider.unweighted = FALSE,
-                           chunks = 1000, force.recalc.degree = FALSE,
-                           force.recalc.network = FALSE,
-                           n.cores = 1, ...) {
+.degreeGeneric <- function(fun = stats::cor, funPrefix = "operator", xdata,
+                           cutoff = 0, considerUnweighted = FALSE,
+                           chunks = 1000, forceRecalcDegree = FALSE,
+                           forceRecalcNetwork = FALSE,
+                           nCores = 1, ...) {
   # fail safe until windows has parallel computing support for mclapply
   if (.Platform$OS.type == "windows") {
-    n.cores <- 1
+    nCores <- 1
   }
 
-  if (force.recalc.network) {
-    force.recalc.degree <- force.recalc.network
+  if (forceRecalcNetwork) {
+    forceRecalcDegree <- forceRecalcNetwork
   }
 
   if (inherits(xdata, "matrix")) {
@@ -163,8 +160,8 @@
     stop("xdata argument must be a matrix object")
   }
 
-  chunk.function <- function(xdata, max.ix, ix.outer, n.cores, cutoff,
-                             consider.unweighted, ...) {
+  chunkFunction <- function(xdata, max.ix, ix.outer, nCores, cutoff,
+                             considerUnweighted, ...) {
     parallel::mclapply(seq(ix.outer, max.ix, 1),
       function(ix.i) {
         line <- .networkWorker(fun, xdata, ix.i, ...)
@@ -172,37 +169,37 @@
         line[is.na(line)] <- 0 # failsafe (for example, when sd = 0)
         line <- abs(line)
         line[line < cutoff] <- 0
-        if (consider.unweighted) {
+        if (considerUnweighted) {
           line[line != 0] <- 1
         }
         line <- c(rep(0, ix.i - 1), sum(line), line)
         return(line)
       },
-      mc.cores = n.cores, mc.allow.recursive = FALSE
+      mc.cores = nCores, mc.allow.recursive = FALSE
     )
   }
 
   #
   # auxiliary function to be able to call with cache
   #
-  weigthed.aux <- function(xdata, cutoff, consider.unweighted, ...) {
+  weigthedAux <- function(xdata, cutoff, considerUnweighted, ...) {
     degree <- array(0, ncol(xdata))
     for (ix.outer in seq(1, ncol(xdata) - 1, chunks)) {
       max.ix <- min(ix.outer + chunks - 1, ncol(xdata) - 1)
       res.chunks <- .runCache(
-        chunk.function,
+        chunkFunction,
         xdata,
         max.ix,
         ix.outer,
-        n.cores,
+        nCores,
         cutoff,
-        consider.unweighted,
+        considerUnweighted,
         ...,
         # run_cache arguments
-        cache_digest = list(xdata.sha256),
-        cache_prefix = fun.prefix,
+        cache_digest = list(xdataSha256),
+        cache_prefix = funPrefix,
         show_message = FALSE,
-        force_recalc = force.recalc.network
+        force_recalc = forceRecalcNetwork
       )
       #
       res.chunks <- matrix(unlist(res.chunks),
@@ -211,21 +208,21 @@
       degree <- degree + colSums(res.chunks)
     }
     names(degree) <- colnames(xdata)
-    return(degree)
+    degree
   }
   #
-  xdata.sha256 <- .digestCache(xdata)
+  xdataSha256 <- .digestCache(xdata)
 
   val <- .runCache(
-    weigthed.aux,
+    weigthedAux,
     xdata,
     cutoff,
-    consider.unweighted,
+    considerUnweighted,
     # run_cache arguments
-    cache_digest = list(xdata.sha256),
-    cache_prefix = sprintf("degree.%s", fun.prefix),
+    cache_digest = list(xdataSha256),
+    cache_prefix = sprintf("degree.%s", funPrefix),
     show_message = FALSE,
-    force_recalc = force.recalc.degree, ...
+    force_recalc = forceRecalcDegree, ...
   )
   return(val)
 }

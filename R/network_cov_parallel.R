@@ -1,12 +1,6 @@
 #' Calculates the covariance network
 #'
-#' @param xdata base data to calculate network
-#' @param build.output if output returns a 'matrix', 'vector' of the upper triu
-#' without the diagonal or NULL with any other argument
-#' @param n.cores number of cores to be used
-#' @param force.recalc.network force recalculation, instead of going to cache
-#' @param show.message shows cache operation messages
-#' @param ... extra parameters for fun
+#' @inheritParams networkCorParallel
 #'
 #' @return depends on build.output parameter
 #' @export
@@ -15,14 +9,44 @@
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 #' networkCovParallel(xdata)
-networkCovParallel <- function(xdata,
-                               build.output = "matrix",
-                               n.cores = 1,
-                               force.recalc.network = FALSE,
-                               show.message = FALSE, ...) {
-  .networkGenericParallel(stats::cov, "covariance", xdata,
-                          build.output = build.output, n.cores = n.cores,
-                          force.recalc.network = force.recalc.network,
-                          show.message = show.message, ...
+networkCovParallel <- function(
+    xdata,
+    buildOutput = "matrix",
+    nCores = 1,
+    forceRecalcNetwork = FALSE,
+    showMessage = FALSE,
+    ...,
+    build.output = deprecated(),
+    n.cores = deprecated(),
+    force.recalc.network = deprecated(),
+    show.message = deprecated()) {
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(build.output)) {
+    .deprecatedDotParam("buildLambda", "build.output")
+    buildOutput <- build.output
+  }
+  if (lifecycle::is_present(n.cores)) {
+    .deprecatedDotParam("buildLambda", "n.cores")
+    nCores <- n.cores
+  }
+  if (lifecycle::is_present(force.recalc.network)) {
+    .deprecatedDotParam("buildLambda", "force.recalc.network")
+    forceRecalcNetwork <- force.recalc.network
+  }
+  if (lifecycle::is_present(show.message)) {
+    .deprecatedDotParam("buildLambda", "show.message")
+    showMessage <- show.message
+  }
+  # Lifecycle management: end
+
+  .networkGenericParallel(
+    stats::cov,
+    "covariance",
+    xdata,
+    buildOutput = buildOutput,
+    nCores = nCores,
+    forceRecalcNetwork = forceRecalcNetwork,
+    showMessage = showMessage,
+    ...
   )
 }

@@ -29,20 +29,20 @@ degreeCor <- function(
     ...) {
   checkmate::assert_matrix(xdata)
   checkmate::assert_double(cutoff, len = 1)
-  checkmate::assert_integerish(n.cores, lower = 1)
   checkmate::assert_flag(consider.unweighted)
   checkmate::assert_flag(force.recalc.degree)
   checkmate::assert_flag(force.recalc.network)
+  checkmate::assert_integerish(n.cores, lower = 1)
 
   .degreeGeneric(
     stats::cor,
     "correlation",
     xdata,
     cutoff = cutoff,
-    consider.unweighted = consider.unweighted,
-    force.recalc.degree = force.recalc.degree,
-    force.recalc.network = force.recalc.network,
-    n.cores = n.cores,
+    considerUnweighted = consider.unweighted,
+    forceRecalcDegree = force.recalc.degree,
+    forceRecalcNetwork = force.recalc.network,
+    nCores = n.cores,
     ...
   )
 }

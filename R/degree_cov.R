@@ -19,14 +19,29 @@
 #' degreeCov(xdata)
 #' degreeCov(xdata, cutoff = .5)
 #' degreeCov(xdata, cutoff = .5, consider.unweighted = TRUE)
-degreeCov <- function(xdata, cutoff = 0, consider.unweighted = FALSE,
-                      force.recalc.degree = FALSE, force.recalc.network = FALSE,
-                      n.cores = 1, ...) {
-  return(.degreeGeneric(stats::cov, "correlation", xdata,
-                        cutoff = cutoff,
-                        consider.unweighted = consider.unweighted,
-                        force.recalc.degree = force.recalc.degree,
-                        force.recalc.network = force.recalc.network,
-                        n.cores = n.cores, ...
-  ))
+degreeCov <- function(
+    xdata,
+    cutoff = 0,
+    consider.unweighted = FALSE,
+    force.recalc.degree = FALSE,
+    force.recalc.network = FALSE,
+    n.cores = 1,
+    ...) {
+  checkmate::assert_matrix(xdata)
+  checkmate::assert_double(cutoff, len = 1)
+  checkmate::assert_flag(consider.unweighted)
+  checkmate::assert_flag(force.recalc.degree)
+  checkmate::assert_flag(force.recalc.network)
+  checkmate::assert_integerish(n.cores, lower = 1)
+
+  .degreeGeneric(
+    stats::cov, "correlation",
+    xdata,
+    cutoff = cutoff,
+    considerUnweighted = consider.unweighted,
+    forceRecalcDegree = force.recalc.degree,
+    forceRecalcNetwork = force.recalc.network,
+    nCores = n.cores,
+    ...
+  )
 }

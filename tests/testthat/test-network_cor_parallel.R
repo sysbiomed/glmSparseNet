@@ -7,17 +7,17 @@ test_that("networkCorParallel: Default methods", {
   mat_non_diag <- cor(xdata)
   diag(mat_non_diag) <- 0
   test_mat <- networkCorParallel(xdata,
-    n.cores = 1, build.output = "matrix",
+    nCores = 1, buildOutput = "matrix",
     #
-    force.recalc = TRUE
+    forceRecalc = TRUE
   )
 
   expect_lt(sum(Matrix::norm(test_mat - mat_non_diag, type = "1")), 5e-10)
   #
   test_mat <- networkCorParallel(xdata,
-    n.cores = 1, build.output = "matrix",
+    nCores = 1, buildOutput = "matrix",
     #
-    force.recalc = FALSE
+    forceRecalc = FALSE
   )
   expect_lt(sum(Matrix::norm(test_mat - mat_non_diag, type = "1")), 5e-10)
 })
@@ -30,17 +30,17 @@ test_that("networkCorParallel: Spearman correlation", {
   mat_non_diag <- cor(xdata, method = my_method)
   diag(mat_non_diag) <- 0
   test_mat <- networkCorParallel(xdata,
-    method = my_method, n.cores = 1, build.output = "matrix",
+    method = my_method, nCores = 1, buildOutput = "matrix",
     #
-    force.recalc = TRUE
+    forceRecalc = TRUE
   )
 
   expect_lt(sum(Matrix::norm(test_mat - mat_non_diag, type = "1")), 5e-10)
   #
   test_mat <- networkCorParallel(xdata,
-    method = my_method, n.cores = 1, build.output = "matrix",
+    method = my_method, nCores = 1, buildOutput = "matrix",
     #
-    force.recalc = FALSE
+    forceRecalc = FALSE
   )
   expect_lt(sum(Matrix::norm(test_mat - mat_non_diag, type = "1")), 5e-10)
 })
@@ -54,75 +54,65 @@ test_that("networkCorParallel: Pearson correlation", {
   diag(mat_non_diag) <- 0
   #
   test_mat <- networkCorParallel(xdata,
-    method = my_method, n.cores = 1, build.output = "matrix",
+    method = my_method, nCores = 1, buildOutput = "matrix",
     #
-    force.recalc = TRUE
+    forceRecalc = TRUE
   )
 
   expect_lt(sum(Matrix::norm(test_mat - mat_non_diag, type = "1")), 5e-10)
   #
   test_mat <- networkCorParallel(xdata,
-    method = my_method, n.cores = 1,
-    build.output = "matrix",
+    method = my_method, nCores = 1,
+    buildOutput = "matrix",
     #
-    force.recalc = FALSE
+    forceRecalc = FALSE
   )
   expect_lt(sum(Matrix::norm(test_mat - mat_non_diag, type = "1")), 5e-10)
 })
 
 test_that("networkCorParallel: Multiple cores", {
   withr::local_tempdir(pattern = "base.dir") |> .baseDir()
-
   xdata <- random_xdata()
+
   my_method <- "pearson"
   mat_non_diag <- cor(xdata, method = my_method)
   diag(mat_non_diag) <- 0
   #
   test_mat <- networkCorParallel(
     xdata,
-    method = my_method, n.cores = 2,
-    build.output = "matrix",
+    method = my_method, nCores = 2,
+    buildOutput = "matrix",
     #
-    force.recalc = TRUE
+    forceRecalc = TRUE
   )
 
   expect_lt(sum(Matrix::norm(test_mat - mat_non_diag, type = "1")), 5e-10)
   #
   test_mat <- networkCorParallel(xdata,
-    method = my_method, n.cores = 2, build.output = "matrix",
+    method = my_method, nCores = 2, buildOutput = "matrix",
     #
-    force.recalc = FALSE
+    forceRecalc = FALSE
   )
   expect_lt(sum(Matrix::norm(test_mat - mat_non_diag, type = "1")), 5e-10)
 })
 
-test_that("networkCorParallel: with platform windows", {
+test_that("networkCorParallel: build vector", {
   withr::local_tempdir(pattern = "base.dir") |> .baseDir()
+  xdata <- random_xdata()
 
-  local({
-    .Platform$OS.type <- "windows"
+  my_method <- "pearson"
+  mat_non_diag <- cor(xdata, method = my_method)
+  diag(mat_non_diag) <- 0
 
-    xdata <- random_xdata()
-    my_method <- "pearson"
-    mat_non_diag <- cor(xdata, method = my_method)
-    diag(mat_non_diag) <- 0
+  #
+  test_mat <- networkCorParallel(
+    xdata,
+    method = my_method, nCores = 2,
+    buildOutput = "vector",
     #
-    test_mat <- networkCorParallel(
-      xdata,
-      method = my_method, n.cores = 2,
-      build.output = "matrix",
-      #
-      force.recalc = TRUE
-    )
+    forceRecalc = TRUE
+  )
 
-    expect_lt(sum(Matrix::norm(test_mat - mat_non_diag, type = "1")), 5e-10)
-    #
-    test_mat <- networkCorParallel(
-      xdata,
-      method = my_method, n.cores = 2, build.output = "matrix",
-      #
-      force.recalc = FALSE
-    )
-    expect_lt(sum(Matrix::norm(test_mat - mat_non_diag, type = "1")), 5e-10)
-  })
+  sum(test_mat[1:59] - as.vector(mat_non_diag)[2:60]) |>
+    expect_lt(5e-10)
 })
