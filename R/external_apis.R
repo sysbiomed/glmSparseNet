@@ -16,14 +16,7 @@
 #' })
 #' }
 .curlWorkaround <- function(expr) {
-  result <- tryCatch(
-    {
-      expr
-    },
-    error = function(err) {
-      err
-    }
-  )
+  result <- tryCatch(expr, error = function(err) err)
 
   if (inherits(result, "error") || is.null(result)) {
     warning(
@@ -158,11 +151,11 @@ geneNames <- function(
     use.cache = deprecated()) { # nolint: object_name_linter.
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(ensembl.genes)) {
-    .deprecatedDotParam("cv.glmSparseNet", "ensembl.genes")
+    .deprecatedDotParam("geneNames", "ensembl.genes")
     ensemblGenes <- ensembl.genes
   }
   if (lifecycle::is_present(use.cache)) {
-    .deprecatedDotParam("cv.glmSparseNet", "use.cache")
+    .deprecatedDotParam("geneNames", "use.cache")
     useCache <- use.cache
   }
   # Lifecycle management: end
@@ -223,11 +216,11 @@ ensemblGeneNames <- function(
     use.cache =  deprecated()) { # nolint: object_name_linter.
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(gene.id)) {
-    .deprecatedDotParam("cv.glmSparseNet", "gene.id")
+    .deprecatedDotParam("ensemblGeneNames", "gene.id")
     geneId <- gene.id
   }
   if (lifecycle::is_present(use.cache)) {
-    .deprecatedDotParam("cv.glmSparseNet", "use.cache")
+    .deprecatedDotParam("ensemblGeneNames", "use.cache")
     useCache <- use.cache
   }
   # Lifecycle management: end
@@ -286,11 +279,16 @@ protein2EnsemblGeneNames <- function(
     ensemblProteins,
     useCache = TRUE,
     verbose = FALSE,
-    ensembl.proteins = deprecated()) { # nolint: object_name_linter.
+    ensembl.proteins = deprecated(),
+    use.cache = deprecated()) { # nolint: object_name_linter.
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(ensembl.proteins)) {
-    .deprecatedDotParam("cv.glmSparseNet", "ensembl.proteins")
+    .deprecatedDotParam("protein2EnsemblGeneNames", "ensembl.proteins")
     ensemblProteins <- ensembl.proteins
+  }
+  if (lifecycle::is_present(use.cache)) {
+    .deprecatedDotParam("protein2EnsemblGeneNames", "use.cache")
+    useCache <- use.cache
   }
   # Lifecycle management: end
 
