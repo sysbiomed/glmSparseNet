@@ -11,31 +11,33 @@
 #' @param remove.text remove text-based interactions
 #'
 #' @return table with combined score
-calculate.combined.score <- function(all.interactions,
-                                     score_threshold,
-                                     remove.text) {
+.calculateCombinedScore <- function(
+    allInteractions,
+    scoreThreshold,
+    removeText) {
   # We manually compute using the guide in stringdb's faq
   prior <- 0.041
 
-  compute.prior <- function(score, prior) {
+  computePrior <- function(score, prior) {
     score[score < prior] <- prior
-    return((score - prior) / (1 - prior))
+    (score - prior) / (1 - prior)
   }
 
   # normalize between 0 and 1
   mat <- Matrix::as.matrix(
-    dplyr::select(all.interactions, -dplyr::starts_with("protein"))
+    dplyr::select(allInteractions, -dplyr::starts_with("protein"))
   ) / 1000
   non_homology.ixs <- which(colnames(mat) != "homology")
 
   # compute prior away
-  mat[, non_homology.ixs] <- compute.prior(mat[, non_homology.ixs], prior)
+  mat[, non_homology.ixs] <- computePrior(mat[, non_homology.ixs], prior)
 
   # then, combine the direct and transferred scores for each category:
   combined <- c(
     "neighborhood", "coexpression", "experiments",
     "database", "textmining"
   )
+
   for (ix in combined) {
     mat[, ix] <- 1 -
       (1 - mat[, ix]) *
@@ -54,31 +56,28 @@ calculate.combined.score <- function(all.interactions,
   )]
 
   # next, do the 1 - multiplication
-  combined_score <- (1 - mat[, "neighborhood"]) *
+  combinedScore <- (1 - mat[, "neighborhood"]) *
     (1 - mat[, "fusion"]) *
     (1 - mat[, "cooccurence"]) *
     (1 - mat[, "coexpression"]) *
     (1 - mat[, "experiments"])
 
-  if (!remove.text) {
-    combined_score <- combined_score *
+  if (isFALSE(removeText)) {
+    combinedScore <- combinedScore *
       (1 - mat[, "database"]) *
       (1 - mat[, "textmining"])
   }
 
   # and lastly, do the 1 - conversion again, and put back the prior
   #  *exactly once*
-  combined_score <- prior + (1 - prior) * (1 - combined_score)
+  combinedScore <- prior + (1 - prior) * (1 - combinedScore)
 
-  return(all.interactions |>
-    dplyr::select(
-      from = !!as.name("protein1"),
-      to = !!as.name("protein2")
-    ) |>
-    dplyr::mutate(combined_score = floor(combined_score * 1000)) |>
+  allInteractions |>
+    dplyr::select(from = "protein1", to = "protein2") |>
+    dplyr::mutate(combined_score = floor(combinedScore * 1000)) |>
     #
     # Refilter combined score
-    dplyr::filter(!!(as.name("combined_score")) >= score_threshold))
+    dplyr::filter(.data$combined_score >= scoreThreshold)
 }
 
 #' Download protein-protein interactions from STRING DB
@@ -94,37 +93,34 @@ calculate.combined.score <- function(all.interactions,
 #' @export
 #' @examples
 #' \donttest{
-#' stringDBhomoSapiens(score_threshold = 800)
+#' stringDBhomoSapiens(scoreThreshold = 800)
 #' }
-stringDBhomoSapiens <- function(version = "11.0",
-                                score_threshold = 0,
-                                remove.text = TRUE) {
+stringDBhomoSapiens <- function(
+    version = "11.0",
+    scoreThreshold = 0,
+    removeText = TRUE) {
   # nolint start: object_usage_linter
   species <- 9606 # Homo sapiens
   links <- "links.full" # what data to retrieve
 
   # Using multiple glue to keep line length short
-  url.domain <- "stringdb-static.org"
-  url.path <- "download/protein.{links}.v{version}" |> glue::glue()
-  url.file <- "{species}.protein.{links}.v{version}.txt.gz" |> glue::glue()
-  url <- "https://{url.domain}/{url.path}/{url.file}" |> glue::glue()
+  urlDomain <- "stringdb-static.org"
+  urlPath <- "download/protein.{links}.v{version}" |> glue::glue()
+  urlFile <- "{species}.protein.{links}.v{version}.txt.gz" |> glue::glue()
+  url <- "https://{urlDomain}/{urlPath}/{urlFile}" |> glue::glue()
   # nolint end: object_usage_linter
 
   # download string data from string-db.org
   #
   # We were using the package before, but the full dataset was
   #  no longer available. So had to do it manually
-  all.interactions <- downloadFileLocal(url, oD = tempdir()) |>
+  allInteractions <- downloadFileLocal(url, oD = tempdir()) |>
     # read file into table
     readr::read_delim(delim = " ") |>
     # remove combined score, as we are calculating ourselves
     dplyr::select(-!!as.name("combined_score"))
 
-  return(calculate.combined.score(
-    all.interactions,
-    score_threshold,
-    remove.text
-  ))
+  .calculateCombinedScore(allInteractions, scoreThreshold, removeText)
 }
 
 #' Build gene network from peptide ids
@@ -133,11 +129,13 @@ stringDBhomoSapiens <- function(version = "11.0",
 #' mapping
 #' between peptide and gene id
 #'
-#' @param string.tbl matrix with colnames and rownames as ensembl peptide id
-#' (same order)
-#' @param use.names default is to use protein names ('protein'), other options
-#' are 'ensembl' for ensembl
-#' gene id or 'external' for external gene names
+#' @param stringTbl `data.frame` or `tibble` with colnames and rownames as
+#' ensembl peptide id _(same order)_.
+#' @param useNames `character(1)` that defaults to use protein names
+#' _('protein'), other options are 'ensembl' for ensembl gene id or 'external'
+#' for external gene names.
+#' @param string.tbl `r lifecycle::badge("deprecated")`
+#' @param use.names `r lifecycle::badge("deprecated")`
 #'
 #' @return a new matrix with gene ids instead of peptide ids. The size of matrix
 #'  can be different as
@@ -146,49 +144,66 @@ stringDBhomoSapiens <- function(version = "11.0",
 #' @seealso stringDBhomoSapiens
 #' @examples
 #' \donttest{
-#' all.interactions.700 <- stringDBhomoSapiens(score_threshold = 700)
-#' string.network <- buildStringNetwork(all.interactions.700,
-#'   use.names = "external"
-#' )
+#' interactions <- stringDBhomoSapiens(scoreThreshold = 100)
+#' string_network <- buildStringNetwork(interactions)
+#'
 #' # number of edges
-#' sum(string.network != 0)
+#' sum(string_network != 0)
 #' }
-buildStringNetwork <- function(string.tbl, use.names = "protein") {
+buildStringNetwork <- function(
+    stringMatrix,
+    useNames = c("protein", "ensembl", "external"),
+    string.tbl = deprecated(),
+    use.names = deprecated()
+  ) {
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(string.tbl)) {
+    .deprecatedDotParam("buildStringNetwork", "string.tbl")
+    stringMatrix <- string.tbl
+  }
+  if (lifecycle::is_present(use.names)) {
+    .deprecatedDotParam("buildStringNetwork", "use.names")
+    useNames <- use.names
+  }
+  # Lifecycle management: end
+
+  useNames <- match.arg(useNames)
+
   # remove 9606. prefix
-  string.tbl$from <- gsub("9606\\.", "", string.tbl$from)
-  string.tbl$to <- gsub("9606\\.", "", string.tbl$to)
+  stringMatrix$from <- gsub("9606\\.", "", stringMatrix$from)
+  stringMatrix$to <- gsub("9606\\.", "", stringMatrix$to)
 
   # get sorted list of proteins
-  merged.prot <- sort(unique(c(string.tbl$from, string.tbl$to)))
+  mergedProt <- sort(unique(c(stringMatrix$from, stringMatrix$to)))
 
-  # if use.names is not default, then replace proteins with genes (either
+  # if useNames is not default, then replace proteins with genes (either
   #   ensembl_id or gene_name)
-  if (use.names == "ensembl" || use.names == "external") {
-    prot.map <- protein2EnsemblGeneNames(merged.prot)
-    rownames(prot.map) <- prot.map$ensembl_peptide_id
+  if (useNames == "ensembl" || useNames == "external") {
+    protMap <- protein2EnsemblGeneNames(mergedProt)
+    rownames(protMap) <- protMap$ensembl_peptide_id
 
     # use external gene names
-    if (use.names == "external") {
-      ext.genes <- prot.map$ensembl_gene_id |>
+    if (useNames == "external") {
+      extGenes <- protMap$ensembl_gene_id |>
         unique() |>
         geneNames()
-      rownames(ext.genes) <- ext.genes$ensembl_gene_id
+      rownames(extGenes) <- extGenes$ensembl_gene_id
 
-      prot.map$ensembl_gene_id <- ext.genes[
-        prot.map$ensembl_gene_id,
+      protMap$ensembl_gene_id <- extGenes[
+        protMap$ensembl_gene_id,
         "external_gene_name"
       ]
     }
 
     # keep only proteins that have mapping to gene
-    new.string <- string.tbl |>
+    newString <- stringMatrix |>
       dplyr::filter(
-        !!(as.name("from")) %in% prot.map$ensembl_peptide_id &
-          !!(as.name("to")) %in% prot.map$ensembl_peptide_id
+        !!(as.name("from")) %in% protMap$ensembl_peptide_id &
+          !!(as.name("to")) %in% protMap$ensembl_peptide_id
       )
 
     # empty gene ids default to previous code
-    prot.map <- prot.map |>
+    protMap <- protMap |>
       dplyr::mutate(
         ensembl_gene_id =
           dplyr::if_else(!!(as.name("ensembl_gene_id")) == "",
@@ -198,43 +213,40 @@ buildStringNetwork <- function(string.tbl, use.names = "protein") {
       )
 
     # replace protein with genes
-    new.string$from <- as.vector(prot.map[
-      new.string$from,
+    newString$from <- as.vector(protMap[
+      newString$from,
       "ensembl_gene_id"
     ])
-    new.string$to <- as.vector(prot.map[new.string$to, "ensembl_gene_id"])
+    newString$to <- as.vector(protMap[newString$to, "ensembl_gene_id"])
 
     # discard all interaction between gene and himself
-    new.string <- new.string[new.string$from != new.string$to, ]
+    newString <- newString[newString$from != newString$to, ]
 
     # update list of protein index with genes
-    merged.prot <- sort(unique(c(new.string$from, new.string$to)))
+    mergedProt <- sort(unique(c(newString$from, newString$to)))
   } else {
-    # if default then just pass the argument as new.string
-    new.string <- string.tbl
+    # if default then just pass the argument as newString
+    newString <- stringMatrix
   }
 
   #
   # Build sparse matrix
 
-  new.string$from <- readr::parse_factor(new.string$from, merged.prot)
-  new.string$to <- readr::parse_factor(new.string$to, merged.prot)
+  newString$from <- readr::parse_factor(newString$from, mergedProt)
+  newString$to <- readr::parse_factor(newString$to, mergedProt)
 
-  i <- as.numeric(new.string$from)
-  j <- as.numeric(new.string$to)
+  i <- as.numeric(newString$from)
+  j <- as.numeric(newString$to)
 
   # Create new sparse matrix with p x p dimensions (p = genes)
-  new.mat <- Matrix::sparseMatrix(
+  Matrix::sparseMatrix(
     i = i,
     j = j,
-    x = new.string$combined_score,
-    dims = array(length(merged.prot), 2),
+    x = newString$combined_score,
+    dims = array(length(mergedProt), 2),
     dimnames = list(
-      levels(new.string$from),
-      levels(new.string$to)
+      levels(newString$from),
+      levels(newString$to)
     )
   )
-
-  # return the new matrix
-  return(new.mat)
 }

@@ -78,11 +78,10 @@
 #'   useCache = TRUE,
 #'   verbose = FALSE
 #' )
-.biomartLoad <- function(
-    attributes, filters, values, useCache, verbose) {
+.biomartLoad <- function(attributes, filters, values, useCache, verbose) {
   # local function that's used twice due to bug with curl
 
-  mart <- .curlWorkaround({
+  mart <- .curlWorkaround(
     .runCache(
       biomaRt::useEnsembl,
       biomart = "genes",
@@ -93,22 +92,19 @@
       cache_prefix = "biomart.useEnsembl",
       show_message = FALSE
     )
-  })
+  )
 
-  #
   results <- tryCatch(
-    {
-      .curlWorkaround(
-        biomaRt::getBM(
-          attributes = attributes,
-          filters = filters,
-          values = values,
-          useCache = useCache,
-          verbose = verbose,
-          mart = mart
-        )
+    .curlWorkaround(
+      biomaRt::getBM(
+        attributes = attributes,
+        filters = filters,
+        values = values,
+        useCache = useCache,
+        verbose = verbose,
+        mart = mart
       )
-    },
+    ),
     error = function(error) {
       if (useCache) {
         warning(
@@ -136,7 +132,7 @@
       )
     )
   }
-  return(results)
+  results
 }
 
 

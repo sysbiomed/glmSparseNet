@@ -73,15 +73,13 @@ For this vignette, we use a cached version of all interaction with
 
 ```{r, eval=FALSE}
 # Not evaluated in vignette as it takes too long to download and process
-all.interactions.700 <- stringDBhomoSapiens(score_threshold = 700)
-string.network <- buildStringNetwork(all.interactions.700,
-  use.names = "external"
-)
+allInteractions700 <- stringDBhomoSapiens(scoreThreshold = 700)
+stringNetwork <- buildStringNetwork(allInteractions700, "external")
 ```
 
 ```{r, include=FALSE}
 data("string.network.700.cache", package = "glmSparseNet")
-string.network <- string.network.700.cache
+stringNetwork <- string.network.700.cache
 ```
 
 # Build network matrix
@@ -89,8 +87,8 @@ string.network <- string.network.700.cache
 Build a sparse matrix object that contains the network.
 
 ```{r}
-string.network.undirected <- string.network + Matrix::t(string.network)
-string.network.undirected <- (string.network.undirected != 0) * 1
+stringNetworkUndirected <- stringNetwork + Matrix::t(stringNetwork)
+stringNetworkUndirected <- (stringNetworkUndirected != 0) * 1
 ```
 
 # Network Statistics
@@ -99,29 +97,29 @@ string.network.undirected <- (string.network.undirected != 0) * 1
 
 ```{r, echo=FALSE, collapse=TRUE}
 flog.info("Directed graph (score_threshold = %d)", 700)
-flog.info("  *       total edges: %d", sum(string.network != 0))
-flog.info("  *    unique protein: %d", nrow(string.network))
+flog.info("  *       total edges: %d", sum(stringNetwork != 0))
+flog.info("  *    unique protein: %d", nrow(stringNetwork))
 flog.info(
   "  * edges per protein: %f",
-  sum(string.network != 0) / nrow(string.network)
+  sum(stringNetwork != 0) / nrow(stringNetwork)
 )
 flog.info("")
 flog.info("Undirected graph (score_threshold = %d)", 700)
-flog.info("  *       total edges: %d", sum(string.network.undirected != 0) / 2)
-flog.info("  *    unique protein: %d", nrow(string.network.undirected))
+flog.info("  *       total edges: %d", sum(stringNetworkUndirected != 0) / 2)
+flog.info("  *    unique protein: %d", nrow(stringNetworkUndirected))
 flog.info(
   "  * edges per protein: %f",
-  sum(string.network.undirected != 0) / 2 / nrow(string.network.undirected)
+  sum(stringNetworkUndirected != 0) / 2 / nrow(stringNetworkUndirected)
 )
 ```
 
 ## Summary of degree *(indegree + outdegree)*
 
 ```{r, echo=FALSE}
-string.network.binary <- (string.network.undirected != 0) * 1
+stringNetworkBinary <- (stringNetworkUndirected != 0) * 1
 degree.network <- (
-  Matrix::rowSums(string.network.binary) +
-    Matrix::colSums(string.network.binary)
+  Matrix::rowSums(stringNetworkBinary) +
+    Matrix::colSums(stringNetworkBinary)
 ) / 2
 
 flog.info("Summary of degree:", summary(degree.network), capture = TRUE)
@@ -255,14 +253,14 @@ ydata <- ydata.raw |>
 #
 # Add degree 0 to genes not in STRING network
 
-my.degree <- degree.network[small.subset]
-my.string <- string.network.binary[small.subset, small.subset]
+myDegree <- degree.network[small.subset]
+my.string <- stringNetworkBinary[small.subset, small.subset]
 ```
 
 Degree distribution for sample set of gene features *(in xdata)*.
 
 ```{r, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
-qplot(my.degree, bins = 100, fill = my.colors(3)) +
+qplot(myDegree, bins = 100, fill = my.colors(3)) +
   theme(legend.position = "none")
 ```
 
@@ -410,7 +408,7 @@ accuracy.
 ```{r, echo=FALSE, warning=FALSE, eval=!is.null(brca)}
 melt(selected_genes) |>
   mutate(
-    Degree = my.degree[value],
+    Degree = myDegree[value],
     value = factor(value),
     L1 = factor(L1)
   ) |>

@@ -75,3 +75,4 @@ vignettes/_stringdb_.*
 ^doc$
 ^Meta$
 ^\.lintr$
+^\.Renviron$

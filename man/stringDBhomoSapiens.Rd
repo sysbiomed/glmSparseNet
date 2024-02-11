@@ -4,7 +4,7 @@
 \alias{stringDBhomoSapiens}
 \title{Download protein-protein interactions from STRING DB}
 \usage{
-stringDBhomoSapiens(version = "11.0", score_threshold = 0, remove.text = TRUE)
+stringDBhomoSapiens(version = "11.0", scoreThreshold = 0, removeText = TRUE)
 }
 \arguments{
 \item{version}{version of the database to use}
@@ -23,6 +23,6 @@ Download protein-protein interactions from STRING DB
 }
 \examples{
 \donttest{
-stringDBhomoSapiens(score_threshold = 800)
+stringDBhomoSapiens(scoreThreshold = 800)
 }
 }

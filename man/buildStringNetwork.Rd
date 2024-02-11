@@ -4,15 +4,24 @@
 \alias{buildStringNetwork}
 \title{Build gene network from peptide ids}
 \usage{
-buildStringNetwork(string.tbl, use.names = "protein")
+buildStringNetwork(
+  stringMatrix,
+  useNames = c("protein", "ensembl", "external"),
+  string.tbl = deprecated(),
+  use.names = deprecated()
+)
 }
 \arguments{
-\item{string.tbl}{matrix with colnames and rownames as ensembl peptide id
-(same order)}
+\item{useNames}{\code{character(1)} that defaults to use protein names
+_('protein'), other options are 'ensembl' for ensembl gene id or 'external'
+for external gene names.}
 
-\item{use.names}{default is to use protein names ('protein'), other options
-are 'ensembl' for ensembl
-gene id or 'external' for external gene names}
+\item{string.tbl}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{use.names}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{stringTbl}{\code{data.frame} or \code{tibble} with colnames and rownames as
+ensembl peptide id \emph{(same order)}.}
 }
 \value{
 a new matrix with gene ids instead of peptide ids. The size of matrix
@@ -26,12 +35,11 @@ between peptide and gene id
 }
 \examples{
 \donttest{
-all.interactions.700 <- stringDBhomoSapiens(score_threshold = 700)
-string.network <- buildStringNetwork(all.interactions.700,
-  use.names = "external"
-)
+interactions <- stringDBhomoSapiens(scoreThreshold = 100)
+string_network <- buildStringNetwork(interactions)
+
 # number of edges
-sum(string.network != 0)
+sum(string_network != 0)
 }
 }
 \seealso{

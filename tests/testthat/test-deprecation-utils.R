@@ -6,7 +6,7 @@ test_that("Deprecated functions", {
 })
 
 test_that("glmOrphan: deprecated parameters", {
-  data <- prepare_mae()
+  data <- prepare_mae(10)
 
   glm_args <- list(
     data$xdata,
@@ -29,7 +29,7 @@ test_that("glmOrphan: deprecated parameters", {
 })
 
 test_that("cv.glmOrphan: deprecated parameters", {
-  data <- prepare_mae()
+  data <- prepare_mae(max_rows = 10)
 
   glm_args <- list(
     data$xdata,
