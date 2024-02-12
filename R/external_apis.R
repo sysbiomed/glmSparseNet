@@ -82,8 +82,8 @@
       host = "https://www.ensembl.org",
       verbose = verbose,
       # run_cache arguments
-      cache_prefix = "biomart.useEnsembl",
-      show_message = FALSE
+      cachePrefix = "biomart.useEnsembl",
+      showMessage = FALSE
     )
   )
 

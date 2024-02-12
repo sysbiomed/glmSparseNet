@@ -34,10 +34,10 @@
               xdata,
               ixI,
               # run_cache arguments
-              cache_digest = list(xdataSha256),
-              cache_prefix = funPrefix,
-              show_message = showMessage,
-              force_recalc = forceRecalcNetwork,
+              cacheDigest = list(xdataSha256),
+              cachePrefix = funPrefix,
+              showMessage = showMessage,
+              forceRecalc = forceRecalcNetwork,
               ...
             )
           },
@@ -60,10 +60,10 @@
     funAux,
     xdata,
     # run_cache arguments
-    cache_prefix = "funAux",
-    cache_digest = list(xdataSha256),
-    force_recalc = forceRecalcNetwork,
-    show_message = showMessage,
+    cachePrefix = "funAux",
+    cacheDigest = list(xdataSha256),
+    forceRecalc = forceRecalcNetwork,
+    showMessage = showMessage,
     ...
   )
   if (buildOutput == "vector") {
@@ -205,10 +205,10 @@
         considerUnweighted,
         ...,
         # run_cache arguments
-        cache_digest = list(xdataSha256),
-        cache_prefix = funPrefix,
-        show_message = FALSE,
-        force_recalc = forceRecalcNetwork
+        cacheDigest = list(xdataSha256),
+        cachePrefix = funPrefix,
+        showMessage = FALSE,
+        forceRecalc = forceRecalcNetwork
       )
       #
       resChunks <- matrix(unlist(resChunks),
@@ -228,10 +228,10 @@
     cutoff,
     considerUnweighted,
     # run_cache arguments
-    cache_digest = list(xdataSha256),
-    cache_prefix = sprintf("degree.%s", funPrefix),
-    show_message = FALSE,
-    force_recalc = forceRecalcDegree, ...
+    cacheDigest = list(xdataSha256),
+    cachePrefix = sprintf("degree.%s", funPrefix),
+    showMessage = FALSE,
+    forceRecalc = forceRecalcDegree, ...
   )
   return(val)
 }

@@ -77,26 +77,26 @@ brca <- curatedTCGAData(
 
 ```{r data.show, warning=FALSE, error=FALSE, eval=!is.null(brca)}
 brca <- TCGAutils::TCGAsplitAssays(brca, c("01", "11"))
-xdata.raw <- t(cbind(assay(brca[[1]]), assay(brca[[2]])))
+xdataRaw <- t(cbind(assay(brca[[1]]), assay(brca[[2]])))
 
 # Get matches between survival and assay data
-class.v <- TCGAbiospec(rownames(xdata.raw))$sample_definition |> factor()
-names(class.v) <- rownames(xdata.raw)
+classV <- TCGAbiospec(rownames(xdataRaw))$sample_definition |> factor()
+names(classV) <- rownames(xdataRaw)
 
 # keep features with standard deviation > 0
-xdata.raw <- xdata.raw[, apply(xdata.raw, 2, sd) != 0] |>
+xdataRaw <- xdataRaw[, apply(xdataRaw, 2, sd) != 0] |>
   scale()
 
 set.seed(params$seed)
-small.subset <- c(
+smallSubset <- c(
   "CD5", "CSF2RB", "HSF1", "IRGC", "LRRC37A6P", "NEUROG2",
   "NLRC4", "PDE11A", "PIK3CB", "QARS", "RPGRIP1L", "SDC1",
   "TMEM31", "YME1L1", "ZBTB11",
-  sample(colnames(xdata.raw), 100)
+  sample(colnames(xdataRaw), 100)
 )
 
-xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
-ydata <- class.v
+xdata <- xdataRaw[, smallSubset[smallSubset %in% colnames(xdataRaw)]]
+ydata <- classV
 ```
 
 # Fit models
@@ -132,11 +132,11 @@ plot(fitted)
 Taking the best model described by `lambda.min`
 
 ```{r show_coefs, eval=!is.null(brca)}
-coefs.v <- Filter(function(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
+coefsCV <- Filter(function(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
 data.frame(
-  ensembl.id = names(coefs.v),
-  gene.name = geneNames(names(coefs.v))$external_gene_name,
-  coefficient = coefs.v,
+  ensembl.id = names(coefsCV),
+  gene.name = geneNames(names(coefsCV))$external_gene_name,
+  coefficient = coefsCV,
   stringsAsFactors = FALSE
 ) |>
   arrange(gene.name) |>
@@ -168,13 +168,13 @@ qplot(response, bins = 100)
 ROC curve
 
 ```{r roc, echo=FALSE, eval=!is.null(brca)}
-roc_obj <- pROC::roc(ydata, as.vector(response))
+rocObj <- pROC::roc(ydata, as.vector(response))
 
-data.frame(TPR = roc_obj$sensitivities, FPR = 1 - roc_obj$specificities) |>
+data.frame(TPR = rocObj$sensitivities, FPR = 1 - rocObj$specificities) |>
   ggplot() +
   geom_line(aes(FPR, TPR), color = 2, size = 1, alpha = 0.7) +
   labs(
-    title = sprintf("ROC curve (AUC = %f)", pROC::auc(roc_obj)),
+    title = sprintf("ROC curve (AUC = %f)", pROC::auc(rocObj)),
     x = "False Positive Rate (1-Specificity)",
     y = "True Positive Rate (Sensitivity)"
   )

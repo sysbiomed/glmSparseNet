@@ -27,15 +27,15 @@ BiocManager::install("glmSparseNet")
 
 # Required Packages
 
-```{r packages, message=FALSE, warning=FALSE}
+```{r packages, message=FALSE, warning=FALSE, results='hide'}
 library(futile.logger)
 library(ggplot2)
 library(glmSparseNet)
 library(survival)
 
 # Some general options for futile.logger the debugging package
-.Last.value <- flog.layout(layout.format("[~l] ~m"))
-.Last.value <- glmSparseNet:::.showMessage(FALSE)
+flog.layout(layout.format("[~l] ~m"))
+glmSparseNet:::.showMessage(FALSE)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
 ```
@@ -55,13 +55,13 @@ ydata <- data.frame(
 _(group cutoff is median calculated relative risk)_
 
 ```{r}
-res.age <- separate2GroupsCox(c(age = 1, 0), xdata, ydata)
+resAge <- separate2GroupsCox(c(age = 1, 0), xdata, ydata)
 ```
 
 ### Kaplan-Meier survival results
 
 ```{r, echo=FALSE}
-res.age$km
+resAge$km
 ```
 
 ### Plot
@@ -74,13 +74,13 @@ The opposite for the high-risk groups, populated with individuals
 above the median relative-risk.
 
 ```{r, echo=FALSE}
-res.age$plot
+resAge$plot
 ```
 
 ## Separate using age as co-variate _(group cutoff is 40% - 60%)_
 
 ```{r}
-res.age.40.60 <-
+resAge4060 <-
   separate2GroupsCox(c(age = 1, 0),
     xdata,
     ydata,
@@ -91,7 +91,7 @@ res.age.40.60 <-
 ### Kaplan-Meier survival results
 
 ```{r, echo=FALSE}
-res.age.40.60$km
+resAge4060$km
 ```
 
 ### Plot
@@ -103,7 +103,7 @@ The opposite for the high-risk groups, populated with individuals above
 the median relative-risk.
 
 ```{r, echo=FALSE}
-res.age.40.60$plot
+resAge4060$plot
 ```
 
 ## Separate using age as co-variate _(group cutoff is 60% - 40%)_
@@ -112,7 +112,7 @@ This is a special case where you want to use a cutoff that includes
 some sample on both high and low risks groups.
 
 ```{r}
-res.age.60.40 <- separate2GroupsCox(
+resAge6040 <- separate2GroupsCox(
   chosen.btas = c(age = 1, 0),
   xdata,
   ydata,
@@ -125,7 +125,7 @@ res.age.60.40 <- separate2GroupsCox(
 
 ```{r, echo=FALSE}
 cat("Kaplan-Meier results", "\n")
-res.age.60.40$km
+resAge6040$km
 ```
 
 ### Plot
@@ -137,7 +137,7 @@ The opposite for the high-risk groups, populated with individuals above
 the median relative-risk.
 
 ```{r, echo=FALSE}
-res.age.60.40$plot
+resAge6040$plot
 ```
 
 

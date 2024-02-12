@@ -4,12 +4,12 @@
 \alias{.createDirectoryForCache}
 \title{Create directories for cache}
 \usage{
-.createDirectoryForCache(base_dir, parent_path)
+.createDirectoryForCache(baseDir, parentPath)
 }
 \arguments{
-\item{base_dir}{tentative base dir to create.}
+\item{baseDir}{tentative base dir to create.}
 
-\item{parent_path}{first 4 characters of digest that will become parent
+\item{parentPath}{first 4 characters of digest that will become parent
 directory for the actual cache file (this reduces number of files per folder)}
 }
 \value{

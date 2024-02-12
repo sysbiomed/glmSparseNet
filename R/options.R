@@ -22,8 +22,8 @@
 #' glmSparseNet:::.baseDir("/tmp/cache")
 .baseDir <- function(path = NULL) {
   checkmate::assert_string(path, null.ok = TRUE)
-  if (!is.null(path)) options("glmSparseNet.base_dir" = path)
-  getOption("glmSparseNet.base_dir")
+  if (!is.null(path)) options("glmSparseNet.baseDir" = path)
+  getOption("glmSparseNet.baseDir")
 }
 
 #' Show messages option in .runCache

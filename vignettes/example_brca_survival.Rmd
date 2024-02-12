@@ -25,7 +25,7 @@ BiocManager::install("glmSparseNet")
 
 # Required Packages
 
-```{r packages, message=FALSE, warning=FALSE}
+```{r packages, message=FALSE, warning=FALSE, results='hide'}
 library(dplyr)
 library(ggplot2)
 library(survival)
@@ -37,8 +37,8 @@ library(MultiAssayExperiment)
 library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
-.Last.value <- flog.layout(layout.format("[~l] ~m"))
-.Last.value <- glmSparseNet:::.showMessage(FALSE)
+flog.layout(layout.format("[~l] ~m"))
+glmSparseNet:::.showMessage(FALSE)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
 ```
@@ -78,11 +78,11 @@ brca <- curatedTCGAData(
 
 ```{r data, warning=FALSE, message=FALSE, eval=!is.null(brca)}
 # keep only solid tumour (code: 01)
-brca.primary.solid.tumor <- TCGAutils::TCGAsplitAssays(brca, "01")
-xdata.raw <- t(assay(brca.primary.solid.tumor[[1]]))
+brcaPrimarySolidTumor <- TCGAutils::TCGAsplitAssays(brca, "01")
+xdataRaw <- t(assay(brcaPrimarySolidTumor[[1]]))
 
 # Get survival information
-ydata.raw <- colData(brca.primary.solid.tumor) |>
+ydataRaw <- colData(brcaPrimarySolidTumor) |>
   as.data.frame() |>
   # Keep only data relative to survival or samples
   dplyr::select(
@@ -111,30 +111,30 @@ ydata.raw <- colData(brca.primary.solid.tumor) |>
   as.data.frame()
 
 # Set index as the patientID
-rownames(ydata.raw) <- ydata.raw$patientID
+rownames(ydataRaw) <- ydataRaw$patientID
 
 # Get matches between survival and assay data
-xdata.raw <- xdata.raw[
-  TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw),
+xdataRaw <- xdataRaw[
+  TCGAbarcode(rownames(xdataRaw)) %in% rownames(ydataRaw),
 ]
-xdata.raw <- xdata.raw[, apply(xdata.raw, 2, sd) != 0] |>
+xdataRaw <- xdataRaw[, apply(xdataRaw, 2, sd) != 0] |>
   scale()
 
 # Order ydata the same as assay
-ydata.raw <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
+ydataRaw <- ydataRaw[TCGAbarcode(rownames(xdataRaw)), ]
 
 # Using only a subset of genes previously selected to keep this short example.
 set.seed(params$seed)
-small.subset <- c(
+smallSubset <- c(
   "CD5", "CSF2RB", "IRGC", "NEUROG2", "NLRC4", "PDE11A",
   "PTEN", "TP53", "BRAF",
   "PIK3CB", "QARS", "RFC3", "RPGRIP1L", "SDC1", "TMEM31",
-  "YME1L1", "ZBTB11", sample(colnames(xdata.raw), 100)
+  "YME1L1", "ZBTB11", sample(colnames(xdataRaw), 100)
 ) |>
   unique()
 
-xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
-ydata <- ydata.raw |> dplyr::select(time, status)
+xdata <- xdataRaw[, smallSubset[smallSubset %in% colnames(xdataRaw)]]
+ydata <- ydataRaw |> dplyr::select(time, status)
 ```
 
 # Fit models
@@ -171,10 +171,10 @@ plot(fitted)
 Taking the best model described by `lambda.min`
 
 ```{r show_coefs, eval=!is.null(brca)}
-coefs.v <- Filter(function(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
+coefsCV <- Filter(function(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
 data.frame(
-  gene.name = names(coefs.v),
-  coefficient = coefs.v,
+  gene.name = names(coefsCV),
+  coefficient = coefsCV,
   stringsAsFactors = FALSE
 ) |>
   arrange(gene.name) |>
@@ -184,8 +184,8 @@ data.frame(
 ## Survival curves and Log rank test
 
 ```{r, eval=!is.null(brca)}
-separate2GroupsCox(as.vector(coefs.v),
-  xdata[, names(coefs.v)],
+separate2GroupsCox(as.vector(coefsCV),
+  xdata[, names(coefsCV)],
   ydata,
   plot.title = "Full dataset", legend.outside = FALSE
 )

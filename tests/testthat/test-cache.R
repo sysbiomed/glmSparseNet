@@ -27,9 +27,9 @@ test_that("run_cache fails with arguments", {
     .runCache(
       1, 1, 2, 3, 4, 5,
       # run_cache arguments
-      base_dir = withr::with_tempdir(),
-      force_recalc = TRUE,
-      show_message = TRUE
+      baseDir = withr::with_tempdir(),
+      forceRecalc = TRUE,
+      showMessage = TRUE
     )
   )
 })
@@ -51,7 +51,7 @@ test_that("run_cache base.dir in folder that does not have access", {
       .runCache(
         sum, 1, 2, 3, 4, 5,
         # run_cache arguments
-        show_message = FALSE, base_dir = "/"
+        showMessage = FALSE, baseDir = "/"
       ),
       "Could not create cache folder inside base.dir"
     )
@@ -74,7 +74,7 @@ test_that("run.cache base.dir in folder that does not have access", {
       .runCache(
         sum, 1, 2, 3, 4, 5,
         # run_cache arguments
-        show_message = FALSE, base_dir = "/daca"
+        showMessage = FALSE, baseDir = "/daca"
       ),
       "Could not create cache base folder"
     )
@@ -88,9 +88,9 @@ test_that("run_cache base.dir in folder that does have access", {
     .runCache(
       sum, 1, 2, 3, 4, 5,
       # run_cache arguments
-      base_dir = withr::local_tempdir(),
-      cache_digest = list(.digestCache(1)),
-      show_message = FALSE
+      baseDir = withr::local_tempdir(),
+      cacheDigest = list(.digestCache(1)),
+      showMessage = FALSE
     ),
     15
   )
@@ -99,9 +99,9 @@ test_that("run_cache base.dir in folder that does have access", {
     .runCache(
       c, 1, 2, 3, 4, 5,
       # run_cache arguments
-      base_dir = withr::local_tempdir(),
-      cache_digest = list(.digestCache(1)),
-      show_message = FALSE
+      baseDir = withr::local_tempdir(),
+      cacheDigest = list(.digestCache(1)),
+      showMessage = FALSE
     ),
     c(1, 2, 3, 4, 5)
   )
@@ -201,13 +201,13 @@ test_that("run_cache test slight differences in code", {
 test_that("run_cache: Two primitives give different results", {
   uniqueTmpDir <- withr::local_tempdir(pattern = "two_primitives-run_cache")
 
-  .runCache(sum, 1, 2, 3, 4, base_dir = uniqueTmpDir)
-  .runCache(c, 1, 2, 3, 4, base_dir = uniqueTmpDir)
+  .runCache(sum, 1, 2, 3, 4, baseDir = uniqueTmpDir)
+  .runCache(c, 1, 2, 3, 4, baseDir = uniqueTmpDir)
 
   expect_failure(
     expect_identical(
-      .runCache(sum, 1, 2, 3, 4, base_dir = uniqueTmpDir),
-      .runCache(c, 1, 2, 3, 4, base_dir = uniqueTmpDir)
+      .runCache(sum, 1, 2, 3, 4, baseDir = uniqueTmpDir),
+      .runCache(c, 1, 2, 3, 4, baseDir = uniqueTmpDir)
     )
   )
 })
@@ -296,10 +296,10 @@ test_that("run.cache add to hash", {
     .runCache(
       sum, 1, 2, 3, 4, 5,
       # run_cache arguments
-      base_dir = withr::local_tempdir(),
-      force_recalc = TRUE,
-      show_message = TRUE,
-      add_to_hash = "something"
+      baseDir = withr::local_tempdir(),
+      forceRecalc = TRUE,
+      showMessage = TRUE,
+      addToHash = "something"
     ),
     "Saving in cache"
   )
@@ -307,10 +307,10 @@ test_that("run.cache add to hash", {
     .runCache(
       sum, 1, 2, 3, 4, 5,
       # run_cache arguments
-      base_dir = withr::local_tempdir(),
-      force_recalc = TRUE,
-      show_message = TRUE,
-      add_to_hash = "other"
+      baseDir = withr::local_tempdir(),
+      forceRecalc = TRUE,
+      showMessage = TRUE,
+      addToHash = "other"
     ),
     "Saving in cache"
   )
@@ -319,19 +319,19 @@ test_that("run.cache add to hash", {
     .runCache(
       sum, 1, 2, 3, 4, 5,
       # run_cache arguments
-      base_dir = withr::local_tempdir(),
-      force_recalc = FALSE,
-      show_message = TRUE,
-      add_to_hash = "something"
+      baseDir = withr::local_tempdir(),
+      forceRecalc = FALSE,
+      showMessage = TRUE,
+      addToHash = "something"
     )
   )
   two <- capture_messages(
     .runCache(
       sum, 1, 2, 3, 4, 5,
-      base_dir = withr::local_tempdir(),
-      force_recalc = FALSE,
-      show_message = TRUE,
-      add_to_hash = "other"
+      baseDir = withr::local_tempdir(),
+      forceRecalc = FALSE,
+      showMessage = TRUE,
+      addToHash = "other"
     )
   )
   expect_false(all(one == two))
@@ -345,9 +345,9 @@ test_that("run.cache with seed", {
       rnorm, 1,
       # run_cache arguments
       seed = 10,
-      base_dir = baseDir,
-      force_recalc = TRUE,
-      show_message = TRUE
+      baseDir = baseDir,
+      forceRecalc = TRUE,
+      showMessage = TRUE
     ),
     "Saving in cache"
   )
@@ -356,9 +356,9 @@ test_that("run.cache with seed", {
       rnorm, 1,
       seed = 11,
       # run_cache arguments
-      base_dir = baseDir,
-      force_recalc = TRUE,
-      show_message = TRUE
+      baseDir = baseDir,
+      forceRecalc = TRUE,
+      showMessage = TRUE
     ),
     "Saving in cache"
   )
@@ -367,9 +367,9 @@ test_that("run.cache with seed", {
       rnorm, 1,
       # run_cache arguments
       seed = 10,
-      base_dir = baseDir,
-      force_recalc = FALSE,
-      show_message = TRUE
+      baseDir = baseDir,
+      forceRecalc = FALSE,
+      showMessage = TRUE
     ),
     "Loading from cache"
   )
@@ -378,9 +378,9 @@ test_that("run.cache with seed", {
       rnorm, 1,
       # run_cache arguments
       seed = 11,
-      base_dir = baseDir,
-      force_recalc = FALSE,
-      show_message = TRUE
+      baseDir = baseDir,
+      forceRecalc = FALSE,
+      showMessage = TRUE
     ),
     "Loading from cache"
   )
@@ -407,17 +407,17 @@ test_that("run.cache uses cache", {
   .runCache(
     sum, 1, 2, 3, 4, 5,
     # run_cache arguments
-    base_dir = baseDir,
-    force_recalc = TRUE,
-    show_message = FALSE
+    baseDir = baseDir,
+    forceRecalc = TRUE,
+    showMessage = FALSE
   )
   expect_message(
     .runCache(
       sum, 1, 2, 3, 4, 5,
       # run_cache arguments
-      base_dir = baseDir,
-      force_recalc = FALSE,
-      show_message = TRUE
+      baseDir = baseDir,
+      forceRecalc = FALSE,
+      showMessage = TRUE
     ),
     "Loading from cache"
   )
@@ -431,8 +431,8 @@ test_that("run.cache show.message option works", {
     .runCache(
       sum, 1, 2, 3, 4, 5,
       # run_cache arguments
-      base_dir = baseDir,
-      force_recalc = TRUE
+      baseDir = baseDir,
+      forceRecalc = TRUE
     ),
     "Saving in cache"
   )
@@ -441,7 +441,7 @@ test_that("run.cache show.message option works", {
     .runCache(
       sum, 1, 2, 3, 4, 5,
       # run_cache arguments
-      base_dir = baseDir, force_recalc = TRUE, show_message = FALSE
+      baseDir = baseDir, forceRecalc = TRUE, showMessage = FALSE
     ),
     NA
   )
@@ -451,7 +451,7 @@ test_that("run.cache show.message option works", {
     .runCache(
       sum, 1, 2, 3, 4, 5,
       # run_cache arguments
-      base_dir = baseDir, force_recalc = TRUE
+      baseDir = baseDir, forceRecalc = TRUE
     ),
     NA
   )
@@ -459,7 +459,7 @@ test_that("run.cache show.message option works", {
   expect_message(
     .runCache(
       sum, 1, 2, 3, 4, 5,
-      base_dir = baseDir, force_recalc = TRUE, show_message = TRUE
+      baseDir = baseDir, forceRecalc = TRUE, showMessage = TRUE
     ),
     "Saving in cache"
   )
@@ -484,7 +484,7 @@ test_that("run.cache base.dir option works", {
     .runCache(
       sum, 1, 2, 3, 4, 5, 9,
       # run_cache arguments
-      base_dir = cache0, force_recalc = FALSE, show_message = TRUE
+      baseDir = cache0, forceRecalc = FALSE, showMessage = TRUE
     ),
     cache0Os
   )
@@ -493,7 +493,7 @@ test_that("run.cache base.dir option works", {
     .runCache(
       sum, 1, 2, 3, 4, 5, 8,
       # run_cache arguments
-      base_dir = cache1, force_recalc = FALSE, show_message = TRUE
+      baseDir = cache1, forceRecalc = FALSE, showMessage = TRUE
     ),
     cache1Os
   )
@@ -502,7 +502,7 @@ test_that("run.cache base.dir option works", {
     .runCache(
       sum, 1, 2, 3, 4, 5, 9,
       # run_cache arguments
-      base_dir = cache0, force_recalc = FALSE, show_message = TRUE
+      baseDir = cache0, forceRecalc = FALSE, showMessage = TRUE
     ),
     cache0Os
   )
@@ -512,7 +512,7 @@ test_that("run.cache base.dir option works", {
     .runCache(
       sum, 1, 2, 3, 4, 5,
       # run_cache arguments
-      force_recalc = FALSE, show_message = TRUE
+      forceRecalc = FALSE, showMessage = TRUE
     ),
     cache2Os
   )

@@ -25,7 +25,7 @@ BiocManager::install("glmSparseNet")
 
 # Required Packages
 
-```{r packages, message=FALSE, warning=FALSE}
+```{r packages, message=FALSE, warning=FALSE, results='hide'}
 library(dplyr)
 library(ggplot2)
 library(survival)
@@ -37,8 +37,8 @@ library(MultiAssayExperiment)
 library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
-.Last.value <- flog.layout(layout.format("[~l] ~m"))
-.Last.value <- glmSparseNet:::.showMessage(FALSE)
+flog.layout(layout.format("[~l] ~m"))
+glmSparseNet:::.showMessage(FALSE)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
 ```
@@ -84,11 +84,11 @@ are alive or dead.
 * Build two matrix objects that fit the data `xdata` and `ydata`
 
 ```{r data.show, warning=FALSE, error=FALSE, eval=!is.null(skcm)}
-skcm.metastatic <- TCGAutils::TCGAsplitAssays(skcm, "06")
-xdata.raw <- t(assay(skcm.metastatic[[1]]))
+skcmMetastatic <- TCGAutils::TCGAsplitAssays(skcm, "06")
+xdataRaw <- t(assay(skcmMetastatic[[1]]))
 
 # Get survival information
-ydata.raw <- colData(skcm.metastatic) |>
+ydataRaw <- colData(skcmMetastatic) |>
   as.data.frame() |>
   # Find max time between all days (ignoring missings)
   dplyr::rowwise() |>
@@ -105,7 +105,7 @@ ydata.raw <- colData(skcm.metastatic) |>
   as.data.frame()
 
 # Get survival information
-ydata.raw <- colData(skcm) |>
+ydataRaw <- colData(skcm) |>
   as.data.frame() |>
   # Find max time between all days (ignoring missings)
   dplyr::rowwise() |>
@@ -119,26 +119,26 @@ ydata.raw <- colData(skcm) |>
   as.data.frame()
 
 # Set index as the patientID
-rownames(ydata.raw) <- ydata.raw$patientID
+rownames(ydataRaw) <- ydataRaw$patientID
 
 # keep only features that have standard deviation > 0
-xdata.raw <- xdata.raw[
-  TCGAbarcode(rownames(xdata.raw)) %in% rownames(ydata.raw),
+xdataRaw <- xdataRaw[
+  TCGAbarcode(rownames(xdataRaw)) %in% rownames(ydataRaw),
 ]
-xdata.raw <- xdata.raw[, apply(xdata.raw, 2, sd) != 0] |>
+xdataRaw <- xdataRaw[, apply(xdataRaw, 2, sd) != 0] |>
   scale()
 
 # Order ydata the same as assay
-ydata.raw <- ydata.raw[TCGAbarcode(rownames(xdata.raw)), ]
+ydataRaw <- ydataRaw[TCGAbarcode(rownames(xdataRaw)), ]
 
 set.seed(params$seed)
-small.subset <- c(
+smallSubset <- c(
   "FOXL2", "KLHL5", "PCYT2", "SLC6A10P", "STRAP", "TMEM33",
-  "WT1-AS", sample(colnames(xdata.raw), 100)
+  "WT1-AS", sample(colnames(xdataRaw), 100)
 )
 
-xdata <- xdata.raw[, small.subset[small.subset %in% colnames(xdata.raw)]]
-ydata <- ydata.raw |> dplyr::select(time, status)
+xdata <- xdataRaw[, smallSubset[smallSubset %in% colnames(xdataRaw)]]
+ydata <- ydataRaw |> dplyr::select(time, status)
 ```
 
 # Fit models
@@ -176,11 +176,11 @@ plot(fitted)
 Taking the best model described by `lambda.min`
 
 ```{r show_coefs, eval=!is.null(skcm)}
-coefs.v <- Filter(function(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
+coefsCV <- Filter(function(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
 data.frame(
-  ensembl.id = names(coefs.v),
-  gene.name = geneNames(names(coefs.v))$external_gene_name,
-  coefficient = coefs.v,
+  ensembl.id = names(coefsCV),
+  gene.name = geneNames(names(coefsCV))$external_gene_name,
+  coefficient = coefsCV,
   stringsAsFactors = FALSE
 ) |>
   arrange(gene.name) |>
@@ -190,8 +190,8 @@ data.frame(
 ## Survival curves and Log rank test
 
 ```{r, eval=!is.null(skcm)}
-separate2GroupsCox(as.vector(coefs.v),
-  xdata[, names(coefs.v)],
+separate2GroupsCox(as.vector(coefsCV),
+  xdata[, names(coefsCV)],
   ydata,
   plot.title = "Full dataset", legend.outside = FALSE
 )

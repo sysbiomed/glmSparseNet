@@ -4,16 +4,16 @@
 \alias{.calculateResult}
 \title{Calculate/load result and save if necessary}
 \usage{
-.calculateResult(path, compression, force_recalc, show_message, fun, ...)
+.calculateResult(path, compression, forceRecalc, showMessage, fun, ...)
 }
 \arguments{
 \item{path}{path to save cache}
 
 \item{compression}{compression used in save}
 
-\item{force_recalc}{force to recalculate cache}
+\item{forceRecalc}{force to recalculate cache}
 
-\item{show_message}{boolean to show messages}
+\item{showMessage}{boolean to show messages}
 
 \item{fun}{function to be called}
 

@@ -7,29 +7,42 @@
 degreeCov(
   xdata,
   cutoff = 0,
-  consider.unweighted = FALSE,
-  force.recalc.degree = FALSE,
-  force.recalc.network = FALSE,
-  n.cores = 1,
-  ...
+  considerUnweighted = FALSE,
+  forceRecalcDegree = FALSE,
+  forceRecalcNetwork = FALSE,
+  nCores = 1,
+  ...,
+  consider.unweighted = deprecated(),
+  force.recalc.degree = deprecated(),
+  force.recalc.network = deprecated(),
+  n.cores = deprecated()
 )
 }
 \arguments{
-\item{xdata}{calculate correlation matrix on each column}
+\item{xdata}{calculate correlation matrix on each column.}
 
-\item{cutoff}{positive value that determines a cutoff value}
+\item{cutoff}{positive value that determines a cutoff value.}
 
-\item{consider.unweighted}{consider all edges as 1 if they are greater than 0}
+\item{considerUnweighted}{consider all edges as 1 if they are greater than
+0.}
 
-\item{force.recalc.degree}{force recalculation of penalty weights (but not
-the network), instead of going to cache}
+\item{forceRecalcDegree}{force recalculation of penalty weights (but not
+the network), instead of going to cache.}
 
-\item{force.recalc.network}{force recalculation of network and penalty
-weights, instead of going to cache}
+\item{forceRecalcNetwork}{force recalculation of network and penalty
+weights, instead of going to cache.}
 
-\item{n.cores}{number of cores to be used}
+\item{nCores}{number of cores to be used.}
 
-\item{...}{extra parameters for cov function}
+\item{...}{extra parameters for cov function.}
+
+\item{consider.unweighted}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{force.recalc.degree}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{force.recalc.network}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{n.cores}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 }
 \value{
 a vector of the degrees

@@ -9,24 +9,24 @@
   fun,
   ...,
   seed = NULL,
-  base_dir = NULL,
-  cache_prefix = "generic_cache",
-  cache_digest = list(),
-  show_message = NULL,
-  force_recalc = FALSE,
-  add_to_hash = NULL
+  baseDir = NULL,
+  cachePrefix = "generic_cache",
+  cacheDigest = list(),
+  showMessage = NULL,
+  forceRecalc = FALSE,
+  addToHash = NULL
 )
 
 \S4method{.runCache}{function}(
   fun,
   ...,
   seed = NULL,
-  base_dir = NULL,
-  cache_prefix = "generic_cache",
-  cache_digest = list(),
-  show_message = NULL,
-  force_recalc = FALSE,
-  add_to_hash = NULL
+  baseDir = NULL,
+  cachePrefix = "generic_cache",
+  cacheDigest = list(),
+  showMessage = NULL,
+  forceRecalc = FALSE,
+  addToHash = NULL
 )
 }
 \arguments{
@@ -36,16 +36,16 @@
 
 \item{seed}{when function call is random, this allows to set seed beforehand}
 
-\item{cache_prefix}{prefix for file name to be generated from
+\item{cachePrefix}{prefix for file name to be generated from
 parameters (...)}
 
-\item{cache_digest}{cache of the digest for one or more of the parameters}
+\item{cacheDigest}{cache of the digest for one or more of the parameters}
 
-\item{show_message}{show message that data is being retrieved from cache}
+\item{showMessage}{show message that data is being retrieved from cache}
 
-\item{force_recalc}{force the recalculation of the values}
+\item{forceRecalc}{force the recalculation of the values}
 
-\item{add_to_hash}{something to add to the filename generation}
+\item{addToHash}{something to add to the filename generation}
 
 \item{base.dir}{directory where data is stored}
 }
@@ -74,6 +74,6 @@ glmSparseNet:::.runCache(c, 1, 2, 3, 4)
 glmSparseNet:::.runCache(c, a = 1, 2, c = 3, 4)
 \donttest{
 # Using a local folder
-# glmSparseNet:::.runCache(c, 1, 2, 3, 4, base_dir = "runcache")
+# glmSparseNet:::.runCache(c, 1, 2, 3, 4, baseDir = "runcache")
 }
 }

@@ -2,9 +2,9 @@
 #'
 #' @keywords internal
 .optionsList <- list(
-  glmSparseNet.compression = getOption("glmSparseNet.compression", "gzip"),
-  glmSparseNet.base_dir = getOption("glmSparseNet.base_dir", .tempdirCache()),
-  glmSparseNet.show_message = getOption("glmSparseNet.show_message", TRUE)
+  "glmSparseNet.compression" = getOption("glmSparseNet.compression", "gzip"),
+  "glmSparseNet.base_dir" = getOption("glmSparseNet.base_dir", .tempdirCache()),
+  "glmSparseNet.show_message" = getOption("glmSparseNet.show_essage", TRUE)
 )
 
 .onLoad <- function(libname, pkgname) {

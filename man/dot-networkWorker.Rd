@@ -2,22 +2,22 @@
 % Please edit documentation in R/centrality-utils.R
 \name{.networkWorker}
 \alias{.networkWorker}
-\title{Worker to calculate edge weight for each pair of ix.i node and following}
+\title{Worker to calculate edge weight for each pair of ixI node and following}
 \usage{
-.networkWorker(fun, xdata, ix.i, ...)
+.networkWorker(fun, xdata, ixI, ...)
 }
 \arguments{
 \item{fun}{function to be used, can be cor, cov or any other defined function}
 
 \item{xdata}{original data to calculate the function over}
 
-\item{ix.i}{starting index, this can be used to save ony upper triu}
+\item{ixI}{starting index, this can be used to save ony upper triu}
 
 \item{...}{extra parameters for fun}
 }
 \value{
-a vector with size \code{ncol(xdata) - ix.i}
+a vector with size \code{ncol(xdata) - ixI}
 }
 \description{
-Note that it assumes it does not calculate for index below and equal to ix.i
+Note that it assumes it does not calculate for index below and equal to ixI
 }

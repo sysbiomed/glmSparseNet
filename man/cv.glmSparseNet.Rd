@@ -134,10 +134,12 @@ cv.glmOrphan(
 # Gaussian model
 xdata <- matrix(rnorm(500), ncol = 5)
 cv.glmSparseNet(
-  xdata, rnorm(nrow(xdata)), "correlation", family = "gaussian"
+  xdata, rnorm(nrow(xdata)), "correlation",
+  family = "gaussian"
 )
 cv.glmSparseNet(
-  xdata, rnorm(nrow(xdata)), "covariance", family = "gaussian"
+  xdata, rnorm(nrow(xdata)), "covariance",
+  family = "gaussian"
 )
 }
 \dontshow{if (requireNamespace("MultiAssayExperiment", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

@@ -144,7 +144,7 @@ separate2GroupsCox <- function(
     )
   }
   if (!all(ncol(xdata) == vapply(chosenBetas, length, integer(1L)))) {
-    stop(
+    rlang::abort(
       sprintf(
         paste(
           "All or some of the chosenBetas (%s) have different",
@@ -168,87 +168,13 @@ separate2GroupsCox <- function(
   futile.logger::flog.debug("prognosticIndex", prognosticIndex,
     capture = TRUE
   )
-  prognosticIndexDf <- data.frame(
-    time = c(), status = c(), group = c(), index = c()
-  )
+
   # populate a data.frame with all patients (multiple rows per patients if has
   # multiple btas) already calculate high/low risk groups
+  prognosticIndexDf <- buildPrognosticIndexDataFrame(
+    ydata, probs, stopWhenOverlap, prognosticIndex
+  )
 
-  for (ix in seq_len(dim(prognosticIndex)[2])) {
-    # threshold
-    #
-    #
-    sampleIxs <- rownames(prognosticIndex) %||%
-      seq_len(nrow(prognosticIndex))
-
-    tempGroup <- array(-1, dim(prognosticIndex)[1])
-    piThres <- stats::quantile(
-      prognosticIndex[, ix],
-      probs = c(probs[1], probs[2])
-    )
-
-    if (
-      sum(prognosticIndex[, ix] <= piThres[1]) == 0 ||
-        sum(prognosticIndex[, ix] > piThres[2]) == 0
-    ) {
-      piThres[1] <- stats::median(unique(prognosticIndex[, ix]))
-      piThres[2] <- piThres[1]
-    }
-
-    # low risk
-    lowRiskIx <- prognosticIndex[, ix] <= piThres[1]
-    tempGroup[lowRiskIx] <- (2 * ix) - 1
-    # high risk
-    highRiskIx <- prognosticIndex[, ix] > piThres[2]
-    tempGroup[highRiskIx] <- (2 * ix)
-
-    ydataNew <- ydata
-
-    if (
-      length(unique(prognosticIndex)) > 1 &&
-        sum(lowRiskIx) + sum(highRiskIx) > length(prognosticIndex)
-    ) {
-      str.message <- paste0(
-        "The cutoff values given to the function allow for some over ",
-        "samples in both groups, with:\n  high risk size (",
-        sum(highRiskIx), ") ",
-        "+ low risk size (", sum(lowRiskIx), ") not equal to ",
-        "xdata/ydata rows (", sum(highRiskIx) + sum(lowRiskIx),
-        " != ", length(prognosticIndex), ")\n\n"
-      )
-
-      stopWhenOverlap && stop(str.message, "Stopping execution...")
-
-      warning(
-        str.message,
-        "We are continuing with execution as parameter `stopWhenOverlap` ",
-        "is FALSE.\n",
-        "  note: This adds duplicate samples to ydata and xdata xdata"
-      )
-
-      overlapSamples <- which(as.vector(highRiskIx & lowRiskIx))
-      #
-      prognosticIndex <-
-        t(t(c(prognosticIndex[, ], prognosticIndex[overlapSamples, ])))
-      ydataNew <- rbind(ydata, ydata[overlapSamples, ])
-
-      sampleIxs <- c(sampleIxs, sampleIxs[overlapSamples])
-      tempGroup <- c(tempGroup, rep((2 * ix) - 1, length(overlapSamples)))
-    }
-    #
-    validIx <- tempGroup != -1
-    #
-    prognosticIndexDf <- rbind(
-      prognosticIndexDf,
-      data.frame(
-        pi = prognosticIndex[validIx, ix],
-        time = ydataNew$time[validIx],
-        status = ydataNew$status[validIx],
-        group = tempGroup[validIx],
-        index = sampleIxs[validIx]
-      )
-    )
-  }
   # factor the group
   prognosticIndexDf$group <- factor(prognosticIndexDf$group)
   # rename the factor to low / high risk
@@ -262,12 +188,14 @@ separate2GroupsCox <- function(
     c(list(prognosticIndexDf$group), newFactorStrL)
   )
   #
-  if (length(levels(prognosticIndexDf$group)) == 1) {
-    stop(
-      "separate2GroupsCox(): There is only one group, cannot create ",
-      "kaplan-meir curve with low and high risk groups"
+  length(levels(prognosticIndexDf$group)) == 1 &&
+    rlang::abort(
+      paste(
+        "separate2GroupsCox(): There is only one group, cannot create",
+        "kaplan-meir curve with low and high risk groups"
+      )
     )
-  }
+
   futile.logger::flog.debug("")
   futile.logger::flog.debug("prognosticIndexDf", prognosticIndexDf,
     capture = TRUE
@@ -304,6 +232,93 @@ separate2GroupsCox <- function(
     legendOutside,
     ...
   )
+}
+
+#' @keywords internal
+buildPrognosticIndexDataFrame <- function(
+    ydata,
+    probs,
+    stopWhenOverlap,
+    prognosticIndex) {
+  prognosticIndexDf <- data.frame(
+    time = c(), status = c(), group = c(), index = c()
+  )
+
+  for (ix in seq_len(dim(prognosticIndex)[2])) {
+    # threshold
+    #
+    #
+    sampleIxs <- rownames(prognosticIndex) %||%
+      seq_len(nrow(prognosticIndex))
+
+    tempGroup <- array(-1, dim(prognosticIndex)[1])
+    piThres <- stats::quantile(
+      prognosticIndex[, ix],
+      probs = c(probs[1], probs[2])
+    )
+
+    if (
+      sum(prognosticIndex[, ix] <= piThres[1]) == 0 ||
+        sum(prognosticIndex[, ix] > piThres[2]) == 0
+    ) {
+      piThres[1] <- stats::median(unique(prognosticIndex[, ix]))
+      piThres[2] <- piThres[1]
+    }
+
+    # low risk
+    lowRiskIx <- prognosticIndex[, ix] <= piThres[1]
+    tempGroup[lowRiskIx] <- (2 * ix) - 1
+    # high risk
+    highRiskIx <- prognosticIndex[, ix] > piThres[2]
+    tempGroup[highRiskIx] <- (2 * ix)
+
+    if (
+      length(unique(prognosticIndex)) > 1 &&
+        sum(lowRiskIx) + sum(highRiskIx) > length(prognosticIndex)
+    ) {
+      str.message <- paste0(
+        "The cutoff values given to the function allow for some over ",
+        "samples in both groups, with:\n  high risk size (",
+        sum(highRiskIx), ") ",
+        "+ low risk size (", sum(lowRiskIx), ") not equal to ",
+        "xdata/ydata rows (", sum(highRiskIx) + sum(lowRiskIx),
+        " != ", length(prognosticIndex), ")\n\n"
+      )
+
+      stopWhenOverlap && stop(str.message, "Stopping execution...")
+
+      warning(
+        str.message,
+        "We are continuing with execution as parameter `stopWhenOverlap` ",
+        "is FALSE.\n",
+        "  note: This adds duplicate samples to ydata and xdata xdata"
+      )
+
+      overlapSamples <- which(as.vector(highRiskIx & lowRiskIx))
+      #
+      prognosticIndex <-
+        t(t(c(prognosticIndex[, ], prognosticIndex[overlapSamples, ])))
+      ydata <- rbind(ydata, ydata[overlapSamples, ])
+
+      sampleIxs <- c(sampleIxs, sampleIxs[overlapSamples])
+      tempGroup <- c(tempGroup, rep((2 * ix) - 1, length(overlapSamples)))
+    }
+    #
+    validIx <- tempGroup != -1
+    #
+    prognosticIndexDf <- rbind(
+      prognosticIndexDf,
+      data.frame(
+        pi = prognosticIndex[validIx, ix],
+        time = ydata$time[validIx],
+        status = ydata$status[validIx],
+        group = tempGroup[validIx],
+        index = sampleIxs[validIx]
+      )
+    )
+  }
+
+  prognosticIndexDf
 }
 
 #' @keywords internal
