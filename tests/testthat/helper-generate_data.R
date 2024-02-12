@@ -67,3 +67,13 @@ prepare_mock_interactions <- function() {
     combined_score = c(490, 198, 159, 606, 167)
   )
 }
+
+prepare_ovarian <- function(columns = c("age", "resid.ds")) {
+  list(
+    xdata = survival::ovarian[, columns],
+    ydata = data.frame(
+      time = survival::ovarian$futime,
+      status = survival::ovarian$fustat
+    )
+  )
+}

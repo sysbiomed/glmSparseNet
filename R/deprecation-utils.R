@@ -6,14 +6,15 @@
 .deprecatedDotParam <- function(
     fun_name,
     argument_name,
+    new_argument_name = gsub("\\.(\\w)", "\\U\\1", argument_name, perl = TRUE),
     version = "1.21.0",
     env = rlang::caller_env(),
     user_env = rlang::caller_env(2)) {
-  new_argument <- gsub("\\.(\\w)", "\\U\\1", argument_name, perl = TRUE)
+
   lifecycle::deprecate_warn(
     version,
     paste0(fun_name, "(", argument_name, " = )"),
-    paste0(fun_name, "(", new_argument, " = )"),
+    paste0(fun_name, "(", new_argument_name, " = )"),
     env = env,
     user_env = user_env
   )

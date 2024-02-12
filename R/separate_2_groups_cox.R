@@ -34,7 +34,6 @@
 #'
 #' @seealso [survminer::ggsurvplot()]
 #' @examples
-#' data("cancer", package = "survival")
 #' xdata <- survival::ovarian[, c("age", "resid.ds")]
 #' ydata <- data.frame(
 #'   time = survival::ovarian$futime,
@@ -51,22 +50,55 @@
 #'   bb = c(age = 0, 1.5)
 #' ), xdata, ydata)
 separate2GroupsCox <- function(
-    chosen.btas,
+    chosenBetas,
     xdata,
     ydata,
     probs = c(.5, .5),
-    no.plot = FALSE,
-    plot.title = "SurvivalCurves",
+    noPlot = FALSE,
+    plotTitle = "SurvivalCurves",
     xlim = NULL,
     ylim = NULL,
-    expand.yzero = FALSE,
-    legend.outside = FALSE,
-    stop.when.overlap = TRUE,
-    ...) {
+    expandYZero = FALSE,
+    legendOutside = FALSE,
+    stopWhenOverlap = TRUE,
+    ...,
+    chosen.btas = deprecated(),
+    no.plot = deprecated(),
+    plot.title = deprecated(),
+    expand.yzero = deprecated(),
+    legend.outside = deprecated(),
+    stop.when.overlap = deprecated()) {
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(chosen.btas)) {
+    .deprecatedDotParam("separate2GroupsCox", "chosen.btas", "chosenBetas")
+    chosenBetas <- chosen.btas
+  }
+  if (lifecycle::is_present(no.plot)) {
+    .deprecatedDotParam("separate2GroupsCox", "no.plot")
+    noPlot <- no.plot
+  }
+  if (lifecycle::is_present(plot.title)) {
+    .deprecatedDotParam("separate2GroupsCox", "plot.title")
+    plotTitle <- plot.title
+  }
+  if (lifecycle::is_present(expand.yzero)) {
+    .deprecatedDotParam("separate2GroupsCox", "expand.yzero", "expandYZero")
+    expandYzero <- expand.yzero
+  }
+  if (lifecycle::is_present(legend.outside)) {
+    .deprecatedDotParam("separate2GroupsCox", "legend.outside")
+    legendOutside <- legend.outside
+  }
+  if (lifecycle::is_present(stop.when.overlap)) {
+    .deprecatedDotParam("separate2GroupsCox", "stop.when.overlap")
+    stopWhenOverlap <- stop.when.overlap
+  }
+  # Lifecycle management: end
+
   checkmate::assert(
-    .var.name = "chosen.btas",
-    checkmate::check_list(chosen.btas),
-    checkmate::check_numeric(chosen.btas),
+    .var.name = "chosenBetas",
+    checkmate::check_list(chosenBetas, types = "numeric"),
+    checkmate::check_numeric(chosenBetas),
   )
   checkmate::assert(
     .var.name = "xdata",
@@ -77,17 +109,27 @@ separate2GroupsCox <- function(
 
   checkmate::assert_data_frame(ydata)
   checkmate::check_numeric(probs, len = 2)
-  checkmate::assert_logical(no.plot)
-  checkmate::assert_character(plot.title)
+  checkmate::assert_logical(noPlot)
+  checkmate::assert_character(plotTitle)
   checkmate::assert_numeric(xlim, len = 2, null.ok = TRUE)
   checkmate::assert_numeric(ylim, len = 2, null.ok = TRUE)
-  checkmate::assert_logical(expand.yzero)
-  checkmate::assert_logical(legend.outside)
-  checkmate::assert_logical(stop.when.overlap)
+  checkmate::assert_logical(expandYZero)
+  checkmate::assert_logical(legendOutside)
+  checkmate::assert_logical(stopWhenOverlap)
 
   #
   # convert between compatible formats
-  if (inherits(chosen.btas, "numeric")) chosen.btas <- list(chosen.btas)
+  if (inherits(chosenBetas, "numeric")) chosenBetas <- list(chosenBetas)
+
+  if (!checkmate::test_names(chosenBetas)) {
+    generatedNames <- seq_along(chosenBetas) |> as.character()
+    if (is.null(names(chosenBetas))) {
+      names(chosenBetas) <- generatedNames
+    } else {
+      emptyIx <- !nzchar(names(chosenBetas))
+      names(chosenBetas)[emptyIx] <- generatedNames[emptyIx]
+    }
+  }
 
   # convert between compatible formats
   xdata <- Matrix::as.matrix(xdata)
@@ -100,184 +142,165 @@ separate2GroupsCox <- function(
       )
     )
   }
-  if (!all(ncol(xdata) == vapply(chosen.btas, length, integer(1L)))) {
+  if (!all(ncol(xdata) == vapply(chosenBetas, length, integer(1L)))) {
     stop(
       sprintf(
         paste(
-          "All or some of the chosen.btas (%s) have different",
+          "All or some of the chosenBetas (%s) have different",
           "number of variables from xdata (%d)"
         ),
-        paste(vapply(chosen.btas, length, 1), collapse = ", "),
+        paste(vapply(chosenBetas, length, 1), collapse = ", "),
         ncol(xdata)
       )
     )
   }
   #
-  # creates a matrix from list of chosen.btas
-  chosen.btas.mat <- chosen.btas |>
+  # creates a matrix from list of chosenBetas
+  chosenBetasMat <- chosenBetas |>
     vapply(function(e) as.vector(e), numeric(ncol(xdata)))
 
   # calculate prognostic indexes for each patient and btas
-  prognostic.index <- tryCatch(
-    xdata %*% chosen.btas.mat,
-    error = function(err) {
-      stop(
-        "xdata is.matrix(.) = ", is.matrix(xdata), "\n",
-        " chosen.btas is.matrix(.) = ", is.matrix(chosen.btas.mat), "\n",
-        "      xdata (nrow)x(ncol) = ", sprintf(
-          "%dx%d",
-          nrow(xdata),
-          ncol(xdata)
-        ), "\n",
-        "chosen.btas (nrow)x(ncol) = ", sprintf(
-          "%dx%d",
-          nrow(chosen.btas.mat),
-          ncol(chosen.btas.mat)
-        ),
-        "\n", "  error description: ", err
-      )
-    }
-  )
+  prognosticIndex <- xdata %*% chosenBetasMat
 
-  colnames(prognostic.index) <- names(chosen.btas)
+  colnames(prognosticIndex) <- names(chosenBetas)
   futile.logger::flog.debug("")
-  futile.logger::flog.debug("prognostic.index", prognostic.index,
+  futile.logger::flog.debug("prognosticIndex", prognosticIndex,
     capture = TRUE
   )
-  prognostic.index.df <- data.frame(
+  prognosticIndexDf <- data.frame(
     time = c(), status = c(), group = c(), index = c()
   )
   # populate a data.frame with all patients (multiple rows per patients if has
   # multiple btas) already calculate high/low risk groups
 
-  for (ix in seq_len(dim(prognostic.index)[2])) {
+  for (ix in seq_len(dim(prognosticIndex)[2])) {
     # threshold
     #
     #
-    sample.ixs <- rownames(prognostic.index) %||%
-      seq_len(nrow(prognostic.index))
+    sampleIxs <- rownames(prognosticIndex) %||%
+      seq_len(nrow(prognosticIndex))
 
-    temp.group <- array(-1, dim(prognostic.index)[1])
+    tempGroup <- array(-1, dim(prognosticIndex)[1])
     pi.thres <- stats::quantile(
-      prognostic.index[, ix],
+      prognosticIndex[, ix],
       probs = c(probs[1], probs[2])
     )
 
     if (
-      sum(prognostic.index[, ix] <= pi.thres[1]) == 0 ||
-        sum(prognostic.index[, ix] > pi.thres[2]) == 0
+      sum(prognosticIndex[, ix] <= pi.thres[1]) == 0 ||
+        sum(prognosticIndex[, ix] > pi.thres[2]) == 0
     ) {
-      pi.thres[1] <- stats::median(unique(prognostic.index[, ix]))
+      pi.thres[1] <- stats::median(unique(prognosticIndex[, ix]))
       pi.thres[2] <- pi.thres[1]
     }
 
     # low risk
-    low.risk.ix <- prognostic.index[, ix] <= pi.thres[1]
-    temp.group[low.risk.ix] <- (2 * ix) - 1
+    lowRiskIx <- prognosticIndex[, ix] <= pi.thres[1]
+    tempGroup[lowRiskIx] <- (2 * ix) - 1
     # high risk
-    high.risk.ix <- prognostic.index[, ix] > pi.thres[2]
-    temp.group[high.risk.ix] <- (2 * ix)
+    highRiskIx <- prognosticIndex[, ix] > pi.thres[2]
+    tempGroup[highRiskIx] <- (2 * ix)
 
     ydata.new <- ydata
 
     if (
-      length(unique(prognostic.index)) > 1 &&
-        sum(low.risk.ix) + sum(high.risk.ix) > length(prognostic.index)
+      length(unique(prognosticIndex)) > 1 &&
+        sum(lowRiskIx) + sum(highRiskIx) > length(prognosticIndex)
     ) {
       str.message <- paste0(
         "The cutoff values given to the function allow for some over ",
         "samples in both groups, with:\n  high risk size (",
-        sum(high.risk.ix), ") ",
-        "+ low risk size (", sum(low.risk.ix), ") not equal to ",
-        "xdata/ydata rows (", sum(high.risk.ix) + sum(low.risk.ix),
-        " != ", length(prognostic.index), ")\n\n"
+        sum(highRiskIx), ") ",
+        "+ low risk size (", sum(lowRiskIx), ") not equal to ",
+        "xdata/ydata rows (", sum(highRiskIx) + sum(lowRiskIx),
+        " != ", length(prognosticIndex), ")\n\n"
       )
 
-      stop.when.overlap && stop(str.message, "Stopping execution...")
+      stopWhenOverlap && stop(str.message, "Stopping execution...")
 
       warning(
         str.message,
-        "We are continuing with execution as parameter stop.when.overlap ",
+        "We are continuing with execution as parameter `stopWhenOverlap` ",
         "is FALSE.\n",
         "  note: This adds duplicate samples to ydata and xdata xdata"
       )
 
-      overlap.samples <- which(as.vector(high.risk.ix & low.risk.ix))
+      overlapSamples <- which(as.vector(highRiskIx & lowRiskIx))
       #
-      prognostic.index <-
-        t(t(c(prognostic.index[, ], prognostic.index[overlap.samples, ])))
-      ydata.new <- rbind(ydata, ydata[overlap.samples, ])
+      prognosticIndex <-
+        t(t(c(prognosticIndex[, ], prognosticIndex[overlapSamples, ])))
+      ydata.new <- rbind(ydata, ydata[overlapSamples, ])
 
-      sample.ixs <- c(sample.ixs, sample.ixs[overlap.samples])
-      temp.group <- c(temp.group, rep((2 * ix) - 1, length(overlap.samples)))
+      sampleIxs <- c(sampleIxs, sampleIxs[overlapSamples])
+      tempGroup <- c(tempGroup, rep((2 * ix) - 1, length(overlapSamples)))
     }
     #
-    valid_ix <- temp.group != -1
+    valid_ix <- tempGroup != -1
     #
-    prognostic.index.df <- rbind(
-      prognostic.index.df,
+    prognosticIndexDf <- rbind(
+      prognosticIndexDf,
       data.frame(
-        pi = prognostic.index[valid_ix, ix],
+        pi = prognosticIndex[valid_ix, ix],
         time = ydata.new$time[valid_ix],
         status = ydata.new$status[valid_ix],
-        group = temp.group[valid_ix],
-        index = sample.ixs[valid_ix]
+        group = tempGroup[valid_ix],
+        index = sampleIxs[valid_ix]
       )
     )
   }
   # factor the group
-  prognostic.index.df$group <- factor(prognostic.index.df$group)
+  prognosticIndexDf$group <- factor(prognosticIndexDf$group)
   # rename the factor to low / high risk
-  new.factor.str <- .generateLegend(chosen.btas)
+  newFactorStr <- .generateLegend(chosenBetas)
 
-  new.factor.str.l <- as.list(as.character(seq_len(2 * length(chosen.btas))))
-  names(new.factor.str.l) <- new.factor.str
+  newFactorStrL <- as.list(as.character(seq_len(2 * length(chosenBetas))))
+  names(newFactorStrL) <- newFactorStr
 
-  prognostic.index.df$group <- do.call(
+  prognosticIndexDf$group <- do.call(
     forcats::fct_collapse,
-    c(list(prognostic.index.df$group), new.factor.str.l)
+    c(list(prognosticIndexDf$group), newFactorStrL)
   )
   #
-  if (length(levels(prognostic.index.df$group)) == 1) {
+  if (length(levels(prognosticIndexDf$group)) == 1) {
     stop(
       "separate2GroupsCox(): There is only one group, cannot create ",
       "kaplan-meir curve with low and high risk groups"
     )
   }
   futile.logger::flog.debug("")
-  futile.logger::flog.debug("prognostic.index.df", prognostic.index.df,
+  futile.logger::flog.debug("prognosticIndexDf", prognosticIndexDf,
     capture = TRUE
   )
   #
   # Generate the Kaplan-Meier survival object
   km <- survival::survfit(survival::Surv(time, status) ~ group,
-    data = prognostic.index.df
+    data = prognosticIndexDf
   )
-  km$custom.data <- prognostic.index.df
+  km$custom.data <- prognosticIndexDf
   futile.logger::flog.debug("")
   futile.logger::flog.debug("kaplan-meier object", km, capture = TRUE)
   # Calculate the logrank test p-value
-  surv.prob <- survival::survdiff(survival::Surv(time, status) ~ group,
-    data = prognostic.index.df
+  survProb <- survival::survdiff(survival::Surv(time, status) ~ group,
+    data = prognosticIndexDf
   )
   futile.logger::flog.debug("")
-  futile.logger::flog.debug("surv.prob object", surv.prob, capture = TRUE)
-  p_value <- 1 - stats::pchisq(surv.prob$chisq, df = 1)
+  futile.logger::flog.debug("survProb object", survProb, capture = TRUE)
+  pValue <- 1 - stats::pchisq(survProb$chisq, df = 1)
 
   futile.logger::flog.debug("")
-  futile.logger::flog.debug("pvalue: %g\n", p_value)
+  futile.logger::flog.debug("pvalue: %g\n", pValue)
 
   .plotSurvival(
-    no.plot,
+    noPlot,
     km,
-    p_value,
-    prognostic.index.df,
-    length(chosen.btas),
-    plot.title,
+    pValue,
+    prognosticIndexDf,
+    length(chosenBetas),
+    plotTitle,
     xlim,
     ylim,
-    expand.yzero,
-    legend.outside,
+    expandYZero,
+    legendOutside,
     ...
   )
 }
@@ -286,17 +309,17 @@ separate2GroupsCox <- function(
 .plotSurvival <- function(
     no_plot,
     km,
-    p_value,
+    pValue,
     prognostic_index_df,
     chosen_btas_len,
-    plot_title,
+    plotTitle,
     xlim,
     ylim,
-    expand_yzero,
-    legend_outside,
+    expandYZero,
+    legendOutside,
     ...) {
   if (no_plot) {
-    return(list(pvalue = p_value, plot = NULL, km = km))
+    return(list(pvalue = pValue, plot = NULL, km = km))
   }
   #
   # Plot survival curve
@@ -308,7 +331,7 @@ separate2GroupsCox <- function(
 
   col.ix <- c("seagreen", "indianred2")
   if (chosen_btas_len > 1L) {
-    col.ix <- my.colors()[c(
+    col.ix <- myColors()[c(
       1, 2, 4, 3, 10, 6, 12, 9, 5, 7, 8, 11, 13, 14, 15, 16, 17
     )]
   }
@@ -322,7 +345,7 @@ separate2GroupsCox <- function(
     ...
   )
 
-  if (expand_yzero) {
+  if (isTRUE(expandYZero)) {
     p1$plot <- p1$plot + ggplot2::expand_limits(y = .047)
   }
   # limit the x axis if needed
@@ -335,14 +358,14 @@ separate2GroupsCox <- function(
 
   p1$plot <- p1$plot + if (chosen_btas_len == 1L) {
     ggplot2::ggtitle(
-      paste0(gsub("_", " ", plot_title), "\np_value = ", p_value)
+      paste0(gsub("_", " ", plotTitle), "\np_value = ", pValue)
     )
   } else {
-    ggplot2::ggtitle(paste0(gsub("_", " ", plot_title)))
+    ggplot2::ggtitle(paste0(gsub("_", " ", plotTitle)))
   }
 
   p1$plot <- p1$plot +
-    ggplot2::labs(colour = paste0("p-value = ", format(p_value)))
+    ggplot2::labs(colour = paste0("p-value = ", format(pValue)))
 
   p1$plot <- p1$plot + ggplot2::theme(
     legend.key = ggplot2::element_blank(),
@@ -353,7 +376,7 @@ separate2GroupsCox <- function(
     legend.background = ggplot2::element_rect(colour = "gray")
   )
 
-  p1$plot <- p1$plot + if (legend_outside == TRUE) {
+  p1$plot <- p1$plot + if (isTRUE(legendOutside)) {
     ggplot2::theme(legend.key.size = ggplot2::unit(20, "points"))
   } else {
     ggplot2::theme(
@@ -364,14 +387,14 @@ separate2GroupsCox <- function(
   }
 
   # return p-value, plot and km object
-  list(pvalue = p_value, plot = p1, km = km)
+  list(pvalue = pValue, plot = p1, km = km)
 }
 
 #' @keywords internal
-.generateLegend <- function(chosen.btas) {
-  as.vector(vapply(seq_along(chosen.btas), function(ix) {
-    if (!is.null(names(chosen.btas)) && length(names(chosen.btas)) >= ix) {
-      e <- names(chosen.btas)[ix]
+.generateLegend <- function(chosenBetas) {
+  as.vector(vapply(seq_along(chosenBetas), function(ix) {
+    if (!is.null(names(chosenBetas)) && length(names(chosenBetas)) >= ix) {
+      e <- names(chosenBetas)[ix]
       as.list(paste0(c("Low risk - ", "High risk - "), e))
     } else {
       list("Low risk", "High risk")
