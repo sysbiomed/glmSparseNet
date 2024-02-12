@@ -5,13 +5,16 @@
 \title{Build gene network from peptide ids}
 \usage{
 buildStringNetwork(
-  stringMatrix,
+  stringTbl,
   useNames = c("protein", "ensembl", "external"),
   string.tbl = deprecated(),
   use.names = deprecated()
 )
 }
 \arguments{
+\item{stringTbl}{\code{data.frame} or \code{tibble} with colnames and rownames as
+ensembl peptide id \emph{(same order)}.}
+
 \item{useNames}{\code{character(1)} that defaults to use protein names
 _('protein'), other options are 'ensembl' for ensembl gene id or 'external'
 for external gene names.}
@@ -19,9 +22,6 @@ for external gene names.}
 \item{string.tbl}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 
 \item{use.names}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
-
-\item{stringTbl}{\code{data.frame} or \code{tibble} with colnames and rownames as
-ensembl peptide id \emph{(same order)}.}
 }
 \value{
 a new matrix with gene ids instead of peptide ids. The size of matrix
@@ -43,5 +43,5 @@ sum(string_network != 0)
 }
 }
 \seealso{
-stringDBhomoSapiens
+\code{\link[=stringDBhomoSapiens]{stringDBhomoSapiens()}}
 }

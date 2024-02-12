@@ -13,7 +13,7 @@ vignette: >
 
 <!-- README.md and README.html are generated from README.Rmd. Please edit that file -->
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, results='hide'}
 knitr::opts_chunk$set(
   echo = TRUE,
   fig.width = 7,
@@ -23,8 +23,8 @@ knitr::opts_chunk$set(
 library(futile.logger)
 library(ggplot2)
 
-.Last.value <- flog.layout(layout.format("[~l] ~m"))
-.Last.value <- flog.appender(appender.tee("logger.txt"))
+flog.layout(layout.format("[~l] ~m"))
+flog.appender(appender.tee("logger.txt"))
 theme_set(theme_minimal())
 ```
 
@@ -95,11 +95,12 @@ The main functions from this packages are the `glmSparseNet` and `cv.glmSparseNe
 *note:* These functions can take any additional arguments that `glmnet` or `cv.glmnet` accept (e.g. number of folds in cross validation)
 
 ```{r, eval=FALSE}
-cv.glmSparseNet(xdata,
+cv.glmSparseNet(
+  xdata,
   ydata,
   family = "cox",
   network = "correlation",
-  network.options = networkOptions(
+  options = networkOptions(
     cutoff = .6,
     minDegree = 0.2
   )
@@ -146,11 +147,11 @@ data("miniACC", package = "MultiAssayExperiment")
 xdata <- miniACC
 
 # build valid data with days of last follow up or to event
-event.ix <- which(!is.na(xdata$days_to_death))
-cens.ix <- which(!is.na(xdata$days_to_last_followup))
-surv_event_time <- array(NA, nrow(colData(xdata)))
-surv_event_time[event.ix] <- xdata$days_to_death[event.ix]
-surv_event_time[cens.ix] <- xdata$days_to_last_followup[cens.ix]
+eventIx <- which(!is.na(xdata$days_to_death))
+censIx <- which(!is.na(xdata$days_to_last_followup))
+survEventTime <- array(NA, nrow(colData(xdata)))
+survEventTime[eventIx] <- xdata$days_to_death[eventIx]
+survEventTime[censIx] <- xdata$days_to_last_followup[censIx]
 
 # Keep only valid individuals
 #
@@ -158,11 +159,11 @@ surv_event_time[cens.ix] <- xdata$days_to_last_followup[cens.ix]
 #  - either a follow_up time or event time
 #  - a valid vital_status (i.e. not missing)
 #  - folloup_time or event_time > 0
-valid.ix <- as.vector(!is.na(surv_event_time) & !is.na(xdata$vital_status) & surv_event_time > 0)
+validIx <- as.vector(!is.na(survEventTime) & !is.na(xdata$vital_status) & survEventTime > 0)
 ydata <- data.frame(
-  time = surv_event_time[valid.ix],
-  status = xdata$vital_status[valid.ix],
-  row.names = xdata$patientID[valid.ix]
+  time = survEventTime[validIx],
+  status = xdata$vital_status[validIx],
+  row.names = xdata$patientID[validIx]
 )
 ```
 
@@ -170,13 +171,15 @@ The function `cv.glmSparseNet` fits the survival data using 10-fold cross valida
 
 ```{r fit.surv}
 # build response object for glmnet
-fit3 <- cv.glmSparseNet(xdata, ydata,
+fit3 <- cv.glmSparseNet(
+  xdata, 
+  ydata,
   family = "cox",
   network = "correlation",
-  experimentName = "RNASeq2GeneNorm",
+  experiment = "RNASeq2GeneNorm",
   alpha = .7,
   nlambda = 1000,
-  network.options = networkOptions(
+  options = networkOptions(
     cutoff = .6,
     minDegree = 0.2,
     transFun = hubHeuristic
@@ -198,31 +201,36 @@ This function generates Kaplan-Meier survival model based on the estimated coeff
 #  * it takes the input data, response and coefficients
 #  * calculates the relative risk
 #  * separates individuals based on relative risk into High/Low risk groups
-xdata.reduced <- as(xdata[, , "RNASeq2GeneNorm"], "MatchedAssayExperiment")
-ydata.km <- ydata[rownames(colData(xdata.reduced)), ]
-best.model.coef <- coef(fit3, s = "lambda.min")[, 1]
+xdataReduced <- as(xdata[, , "RNASeq2GeneNorm"], "MatchedAssayExperiment")
+ydataKM <- ydata[rownames(colData(xdataReduced)), ]
+bestModelCoef <- coef(fit3, s = "lambda.min")[, 1]
 ```
 
 Kaplan-Meier plot
 
 ```{r call.kaplan}
-separate2GroupsCox(best.model.coef, t(assay(xdata[["RNASeq2GeneNorm"]])), ydata.km, ylim = c(0, 1))
+separate2GroupsCox(
+  bestModelCoef, t(assay(xdata[["RNASeq2GeneNorm"]])), ydataKM, ylim = c(0, 1)
+)
 ```
 
 ```{r glmnet.classic, include=FALSE, eval=FALSE}
 library(glmnet)
 # Comparing against a classical GLMNET call
-xdata.reduced <- as(xdata[, , "RNASeq2GeneNorm"], "MatchedAssayExperiment")
-xdata.surv <- t(assay(xdata.reduced[["RNASeq2GeneNorm"]]))
-ydata.reduced <- ydata[xdata.reduced$patientID, ]
-ydata.surv <- Surv(ydata.reduced$time, ydata.reduced$status)
+xdataReduced <- as(xdata[, , "RNASeq2GeneNorm"], "MatchedAssayExperiment")
+xdataSurv <- t(assay(xdataReduced[["RNASeq2GeneNorm"]]))
+ydataReduced <- ydata[xdataReduced$patientID, ]
+ydataSurv <- Surv(ydataReduced$time, ydataReduced$status)
 
-fit4 <- cv.glmnet(xdata.surv, ydata.surv, family = "cox", alpha = .7, nlambda = 1000)
-best.model.coef.g <- Filter(function(.x) .x != 0, coef(fit4, s = "lambda.min")[, 1])
+fit4 <- cv.glmnet(
+  xdataSurv, ydataSurv, family = "cox", alpha = .7, nlambda = 1000
+)
+bestModelCoefG <- Filter(function(.x) .x != 0, coef(fit4, s = "lambda.min")[, 1])
 
-separate2groupsCox(best.model.coef.g,
-  t(assay(xdata[["RNASeq2GeneNorm"]]))[, names(best.model.coef.g)],
-  ydata.km,
+separate2groupsCox(
+  bestModelCoefG,
+  t(assay(xdata[["RNASeq2GeneNorm"]]))[, names(bestModelCoefG)],
+  ydataKM,
   ylim = c(0, 1)
 )$plot
 ```

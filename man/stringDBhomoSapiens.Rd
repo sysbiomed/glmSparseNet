@@ -4,14 +4,24 @@
 \alias{stringDBhomoSapiens}
 \title{Download protein-protein interactions from STRING DB}
 \usage{
-stringDBhomoSapiens(version = "11.0", scoreThreshold = 0, removeText = TRUE)
+stringDBhomoSapiens(
+  version = "11.0",
+  scoreThreshold = 0,
+  removeText = TRUE,
+  score_threshold = deprecated(),
+  remove.text = deprecated()
+)
 }
 \arguments{
 \item{version}{version of the database to use}
 
-\item{score_threshold}{remove scores below threshold}
+\item{scoreThreshold}{remove scores below threshold}
 
-\item{remove.text}{remove text mining-based scores}
+\item{removeText}{remove text mining-based scores}
+
+\item{score_threshold}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{remove.text}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 }
 \value{
 a data.frame with rows representing an interaction between two

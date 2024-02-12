@@ -135,8 +135,8 @@
 #' @param useCache Boolean indicating if biomaRt cache should be used
 #' @param verbose When using biomaRt in webservice mode and setting verbose to
 #' TRUE, the XML query to the webservice will be printed.
-#' @param ensemblGenes `r lifecycle::badge("deprecated")`
-#' @param useCache `r lifecycle::badge("deprecated")`
+#' @param ensembl.genes `r lifecycle::badge("deprecated")`
+#' @param use.cache `r lifecycle::badge("deprecated")`
 #'
 #' @return a dataframe with external gene names, ensembl_id
 #' @export
@@ -267,6 +267,8 @@ ensemblGeneNames <- function(
 #' @param useCache Boolean indicating if biomaRt cache should be used
 #' @param verbose When using biomaRt in webservice mode and setting verbose to
 #' TRUE, the XML query to the webservice will be printed.
+#' @param ensembl.proteins `r lifecycle::badge("deprecated")`
+#' @param use.cache `r lifecycle::badge("deprecated")`
 #'
 #' @return a dataframe with external gene names, ensembl_peptide_id
 #' @export

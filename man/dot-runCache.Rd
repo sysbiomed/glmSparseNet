@@ -36,6 +36,8 @@
 
 \item{seed}{when function call is random, this allows to set seed beforehand}
 
+\item{baseDir}{directory where data is stored}
+
 \item{cachePrefix}{prefix for file name to be generated from
 parameters (...)}
 
@@ -46,8 +48,6 @@ parameters (...)}
 \item{forceRecalc}{force the recalculation of the values}
 
 \item{addToHash}{something to add to the filename generation}
-
-\item{base.dir}{directory where data is stored}
 }
 \value{
 the result of fun(...)

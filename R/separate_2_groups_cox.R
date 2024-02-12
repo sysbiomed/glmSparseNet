@@ -3,21 +3,27 @@
 #' Draws multiple kaplan meyer survival curves (or just 1) and calculates
 #' logrank test
 #'
-#' @param chosen.btas list of testing coefficients to calculate prognostic
+#' @param chosenBetas list of testing coefficients to calculate prognostic
 #' indexes, for example `list(Age = some_vector)`.
 #' @param xdata n x m matrix with n observations and m variables.
 #' @param ydata Survival object.
 #' @param probs How to separate high and low risk patients `50%-50%` is the
 #' default, but for top and bottom `40%` -> `c(.4,.6)`.
-#' @param no.plot Only calculate p-value and do not generate survival curve
+#' @param noPlot Only calculate p-value and do not generate survival curve
 #' plot.
-#' @param plot.title Name of file if.
+#' @param plotTitle Name of file if.
 #' @param xlim Optional argument to limit the x-axis view.
 #' @param ylim Optional argument to limit the y-axis view.
-#' @param legend.outside If TRUE legend will be outside plot, otherwise inside.
-#' @param expand.yzero expand to y = 0.
-#' @param stop.when.overlap when probs vector allows for overlapping of samples
+#' @param legendOutside If TRUE legend will be outside plot, otherwise inside.
+#' @param expandYZero expand to y = 0.
+#' @param stopWhenOverlap when probs vector allows for overlapping of samples
 #' in both groups, then stop.
+#' @param chosen.btas `r lifecycle::badge("deprecated")`
+#' @param no.plot `r lifecycle::badge("deprecated")`
+#' @param plot.title `r lifecycle::badge("deprecated")`
+#' @param legend.outside `r lifecycle::badge("deprecated")`
+#' @param expand.yzero `r lifecycle::badge("deprecated")`
+#' @param stop.when.overlap `r lifecycle::badge("deprecated")`
 #'
 #' Otherwise it will calculate with duplicate samples, i.e. simply adding them
 #' to xdata and ydata (in a different group).

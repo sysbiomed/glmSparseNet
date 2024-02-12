@@ -13,7 +13,7 @@
 
 \item{compression}{compression method to be used}
 
-\item{show.message}{TRUE to show messages, FALSE otherwise}
+\item{showMessage}{TRUE to show messages, FALSE otherwise}
 }
 \value{
 result of save operation

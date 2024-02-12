@@ -20,6 +20,10 @@ ensembl_peptide_id format}
 
 \item{verbose}{When using biomaRt in webservice mode and setting verbose to
 TRUE, the XML query to the webservice will be printed.}
+
+\item{ensembl.proteins}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
+
+\item{use.cache}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 }
 \value{
 a dataframe with external gene names, ensembl_peptide_id

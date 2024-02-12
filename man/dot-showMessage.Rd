@@ -7,7 +7,7 @@
 .showMessage(showMessage = NULL)
 }
 \arguments{
-\item{show.message}{boolean indicating to show messages or not}
+\item{showMessage}{boolean indicating to show messages or not}
 }
 \value{
 the show.message option

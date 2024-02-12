@@ -6,9 +6,9 @@
 #' To better understand how the score is calculated, please see:
 #'  https://string-db.org/help/faq/#how-are-the-scores-computed
 #'
-#' @param all.interactions table with score of all interactions
-#' @param score_threshold threshold to keep interactions
-#' @param remove.text remove text-based interactions
+#' @param allInteractions table with score of all interactions
+#' @param scoreThreshold threshold to keep interactions
+#' @param removeText remove text-based interactions
 #'
 #' @return table with combined score
 .calculateCombinedScore <- function(
@@ -83,8 +83,10 @@
 #' Download protein-protein interactions from STRING DB
 #'
 #' @param version version of the database to use
-#' @param score_threshold remove scores below threshold
-#' @param remove.text remove text mining-based scores
+#' @param scoreThreshold remove scores below threshold
+#' @param removeText remove text mining-based scores
+#' @param score_threshold `r lifecycle::badge("deprecated")`
+#' @param remove.text `r lifecycle::badge("deprecated")`
 #'
 #' @return a data.frame with rows representing an interaction between two
 #' proteins, and columns
@@ -98,7 +100,23 @@
 stringDBhomoSapiens <- function(
     version = "11.0",
     scoreThreshold = 0,
-    removeText = TRUE) {
+    removeText = TRUE,
+    # Deprecated arguments with dots in name
+    score_threshold = deprecated(), # nolint: object_name_linter.
+    remove.text = deprecated()) { # nolint: object_name_linter.)
+  # Lifecycle management: to remove after 1.23.0
+  if (lifecycle::is_present(score_threshold)) {
+    .deprecatedDotParam(
+      "stringDBhomoSapiens", "score_threshold", "scoreThreshold"
+    )
+    scoreThreshold <- score_threshold
+  }
+  if (lifecycle::is_present(remove.text)) {
+    .deprecatedDotParam("separate2GroupsCox", "remove.text")
+    removeText <- remove.text
+  }
+  # Lifecycle management: end
+
   # nolint start: object_usage_linter
   species <- 9606 # Homo sapiens
   links <- "links.full" # what data to retrieve
@@ -140,8 +158,11 @@ stringDBhomoSapiens <- function(
 #' @return a new matrix with gene ids instead of peptide ids. The size of matrix
 #'  can be different as
 #' there may not be a mapping or a peptide mapping can have multiple genes.
+#'
+#' @seealso [stringDBhomoSapiens()]
+#'
 #' @export
-#' @seealso stringDBhomoSapiens
+#'
 #' @examples
 #' \donttest{
 #' interactions <- stringDBhomoSapiens(scoreThreshold = 100)
@@ -151,7 +172,7 @@ stringDBhomoSapiens <- function(
 #' sum(string_network != 0)
 #' }
 buildStringNetwork <- function(
-    stringMatrix,
+    stringTbl,
     useNames = c("protein", "ensembl", "external"),
     # Deprecated arguments with dots in name
     string.tbl = deprecated(), # nolint: object_name_linter.
@@ -159,7 +180,7 @@ buildStringNetwork <- function(
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(string.tbl)) {
     .deprecatedDotParam("buildStringNetwork", "string.tbl")
-    stringMatrix <- string.tbl
+    stringTbl <- string.tbl
   }
   if (lifecycle::is_present(use.names)) {
     .deprecatedDotParam("buildStringNetwork", "use.names")
@@ -170,11 +191,11 @@ buildStringNetwork <- function(
   useNames <- match.arg(useNames)
 
   # remove 9606. prefix
-  stringMatrix$from <- gsub("9606\\.", "", stringMatrix$from)
-  stringMatrix$to <- gsub("9606\\.", "", stringMatrix$to)
+  stringTbl$from <- gsub("9606\\.", "", stringTbl$from)
+  stringTbl$to <- gsub("9606\\.", "", stringTbl$to)
 
   # get sorted list of proteins
-  mergedProt <- sort(unique(c(stringMatrix$from, stringMatrix$to)))
+  mergedProt <- sort(unique(c(stringTbl$from, stringTbl$to)))
 
   # if useNames is not default, then replace proteins with genes (either
   #   ensembl_id or gene_name)
@@ -196,7 +217,7 @@ buildStringNetwork <- function(
     }
 
     # keep only proteins that have mapping to gene
-    newString <- stringMatrix |>
+    newString <- stringTbl |>
       dplyr::filter(
         !!(as.name("from")) %in% protMap$ensembl_peptide_id &
           !!(as.name("to")) %in% protMap$ensembl_peptide_id
@@ -226,7 +247,7 @@ buildStringNetwork <- function(
     mergedProt <- sort(unique(c(newString$from, newString$to)))
   } else {
     # if default then just pass the argument as newString
-    newString <- stringMatrix
+    newString <- stringTbl
   }
 
   #

@@ -13,7 +13,7 @@
 directory for the actual cache file (this reduces number of files per folder)}
 }
 \value{
-a list of updated base.dir and parent.dir
+a list of updated baseDir and parentDir
 }
 \description{
 Create directories for cache

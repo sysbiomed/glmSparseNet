@@ -5,7 +5,7 @@ withr::local_tempdir(pattern = "base.dir") |>
 
 test_that("folder can be created in tempdir", {
   result <- .createDirectoryForCache(withr::local_tempdir(), "abcd")
-  expect_true(dir.exists(result$parent_dir))
+  expect_true(dir.exists(result$parentDir))
 })
 
 test_that("digest cache is consistent", {
@@ -34,15 +34,15 @@ test_that("run_cache fails with arguments", {
   )
 })
 
-test_that("run_cache base.dir in folder that does not have access", {
+test_that("run_cache baseDir in folder that does not have access", {
   if (grepl("windows", getOs, ignore.case = TRUE)) {
     # CRAN automated tests allow to write in c:/Windows
     # expect_warning(
     #   .runCache(
     #     sum, 1, 2, 3, 4, 5,
-    #     show.message = FALSE, base.dir = 'c:/Windows'
+    #     show.message = FALSE, baseDir = 'c:/Windows'
     #   ),
-    #   'Could not create cache folder inside base.dir'
+    #   'Could not create cache folder inside baseDir'
     # )
   } else if (grepl("darwin", getOs, ignore.case = TRUE)) {
     # Do nothing, the same test for linux fails
@@ -53,18 +53,18 @@ test_that("run_cache base.dir in folder that does not have access", {
         # run_cache arguments
         showMessage = FALSE, baseDir = "/"
       ),
-      "Could not create cache folder inside base.dir"
+      "Could not create cache folder inside baseDir"
     )
   }
 })
 
-test_that("run.cache base.dir in folder that does not have access", {
+test_that("run.cache baseDir in folder that does not have access", {
   if (grepl("windows", getOs, ignore.case = TRUE)) {
     # CRAN automated tests allow to write in c:/Windows
     # expect_warning(
     #   .runCache(
     #     sum, 1, 2, 3, 4, 5,
-    #     show.message = FALSE, base.dir = file.path('c:', 'windows', 'caca')),
+    #     show.message = FALSE, baseDir = file.path('c:', 'windows', 'caca')),
     #   'Could not create cache base folder'
     # )
   } else if (grepl("darwin", getOs, ignore.case = TRUE)) {
@@ -83,7 +83,7 @@ test_that("run.cache base.dir in folder that does not have access", {
   }
 })
 
-test_that("run_cache base.dir in folder that does have access", {
+test_that("run_cache baseDir in folder that does have access", {
   expect_equal(
     .runCache(
       sum, 1, 2, 3, 4, 5,
@@ -277,10 +277,10 @@ test_that("builds different hash for different functions", {
 
   allFuns <- c(listOfFun, funFromPackages)
 
-  funDigest <- sapply(allFuns, glmSparseNet:::.buildFunctionDigest)
+  funDigest <- sapply(allFuns, .buildFunctionDigest)
 
-  for (digest_ix in unique(fun_digest[duplicated(fun_digest)])) {
-    print(allFuns[fun_digest == digest_ix])
+  for (digestIx in unique(funDigest[duplicated(funDigest)])) {
+    print(allFuns[funDigest == digestIx])
     futile.logger::flog.info("----------------")
   }
 
@@ -393,7 +393,7 @@ test_that("run.cache with seed", {
 #   output <- capture_output(
 #     .runCache(
 #       sum, 1, 2, 3, 4, 5,
-#       base.dir = withr::local_tempdir(),
+#       baseDir = withr::local_tempdir(),
 #       force.recalc = TRUE,
 #       show.message = TRUE
 #     )
@@ -465,7 +465,7 @@ test_that("run.cache show.message option works", {
   )
 })
 
-test_that("run.cache base.dir option works", {
+test_that("run.cache baseDir option works", {
   cache0 <- file.path(withr::local_tempdir(), "run-cache")
   cache1 <- file.path(withr::local_tempdir(), "run-cache-changed1")
   cache2 <- file.path(withr::local_tempdir(), "run-cache-changed2")

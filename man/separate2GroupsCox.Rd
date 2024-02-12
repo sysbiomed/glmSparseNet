@@ -26,6 +26,9 @@ separate2GroupsCox(
 )
 }
 \arguments{
+\item{chosenBetas}{list of testing coefficients to calculate prognostic
+indexes, for example \code{list(Age = some_vector)}.}
+
 \item{xdata}{n x m matrix with n observations and m variables.}
 
 \item{ydata}{Survival object.}
@@ -33,26 +36,35 @@ separate2GroupsCox(
 \item{probs}{How to separate high and low risk patients \verb{50\%-50\%} is the
 default, but for top and bottom \verb{40\%} -> \code{c(.4,.6)}.}
 
+\item{noPlot}{Only calculate p-value and do not generate survival curve
+plot.}
+
+\item{plotTitle}{Name of file if.}
+
 \item{xlim}{Optional argument to limit the x-axis view.}
 
 \item{ylim}{Optional argument to limit the y-axis view.}
 
+\item{expandYZero}{expand to y = 0.}
+
+\item{legendOutside}{If TRUE legend will be outside plot, otherwise inside.}
+
+\item{stopWhenOverlap}{when probs vector allows for overlapping of samples
+in both groups, then stop.}
+
 \item{...}{additional parameters to survminer::ggsurvplot}
 
-\item{chosen.btas}{list of testing coefficients to calculate prognostic
-indexes, for example \code{list(Age = some_vector)}.}
+\item{chosen.btas}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 
-\item{no.plot}{Only calculate p-value and do not generate survival curve
-plot.}
+\item{no.plot}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 
-\item{plot.title}{Name of file if.}
+\item{plot.title}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 
-\item{expand.yzero}{expand to y = 0.}
+\item{expand.yzero}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 
-\item{legend.outside}{If TRUE legend will be outside plot, otherwise inside.}
+\item{legend.outside}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 
-\item{stop.when.overlap}{when probs vector allows for overlapping of samples
-in both groups, then stop.
+\item{stop.when.overlap}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
 
 Otherwise it will calculate with duplicate samples, i.e. simply adding them
 to xdata and ydata (in a different group).}

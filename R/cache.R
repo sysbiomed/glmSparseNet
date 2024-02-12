@@ -22,7 +22,7 @@
 #'
 #' This method saves the function that's being called
 #'
-#' @param base.dir directory where data is stored
+#' @param baseDir directory where data is stored
 #' @param fun function call name
 #' @param ... parameters for function call
 #' @param seed when function call is random, this allows to set seed beforehand
@@ -161,7 +161,7 @@ methods::setGeneric(".runCache", function(
 #' @param parentPath first 4 characters of digest that will become parent
 #' directory for the actual cache file (this reduces number of files per folder)
 #'
-#' @return a list of updated base.dir and parent.dir
+#' @return a list of updated baseDir and parentDir
 #'
 #' @examples
 #' glmSparseNet:::.createDirectoryForCache(tempdir(), "abcd")
@@ -223,7 +223,7 @@ methods::setGeneric(".runCache", function(
 #' @param result main result to save
 #' @param path path to the file to save
 #' @param compression compression method to be used
-#' @param show.message TRUE to show messages, FALSE otherwise
+#' @param showMessage TRUE to show messages, FALSE otherwise
 #'
 #' @return result of save operation
 #'
@@ -316,7 +316,7 @@ methods::setMethod(
     filename <- sprintf("cache-%s-H_%s.RData", cachePrefix, myDigest)
     parentPath <- strtrim(myDigest, width = 4)
 
-    # create dir and update base.dir (in case it failed)
+    # create dir and update baseDir (in case it failed)
     cacheDirPaths <- .createDirectoryForCache(baseDir, parentPath)
     parentDir <- cacheDirPaths$parentDir
     baseDir <- cacheDirPaths$baseDir

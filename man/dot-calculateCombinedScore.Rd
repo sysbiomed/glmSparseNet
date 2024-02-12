@@ -7,11 +7,11 @@
 .calculateCombinedScore(allInteractions, scoreThreshold, removeText)
 }
 \arguments{
-\item{all.interactions}{table with score of all interactions}
+\item{allInteractions}{table with score of all interactions}
 
-\item{score_threshold}{threshold to keep interactions}
+\item{scoreThreshold}{threshold to keep interactions}
 
-\item{remove.text}{remove text-based interactions}
+\item{removeText}{remove text-based interactions}
 }
 \value{
 table with combined score
