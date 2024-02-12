@@ -121,3 +121,25 @@ test_that("separate2GroupsCox: deprecated parameters", {
   ) |>
     lifecycle::expect_deprecated("stopWhenOverlap")
 })
+
+test_that("netWorkOptions: deprecated parameters", {
+  networkOptions(min.degree = 0.2) |>
+    lifecycle::expect_deprecated("minDegree")
+
+  networkOptions(n.cores = 1) |>
+    lifecycle::expect_deprecated("nCores")
+
+  networkOptions(trans.fun = \(x) x) |>
+    lifecycle::expect_deprecated("transFun")
+})
+
+test_that("heuristicScale: deprecated parameters", {
+  heuristicScale(1, sub.exp10 = -1) |>
+    lifecycle::expect_deprecated("subExp10")
+
+  heuristicScale(1, exp.mult = -1) |>
+    lifecycle::expect_deprecated("expMult")
+
+  heuristicScale(1, sub.exp = -1) |>
+    lifecycle::expect_deprecated("subExp")
+})

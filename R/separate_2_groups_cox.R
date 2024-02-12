@@ -62,12 +62,13 @@ separate2GroupsCox <- function(
     legendOutside = FALSE,
     stopWhenOverlap = TRUE,
     ...,
-    chosen.btas = deprecated(),
-    no.plot = deprecated(),
-    plot.title = deprecated(),
-    expand.yzero = deprecated(),
-    legend.outside = deprecated(),
-    stop.when.overlap = deprecated()) {
+    # Deprecated arguments with dots in name
+    chosen.btas = deprecated(), # nolint: object_name_linter.
+    no.plot = deprecated(), # nolint: object_name_linter.
+    plot.title = deprecated(), # nolint: object_name_linter.
+    expand.yzero = deprecated(), # nolint: object_name_linter.
+    legend.outside = deprecated(), # nolint: object_name_linter.
+    stop.when.overlap = deprecated()) { # nolint: object_name_linter.
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(chosen.btas)) {
     .deprecatedDotParam("separate2GroupsCox", "chosen.btas", "chosenBetas")

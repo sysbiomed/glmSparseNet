@@ -33,7 +33,7 @@ networkOptions <- function(
     minDegree = 0,
     nCores = 1,
     transFun = function(x) x,
-    # deprecated arguments
+    # Deprecated arguments with dots in name
     min.degree = deprecated(), # nolint: object_name_linter.
     n.cores = deprecated(), # nolint: object_name_linter.
     trans.fun = deprecated()) { # nolint: object_name_linter.
@@ -111,7 +111,7 @@ networkOptions <- function(
     )
   } else {
     stop(sprintf(
-      "Centrality method not recognised: %d",
+      "Centrality method not recognised: %s",
       options$centrality
     ))
   }
@@ -169,6 +169,7 @@ heuristicScale <- function(
     subExp10 = -1,
     expMult = -1,
     subExp = -1,
+    # Deprecated arguments with dots in name
     sub.exp10 = deprecated(), # nolint: object_name_linter.
     exp.mult = deprecated(), # nolint: object_name_linter.
     sub.exp = deprecated()) { # nolint: object_name_linter.

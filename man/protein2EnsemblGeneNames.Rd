@@ -8,7 +8,8 @@ protein2EnsemblGeneNames(
   ensemblProteins,
   useCache = TRUE,
   verbose = FALSE,
-  ensembl.proteins = deprecated()
+  ensembl.proteins = deprecated(),
+  use.cache = deprecated()
 )
 }
 \arguments{

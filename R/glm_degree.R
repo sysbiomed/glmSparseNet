@@ -20,16 +20,17 @@ glmDegree <- function(
     network,
     options = networkOptions(),
     experiment = NULL,
+    # Deprecated arguments with dots in name
     network.options = deprecated(), # nolint: object_name_linter.
     experiment.name = deprecated(), # nolint: object_name_linter.
     ...) {
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(network.options)) {
-    .deprecatedDotParam("cv.glmSparseNet", "network.options")
+    .deprecatedDotParam("glmDegree", "network.options", "options")
     options <- network.options
   }
   if (lifecycle::is_present(experiment.name)) {
-    .deprecatedDotParam("cv.glmSparseNet", "experiment.name")
+    .deprecatedDotParam("glmDegree", "experiment.name", "experiment")
     experiment <- experiment.name
   }
   # Lifecycle management: end
@@ -68,16 +69,17 @@ cv.glmDegree <- function(
     network,
     options = networkOptions(),
     experiment = NULL,
+    # Deprecated arguments with dots in name
     network.options = deprecated(), # nolint: object_name_linter.
     experiment.name = deprecated(), # nolint: object_name_linter.
     ...) {
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(network.options)) {
-    .deprecatedDotParam("cv.glmSparseNet", "network.options")
+    .deprecatedDotParam("cv.glmDegree", "network.options", "options")
     options <- network.options
   }
   if (lifecycle::is_present(experiment.name)) {
-    .deprecatedDotParam("cv.glmSparseNet", "experiment.name")
+    .deprecatedDotParam("cv.glmDegree", "experiment.name", "experiment")
     experiment <- experiment.name
   }
   # Lifecycle management: end

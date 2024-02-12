@@ -147,6 +147,7 @@ geneNames <- function(
     ensemblGenes,
     useCache = TRUE,
     verbose = FALSE,
+    # Deprecated arguments with dots in name
     ensembl.genes = deprecated(), # nolint: object_name_linter.
     use.cache = deprecated()) { # nolint: object_name_linter.
   # Lifecycle management: to remove after 1.23.0
@@ -212,6 +213,7 @@ ensemblGeneNames <- function(
     geneId,
     useCache = TRUE,
     verbose = FALSE,
+    # Deprecated arguments with dots in name
     gene.id = deprecated(), # nolint: object_name_linter.
     use.cache =  deprecated()) { # nolint: object_name_linter.
   # Lifecycle management: to remove after 1.23.0
@@ -279,7 +281,7 @@ protein2EnsemblGeneNames <- function(
     ensemblProteins,
     useCache = TRUE,
     verbose = FALSE,
-    ensembl.proteins = deprecated(),
+    ensembl.proteins = deprecated(), # nolint: object_name_linter.
     use.cache = deprecated()) { # nolint: object_name_linter.
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(ensembl.proteins)) {

@@ -153,9 +153,9 @@ stringDBhomoSapiens <- function(
 buildStringNetwork <- function(
     stringMatrix,
     useNames = c("protein", "ensembl", "external"),
-    string.tbl = deprecated(),
-    use.names = deprecated()
-  ) {
+    # Deprecated arguments with dots in name
+    string.tbl = deprecated(), # nolint: object_name_linter.
+    use.names = deprecated()) { # nolint: object_name_linter.
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(string.tbl)) {
     .deprecatedDotParam("buildStringNetwork", "string.tbl")
