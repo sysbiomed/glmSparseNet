@@ -2,7 +2,7 @@ test_that("stringDBhomoSapiens: Will parse a valid (fake) dataset", {
   testthat::local_mocked_bindings(
     download.file = function(url, destfile, method, ...) {
       # write a file with some data
-      readr::write_delim(prepare_mock_interactions(), destfile, delim = " ")
+      readr::write_delim(prepareMockInteractions(), destfile, delim = " ")
     },
     .package = "utils"
   )
@@ -21,7 +21,7 @@ test_that("buildStringNetwork: Can build network", {
   testthat::local_mocked_bindings(
     download.file = function(url, destfile, method, ...) {
       # write a file with some data
-      readr::write_delim(prepare_mock_interactions(), destfile, delim = " ")
+      readr::write_delim(prepareMockInteractions(), destfile, delim = " ")
     },
     .package = "utils"
   )
@@ -94,7 +94,7 @@ test_that("calculateCombinedScore: removeText will return different score", {
   testthat::local_mocked_bindings(
     download.file = function(url, destfile, method, ...) {
       # write a file with some data
-      readr::write_delim(prepare_mock_interactions(), destfile, delim = " ")
+      readr::write_delim(prepareMockInteractions(), destfile, delim = " ")
     },
     .package = "utils"
   )

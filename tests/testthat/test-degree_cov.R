@@ -1,32 +1,31 @@
 set.seed(1985)
 xdata <- matrix(rnorm(7000), nrow = 175)
 
-corP <- abs(cor(xdata, method = "pearson")) - diag(ncol(xdata))
-corS <- abs(cor(xdata, method = "spearman")) - diag(ncol(xdata))
+covPearson <- abs(cov(xdata, method = "pearson"))
+diag(covPearson) <- 0
+covSpearman <- abs(cov(xdata, method = "spearman"))
+diag(covSpearman) <- 0
+
+context("Degree - Covariance - Pearson")
 
 # use a temporary directory that can be written
 withr::local_tempdir(pattern = "base.dir") |>
   .baseDir()
 
-context("Degree - Correlation - Pearson")
-
 test_that("Degree with cutoff", {
-  corP_0_5 <- corP
-  corP_0_5[corP_0_5 < 0.5] <- 0
-  diff.degree <- degreeCor(
-    xdata,
-    method = "pearson",
-    cutoff = 0.5,
-    chunks = 10,
-    n.cores = 2,
+  covPearsonLocal <- covPearson
+  covPearsonLocal[covPearsonLocal < 0.05] <- 0
+  diffDegree <- degreeCov(xdata,
+    method = "pearson", cutoff = 0.05,
+    chunks = 10, n.cores = 2,
     force.recalc.degree = TRUE,
     force.recalc.network = TRUE
-  ) - Matrix::colSums(corP_0_5)
-  expect_lt(sum(abs(diff.degree)), 5e-14)
+  ) - Matrix::colSums(covPearsonLocal)
+  expect_lt(sum(abs(diffDegree)), 1e-09)
 })
 
 test_that("Degree forcing recalculation", {
-  diff.degree <- degreeCor(
+  diffDegree <- degreeCov(
     xdata,
     method = "pearson",
     cutoff = 0,
@@ -34,74 +33,48 @@ test_that("Degree forcing recalculation", {
     n.cores = 2,
     force.recalc.degree = TRUE,
     force.recalc.network = TRUE
-  ) - Matrix::colSums(corP)
-  expect_lt(sum(abs(diff.degree)), 5e-14)
+  ) - Matrix::colSums(covPearson)
+  expect_lt(sum(abs(diffDegree)), 1e-09)
 })
 
 test_that("Degree forcing recalculation of degree only", {
-  diff.degree <- degreeCor(
+  diffDegree <- degreeCov(
     xdata,
     method = "pearson",
     cutoff = 0,
     chunks = 10,
     n.cores = 2,
     force.recalc.degree = TRUE
-  ) - Matrix::colSums(corP)
-  expect_lt(sum(abs(diff.degree)), 5e-14)
+  ) - Matrix::colSums(covPearson)
+  expect_lt(sum(abs(diffDegree)), 1e-09)
 })
 
 test_that("Degree using cache", {
-  degreeCor(
+  degreeCov(
     xdata,
     method = "pearson",
     cutoff = 0,
     chunks = 10,
     n.cores = 2,
     force.recalc.degree = FALSE
-  ) - Matrix::colSums(corP)
-  diff.degree <- degreeCor(
+  ) - Matrix::colSums(covPearson)
+  diffDegree <- degreeCov(
     xdata,
     method = "pearson",
     cutoff = 0,
     chunks = 10,
     n.cores = 2,
     force.recalc.degree = FALSE
-  ) - Matrix::colSums(corP)
-  expect_lt(sum(abs(diff.degree)), 5e-14)
+  ) - Matrix::colSums(covPearson)
+  expect_lt(sum(abs(diffDegree)), 1e-09)
 })
 
-context("Degree - Correlation - Spearman")
+context("Degree - Covariance - Spearman")
 
 test_that("Degree with cutoff", {
-  corS_0_5 <- corS
-  corS_0_5[corS_0_5 < 0.5] <- 0
-  diff.degree <- degreeCor(
-    xdata,
-    method = "spearman",
-    cutoff = 0.5,
-    chunks = 10,
-    n.cores = 2,
-    force.recalc.degree = TRUE,
-    force.recalc.network = TRUE
-  ) - Matrix::colSums(corS_0_5)
-  expect_lt(sum(abs(diff.degree)), 5e-14)
-})
-
-test_that("Degree forcing recalculation of all", {
-  diff.degree <- degreeCor(
-    xdata,
-    method = "spearman",
-    cutoff = 0,
-    chunks = 10,
-    n.cores = 2,
-    force.recalc.degree = TRUE,
-    force.recalc.network = TRUE
-  ) - Matrix::colSums(corS)
-  expect_lt(sum(abs(diff.degree)), 5e-14)
-})
-
-test_that("Degree forcing recalculation of degree", {
-  degreeCor(
+  covSpearmanLocal <- covSpearman
+  covSpearmanLocal[covSpearmanLocal < 0.05] <- 0
+  diffDegree <- degreeCov(
     xdata,
     method = "spearman",
     cutoff = 0.05,
@@ -109,21 +82,12 @@ test_that("Degree forcing recalculation of degree", {
     n.cores = 2,
     force.recalc.degree = TRUE,
     force.recalc.network = TRUE
-  ) - Matrix::colSums(corS)
-  diff.degree <- degreeCor(
-    xdata,
-    method = "spearman",
-    cutoff = 0,
-    chunks = 10,
-    n.cores = 2,
-    force.recalc.degree = TRUE
-  ) - Matrix::colSums(corS)
-  expect_lt(sum(abs(diff.degree)), 5e-14)
+  ) - Matrix::colSums(covSpearmanLocal)
+  expect_lt(sum(abs(diffDegree)), 1e-09)
 })
 
-test_that("Degree using cache", {
-  # forcing recalculation
-  degreeCor(
+test_that("Degree forcing recalculation of all", {
+  diffDegree <- degreeCov(
     xdata,
     method = "spearman",
     cutoff = 0,
@@ -131,15 +95,50 @@ test_that("Degree using cache", {
     n.cores = 2,
     force.recalc.degree = TRUE,
     force.recalc.network = TRUE
-  ) - Matrix::colSums(corS)
+  ) - Matrix::colSums(covSpearman)
+  expect_lt(sum(abs(diffDegree)), 1e-09)
+})
+
+test_that("Degree forcing recalculation of degree", {
+  degreeCov(
+    xdata,
+    method = "spearman",
+    cutoff = 0,
+    chunks = 10,
+    n.cores = 2,
+    force.recalc.degree = TRUE,
+    force.recalc.network = TRUE
+  ) - Matrix::colSums(covSpearman)
+  diffDegree <- degreeCov(
+    xdata,
+    method = "spearman",
+    cutoff = 0,
+    chunks = 10,
+    n.cores = 2,
+    force.recalc.degree = TRUE
+  ) - Matrix::colSums(covSpearman)
+  expect_lt(sum(abs(diffDegree)), 1e-09)
+})
+
+test_that("Degree using cache", {
+  # forcing recalculation
+  degreeCov(
+    xdata,
+    method = "spearman",
+    cutoff = 0,
+    chunks = 10,
+    n.cores = 2,
+    force.recalc.degree = TRUE,
+    force.recalc.network = TRUE
+  ) - Matrix::colSums(covSpearman)
   # actual call to get from cache
-  diff.degree <- degreeCor(
+  diffDegree <- degreeCov(
     xdata,
     method = "spearman",
     cutoff = 0,
     chunks = 10,
     n.cores = 2,
     force.recalc.degree = FALSE
-  ) - Matrix::colSums(corS)
-  expect_lt(sum(abs(diff.degree)), 5e-14)
+  ) - Matrix::colSums(covSpearman)
+  expect_lt(sum(abs(diffDegree)), 1e-09)
 })

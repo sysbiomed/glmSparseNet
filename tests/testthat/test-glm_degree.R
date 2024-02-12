@@ -1,5 +1,5 @@
 test_that("glmDegree: coefficients have the same number of variables", {
-  xdata <- random_xdata(100, 20)
+  xdata <- randomXData(100, 20)
   glmDegree(
     xdata,
     rnorm(nrow(xdata)),

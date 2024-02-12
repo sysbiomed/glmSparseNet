@@ -6,9 +6,9 @@ test_that("Deprecated functions", {
 })
 
 test_that("glmOrphan: deprecated parameters", {
-  data <- prepare_mae(10)
+  data <- prepareMAE(10)
 
-  glm_args <- list(
+  glmArgs <- list(
     data$xdata,
     data$ydata,
     "correlation",
@@ -18,11 +18,11 @@ test_that("glmOrphan: deprecated parameters", {
   )
 
   list(glmOrphan, glmHub, glmDegree, glmSparseNet) |>
-    lapply(function(fun_name) {
-      do.call(fun_name, glm_args) |>
+    lapply(function(funName) {
+      do.call(funName, glmArgs) |>
         coef() |>
         nrow() |>
-        expect_equal(data$xdata[["RNASeq2GeneNorm"]] |> nrow()) |>
+        expect_equal(nrow(data$xdata[["RNASeq2GeneNorm"]])) |>
         expect_warning("experiments.* dropped") |>
         expect_message("harmonizing input")
     })
@@ -57,9 +57,9 @@ test_that("networkCovParallel: deprecated parameters", {
 })
 
 test_that("cv.glmOrphan: deprecated parameters", {
-  data <- prepare_mae(max_rows = 10)
+  data <- prepareMAE(maxRows = 10)
 
-  glm_args <- list(
+  glmArgs <- list(
     data$xdata,
     data$ydata,
     "correlation",
@@ -70,11 +70,11 @@ test_that("cv.glmOrphan: deprecated parameters", {
   )
 
   list(cv.glmOrphan, cv.glmHub, cv.glmDegree, cv.glmSparseNet) |>
-    lapply(function(fun_name) {
-      do.call(fun_name, glm_args) |>
+    lapply(function(funName) {
+      do.call(funName, glmArgs) |>
         coef() |>
         nrow() |>
-        expect_equal(data$xdata[["RNASeq2GeneNorm"]] |> nrow()) |>
+        expect_equal(nrow(data$xdata[["RNASeq2GeneNorm"]])) |>
         expect_warning("experiments.* dropped") |>
         expect_message("harmonizing input")
     })
@@ -92,7 +92,7 @@ test_that("buildLambda: deprecated parameters", {
 })
 
 test_that("separate2GroupsCox: deprecated parameters", {
-  data <- prepare_ovarian()
+  data <- prepareOvarian()
   separate2GroupsCox(
     chosen.btas = c(1, 2), xdata = data$xdata, ydata = data$ydata
   ) |>

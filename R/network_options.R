@@ -89,31 +89,23 @@ networkOptions <- function(
 #' glmSparseNet:::.calcPenalty(xdata, "covariance")
 .calcPenalty <- function(xdata, penaltyType, options = networkOptions()) {
   if (options$centrality == "degree") {
+    degreeArgs <- list(
+      xdata = xdata,
+      method = options$method,
+      considerUnweighted = options$unweighted,
+      cutoff = options$cutoff,
+      nCores = options$nCores
+    )
     penaltyFactor <- switch(penaltyType,
-      correlation = degreeCor(
-        xdata,
-        method = options$method,
-        consider.unweighted = options$unweighted,
-        cutoff = options$cutoff,
-        #
-        n.cores = options$nCores
-      ),
-      covariance = degreeCov(
-        xdata,
-        method = options$method,
-        consider.unweighted = options$unweighted,
-        cutoff = options$cutoff,
-        #
-        n.cores = options$nCores
-      ),
+      correlation = do.call(degreeCor, degreeArgs),
+      covariance = do.call(degreeCov, degreeArgs),
       none = rep(1, ncol(xdata)),
-      stop("Unkown network type, see documentation of glmSparseNet")
+      rlang::abort("Unkown network type, see documentation of glmSparseNet")
     )
   } else {
-    stop(sprintf(
-      "Centrality method not recognised: %s",
-      options$centrality
-    ))
+    rlang::abort(
+      sprintf("Centrality method not recognised: %s", options$centrality)
+    )
   }
   options$transFun(penaltyFactor)
 }

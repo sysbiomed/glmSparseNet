@@ -9,21 +9,21 @@
 #' myColors()
 #' myColors(5)
 myColors <- function(ix = NULL) {
-  ret_colors <- c(
+  retColors <- c(
     "navyblue", "forestgreen", "tomato4", "tan1",
     "turquoise", "springgreen1", "brown", "violetred1",
     "ivory4", "slateblue1", "chocolate4", "deeppink1",
     "slategray4", "coral3", "darkblue", "mediumorchid1", "black"
   )
   if (is.null(ix)) {
-    return(ret_colors)
+    return(retColors)
   }
-  if (ix %% length(ret_colors) == 0) {
-    ix <- length(ret_colors)
+  if (ix %% length(retColors) == 0) {
+    ix <- length(retColors)
   } else {
-    ix <- ix %% length(ret_colors)
+    ix <- ix %% length(retColors)
   }
-  return(ret_colors[ix])
+  return(retColors[ix])
 }
 
 #' Custom pallete of symbols in plots
@@ -37,7 +37,7 @@ myColors <- function(ix = NULL) {
 #' mySymbols()
 #' mySymbols(2)
 mySymbols <- function(ix = NULL) {
-  ret_symbols <- c(
+  retSymbols <- c(
     0, 4, 1, 8, 5,
     3, 6, 7, 2,
     9, 10, 11, 12,
@@ -45,12 +45,12 @@ mySymbols <- function(ix = NULL) {
     17
   )
   if (is.null(ix)) {
-    return(ret_symbols)
+    return(retSymbols)
   }
-  if (ix %% length(ret_symbols) == 0) {
-    ix <- length(ret_symbols)
+  if (ix %% length(retSymbols) == 0) {
+    ix <- length(retSymbols)
   } else {
-    ix <- ix %% length(ret_symbols)
+    ix <- ix %% length(retSymbols)
   }
-  return(ret_symbols[ix])
+  return(retSymbols[ix])
 }

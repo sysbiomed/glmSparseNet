@@ -1,5 +1,5 @@
 test_that("glmHub: coefficients have the same number of variables", {
-  xdata <- random_xdata(100, 20)
+  xdata <- randomXData(100, 20)
   glmHub(
     xdata,
     rnorm(nrow(xdata)),

@@ -1,47 +1,47 @@
-random_xdata <- function(n_values = 30000, n_row = 500, seed = 1985) {
+randomXData <- function(nValues = 30000, nRow = 500, seed = 1985) {
   set.seed(seed)
-  xdata <- matrix(rnorm(n_values), nrow = n_row)
+  matrix(rnorm(nValues), nrow = nRow)
 }
 
-prepare_mae <- function(max_rows = NULL) {
-  tmp_env <- new.env()
-  data("miniACC", package = "MultiAssayExperiment", envir = tmp_env)
+prepareMAE <- function(maxRows = NULL) {
+  tmpEnv <- new.env()
+  data("miniACC", package = "MultiAssayExperiment", envir = tmpEnv)
 
-  xdata <- tmp_env$miniACC
+  xdata <- tmpEnv$miniACC
 
-  if (!is.null(max_rows)) xdata <- xdata[, 1:max_rows]
+  if (!is.null(maxRows)) xdata <- xdata[, 1:maxRows]
 
-  event_ix <- which(!is.na(
+  eventIx <- which(!is.na(
     MultiAssayExperiment::colData(xdata)$days_to_death
   ))
-  cens_ix <- which(!is.na(
+  censIx <- which(!is.na(
     MultiAssayExperiment::colData(xdata)$days_to_last_followup
   ))
 
   xdata$surv_event_time <- array(
     NA_integer_, nrow(MultiAssayExperiment::colData(xdata))
   )
-  xdata$surv_event_time[event_ix] <- xdata$days_to_death[event_ix]
-  xdata$surv_event_time[cens_ix] <- xdata$days_to_last_followup[cens_ix]
+  xdata$surv_event_time[eventIx] <- xdata$days_to_death[eventIx]
+  xdata$surv_event_time[censIx] <- xdata$days_to_last_followup[censIx]
 
   # Keep only valid individuals
-  valid_ix <- as.vector(
+  validIx <- as.vector(
     !is.na(xdata$surv_event_time) &
       !is.na(xdata$vital_status) &
       xdata$surv_event_time > 0
   )
-  xdata_valid <- xdata[
-    , rownames(MultiAssayExperiment::colData(xdata))[valid_ix]
+  xdataValid <- xdata[
+    , rownames(MultiAssayExperiment::colData(xdata))[validIx]
   ]
-  ydata_valid <- MultiAssayExperiment::colData(
-    xdata_valid
+  ydataValid <- MultiAssayExperiment::colData(
+    xdataValid
   )[, c("surv_event_time", "vital_status")]
-  colnames(ydata_valid) <- c("time", "status")
+  colnames(ydataValid) <- c("time", "status")
 
-  list(xdata = xdata_valid, ydata = ydata_valid)
+  list(xdata = xdataValid, ydata = ydataValid)
 }
 
-prepare_mock_interactions <- function() {
+prepareMockInteractions <- function() {
   dplyr::tibble(
     protein1 = c(
       "9606.ENSP00000000233", "9606.ENSP00000000234", "9606.ENSP00000000235",
@@ -68,7 +68,7 @@ prepare_mock_interactions <- function() {
   )
 }
 
-prepare_ovarian <- function(columns = c("age", "resid.ds")) {
+prepareOvarian <- function(columns = c("age", "resid.ds")) {
   list(
     xdata = survival::ovarian[, columns],
     ydata = data.frame(

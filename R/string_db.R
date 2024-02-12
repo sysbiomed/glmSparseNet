@@ -27,10 +27,10 @@
   mat <- Matrix::as.matrix(
     dplyr::select(allInteractions, -dplyr::starts_with("protein"))
   ) / 1000
-  non_homology.ixs <- which(colnames(mat) != "homology")
+  nonHomologyIxs <- which(colnames(mat) != "homology")
 
   # compute prior away
-  mat[, non_homology.ixs] <- computePrior(mat[, non_homology.ixs], prior)
+  mat[, nonHomologyIxs] <- computePrior(mat[, nonHomologyIxs], prior)
 
   # then, combine the direct and transferred scores for each category:
   combined <- c(

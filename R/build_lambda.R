@@ -44,24 +44,24 @@ buildLambda <- function(
   }
   # Lifecycle management: end
 
-  lambda_first <- if (!is.null(lambdaLargest)) {
+  lambdaFirst <- if (!is.null(lambdaLargest)) {
     lambdaLargest
   } else if (!is.null(xdata) && !is.null(ydata) && !is.null(family)) {
     fitted <- glmnet::glmnet(xdata, ydata, family = family)
     fitted$lambda[1]
   }
 
-  lambda_nrow <- lambdaPerOrderMagnitude
-  lambda_ncol <- ordersOfMagnitudeSmaller
+  lambdaNRow <- lambdaPerOrderMagnitude
+  lambdaNCol <- ordersOfMagnitudeSmaller
 
   lambda <- (
     matrix(
-      rep(1 / 10^seq(0, lambda_ncol - 1, 1), lambda_nrow),
-      nrow = lambda_nrow, byrow = TRUE
+      rep(1 / 10^seq(0, lambdaNCol - 1, 1), lambdaNRow),
+      nrow = lambdaNRow, byrow = TRUE
     ) *
       array(
-        lambda_first * seq(1 / lambda_nrow, 1, 1 / lambda_nrow),
-        dim = c(lambda_nrow, lambda_ncol)
+        lambdaFirst * seq(1 / lambdaNRow, 1, 1 / lambdaNRow),
+        dim = c(lambdaNRow, lambdaNCol)
       )
   ) |>
     as.vector() |>

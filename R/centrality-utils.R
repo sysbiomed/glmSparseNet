@@ -23,16 +23,16 @@
   #
   xdataSha256 <- .digestCache(xdata)
   #
-  fun_aux <- function(xdata, ...) {
+  funAux <- function(xdata, ...) {
     result <- parallel::mclapply(as.numeric(seq_len(ncol(xdata) - 1)),
-      function(ix.i) {
+      function(ixI) {
         tryCatch(
           {
             result <- .runCache(
               .networkWorker,
               fun,
               xdata,
-              ix.i,
+              ixI,
               # run_cache arguments
               cache_digest = list(xdataSha256),
               cache_prefix = funPrefix,
@@ -41,11 +41,8 @@
               ...
             )
           },
-          error = function(error.str) {
-            futile.logger::flog.error(
-              "This error has occured %s",
-              error.str
-            )
+          error = function(errorStr) {
+            futile.logger::flog.error("This error has occured %s", errorStr)
           }
         )
         if (buildOutput == "vector" || buildOutput == "matrix") {
@@ -60,10 +57,10 @@
   }
 
   result <- .runCache(
-    fun_aux,
+    funAux,
     xdata,
     # run_cache arguments
-    cache_prefix = "fun_aux",
+    cache_prefix = "funAux",
     cache_digest = list(xdataSha256),
     force_recalc = forceRecalcNetwork,
     show_message = showMessage,
@@ -72,11 +69,11 @@
   if (buildOutput == "vector") {
     return(unlist(result))
   } else if (buildOutput == "matrix") {
-    sparse.data <- data.frame(i = c(), j = c(), p = c())
+    sparseData <- data.frame(i = c(), j = c(), p = c())
     for (ix in rev(seq_along(result))) {
       line <- result[[ix]]
-      sparse.data <- rbind(
-        sparse.data,
+      sparseData <- rbind(
+        sparseData,
         data.frame(
           i = array(ix, length(line)),
           j = ix + seq_along(line),
@@ -86,8 +83,8 @@
       result[[ix]] <- NULL
     }
     return(Matrix::sparseMatrix(
-      i = sparse.data$i, j = sparse.data$j,
-      x = sparse.data$p, dims = c(
+      i = sparseData$i, j = sparseData$j,
+      x = sparseData$p, dims = c(
         ncol(xdata),
         ncol(xdata)
       ),
@@ -98,23 +95,23 @@
   }
 }
 
-#' Worker to calculate edge weight for each pair of ix.i node and following
+#' Worker to calculate edge weight for each pair of ixI node and following
 #'
-#' Note that it assumes it does not calculate for index below and equal to ix.i
+#' Note that it assumes it does not calculate for index below and equal to ixI
 #'
 #' @param fun function to be used, can be cor, cov or any other defined function
 #' @param xdata original data to calculate the function over
-#' @param ix.i starting index, this can be used to save ony upper triu
+#' @param ixI starting index, this can be used to save ony upper triu
 #' @param ... extra parameters for fun
 #'
-#' @return a vector with size `ncol(xdata) - ix.i`
-.networkWorker <- function(fun, xdata, ix.i, ...) {
+#' @return a vector with size `ncol(xdata) - ixI`
+.networkWorker <- function(fun, xdata, ixI, ...) {
   result <- fun(
-    as.vector(xdata[, ix.i]),
-    base::as.matrix(xdata[, seq(ix.i + 1, ncol(xdata))]), ...
+    as.vector(xdata[, ixI]),
+    base::as.matrix(xdata[, seq(ixI + 1, ncol(xdata))]), ...
   )
   result[is.na(result)] <- 0
-  return(result)
+  result
 }
 
 #' Generic function to calculate degree based on data
@@ -138,11 +135,17 @@
 #' @param ... extra parameters for fun
 #'
 #' @return a vector of the degrees
-.degreeGeneric <- function(fun = stats::cor, funPrefix = "operator", xdata,
-                           cutoff = 0, considerUnweighted = FALSE,
-                           chunks = 1000, forceRecalcDegree = FALSE,
-                           forceRecalcNetwork = FALSE,
-                           nCores = 1, ...) {
+.degreeGeneric <- function(
+    fun = stats::cor,
+    funPrefix = "operator",
+    xdata,
+    cutoff = 0,
+    considerUnweighted = FALSE,
+    chunks = 1000,
+    forceRecalcDegree = FALSE,
+    forceRecalcNetwork = FALSE,
+    nCores = 1,
+    ...) {
   # fail safe until windows has parallel computing support for mclapply
   if (.Platform$OS.type == "windows") {
     nCores <- 1
@@ -162,15 +165,15 @@
 
   chunkFunction <- function(
       xdata,
-      max.ix,
-      ix.outer,
+      maxIx,
+      ixOuter,
       nCores,
       cutoff,
       considerUnweighted,
       ...) {
-    parallel::mclapply(seq(ix.outer, max.ix, 1),
-      function(ix.i) {
-        line <- .networkWorker(fun, xdata, ix.i, ...)
+    parallel::mclapply(seq(ixOuter, maxIx, 1),
+      function(ixI) {
+        line <- .networkWorker(fun, xdata, ixI, ...)
         #
         line[is.na(line)] <- 0 # failsafe (for example, when sd = 0)
         line <- abs(line)
@@ -178,7 +181,7 @@
         if (considerUnweighted) {
           line[line != 0] <- 1
         }
-        line <- c(rep(0, ix.i - 1), sum(line), line)
+        line <- c(rep(0, ixI - 1), sum(line), line)
         return(line)
       },
       mc.cores = nCores, mc.allow.recursive = FALSE
@@ -190,13 +193,13 @@
   #
   weigthedAux <- function(xdata, cutoff, considerUnweighted, ...) {
     degree <- array(0, ncol(xdata))
-    for (ix.outer in seq(1, ncol(xdata) - 1, chunks)) {
-      max.ix <- min(ix.outer + chunks - 1, ncol(xdata) - 1)
-      res.chunks <- .runCache(
+    for (ixOuter in seq(1, ncol(xdata) - 1, chunks)) {
+      maxIx <- min(ixOuter + chunks - 1, ncol(xdata) - 1)
+      resChunks <- .runCache(
         chunkFunction,
         xdata,
-        max.ix,
-        ix.outer,
+        maxIx,
+        ixOuter,
         nCores,
         cutoff,
         considerUnweighted,
@@ -208,10 +211,10 @@
         force_recalc = forceRecalcNetwork
       )
       #
-      res.chunks <- matrix(unlist(res.chunks),
+      resChunks <- matrix(unlist(resChunks),
         ncol = ncol(xdata), byrow = TRUE
       )
-      degree <- degree + colSums(res.chunks)
+      degree <- degree + colSums(resChunks)
     }
     names(degree) <- colnames(xdata)
     degree

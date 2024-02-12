@@ -1,6 +1,6 @@
 # Function to make sure we have correct platform
-get_os <- tryCatch({
-  get_os_fun <- function() {
+getOs <- tryCatch({
+  getOsFun <- function() {
     sysinf <- Sys.info()
     if (!is.null(sysinf)) {
       os <- sysinf["sysname"]
@@ -18,5 +18,5 @@ get_os <- tryCatch({
     }
     tolower(os)
   }
-  get_os_fun()
+  getOsFun()
 })

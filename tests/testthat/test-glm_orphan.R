@@ -1,5 +1,5 @@
 test_that("glmOrphan: coefficients have the same number of variables", {
-  xdata <- random_xdata(100, 20)
+  xdata <- randomXData(100, 20)
   glmOrphan(
     xdata,
     rnorm(nrow(xdata)),

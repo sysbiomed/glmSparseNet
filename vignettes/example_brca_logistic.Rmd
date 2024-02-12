@@ -25,7 +25,7 @@ BiocManager::install("glmSparseNet")
 
 # Required Packages
 
-```{r packages, message=FALSE, warning=FALSE}
+```{r packages, message=FALSE, warning=FALSE, results='hide'}
 library(dplyr)
 library(ggplot2)
 library(survival)
@@ -37,8 +37,8 @@ library(TCGAutils)
 library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
-.Last.value <- flog.layout(layout.format("[~l] ~m"))
-.Last.value <- glmSparseNet:::.showMessage(FALSE)
+flog.layout(layout.format("[~l] ~m"))
+glmSparseNet:::.showMessage(FALSE)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
 ```

@@ -84,7 +84,7 @@ separate2GroupsCox <- function(
   }
   if (lifecycle::is_present(expand.yzero)) {
     .deprecatedDotParam("separate2GroupsCox", "expand.yzero", "expandYZero")
-    expandYzero <- expand.yzero
+    expandYZero <- expand.yzero
   }
   if (lifecycle::is_present(legend.outside)) {
     .deprecatedDotParam("separate2GroupsCox", "legend.outside")
@@ -182,27 +182,27 @@ separate2GroupsCox <- function(
       seq_len(nrow(prognosticIndex))
 
     tempGroup <- array(-1, dim(prognosticIndex)[1])
-    pi.thres <- stats::quantile(
+    piThres <- stats::quantile(
       prognosticIndex[, ix],
       probs = c(probs[1], probs[2])
     )
 
     if (
-      sum(prognosticIndex[, ix] <= pi.thres[1]) == 0 ||
-        sum(prognosticIndex[, ix] > pi.thres[2]) == 0
+      sum(prognosticIndex[, ix] <= piThres[1]) == 0 ||
+        sum(prognosticIndex[, ix] > piThres[2]) == 0
     ) {
-      pi.thres[1] <- stats::median(unique(prognosticIndex[, ix]))
-      pi.thres[2] <- pi.thres[1]
+      piThres[1] <- stats::median(unique(prognosticIndex[, ix]))
+      piThres[2] <- piThres[1]
     }
 
     # low risk
-    lowRiskIx <- prognosticIndex[, ix] <= pi.thres[1]
+    lowRiskIx <- prognosticIndex[, ix] <= piThres[1]
     tempGroup[lowRiskIx] <- (2 * ix) - 1
     # high risk
-    highRiskIx <- prognosticIndex[, ix] > pi.thres[2]
+    highRiskIx <- prognosticIndex[, ix] > piThres[2]
     tempGroup[highRiskIx] <- (2 * ix)
 
-    ydata.new <- ydata
+    ydataNew <- ydata
 
     if (
       length(unique(prognosticIndex)) > 1 &&
@@ -230,22 +230,22 @@ separate2GroupsCox <- function(
       #
       prognosticIndex <-
         t(t(c(prognosticIndex[, ], prognosticIndex[overlapSamples, ])))
-      ydata.new <- rbind(ydata, ydata[overlapSamples, ])
+      ydataNew <- rbind(ydata, ydata[overlapSamples, ])
 
       sampleIxs <- c(sampleIxs, sampleIxs[overlapSamples])
       tempGroup <- c(tempGroup, rep((2 * ix) - 1, length(overlapSamples)))
     }
     #
-    valid_ix <- tempGroup != -1
+    validIx <- tempGroup != -1
     #
     prognosticIndexDf <- rbind(
       prognosticIndexDf,
       data.frame(
-        pi = prognosticIndex[valid_ix, ix],
-        time = ydata.new$time[valid_ix],
-        status = ydata.new$status[valid_ix],
-        group = tempGroup[valid_ix],
-        index = sampleIxs[valid_ix]
+        pi = prognosticIndex[validIx, ix],
+        time = ydataNew$time[validIx],
+        status = ydataNew$status[validIx],
+        group = tempGroup[validIx],
+        index = sampleIxs[validIx]
       )
     )
   }
@@ -308,18 +308,18 @@ separate2GroupsCox <- function(
 
 #' @keywords internal
 .plotSurvival <- function(
-    no_plot,
+    noPlot,
     km,
     pValue,
-    prognostic_index_df,
-    chosen_btas_len,
+    prognosticIndexDf,
+    chosenBetasLen,
     plotTitle,
     xlim,
     ylim,
     expandYZero,
     legendOutside,
     ...) {
-  if (no_plot) {
+  if (noPlot) {
     return(list(pvalue = pValue, plot = NULL, km = km))
   }
   #
@@ -330,9 +330,9 @@ separate2GroupsCox <- function(
   # if there are more than 1 btas then lines should have transparency
   # (removed as it was not being used .5 and 1)
 
-  col.ix <- c("seagreen", "indianred2")
-  if (chosen_btas_len > 1L) {
-    col.ix <- myColors()[c(
+  colIx <- c("seagreen", "indianred2")
+  if (chosenBetasLen > 1L) {
+    colIx <- myColors()[c(
       1, 2, 4, 3, 10, 6, 12, 9, 5, 7, 8, 11, 13, 14, 15, 16, 17
     )]
   }
@@ -340,8 +340,8 @@ separate2GroupsCox <- function(
   p1 <- survminer::ggsurvplot(
     km,
     conf.int = FALSE,
-    palette = col.ix,
-    data = prognostic_index_df,
+    palette = colIx,
+    data = prognosticIndexDf,
     ggtheme = ggplot2::theme_minimal(),
     ...
   )
@@ -357,7 +357,7 @@ separate2GroupsCox <- function(
     p1$plot <- p1$plot + ggplot2::coord_cartesian(ylim = ylim, xlim = xlim)
   }
 
-  p1$plot <- p1$plot + if (chosen_btas_len == 1L) {
+  p1$plot <- p1$plot + if (chosenBetasLen == 1L) {
     ggplot2::ggtitle(
       paste0(gsub("_", " ", plotTitle), "\np_value = ", pValue)
     )

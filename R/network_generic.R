@@ -33,32 +33,30 @@
     ydata, c("DataFrame", "data.frame", "matrix", "Matrix", "numeric")
   )
 
-  xdata <- .normalizeXdataMAE(xdata, experiment)
-  xdata_norm <- .normalizeXdata(xdata, experiment)
-  ydata_norm <- .normalizeYdata(xdata, ydata, experiment)
+  xdata <- .normalizeXDataMAE(xdata, experiment)
+  xdataNorm <- .normalizeXData(xdata, experiment)
+  ydataNorm <- .normalizeYData(xdata, ydata, experiment)
 
-  penalty_factor <- if (is.character(network)) {
-    .calcPenalty(xdata_norm, network, options)
+  penaltyFactor <- options$minDegree + if (is.character(network)) {
+    .calcPenalty(xdataNorm, network, options)
   } else if (is.matrix(network) || inherits(network, "Matrix")) {
     options$transFun(Matrix::colSums(network) + Matrix::rowSums(network))
   } else if (is.vector(network)) {
-    length(network) != ncol(xdata_norm) &&
-      stop("Network vector size does not match xdata input")
+    length(network) != ncol(xdataNorm) &&
+      rlang::abort("Network vector size does not match xdata input")
     options$transFun(network)
   } else {
-    stop("There was an error with network argumnent")
+    rlang::abort("There was an error with network argumnent")
   }
 
-  penalty_factor <- penalty_factor + options$minDegree
-
-  if (all(penalty_factor <= 0)) {
+  if (all(penaltyFactor <= 0)) {
     warning(
       "The `penalty.factor` calculated from network (or given) has ",
       "all 0 values, this might lead to convergence problems. Try",
       " changing some of the network options."
     )
     # penalty.factor <- rep(1, length(penalty.factor)) # nolint: commented_code_linter
-  } else if (any(penalty_factor == 0)) {
+  } else if (any(penaltyFactor == 0)) {
     warning(
       "The `penalty.factor` calculated from network (or given) has ",
       "some 0 values, this might lead to convergence problems. Try ",
@@ -66,14 +64,15 @@
     )
   }
 
-  obj <- fun(xdata_norm, ydata_norm, penalty.factor = penalty_factor, ...)
-  obj$penalty.factor <- penalty_factor
+  # Call on one of the glmnet functions
+  obj <- fun(xdataNorm, ydataNorm, penalty.factor = penaltyFactor, ...)
+  obj$penalty.factor <- penaltyFactor
 
   obj
 }
 
 #' @keywords internal
-.normalizeYdata <- function(xdata, ydata, experiment) {
+.normalizeYData <- function(xdata, ydata, experiment) {
   if (inherits(xdata, "MultiAssayExperiment")) {
     # if ydata has rownames then it uses it to match with valid experiences
     #  this is done to avoid missorted objects
@@ -93,10 +92,10 @@
 }
 
 #' @keywords internal
-.normalizeXdataMAE <- function(xdata, experiment) {
+.normalizeXDataMAE <- function(xdata, experiment) {
   if (inherits(xdata, "MultiAssayExperiment")) {
     experiment %||%
-      stop("`experiment` argument must be passed, see documentation.")
+      rlang::abort("`experiment` argument must be passed, see documentation.")
 
     # filter the MultiAssayExperiment keeping only individuals with data in
     #  specific experiment
@@ -104,7 +103,7 @@
 
     # stop if output xdata has no rows (should not happen)
     nrow(MultiAssayExperiment::colData(xdata)) == 0L &&
-      stop(
+      rlang::abort(
         "Experiment has no observations or the MultiAssayExperiment object",
         " is corrupt."
       )
@@ -125,7 +124,7 @@
 #'  note: this needs to be sequential instead of if () else (), as one
 #'   transformation will pipe to another
 #' @keywords internal
-.normalizeXdata <- function(xdata, experiment) {
+.normalizeXData <- function(xdata, experiment) {
   if (inherits(xdata, "MultiAssayExperiment")) {
     xdata <- xdata[[experiment]]
   }
