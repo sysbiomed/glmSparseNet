@@ -193,4 +193,3 @@ test_that(".biomartLoad: handles error gracefully", {
     expect_warning("calling the function with ssl_verifypeer to FALSE") |>
     expect_equal("success")
 })
-

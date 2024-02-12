@@ -1,4 +1,3 @@
-
 #' Change cache.compression for run_cache
 #'
 #' @param compression see compression parameter in save function

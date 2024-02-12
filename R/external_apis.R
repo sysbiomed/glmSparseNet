@@ -215,7 +215,7 @@ ensemblGeneNames <- function(
     verbose = FALSE,
     # Deprecated arguments with dots in name
     gene.id = deprecated(), # nolint: object_name_linter.
-    use.cache =  deprecated()) { # nolint: object_name_linter.
+    use.cache = deprecated()) { # nolint: object_name_linter.
   # Lifecycle management: to remove after 1.23.0
   if (lifecycle::is_present(gene.id)) {
     .deprecatedDotParam("ensemblGeneNames", "gene.id")

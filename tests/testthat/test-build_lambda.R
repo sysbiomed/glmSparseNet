@@ -5,7 +5,6 @@ test_that("buildLambda: returns an empty vector without arguments", {
 })
 
 test_that("buildLambda: returns 1 value per order of magnitude", {
-
   buildLambda(1, ordersOfMagnitudeSmaller = 5, lambdaPerOrderMagnitude = 1) |>
     expect_equal(c(1, .1, .01, .001, .0001))
 })

@@ -10,7 +10,6 @@
     version = "1.21.0",
     env = rlang::caller_env(),
     user_env = rlang::caller_env(2)) {
-
   lifecycle::deprecate_warn(
     version,
     paste0(fun_name, "(", argument_name, " = )"),

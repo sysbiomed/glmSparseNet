@@ -7,8 +7,12 @@ test_that("Only one set", {
   )
   result <- balancedCvFolds(set1, nfolds = 10)
 
-  result$train |> checkmate::expect_list() |> expect_failure()
-  result$test |> checkmate::expect_list() |> expect_failure()
+  result$train |>
+    checkmate::expect_list() |>
+    expect_failure()
+  result$test |>
+    checkmate::expect_list() |>
+    expect_failure()
 })
 
 test_that("Creates nice cv folds", {

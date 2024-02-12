@@ -43,7 +43,7 @@ prepare_mae <- function(max_rows = NULL) {
 
 prepare_mock_interactions <- function() {
   dplyr::tibble(
-    protein1= c(
+    protein1 = c(
       "9606.ENSP00000000233", "9606.ENSP00000000234", "9606.ENSP00000000235",
       "9606.ENSP00000000236", "9606.ENSP00000000237"
     ),

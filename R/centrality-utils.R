@@ -160,8 +160,14 @@
     stop("xdata argument must be a matrix object")
   }
 
-  chunkFunction <- function(xdata, max.ix, ix.outer, nCores, cutoff,
-                             considerUnweighted, ...) {
+  chunkFunction <- function(
+      xdata,
+      max.ix,
+      ix.outer,
+      nCores,
+      cutoff,
+      considerUnweighted,
+      ...) {
     parallel::mclapply(seq(ix.outer, max.ix, 1),
       function(ix.i) {
         line <- .networkWorker(fun, xdata, ix.i, ...)

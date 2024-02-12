@@ -102,22 +102,26 @@ test_that("separate2GroupsCox: deprecated parameters", {
     lifecycle::expect_deprecated("noPlot")
 
   separate2GroupsCox(
-    c(1, 2), data$xdata, data$ydata, noPlot = TRUE, expand.yzero = TRUE
+    c(1, 2), data$xdata, data$ydata,
+    noPlot = TRUE, expand.yzero = TRUE
   ) |>
     lifecycle::expect_deprecated("expandYZero")
 
   separate2GroupsCox(
-    c(1, 2), data$xdata, data$ydata, noPlot = TRUE, plot.title = "Some title"
+    c(1, 2), data$xdata, data$ydata,
+    noPlot = TRUE, plot.title = "Some title"
   ) |>
     lifecycle::expect_deprecated("plotTitle")
 
   separate2GroupsCox(
-    c(1, 2), data$xdata, data$ydata, noPlot = TRUE, legend.outside = TRUE
+    c(1, 2), data$xdata, data$ydata,
+    noPlot = TRUE, legend.outside = TRUE
   ) |>
     lifecycle::expect_deprecated("legendOutside")
 
   separate2GroupsCox(
-    c(1, 2), data$xdata, data$ydata, noPlot = TRUE, stop.when.overlap = TRUE
+    c(1, 2), data$xdata, data$ydata,
+    noPlot = TRUE, stop.when.overlap = TRUE
   ) |>
     lifecycle::expect_deprecated("stopWhenOverlap")
 })

@@ -114,10 +114,12 @@ glmSparseNet <- function(
 #' # Gaussian model
 #' xdata <- matrix(rnorm(500), ncol = 5)
 #' cv.glmSparseNet(
-#'   xdata, rnorm(nrow(xdata)), "correlation", family = "gaussian"
+#'   xdata, rnorm(nrow(xdata)), "correlation",
+#'   family = "gaussian"
 #' )
 #' cv.glmSparseNet(
-#'   xdata, rnorm(nrow(xdata)), "covariance", family = "gaussian"
+#'   xdata, rnorm(nrow(xdata)), "covariance",
+#'   family = "gaussian"
 #' )
 #' }
 #' @examplesIf requireNamespace("MultiAssayExperiment", quietly = TRUE)

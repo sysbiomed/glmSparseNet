@@ -89,7 +89,8 @@ test_that("separate2GroupsCox: throws warning when overlapping prob.", {
   ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
 
   separate2GroupsCox(
-    c(1, 0), xdata, ydata, probs = c(.55, .45), stop.when.overlap = FALSE
+    c(1, 0), xdata, ydata,
+    probs = c(.55, .45), stop.when.overlap = FALSE
   ) |>
     expect_warning("The cutoff values")
 })
@@ -100,7 +101,8 @@ test_that("separate2GroupsCox: no plot is returned when argument is given", {
   ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
 
   separate2GroupsCox(
-    c(1, 0), xdata, ydata, noPlot = TRUE
+    c(1, 0), xdata, ydata,
+    noPlot = TRUE
   ) |>
     magrittr::extract2("plot") |>
     expect_null()
@@ -127,4 +129,3 @@ test_that("separate2GroupsCox: kaplan-meier should have 4 groups", {
     magrittr::extract2("strata") |>
     expect_length(4)
 })
-
