@@ -17,7 +17,7 @@ test_that("glmOrphan: deprecated parameters", {
     experiment.name = "RNASeq2GeneNorm"
   )
 
-  list(glmOrphan, glmHub, glmDegree) |>
+  list(glmOrphan, glmHub, glmDegree, glmSparseNet) |>
     lapply(function(fun_name) {
       do.call(fun_name, glm_args) |>
         coef() |>
@@ -69,7 +69,7 @@ test_that("cv.glmOrphan: deprecated parameters", {
     experiment.name = "RNASeq2GeneNorm"
   )
 
-  list(cv.glmOrphan, cv.glmHub, cv.glmDegree) |>
+  list(cv.glmOrphan, cv.glmHub, cv.glmDegree, cv.glmSparseNet) |>
     lapply(function(fun_name) {
       do.call(fun_name, glm_args) |>
         coef() |>
