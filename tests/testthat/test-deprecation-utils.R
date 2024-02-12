@@ -51,3 +51,14 @@ test_that("cv.glmOrphan: deprecated parameters", {
         expect_message("harmonizing input")
     })
 })
+
+test_that("buildLambda: deprecated parameters", {
+  buildLambda(lambda.largest = NULL) |>
+    lifecycle::expect_deprecated("lambdaLargest")
+
+  buildLambda(lambda.per.order.magnitude = 100) |>
+    lifecycle::expect_deprecated("lambdaPerOrderMagnitude")
+
+  buildLambda(orders.of.magnitude.smaller = 3) |>
+    lifecycle::expect_deprecated("ordersOfMagnitudeSmaller")
+})

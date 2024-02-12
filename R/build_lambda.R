@@ -44,11 +44,11 @@ buildLambda <- function(
   }
   # Lifecycle management: end
 
-  if (!is.null(lambdaLargest)) {
-    lambda_first <- lambdaLargest
+  lambda_first <- if (!is.null(lambdaLargest)) {
+    lambdaLargest
   } else if (!is.null(xdata) && !is.null(ydata) && !is.null(family)) {
     fitted <- glmnet::glmnet(xdata, ydata, family = family)
-    lambda_first <- fitted$lambda[1]
+    fitted$lambda[1]
   }
 
   lambda_nrow <- lambdaPerOrderMagnitude
