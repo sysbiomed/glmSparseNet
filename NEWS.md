@@ -11,27 +11,27 @@
 
 ### Miscellaneous
 
-- Use of native pipe instead of magritrr's `%>%`
+- Use of native pipe instead of `{magritrr}`'s `%>%`
 - Corrects styling and linter issues for better code quality and readability
 - Starts to deprecates parameters using dot.case in favor of camelCase.
 - Increases code coverage to `95%`.
 
 ## Changes in 1.14.3
 
-- Corrects bug when calculating the penalty.factor from a matrix (as it was not applying the transformation function)
+- Corrects bug when calculating the `penalty.factor` from a matrix (as it was not applying the transformation function)
 
 ## Changes in 1.14.2
 
-- Corrects all CRAN deprecations (includes code from loose.rock in this package)
+- Corrects all CRAN deprecations (includes code from `{loose.rock}` in this package)
 
 ## Changes in 1.11.0
 
-- sparsebn has been disabled pending upstream corrections (examples
+- `{sparsebn}` has been disabled pending upstream corrections (examples
 from that package failed to pass)
 
 ## Changes in version 1.2.0
 
-- Depends on more recent version of loose.rock (previous was deprecated)
+- Depends on more recent version of `{loose.rock}` (previous was deprecated)
 - Release of new Bioconductor 3.9
 
 ## Changes in version 1.1.0
