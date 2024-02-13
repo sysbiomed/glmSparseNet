@@ -1,10 +1,11 @@
 # glmSparseNet
 ----------------------------------------------------------------
 
-## Changes in 1.21.0
+## Changes in 1.22.0
 
 ### Breaking changes
 
+- Adds `experiment` parameter to different glm* functions.
 - Changing in hashing function to use `rlang::hash` that reduces a dependency.
 - Deprecates `hallmarks` function as API has been shutdown.
 
@@ -12,8 +13,8 @@
 
 - Use of native pipe instead of magritrr's `%>%`
 - Corrects styling and linter issues for better code quality and readability
-- Start to deprecate some functions that have dots in the name in favor of
-underscore (`_`)
+- Starts to deprecates parameters using dot.case in favor of camelCase.
+- Increases code coverage to `95%`.
 
 ## Changes in 1.14.3
 
