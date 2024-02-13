@@ -101,45 +101,45 @@ glmnet)
 
 xdata <- matrix(rnorm(100), ncol = 5)
 cv.glmDegree(
-  xdata,
-  rnorm(nrow(xdata)),
-  "correlation",
-  family = "gaussian",
-  nfolds = 5,
-  options = networkOptions(minDegree = .2)
+    xdata,
+    rnorm(nrow(xdata)),
+    "correlation",
+    family = "gaussian",
+    nfolds = 5,
+    options = networkOptions(minDegree = .2)
 )
 # Hub penalization
 
 xdata <- matrix(rnorm(100), ncol = 5)
 cv.glmHub(
-  xdata,
-  rnorm(nrow(xdata)),
-  "correlation",
-  family = "gaussian",
-  nfolds = 5,
-  options = networkOptions(minDegree = .2)
+    xdata,
+    rnorm(nrow(xdata)),
+    "correlation",
+    family = "gaussian",
+    nfolds = 5,
+    options = networkOptions(minDegree = .2)
 )
 # Orphan penalization
 
 xdata <- matrix(rnorm(100), ncol = 5)
 cv.glmOrphan(
-  xdata,
-  rnorm(nrow(xdata)),
-  "correlation",
-  family = "gaussian",
-  nfolds = 5,
-  options = networkOptions(minDegree = .2)
+    xdata,
+    rnorm(nrow(xdata)),
+    "correlation",
+    family = "gaussian",
+    nfolds = 5,
+    options = networkOptions(minDegree = .2)
 )
 \donttest{
 # Gaussian model
 xdata <- matrix(rnorm(500), ncol = 5)
 cv.glmSparseNet(
-  xdata, rnorm(nrow(xdata)), "correlation",
-  family = "gaussian"
+    xdata, rnorm(nrow(xdata)), "correlation",
+    family = "gaussian"
 )
 cv.glmSparseNet(
-  xdata, rnorm(nrow(xdata)), "covariance",
-  family = "gaussian"
+    xdata, rnorm(nrow(xdata)), "covariance",
+    family = "gaussian"
 )
 }
 \dontshow{if (requireNamespace("MultiAssayExperiment", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
@@ -162,20 +162,20 @@ xdata$surv_event_time[cens.ix] <- xdata$days_to_last_followup[cens.ix]
 #
 # Keep only valid individuals
 valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
-  !is.na(xdata$vital_status) &
-  xdata$surv_event_time > 0)
+    !is.na(xdata$vital_status) &
+    xdata$surv_event_time > 0)
 xdata.valid <- xdata[, rownames(colData(xdata))[valid.ix]]
 ydata.valid <- colData(xdata.valid)[, c("surv_event_time", "vital_status")]
 colnames(ydata.valid) <- c("time", "status")
 
 #
 cv.glmSparseNet(
-  xdata.valid,
-  ydata.valid,
-  nfolds     = 5,
-  family     = "cox",
-  network    = "correlation",
-  experiment = "RNASeq2GeneNorm"
+    xdata.valid,
+    ydata.valid,
+    nfolds     = 5,
+    family     = "cox",
+    network    = "correlation",
+    experiment = "RNASeq2GeneNorm"
 )
 \dontshow{\}) # examplesIf}
 }

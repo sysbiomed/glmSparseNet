@@ -1,6 +1,5 @@
 #' Internal list with all the supported options of glmSparseNet with defaults
-#'
-#' @keywords internal
+#' @noRd
 .optionsList <- list(
     "glmSparseNet.compression" = getOption("glmSparseNet.compression", "gzip"),
     "glmSparseNet.base_dir" = getOption(

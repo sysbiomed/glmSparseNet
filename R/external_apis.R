@@ -21,7 +21,7 @@
     if (inherits(result, "error") || is.null(result)) {
         warning(
             "There was an problem, calling the function with ",
-            "ssl_verifypeer to FALSE", "\n\n\t error: ", result$message
+            "ssl_verifypeer to FALSE", "\n\n\t: ", result$message
         )
 
         result <- httr::with_config(
@@ -107,7 +107,13 @@
                     error
                 )
             } else {
-                stop("There was a problem with biomaRt::getBM()", "\n\t", error)
+                rlang::abort(
+                    paste0(
+                        "There was a problem with biomaRt::getBM()",
+                        "\n\t",
+                        error
+                    )
+                )
             }
             warning(error)
         }
@@ -185,7 +191,7 @@ geneNames <- function(
                 dplyr::arrange("external_gene_name")
         },
         error = function(msg) {
-            warning(sprintf("Error when finding gene names:\n\t%s", msg))
+            warning(sprintf("Problem when finding gene names:\n\t%s", msg))
             data.frame(
                 ensembl_gene_id = ensemblGenes,
                 external_gene_name = ensemblGenes,
@@ -252,7 +258,7 @@ ensemblGeneNames <- function(
                 dplyr::arrange("external_gene_name")
         },
         error = function(msg) {
-            warning(sprintf("Error when finding gene names:\n\t%s", msg))
+            warning(sprintf("Problem when finding gene names:\n\t%s", msg))
             data.frame(
                 ensembl_gene_id = geneId,
                 external_gene_name = geneId,
@@ -310,7 +316,7 @@ protein2EnsemblGeneNames <- function(
                 dplyr::arrange("ensembl_peptide_id")
         },
         error = function(msg) {
-            warning(sprintf("Error when finding gene names:\n\t%s", msg))
+            warning(sprintf("Problem when finding gene names:\n\t%s", msg))
             data.frame(
                 ensembl_peptide_id = ensemblProteins,
                 ensembl_gene_id    = ensemblProteins,

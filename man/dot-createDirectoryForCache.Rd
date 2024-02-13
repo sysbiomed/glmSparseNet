@@ -22,7 +22,7 @@ Create directories for cache
 glmSparseNet:::.createDirectoryForCache(tempdir(), "abcd")
 \donttest{
 glmSparseNet:::.createDirectoryForCache(
-  file.path(getwd(), "run-cache"), "abcd"
+    file.path(getwd(), "run-cache"), "abcd"
 )
 }
 }

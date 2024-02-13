@@ -144,7 +144,7 @@ test_that("protein2EnsemblGeneNames: protein query", {
 
 # test .curlWorkaround
 test_that("curl workaround", {
-    dummy <- function(...) stop("Expected error +1")
+    dummy <- function(...) rlang::abort("Expected error +1")
 
     aa <- .curlWorkaround(dummy()) |>
         expect_warning("calling the function with ssl_verifypeer to FALSE") |>
@@ -155,7 +155,7 @@ test_that("(all): connection fails", {
     local_mocked_bindings(
         useEnsembl = function(...) list(),
         getBM = function(...) {
-            stop("Error no connection")
+            rlang::abort("Error no connection")
         },
         .package = "biomaRt"
     )

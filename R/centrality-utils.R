@@ -162,16 +162,17 @@
     }
 
     if (!inherits(xdata, "Matrix")) {
-        stop("xdata argument must be a matrix object")
+        rlang::abort("xdata argument must be a matrix object")
     }
 
-    chunkFunction <- function(xdata,
-                              maxIx,
-                              ixOuter,
-                              nCores,
-                              cutoff,
-                              considerUnweighted,
-                              ...) {
+    chunkFunction <- function(
+            xdata,
+            maxIx,
+            ixOuter,
+            nCores,
+            cutoff,
+            considerUnweighted,
+            ...) {
         parallel::mclapply(seq(ixOuter, maxIx, 1),
             function(ixI) {
                 line <- .networkWorker(fun, xdata, ixI, ...)

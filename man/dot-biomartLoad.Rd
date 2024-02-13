@@ -32,11 +32,11 @@ Common call to biomaRt to avoid repetitive code
 }
 \examples{
 glmSparseNet:::.biomartLoad(
-  attributes = c("external_gene_name", "ensembl_gene_id"),
-  filters = "external_gene_name",
-  values = c("MOB1A", "RFLNB", "SPIC", "TP53"),
-  useCache = TRUE,
-  verbose = FALSE
+    attributes = c("external_gene_name", "ensembl_gene_id"),
+    filters = "external_gene_name",
+    values = c("MOB1A", "RFLNB", "SPIC", "TP53"),
+    useCache = TRUE,
+    verbose = FALSE
 )
 }
 \seealso{

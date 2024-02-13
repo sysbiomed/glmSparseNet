@@ -14,6 +14,7 @@
 #' @param lambda.per.order.magnitude `r lifecycle::badge("deprecated")`
 #'
 #' @return a numeric vector with suitable lambdas
+#'
 #' @export
 #'
 #' @examples

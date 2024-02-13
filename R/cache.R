@@ -156,7 +156,7 @@ methods::setGeneric(".runCache", function(
             }
         )
     }
-    return(readmePath)
+    readmePath
 }
 
 #' Create directories for cache
@@ -272,16 +272,17 @@ methods::setGeneric(".runCache", function(
 methods::setMethod(
     ".runCache",
     signature("function"),
-    function(fun,
-             ...,
-             # run_cache options
-             seed = NULL,
-             baseDir = NULL,
-             cachePrefix = "generic_cache",
-             cacheDigest = list(),
-             showMessage = NULL,
-             forceRecalc = FALSE,
-             addToHash = NULL) {
+    function(
+            fun,
+            ...,
+            # run_cache options
+            seed = NULL,
+            baseDir = NULL,
+            cachePrefix = "generic_cache",
+            cacheDigest = list(),
+            showMessage = NULL,
+            forceRecalc = FALSE,
+            addToHash = NULL) {
         #
         # baseDir
         if (is.null(baseDir)) {
@@ -373,7 +374,12 @@ methods::setMethod(
 #'     1, 2, 3
 #' )
 .calculateResult <- function(
-        path, compression, forceRecalc, showMessage, fun, ...) {
+        path,
+        compression,
+        forceRecalc,
+        showMessage,
+        fun,
+        ...) {
     #
     result <- NULL
     if (file.exists(path) && !forceRecalc) {
@@ -410,7 +416,6 @@ methods::setMethod(
             },
             error = function(err) {
                 warning(
-                    "WARN:: ",
                     err,
                     " -- file: ",
                     path, ".\n  -> Calculating again.\n"

@@ -23,6 +23,6 @@ Saving the cache
 }
 \examples{
 glmSparseNet:::.saveRunCache(
-  35, file.path(tempdir(), "save_run_cache.Rdata"), FALSE, TRUE
+    35, file.path(tempdir(), "save_run_cache.Rdata"), FALSE, TRUE
 )
 }

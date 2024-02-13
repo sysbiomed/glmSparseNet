@@ -72,7 +72,7 @@
     obj
 }
 
-#' @keywords internal
+#' @noRd
 .normalizeYData <- function(xdata, ydata, experiment) {
     if (inherits(xdata, "MultiAssayExperiment")) {
         # if ydata has rownames then it uses it to match with valid experiences
@@ -94,7 +94,7 @@
     ydata
 }
 
-#' @keywords internal
+#' @noRd
 .normalizeXDataMAE <- function(xdata, experiment) {
     if (inherits(xdata, "MultiAssayExperiment")) {
         if (is.null(experiment)) {
@@ -132,7 +132,14 @@
 #'   3. Checks if xdata is matrix, if it is transform to Matrix
 #'  note: this needs to be sequential instead of if () else (), as one
 #'   transformation will pipe to another
-#' @keywords internal
+#'
+#' @param xdata input data, can be a matrix or `MultiAssayExperiment`.
+#' @param experiment name of experiment when `xdata` is a
+#' `MultiAssayExperiment` object.
+#'
+#' @return `xdata` with changes
+#'
+#' @noRd
 .normalizeXData <- function(xdata, experiment) {
     if (inherits(xdata, "MultiAssayExperiment")) {
         xdata <- xdata[[experiment]]
