@@ -32,7 +32,10 @@
     )
     checkmate::assert_multi_class(
         ydata,
-        c("DataFrame", "data.frame", "matrix", "Matrix", "numeric", "Surv")
+        c(
+            "DataFrame", "data.frame", "matrix",
+            "Matrix", "numeric", "Surv", "factor"
+        )
     )
     xdata <- .normalizeXDataMAE(xdata, experiment)
     xdataNorm <- .normalizeXData(xdata, experiment)
