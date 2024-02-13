@@ -149,7 +149,7 @@ Fit model model penalizing by the hubs using the cross-validation function by
 set.seed(params$seed)
 fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status),
     family = "cox",
-    lambda = build_lambda(1),
+    lambda = buildLambda(1),
     network = "correlation",
     options = networkOptions(
         cutoff = .6,
