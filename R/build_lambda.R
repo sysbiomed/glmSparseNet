@@ -19,54 +19,56 @@
 #' @examples
 #' buildLambda(5.4)
 buildLambda <- function(
-    lambdaLargest = NULL,
-    xdata = NULL,
-    ydata = NULL,
-    family = NULL,
-    ordersOfMagnitudeSmaller = 3,
-    lambdaPerOrderMagnitude = 150,
-    # Deprecated arguments with dots in name
-    lambda.largest = deprecated(), # nolint: object_name_linter.
-    orders.of.magnitude.smaller = deprecated(), # nolint: object_name_linter.
-    lambda.per.order.magnitude = deprecated()) { # nolint: object_name_linter.
-  # Lifecycle management: to remove after 1.23.0
-  if (lifecycle::is_present(lambda.largest)) {
-    .deprecatedDotParam("buildLambda", "lambda.largest")
-    lambdaLargest <- lambda.largest
-  }
-  if (lifecycle::is_present(orders.of.magnitude.smaller)) {
-    .deprecatedDotParam("buildLambda", "orders.of.magnitude.smaller")
-    ordersOfMagnitudeSmaller <- orders.of.magnitude.smaller
-  }
-  if (lifecycle::is_present(lambda.per.order.magnitude)) {
-    .deprecatedDotParam("buildLambda", "lambda.per.order.magnitude")
-    lambdaPerOrderMagnitude <- lambda.per.order.magnitude
-  }
-  # Lifecycle management: end
+        lambdaLargest = NULL,
+        xdata = NULL,
+        ydata = NULL,
+        family = NULL,
+        ordersOfMagnitudeSmaller = 3,
+        lambdaPerOrderMagnitude = 150,
+        # Deprecated arguments with dots in name
+        # nolint start: object_name_linter.
+        lambda.largest = deprecated(),
+        orders.of.magnitude.smaller = deprecated(),
+        lambda.per.order.magnitude = deprecated()) {
+    # nolint end: object_name_linter.
+    # Lifecycle management: to remove after 1.23.0
+    if (lifecycle::is_present(lambda.largest)) {
+        .deprecatedDotParam("buildLambda", "lambda.largest")
+        lambdaLargest <- lambda.largest
+    }
+    if (lifecycle::is_present(orders.of.magnitude.smaller)) {
+        .deprecatedDotParam("buildLambda", "orders.of.magnitude.smaller")
+        ordersOfMagnitudeSmaller <- orders.of.magnitude.smaller
+    }
+    if (lifecycle::is_present(lambda.per.order.magnitude)) {
+        .deprecatedDotParam("buildLambda", "lambda.per.order.magnitude")
+        lambdaPerOrderMagnitude <- lambda.per.order.magnitude
+    }
+    # Lifecycle management: end
 
-  lambdaFirst <- if (!is.null(lambdaLargest)) {
-    lambdaLargest
-  } else if (!is.null(xdata) && !is.null(ydata) && !is.null(family)) {
-    fitted <- glmnet::glmnet(xdata, ydata, family = family)
-    fitted$lambda[1]
-  }
+    lambdaFirst <- if (!is.null(lambdaLargest)) {
+        lambdaLargest
+    } else if (!is.null(xdata) && !is.null(ydata) && !is.null(family)) {
+        fitted <- glmnet::glmnet(xdata, ydata, family = family)
+        fitted$lambda[1]
+    }
 
-  lambdaNRow <- lambdaPerOrderMagnitude
-  lambdaNCol <- ordersOfMagnitudeSmaller
+    lambdaNRow <- lambdaPerOrderMagnitude
+    lambdaNCol <- ordersOfMagnitudeSmaller
 
-  lambda <- (
-    matrix(
-      rep(1 / 10^seq(0, lambdaNCol - 1, 1), lambdaNRow),
-      nrow = lambdaNRow, byrow = TRUE
-    ) *
-      array(
-        lambdaFirst * seq(1 / lambdaNRow, 1, 1 / lambdaNRow),
-        dim = c(lambdaNRow, lambdaNCol)
-      )
-  ) |>
-    as.vector() |>
-    unique() |>
-    sort(decreasing = TRUE)
+    lambda <- (
+        matrix(
+            rep(1 / 10^seq(0, lambdaNCol - 1, 1), lambdaNRow),
+            nrow = lambdaNRow, byrow = TRUE
+        ) *
+            array(
+                lambdaFirst * seq(1 / lambdaNRow, 1, 1 / lambdaNRow),
+                dim = c(lambdaNRow, lambdaNCol)
+            )
+    ) |>
+        as.vector() |>
+        unique() |>
+        sort(decreasing = TRUE)
 
-  return(lambda)
+    return(lambda)
 }

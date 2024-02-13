@@ -15,9 +15,9 @@ vignette: >
 
 ```{r setup, include=FALSE, results='hide'}
 knitr::opts_chunk$set(
-  echo = TRUE,
-  fig.width = 7,
-  fig.height = 6
+    echo = TRUE,
+    fig.width = 7,
+    fig.height = 6
 )
 
 library(futile.logger)
@@ -62,7 +62,7 @@ Bioconductor is necessary for the installation of this package.
 
 ```{r install, eval=FALSE}
 if (!require("BiocManager")) {
-  install.packages("BiocManager")
+    install.packages("BiocManager")
 }
 BiocManager::install("glmSparseNet")
 ```
@@ -96,14 +96,14 @@ The main functions from this packages are the `glmSparseNet` and `cv.glmSparseNe
 
 ```{r, eval=FALSE}
 cv.glmSparseNet(
-  xdata,
-  ydata,
-  family = "cox",
-  network = "correlation",
-  options = networkOptions(
-    cutoff = .6,
-    minDegree = 0.2
-  )
+    xdata,
+    ydata,
+    family = "cox",
+    network = "correlation",
+    options = networkOptions(
+        cutoff = .6,
+        minDegree = 0.2
+    )
 )
 ```
 
@@ -161,9 +161,9 @@ survEventTime[censIx] <- xdata$days_to_last_followup[censIx]
 #  - folloup_time or event_time > 0
 validIx <- as.vector(!is.na(survEventTime) & !is.na(xdata$vital_status) & survEventTime > 0)
 ydata <- data.frame(
-  time = survEventTime[validIx],
-  status = xdata$vital_status[validIx],
-  row.names = xdata$patientID[validIx]
+    time = survEventTime[validIx],
+    status = xdata$vital_status[validIx],
+    row.names = xdata$patientID[validIx]
 )
 ```
 
@@ -172,18 +172,18 @@ The function `cv.glmSparseNet` fits the survival data using 10-fold cross valida
 ```{r fit.surv}
 # build response object for glmnet
 fit3 <- cv.glmSparseNet(
-  xdata, 
-  ydata,
-  family = "cox",
-  network = "correlation",
-  experiment = "RNASeq2GeneNorm",
-  alpha = .7,
-  nlambda = 1000,
-  options = networkOptions(
-    cutoff = .6,
-    minDegree = 0.2,
-    transFun = hubHeuristic
-  )
+    xdata,
+    ydata,
+    family = "cox",
+    network = "correlation",
+    experiment = "RNASeq2GeneNorm",
+    alpha = .7,
+    nlambda = 1000,
+    options = networkOptions(
+        cutoff = .6,
+        minDegree = 0.2,
+        transFun = hubHeuristic
+    )
 )
 plot(fit3)
 ```
@@ -210,7 +210,8 @@ Kaplan-Meier plot
 
 ```{r call.kaplan}
 separate2GroupsCox(
-  bestModelCoef, t(assay(xdata[["RNASeq2GeneNorm"]])), ydataKM, ylim = c(0, 1)
+    bestModelCoef, t(assay(xdata[["RNASeq2GeneNorm"]])), ydataKM,
+    ylim = c(0, 1)
 )
 ```
 
@@ -223,15 +224,16 @@ ydataReduced <- ydata[xdataReduced$patientID, ]
 ydataSurv <- Surv(ydataReduced$time, ydataReduced$status)
 
 fit4 <- cv.glmnet(
-  xdataSurv, ydataSurv, family = "cox", alpha = .7, nlambda = 1000
+    xdataSurv, ydataSurv,
+    family = "cox", alpha = .7, nlambda = 1000
 )
 bestModelCoefG <- Filter(function(.x) .x != 0, coef(fit4, s = "lambda.min")[, 1])
 
 separate2groupsCox(
-  bestModelCoefG,
-  t(assay(xdata[["RNASeq2GeneNorm"]]))[, names(bestModelCoefG)],
-  ydataKM,
-  ylim = c(0, 1)
+    bestModelCoefG,
+    t(assay(xdata[["RNASeq2GeneNorm"]]))[, names(bestModelCoefG)],
+    ydataKM,
+    ylim = c(0, 1)
 )$plot
 ```
 

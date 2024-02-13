@@ -7,9 +7,9 @@
 #' @examples
 #' glmSparseNet:::.cacheCompression("bzip2")
 .cacheCompression <- function(compression = NULL) {
-  checkmate::assert_string(compression, null.ok = TRUE)
-  if (!is.null(compression)) options("glmSparseNet.compression" = compression)
-  getOption("glmSparseNet.compression")
+    checkmate::assert_string(compression, null.ok = TRUE)
+    if (!is.null(compression)) options("glmSparseNet.compression" = compression)
+    getOption("glmSparseNet.compression")
 }
 
 #' Change base dir for `.runCache
@@ -21,9 +21,9 @@
 #' @examples
 #' glmSparseNet:::.baseDir("/tmp/cache")
 .baseDir <- function(path = NULL) {
-  checkmate::assert_string(path, null.ok = TRUE)
-  if (!is.null(path)) options("glmSparseNet.base_dir" = path)
-  getOption("glmSparseNet.base_dir")
+    checkmate::assert_string(path, null.ok = TRUE)
+    if (!is.null(path)) options("glmSparseNet.base_dir" = path)
+    getOption("glmSparseNet.base_dir")
 }
 
 #' Show messages option in .runCache
@@ -35,9 +35,9 @@
 #' @examples
 #' glmSparseNet:::.showMessage(FALSE)
 .showMessage <- function(showMessage = NULL) {
-  checkmate::assert_logical(showMessage, null.ok = TRUE)
-  if (!is.null(showMessage)) {
-    options("glmSparseNet.show_message" = showMessage)
-  }
-  getOption("glmSparseNet.show_message")
+    checkmate::assert_logical(showMessage, null.ok = TRUE)
+    if (!is.null(showMessage)) {
+        options("glmSparseNet.show_message" = showMessage)
+    }
+    getOption("glmSparseNet.show_message")
 }

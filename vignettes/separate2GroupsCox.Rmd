@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, eval=FALSE}
 if (!require("BiocManager")) {
-  install.packages("BiocManager")
+    install.packages("BiocManager")
 }
 BiocManager::install("glmSparseNet")
 ```
@@ -46,8 +46,8 @@ theme_set(ggplot2::theme_minimal())
 data("cancer", package = "survival")
 xdata <- survival::ovarian[, c("age", "resid.ds")]
 ydata <- data.frame(
-  time = survival::ovarian$futime,
-  status = survival::ovarian$fustat
+    time = survival::ovarian$futime,
+    status = survival::ovarian$fustat
 )
 ```
 
@@ -81,11 +81,11 @@ resAge$plot
 
 ```{r}
 resAge4060 <-
-  separate2GroupsCox(c(age = 1, 0),
-    xdata,
-    ydata,
-    probs = c(.4, .6)
-  )
+    separate2GroupsCox(c(age = 1, 0),
+        xdata,
+        ydata,
+        probs = c(.4, .6)
+    )
 ```
 
 ### Kaplan-Meier survival results
@@ -113,11 +113,11 @@ some sample on both high and low risks groups.
 
 ```{r}
 resAge6040 <- separate2GroupsCox(
-  chosen.btas = c(age = 1, 0),
-  xdata,
-  ydata,
-  probs = c(.6, .4),
-  stop.when.overlap = FALSE
+    chosen.btas = c(age = 1, 0),
+    xdata,
+    ydata,
+    probs = c(.6, .4),
+    stop.when.overlap = FALSE
 )
 ```
 

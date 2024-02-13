@@ -18,7 +18,7 @@ params:
 
 ```{r, eval=FALSE}
 if (!require("BiocManager")) {
-  install.packages("BiocManager")
+    install.packages("BiocManager")
 }
 BiocManager::install("glmSparseNet")
 ```
@@ -55,24 +55,24 @@ procedure to obtain the data manually is described in the following chunk.
 ```{r curated_data, include=FALSE}
 # chunk not included as it produces to many unnecessary messages
 brca <- tryCatch(
-  {
-    curatedTCGAData(
-      diseaseCode = "BRCA",
-      assays = "RNASeq2GeneNorm",
-      version = "1.1.38",
-      dry.run = FALSE
-    )
-  },
-  error = function(err) {
-    NULL
-  }
+    {
+        curatedTCGAData(
+            diseaseCode = "BRCA",
+            assays = "RNASeq2GeneNorm",
+            version = "1.1.38",
+            dry.run = FALSE
+        )
+    },
+    error = function(err) {
+        NULL
+    }
 )
 ```
 
 ```{r curated_data_non_eval, eval=FALSE}
 brca <- curatedTCGAData(
-  diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
-  version = "1.1.38", dry.run = FALSE
+    diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
+    version = "1.1.38", dry.run = FALSE
 )
 ```
 
@@ -83,42 +83,42 @@ xdataRaw <- t(assay(brcaPrimarySolidTumor[[1]]))
 
 # Get survival information
 ydataRaw <- colData(brcaPrimarySolidTumor) |>
-  as.data.frame() |>
-  # Keep only data relative to survival or samples
-  dplyr::select(
-    patientID, vital_status,
-    Days.to.date.of.Death, Days.to.Date.of.Last.Contact,
-    days_to_death, days_to_last_followup,
-    Vital.Status
-  ) |>
-  # Convert days to integer
-  dplyr::mutate(Days.to.date.of.Death = as.integer(Days.to.date.of.Death)) |>
-  dplyr::mutate(
-    Days.to.Last.Contact = as.integer(Days.to.Date.of.Last.Contact)
-  ) |>
-  # Find max time between all days (ignoring missings)
-  dplyr::rowwise() |>
-  dplyr::mutate(
-    time = max(days_to_last_followup, Days.to.date.of.Death,
-      Days.to.Last.Contact, days_to_death,
-      na.rm = TRUE
-    )
-  ) |>
-  # Keep only survival variables and codes
-  dplyr::select(patientID, status = vital_status, time) |>
-  # Discard individuals with survival time less or equal to 0
-  dplyr::filter(!is.na(time) & time > 0) |>
-  as.data.frame()
+    as.data.frame() |>
+    # Keep only data relative to survival or samples
+    dplyr::select(
+        patientID, vital_status,
+        Days.to.date.of.Death, Days.to.Date.of.Last.Contact,
+        days_to_death, days_to_last_followup,
+        Vital.Status
+    ) |>
+    # Convert days to integer
+    dplyr::mutate(Days.to.date.of.Death = as.integer(Days.to.date.of.Death)) |>
+    dplyr::mutate(
+        Days.to.Last.Contact = as.integer(Days.to.Date.of.Last.Contact)
+    ) |>
+    # Find max time between all days (ignoring missings)
+    dplyr::rowwise() |>
+    dplyr::mutate(
+        time = max(days_to_last_followup, Days.to.date.of.Death,
+            Days.to.Last.Contact, days_to_death,
+            na.rm = TRUE
+        )
+    ) |>
+    # Keep only survival variables and codes
+    dplyr::select(patientID, status = vital_status, time) |>
+    # Discard individuals with survival time less or equal to 0
+    dplyr::filter(!is.na(time) & time > 0) |>
+    as.data.frame()
 
 # Set index as the patientID
 rownames(ydataRaw) <- ydataRaw$patientID
 
 # Get matches between survival and assay data
 xdataRaw <- xdataRaw[
-  TCGAbarcode(rownames(xdataRaw)) %in% rownames(ydataRaw),
+    TCGAbarcode(rownames(xdataRaw)) %in% rownames(ydataRaw),
 ]
 xdataRaw <- xdataRaw[, apply(xdataRaw, 2, sd) != 0] |>
-  scale()
+    scale()
 
 # Order ydata the same as assay
 ydataRaw <- ydataRaw[TCGAbarcode(rownames(xdataRaw)), ]
@@ -126,12 +126,12 @@ ydataRaw <- ydataRaw[TCGAbarcode(rownames(xdataRaw)), ]
 # Using only a subset of genes previously selected to keep this short example.
 set.seed(params$seed)
 smallSubset <- c(
-  "CD5", "CSF2RB", "IRGC", "NEUROG2", "NLRC4", "PDE11A",
-  "PTEN", "TP53", "BRAF",
-  "PIK3CB", "QARS", "RFC3", "RPGRIP1L", "SDC1", "TMEM31",
-  "YME1L1", "ZBTB11", sample(colnames(xdataRaw), 100)
+    "CD5", "CSF2RB", "IRGC", "NEUROG2", "NLRC4", "PDE11A",
+    "PTEN", "TP53", "BRAF",
+    "PIK3CB", "QARS", "RFC3", "RPGRIP1L", "SDC1", "TMEM31",
+    "YME1L1", "ZBTB11", sample(colnames(xdataRaw), 100)
 ) |>
-  unique()
+    unique()
 
 xdata <- xdataRaw[, smallSubset[smallSubset %in% colnames(xdataRaw)]]
 ydata <- ydataRaw |> dplyr::select(time, status)
@@ -145,13 +145,13 @@ Fit model model penalizing by the hubs using the cross-validation function by
 ```{r fit, eval=!is.null(brca)}
 set.seed(params$seed)
 fitted <- cv.glmHub(xdata, Surv(ydata$time, ydata$status),
-  family = "cox",
-  lambda = build_lambda(1),
-  network = "correlation",
-  network.options = networkOptions(
-    cutoff = .6,
-    minDegree = .2
-  )
+    family = "cox",
+    lambda = build_lambda(1),
+    network = "correlation",
+    network.options = networkOptions(
+        cutoff = .6,
+        minDegree = .2
+    )
 )
 ```
 
@@ -173,21 +173,21 @@ Taking the best model described by `lambda.min`
 ```{r show_coefs, eval=!is.null(brca)}
 coefsCV <- Filter(function(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
 data.frame(
-  gene.name = names(coefsCV),
-  coefficient = coefsCV,
-  stringsAsFactors = FALSE
+    gene.name = names(coefsCV),
+    coefficient = coefsCV,
+    stringsAsFactors = FALSE
 ) |>
-  arrange(gene.name) |>
-  knitr::kable()
+    arrange(gene.name) |>
+    knitr::kable()
 ```
 
 ## Survival curves and Log rank test
 
 ```{r, eval=!is.null(brca)}
 separate2GroupsCox(as.vector(coefsCV),
-  xdata[, names(coefsCV)],
-  ydata,
-  plot.title = "Full dataset", legend.outside = FALSE
+    xdata[, names(coefsCV)],
+    ydata,
+    plot.title = "Full dataset", legend.outside = FALSE
 )
 ```
 

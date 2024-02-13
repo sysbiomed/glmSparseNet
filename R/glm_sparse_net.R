@@ -47,49 +47,49 @@
 #'
 #' # Keep only valid individuals
 #' valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
-#'   !is.na(xdata$vital_status) &
-#'   xdata$surv_event_time > 0)
+#'     !is.na(xdata$vital_status) &
+#'     xdata$surv_event_time > 0)
 #' xdata.valid <- xdata[, rownames(colData(xdata))[valid.ix]]
 #' ydata.valid <- colData(xdata.valid)[, c("surv_event_time", "vital_status")]
 #' colnames(ydata.valid) <- c("time", "status")
 #'
 #' glmSparseNet(
-#'   xdata.valid,
-#'   ydata.valid,
-#'   family = "cox",
-#'   network = "correlation",
-#'   experiment = "RNASeq2GeneNorm"
+#'     xdata.valid,
+#'     ydata.valid,
+#'     family = "cox",
+#'     network = "correlation",
+#'     experiment = "RNASeq2GeneNorm"
 #' )
 glmSparseNet <- function(
-    xdata,
-    ydata,
-    network,
-    options = networkOptions(),
-    experiment = NULL,
-    # Deprecated arguments with dots in name
-    network.options = deprecated(), # nolint: object_name_linter.
-    experiment.name = deprecated(), # nolint: object_name_linter.
-    ...) {
-  # Lifecycle management: to remove after 1.23.0
-  if (lifecycle::is_present(network.options)) {
-    .deprecatedDotParam("glmSparseNet", "network.options", "options")
-    options <- network.options
-  }
-  if (lifecycle::is_present(experiment.name)) {
-    .deprecatedDotParam("glmSparseNet", "experiment.name", "experiment")
-    experiment <- experiment.name
-  }
-  # Lifecycle management: end
+        xdata,
+        ydata,
+        network,
+        options = networkOptions(),
+        experiment = NULL,
+        # Deprecated arguments with dots in name
+        network.options = deprecated(), # nolint: object_name_linter.
+        experiment.name = deprecated(), # nolint: object_name_linter.
+        ...) {
+    # Lifecycle management: to remove after 1.23.0
+    if (lifecycle::is_present(network.options)) {
+        .deprecatedDotParam("glmSparseNet", "network.options", "options")
+        options <- network.options
+    }
+    if (lifecycle::is_present(experiment.name)) {
+        .deprecatedDotParam("glmSparseNet", "experiment.name", "experiment")
+        experiment <- experiment.name
+    }
+    # Lifecycle management: end
 
-  .glmSparseNetPrivate(
-    glmnet::glmnet,
-    xdata,
-    ydata,
-    network = network,
-    options = options,
-    experiment = experiment,
-    ...
-  )
+    .glmSparseNetPrivate(
+        glmnet::glmnet,
+        xdata,
+        ydata,
+        network = network,
+        options = options,
+        experiment = experiment,
+        ...
+    )
 }
 
 #' Calculate cross validating GLM model with network-based regularization
@@ -114,12 +114,12 @@ glmSparseNet <- function(
 #' # Gaussian model
 #' xdata <- matrix(rnorm(500), ncol = 5)
 #' cv.glmSparseNet(
-#'   xdata, rnorm(nrow(xdata)), "correlation",
-#'   family = "gaussian"
+#'     xdata, rnorm(nrow(xdata)), "correlation",
+#'     family = "gaussian"
 #' )
 #' cv.glmSparseNet(
-#'   xdata, rnorm(nrow(xdata)), "covariance",
-#'   family = "gaussian"
+#'     xdata, rnorm(nrow(xdata)), "covariance",
+#'     family = "gaussian"
 #' )
 #' }
 #' @examplesIf requireNamespace("MultiAssayExperiment", quietly = TRUE)
@@ -142,49 +142,49 @@ glmSparseNet <- function(
 #' #
 #' # Keep only valid individuals
 #' valid.ix <- as.vector(!is.na(xdata$surv_event_time) &
-#'   !is.na(xdata$vital_status) &
-#'   xdata$surv_event_time > 0)
+#'     !is.na(xdata$vital_status) &
+#'     xdata$surv_event_time > 0)
 #' xdata.valid <- xdata[, rownames(colData(xdata))[valid.ix]]
 #' ydata.valid <- colData(xdata.valid)[, c("surv_event_time", "vital_status")]
 #' colnames(ydata.valid) <- c("time", "status")
 #'
 #' #
 #' cv.glmSparseNet(
-#'   xdata.valid,
-#'   ydata.valid,
-#'   nfolds     = 5,
-#'   family     = "cox",
-#'   network    = "correlation",
-#'   experiment = "RNASeq2GeneNorm"
+#'     xdata.valid,
+#'     ydata.valid,
+#'     nfolds     = 5,
+#'     family     = "cox",
+#'     network    = "correlation",
+#'     experiment = "RNASeq2GeneNorm"
 #' )
 cv.glmSparseNet <- function(
-    xdata,
-    ydata,
-    network,
-    options = networkOptions(),
-    experiment = NULL,
-    # Deprecated arguments with dots in name
-    network.options = deprecated(), # nolint: object_name_linter.
-    experiment.name = deprecated(), # nolint: object_name_linter.
-    ...) {
-  # Lifecycle management: to remove after 1.23.0
-  if (lifecycle::is_present(network.options)) {
-    .deprecatedDotParam("cv.glmSparseNet", "network.options", "options")
-    options <- network.options
-  }
-  if (lifecycle::is_present(experiment.name)) {
-    .deprecatedDotParam("cv.glmSparseNet", "experiment.name", "experiment")
-    experiment <- experiment.name
-  }
-  # Lifecycle management: end
+        xdata,
+        ydata,
+        network,
+        options = networkOptions(),
+        experiment = NULL,
+        # Deprecated arguments with dots in name
+        network.options = deprecated(), # nolint: object_name_linter.
+        experiment.name = deprecated(), # nolint: object_name_linter.
+        ...) {
+    # Lifecycle management: to remove after 1.23.0
+    if (lifecycle::is_present(network.options)) {
+        .deprecatedDotParam("cv.glmSparseNet", "network.options", "options")
+        options <- network.options
+    }
+    if (lifecycle::is_present(experiment.name)) {
+        .deprecatedDotParam("cv.glmSparseNet", "experiment.name", "experiment")
+        experiment <- experiment.name
+    }
+    # Lifecycle management: end
 
-  .glmSparseNetPrivate(
-    glmnet::cv.glmnet,
-    xdata,
-    ydata,
-    network,
-    experiment = experiment,
-    options = options,
-    ...
-  )
+    .glmSparseNetPrivate(
+        glmnet::cv.glmnet,
+        xdata,
+        ydata,
+        network,
+        experiment = experiment,
+        options = options,
+        ...
+    )
 }

@@ -26,42 +26,41 @@
 #' @examples
 #' networkOptions(unweighted = FALSE)
 networkOptions <- function(
-    method = "pearson",
-    unweighted = TRUE,
-    cutoff = 0,
-    centrality = "degree",
-    minDegree = 0,
-    nCores = 1,
-    transFun = function(x) x,
-    # Deprecated arguments with dots in name
-    min.degree = deprecated(), # nolint: object_name_linter.
-    n.cores = deprecated(), # nolint: object_name_linter.
-    trans.fun = deprecated()) { # nolint: object_name_linter.
+        method = "pearson",
+        unweighted = TRUE,
+        cutoff = 0,
+        centrality = "degree",
+        minDegree = 0,
+        nCores = 1,
+        transFun = function(x) x,
+        # Deprecated arguments with dots in name
+        min.degree = deprecated(), # nolint: object_name_linter.
+        n.cores = deprecated(), # nolint: object_name_linter.
+        trans.fun = deprecated()) { # nolint: object_name_linter.
+    # Lifecycle management: to remove after 1.23.0
+    if (lifecycle::is_present(min.degree)) {
+        .deprecatedDotParam("networkOptions", "min.degree")
+        minDegree <- min.degree
+    }
+    if (lifecycle::is_present(n.cores)) {
+        .deprecatedDotParam("networkOptions", "n.cores")
+        nCores <- n.cores
+    }
+    if (lifecycle::is_present(trans.fun)) {
+        .deprecatedDotParam("networkOptions", "trans.fun")
+        transFun <- trans.fun
+    }
+    # Lifecycle management: end
 
-  # Lifecycle management: to remove after 1.23.0
-  if (lifecycle::is_present(min.degree)) {
-    .deprecatedDotParam("networkOptions", "min.degree")
-    minDegree <- min.degree
-  }
-  if (lifecycle::is_present(n.cores)) {
-    .deprecatedDotParam("networkOptions", "n.cores")
-    nCores <- n.cores
-  }
-  if (lifecycle::is_present(trans.fun)) {
-    .deprecatedDotParam("networkOptions", "trans.fun")
-    transFun <- trans.fun
-  }
-  # Lifecycle management: end
-
-  list(
-    method = method,
-    unweighted = unweighted,
-    cutoff = cutoff,
-    centrality = centrality,
-    nCores = nCores,
-    minDegree = minDegree,
-    transFun = transFun
-  )
+    list(
+        method = method,
+        unweighted = unweighted,
+        cutoff = cutoff,
+        centrality = centrality,
+        nCores = nCores,
+        minDegree = minDegree,
+        transFun = transFun
+    )
 }
 
 #' Calculate penalty based on data
@@ -78,36 +77,38 @@ networkOptions <- function(
 #' xdata <- matrix(rnorm(1000), ncol = 200)
 #' glmSparseNet:::.calcPenalty(xdata, "none")
 #' glmSparseNet:::.calcPenalty(
-#'   xdata, "correlation",
-#'   networkOptions(cutoff = .6)
+#'     xdata, "correlation",
+#'     networkOptions(cutoff = .6)
 #' )
 #' glmSparseNet:::.calcPenalty(xdata, "correlation")
 #' glmSparseNet:::.calcPenalty(
-#'   xdata, "covariance",
-#'   networkOptions(cutoff = .6)
+#'     xdata, "covariance",
+#'     networkOptions(cutoff = .6)
 #' )
 #' glmSparseNet:::.calcPenalty(xdata, "covariance")
 .calcPenalty <- function(xdata, penaltyType, options = networkOptions()) {
-  if (options$centrality == "degree") {
-    degreeArgs <- list(
-      xdata = xdata,
-      method = options$method,
-      considerUnweighted = options$unweighted,
-      cutoff = options$cutoff,
-      nCores = options$nCores
-    )
-    penaltyFactor <- switch(penaltyType,
-      correlation = do.call(degreeCor, degreeArgs),
-      covariance = do.call(degreeCov, degreeArgs),
-      none = rep(1, ncol(xdata)),
-      rlang::abort("Unkown network type, see documentation of glmSparseNet")
-    )
-  } else {
-    rlang::abort(
-      sprintf("Centrality method not recognised: %s", options$centrality)
-    )
-  }
-  options$transFun(penaltyFactor)
+    if (options$centrality == "degree") {
+        degreeArgs <- list(
+            xdata = xdata,
+            method = options$method,
+            considerUnweighted = options$unweighted,
+            cutoff = options$cutoff,
+            nCores = options$nCores
+        )
+        penaltyFactor <- switch(penaltyType,
+            correlation = do.call(degreeCor, degreeArgs),
+            covariance = do.call(degreeCov, degreeArgs),
+            none = rep(1L, ncol(xdata)),
+            rlang::abort(
+                "Unkown network type, see documentation of glmSparseNet"
+            )
+        )
+    } else {
+        rlang::abort(
+            sprintf("Centrality method not recognised: %s", options$centrality)
+        )
+    }
+    options$transFun(penaltyFactor)
 }
 
 #' Heuristic function to penalize nodes with low degree
@@ -120,8 +121,8 @@ networkOptions <- function(
 #' @examples
 #' hubHeuristic(rnorm(1:10))
 hubHeuristic <- function(x) {
-  x <- x / max(x)
-  heuristicScale(1 - x)
+    x <- x / max(x)
+    heuristicScale(1 - x)
 }
 
 #' Heuristic function to penalize nodes with high degree
@@ -134,8 +135,8 @@ hubHeuristic <- function(x) {
 #' @examples
 #' orphanHeuristic(rnorm(1:10))
 orphanHeuristic <- function(x) {
-  x <- x / max(x)
-  heuristicScale(x)
+    x <- x / max(x)
+    heuristicScale(x)
 }
 
 #' Heuristic function to use in high dimensions
@@ -157,28 +158,28 @@ orphanHeuristic <- function(x) {
 #' @examples
 #' heuristicScale(rnorm(1:10))
 heuristicScale <- function(
-    x,
-    subExp10 = -1,
-    expMult = -1,
-    subExp = -1,
-    # Deprecated arguments with dots in name
-    sub.exp10 = deprecated(), # nolint: object_name_linter.
-    exp.mult = deprecated(), # nolint: object_name_linter.
-    sub.exp = deprecated()) { # nolint: object_name_linter.
-  # Lifecycle management: to remove after 1.23.0
-  if (lifecycle::is_present(sub.exp10)) {
-    .deprecatedDotParam("heuristicScale", "sub.exp10")
-    subExp10 <- sub.exp10
-  }
-  if (lifecycle::is_present(exp.mult)) {
-    .deprecatedDotParam("heuristicScale", "exp.mult")
-    expMult <- exp.mult
-  }
-  if (lifecycle::is_present(sub.exp)) {
-    .deprecatedDotParam("heuristicScale", "sub.exp")
-    subExp <- sub.exp
-  }
-  # Lifecycle management: end
+        x,
+        subExp10 = -1,
+        expMult = -1,
+        subExp = -1,
+        # Deprecated arguments with dots in name
+        sub.exp10 = deprecated(), # nolint: object_name_linter.
+        exp.mult = deprecated(), # nolint: object_name_linter.
+        sub.exp = deprecated()) { # nolint: object_name_linter.
+    # Lifecycle management: to remove after 1.23.0
+    if (lifecycle::is_present(sub.exp10)) {
+        .deprecatedDotParam("heuristicScale", "sub.exp10")
+        subExp10 <- sub.exp10
+    }
+    if (lifecycle::is_present(exp.mult)) {
+        .deprecatedDotParam("heuristicScale", "exp.mult")
+        expMult <- exp.mult
+    }
+    if (lifecycle::is_present(sub.exp)) {
+        .deprecatedDotParam("heuristicScale", "sub.exp")
+        subExp <- sub.exp
+    }
+    # Lifecycle management: end
 
-  subExp10 + 10^(-expMult * (exp(x) + subExp))
+    subExp10 + 10^(-expMult * (exp(x) + subExp))
 }

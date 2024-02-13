@@ -18,7 +18,7 @@ params:
 
 ```{r, eval=FALSE}
 if (!require("BiocManager")) {
-  install.packages("BiocManager")
+    install.packages("BiocManager")
 }
 BiocManager::install("glmSparseNet")
 ```
@@ -54,24 +54,24 @@ procedure to obtain the data manually is described in the following chunk.
 
 ```{r curated_data, include=TRUE, results="hide", message=FALSE, warning=FALSE}
 brca <- tryCatch(
-  {
-    curatedTCGAData(
-      diseaseCode = "BRCA",
-      assays = "RNASeq2GeneNorm",
-      version = "1.1.38",
-      dry.run = FALSE
-    )
-  },
-  error = function(err) {
-    NULL
-  }
+    {
+        curatedTCGAData(
+            diseaseCode = "BRCA",
+            assays = "RNASeq2GeneNorm",
+            version = "1.1.38",
+            dry.run = FALSE
+        )
+    },
+    error = function(err) {
+        NULL
+    }
 )
 ```
 
 ```{r curated_data_non_eval, eval=FALSE}
 brca <- curatedTCGAData(
-  diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
-  version = "1.1.38", dry.run = FALSE
+    diseaseCode = "BRCA", assays = "RNASeq2GeneNorm",
+    version = "1.1.38", dry.run = FALSE
 )
 ```
 
@@ -85,14 +85,14 @@ names(classV) <- rownames(xdataRaw)
 
 # keep features with standard deviation > 0
 xdataRaw <- xdataRaw[, apply(xdataRaw, 2, sd) != 0] |>
-  scale()
+    scale()
 
 set.seed(params$seed)
 smallSubset <- c(
-  "CD5", "CSF2RB", "HSF1", "IRGC", "LRRC37A6P", "NEUROG2",
-  "NLRC4", "PDE11A", "PIK3CB", "QARS", "RPGRIP1L", "SDC1",
-  "TMEM31", "YME1L1", "ZBTB11",
-  sample(colnames(xdataRaw), 100)
+    "CD5", "CSF2RB", "HSF1", "IRGC", "LRRC37A6P", "NEUROG2",
+    "NLRC4", "PDE11A", "PIK3CB", "QARS", "RPGRIP1L", "SDC1",
+    "TMEM31", "YME1L1", "ZBTB11",
+    sample(colnames(xdataRaw), 100)
 )
 
 xdata <- xdataRaw[, smallSubset[smallSubset %in% colnames(xdataRaw)]]
@@ -106,13 +106,13 @@ Fit model model penalizing by the hubs using the cross-validation function by
 
 ```{r fit.show, eval=!is.null(brca)}
 fitted <- cv.glmHub(xdata, ydata,
-  family = "binomial",
-  network = "correlation",
-  nlambda = 1000,
-  network.options = networkOptions(
-    cutoff = .6,
-    minDegree = .2
-  )
+    family = "binomial",
+    network = "correlation",
+    nlambda = 1000,
+    network.options = networkOptions(
+        cutoff = .6,
+        minDegree = .2
+    )
 )
 ```
 
@@ -134,13 +134,13 @@ Taking the best model described by `lambda.min`
 ```{r show_coefs, eval=!is.null(brca)}
 coefsCV <- Filter(function(.x) .x != 0, coef(fitted, s = "lambda.min")[, 1])
 data.frame(
-  ensembl.id = names(coefsCV),
-  gene.name = geneNames(names(coefsCV))$external_gene_name,
-  coefficient = coefsCV,
-  stringsAsFactors = FALSE
+    ensembl.id = names(coefsCV),
+    gene.name = geneNames(names(coefsCV))$external_gene_name,
+    coefficient = coefsCV,
+    stringsAsFactors = FALSE
 ) |>
-  arrange(gene.name) |>
-  knitr::kable()
+    arrange(gene.name) |>
+    knitr::kable()
 ```
 
 ## Accuracy
@@ -149,12 +149,12 @@ data.frame(
 resp <- predict(fitted, s = "lambda.min", newx = xdata, type = "class")
 flog.info("Misclassified (%d)", sum(ydata != resp))
 flog.info(
-  "  * False primary solid tumour: %d",
-  sum(resp != ydata & resp == "Primary Solid Tumor")
+    "  * False primary solid tumour: %d",
+    sum(resp != ydata & resp == "Primary Solid Tumor")
 )
 flog.info(
-  "  * False normal              : %d",
-  sum(resp != ydata & resp == "Solid Tissue Normal")
+    "  * False normal              : %d",
+    sum(resp != ydata & resp == "Solid Tissue Normal")
 )
 ```
 
@@ -171,13 +171,13 @@ ROC curve
 rocObj <- pROC::roc(ydata, as.vector(response))
 
 data.frame(TPR = rocObj$sensitivities, FPR = 1 - rocObj$specificities) |>
-  ggplot() +
-  geom_line(aes(FPR, TPR), color = 2, size = 1, alpha = 0.7) +
-  labs(
-    title = sprintf("ROC curve (AUC = %f)", pROC::auc(rocObj)),
-    x = "False Positive Rate (1-Specificity)",
-    y = "True Positive Rate (Sensitivity)"
-  )
+    ggplot() +
+    geom_line(aes(FPR, TPR), color = 2, size = 1, alpha = 0.7) +
+    labs(
+        title = sprintf("ROC curve (AUC = %f)", pROC::auc(rocObj)),
+        x = "False Positive Rate (1-Specificity)",
+        y = "True Positive Rate (Sensitivity)"
+    )
 ```
 
 # Session Info

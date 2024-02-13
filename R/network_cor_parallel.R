@@ -21,44 +21,44 @@
 #' xdata <- matrix(rnorm(n_col * 4), ncol = n_col)
 #' networkCorParallel(xdata)
 networkCorParallel <- function(
-    xdata,
-    buildOutput = "matrix",
-    nCores = 1,
-    forceRecalcNetwork = FALSE,
-    showMessage = FALSE,
-    ...,
-    # Deprecated arguments with dots in name
-    build.output = deprecated(), # nolint: object_name_linter.
-    n.cores = deprecated(), # nolint: object_name_linter.
-    force.recalc.network = deprecated(), # nolint: object_name_linter.
-    show.message = deprecated()) { # nolint: object_name_linter.
-  # Lifecycle management: to remove after 1.23.0
-  if (lifecycle::is_present(build.output)) {
-    .deprecatedDotParam("networkCorParallel", "build.output")
-    buildOutput <- build.output
-  }
-  if (lifecycle::is_present(n.cores)) {
-    .deprecatedDotParam("networkCorParallel", "n.cores")
-    nCores <- n.cores
-  }
-  if (lifecycle::is_present(force.recalc.network)) {
-    .deprecatedDotParam("networkCorParallel", "force.recalc.network")
-    forceRecalcNetwork <- force.recalc.network
-  }
-  if (lifecycle::is_present(show.message)) {
-    .deprecatedDotParam("networkCorParallel", "show.message")
-    showMessage <- show.message
-  }
-  # Lifecycle management: end
+        xdata,
+        buildOutput = "matrix",
+        nCores = 1,
+        forceRecalcNetwork = FALSE,
+        showMessage = FALSE,
+        ...,
+        # Deprecated arguments with dots in name
+        build.output = deprecated(), # nolint: object_name_linter.
+        n.cores = deprecated(), # nolint: object_name_linter.
+        force.recalc.network = deprecated(), # nolint: object_name_linter.
+        show.message = deprecated()) { # nolint: object_name_linter.
+    # Lifecycle management: to remove after 1.23.0
+    if (lifecycle::is_present(build.output)) {
+        .deprecatedDotParam("networkCorParallel", "build.output")
+        buildOutput <- build.output
+    }
+    if (lifecycle::is_present(n.cores)) {
+        .deprecatedDotParam("networkCorParallel", "n.cores")
+        nCores <- n.cores
+    }
+    if (lifecycle::is_present(force.recalc.network)) {
+        .deprecatedDotParam("networkCorParallel", "force.recalc.network")
+        forceRecalcNetwork <- force.recalc.network
+    }
+    if (lifecycle::is_present(show.message)) {
+        .deprecatedDotParam("networkCorParallel", "show.message")
+        showMessage <- show.message
+    }
+    # Lifecycle management: end
 
-  .networkGenericParallel(
-    stats::cor,
-    "correlation",
-    xdata,
-    buildOutput = buildOutput,
-    nCores = nCores,
-    forceRecalcNetwork = forceRecalcNetwork,
-    showMessage = showMessage,
-    ...
-  )
+    .networkGenericParallel(
+        stats::cor,
+        "correlation",
+        xdata,
+        buildOutput = buildOutput,
+        nCores = nCores,
+        forceRecalcNetwork = forceRecalcNetwork,
+        showMessage = showMessage,
+        ...
+    )
 }

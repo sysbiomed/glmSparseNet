@@ -4,29 +4,29 @@
 #' .deprecatedDotParam("test_me", "n.folds", "1.21")
 #'
 .deprecatedDotParam <- function(
-    funName,
-    argumentName,
-    newArgumentName = gsub("\\.(\\w)", "\\U\\1", argumentName, perl = TRUE),
-    version = "1.21.0",
-    env = rlang::caller_env(),
-    userEnv = rlang::caller_env(2)) {
-  lifecycle::deprecate_warn(
-    version,
-    paste0(funName, "(", argumentName, " = )"),
-    paste0(funName, "(", newArgumentName, " = )"),
-    env = env,
-    user_env = userEnv
-  )
+        funName,
+        argumentName,
+        newArgumentName = gsub("\\.(\\w)", "\\U\\1", argumentName, perl = TRUE),
+        version = "1.21.0",
+        env = rlang::caller_env(),
+        userEnv = rlang::caller_env(2)) {
+    lifecycle::deprecate_warn(
+        version,
+        paste0(funName, "(", argumentName, " = )"),
+        paste0(funName, "(", newArgumentName, " = )"),
+        env = env,
+        user_env = userEnv
+    )
 }
 
 #' @rdname balancedCvFolds
 #' @usage # deprecated, please use balancedCvFolds()
 #' balanced.cv.folds(..., nfolds = 10)
 balanced.cv.folds <- function(..., nfolds = 10) { # nolint: object_name_linter.
-  lifecycle::deprecate_soft(
-    "1.21.0", "balanced.cv.folds()", "balanced_cv_folds()"
-  )
-  balancedCvFolds(..., nfolds = nfolds)
+    lifecycle::deprecate_soft(
+        "1.21.0", "balanced.cv.folds()", "balanced_cv_folds()"
+    )
+    balancedCvFolds(..., nfolds = nfolds)
 }
 
 #' @rdname myColors
@@ -34,8 +34,8 @@ balanced.cv.folds <- function(..., nfolds = 10) { # nolint: object_name_linter.
 #' my.colors(ix = NULL)
 #' @export
 my.colors <- function(ix = NULL) { # nolint: object_name_linter.
-  lifecycle::deprecate_soft("1.21.0", "my.colors()", "myColors()")
-  myColors(ix)
+    lifecycle::deprecate_soft("1.21.0", "my.colors()", "myColors()")
+    myColors(ix)
 }
 
 #' @rdname mySymbols
@@ -43,8 +43,8 @@ my.colors <- function(ix = NULL) { # nolint: object_name_linter.
 #' my.symbols(ix = NULL)
 #' @export
 my.symbols <- function(ix = NULL) { # nolint: object_name_linter.
-  lifecycle::deprecate_soft("1.21.0", "my.symbols()", "mySymbols()")
-  mySymbols(ix)
+    lifecycle::deprecate_soft("1.21.0", "my.symbols()", "mySymbols()")
+    mySymbols(ix)
 }
 
 #' Retrieve hallmarks of cancer count for genes
@@ -71,13 +71,13 @@ my.symbols <- function(ix = NULL) { # nolint: object_name_linter.
 #'
 #' @export
 hallmarks <- function(
-    genes,
-    metric = "count",
-    hierarchy = "full",
-    generate.plot = TRUE, # nolint: object_name_linter.
-    show.message = FALSE) { # nolint: object_name_linter.
-  lifecycle::deprecate_stop(
-    "1.21.0", "hallmarks()",
-    details = "API is no longer available"
-  )
+        genes,
+        metric = "count",
+        hierarchy = "full",
+        generate.plot = TRUE, # nolint: object_name_linter.
+        show.message = FALSE) { # nolint: object_name_linter.
+    lifecycle::deprecate_stop(
+        "1.21.0", "hallmarks()",
+        details = "API is no longer available"
+    )
 }
