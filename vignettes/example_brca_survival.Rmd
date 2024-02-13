@@ -38,7 +38,7 @@ library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
 flog.layout(layout.format("[~l] ~m"))
-glmSparseNet:::.showMessage(FALSE)
+options("glmSparseNet.show_message" = FALSE)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
 ```
