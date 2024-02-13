@@ -26,7 +26,6 @@ BiocManager::install("glmSparseNet")
 # Required Packages
 
 ```{r packages, message=FALSE, warning=FALSE, results='hide'}
-pkgload::load_all("/home/averissimo/work/opensource🟠/glmSparseNet")
 library(dplyr)
 library(ggplot2)
 library(survival)
@@ -39,7 +38,10 @@ library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
 flog.layout(layout.format("[~l] ~m"))
-options("glmSparseNet.show_message" = FALSE)
+options(
+    "glmSparseNet.show_message" = FALSE,
+    "glmSparseNet.base_dir" = withr::local_tempdir()
+)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
 ```
@@ -197,7 +199,7 @@ data.frame(
 separate2GroupsCox(as.vector(coefsCV),
     xdata[, names(coefsCV)],
     ydata,
-    plot.title = "Full dataset", legend.outside = FALSE
+    plotTitle = "Full dataset", legendOutside = FALSE
 )
 ```
 

@@ -38,7 +38,10 @@ library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
 flog.layout(layout.format("[~l] ~m"))
-options("glmSparseNet.show_message" = FALSE)
+options(
+    "glmSparseNet.show_message" = FALSE,
+    "glmSparseNet.base_dir" = withr::local_tempdir()
+)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
 ```
@@ -52,7 +55,7 @@ To accelerate the process we use a very reduced dataset down to 107 variables
 only *(genes)*, which is stored as a data object in this package. However, the 
 procedure to obtain the data manually is described in the following chunk.
 
-```{r curated_data, include=TRUE, results="hide", message=FALSE, warning=FALSE}
+```{r curated_data, include=FALSE, results="hide", message=FALSE, warning=FALSE}
 brca <- tryCatch(
     {
         curatedTCGAData(
@@ -109,7 +112,7 @@ fitted <- cv.glmHub(xdata, ydata,
     family = "binomial",
     network = "correlation",
     nlambda = 1000,
-    network.options = networkOptions(
+    options = networkOptions(
         cutoff = .6,
         minDegree = .2
     )

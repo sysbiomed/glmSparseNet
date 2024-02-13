@@ -44,7 +44,10 @@ library(glmSparseNet)
 #
 # Some general options for futile.logger the debugging package
 flog.layout(layout.format("[~l] ~m"))
-options("glmSparseNet.show_message" = FALSE)
+options(
+    "glmSparseNet.show_message" = FALSE,
+    "glmSparseNet.base_dir" = withr::local_tempdir()
+)
 # Setting ggplot2 default theme as minimal
 theme_set(ggplot2::theme_minimal())
 ```
@@ -369,8 +372,8 @@ Kaplan-Meier estimator separating individuals by low and high risk
 separate2GroupsCox(
     as.vector(coef(resultCVGlmnet, s = "lambda.min")[, 1]),
     xdata, ydata,
-    plot.title = "Full dataset",
-    legend.outside = FALSE
+    plotTitle = "Full dataset",
+    legendOutside = FALSE
 )
 
 selectedGenes[["GLMnet"]] <- Filter(
@@ -422,7 +425,7 @@ melt(selectedGenes) |>
     ggplot() +
     geom_point(
         aes(value, L1, size = Degree),
-        shape = myColors(3), color = myColors(3)
+        shape = mySymbols(3), color = myColors(3)
     ) +
     theme(
         axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0),
