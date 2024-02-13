@@ -26,6 +26,7 @@ BiocManager::install("glmSparseNet")
 # Required Packages
 
 ```{r packages, message=FALSE, warning=FALSE, results='hide'}
+pkgload::load_all("/home/averissimo/work/opensource🟠/glmSparseNet")
 library(dplyr)
 library(ggplot2)
 library(survival)
@@ -108,6 +109,9 @@ ydataRaw <- colData(skcmMetastatic) |>
 ydataRaw <- colData(skcm) |>
     as.data.frame() |>
     # Find max time between all days (ignoring missings)
+    dplyr::filter(
+        !is.na(days_to_last_followup) | !is.na(days_to_death)
+    ) |>
     dplyr::rowwise() |>
     dplyr::mutate(
         time = max(days_to_last_followup, days_to_death, na.rm = TRUE)
@@ -151,9 +155,9 @@ fitted <- cv.glmHub(
     xdata,
     Surv(ydata$time, ydata$status),
     family = "cox",
-    foldid = glmSparseNet:::balancedCvFolds(!!ydata$status)$output,
+    foldid = glmSparseNet:::balancedCvFolds(ydata$status)$output,
     network = "correlation",
-    network.options = networkOptions(
+    options = networkOptions(
         cutoff = .6,
         minDegree = .2
     )

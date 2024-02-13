@@ -113,11 +113,11 @@ some sample on both high and low risks groups.
 
 ```{r}
 resAge6040 <- separate2GroupsCox(
-    chosen.btas = c(age = 1, 0),
+    chosenBetas = c(age = 1, 0),
     xdata,
     ydata,
     probs = c(.6, .4),
-    stop.when.overlap = FALSE
+    stopWhenOverlap = FALSE
 )
 ```
 

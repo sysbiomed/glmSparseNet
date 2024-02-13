@@ -7,12 +7,13 @@
 #' matching the input with foldid attributed to each position.
 #'
 #' @examples
-#' glmSparseNet:::balancedCvFolds(seq(10), seq(11, 15), nfolds = 2)
+#' balancedCvFolds(seq(10), seq(11, 15), nfolds = 2)
 #'
 #' # will give a warning
-#' glmSparseNet:::balancedCvFolds(seq(10), seq(11, 13), nfolds = 10)
+#' balancedCvFolds(seq(10), seq(11, 13), nfolds = 10)
 #'
-#' glmSparseNet:::balancedCvFolds(seq(100), seq(101, 133), nfolds = 10)
+#' balancedCvFolds(seq(100), seq(101, 133), nfolds = 10)
+#' @export
 balancedCvFolds <- function(..., nfolds = 10) {
     inputList <- rlang::list2(...)
     outputList <- list()

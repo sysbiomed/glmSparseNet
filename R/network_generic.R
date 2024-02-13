@@ -31,9 +31,9 @@
         c("MultiAssayExperiment", "SummarizedExperiment", "matrix", "Matrix")
     )
     checkmate::assert_multi_class(
-        ydata, c("DataFrame", "data.frame", "matrix", "Matrix", "numeric")
+        ydata,
+        c("DataFrame", "data.frame", "matrix", "Matrix", "numeric", "Surv")
     )
-
     xdata <- .normalizeXDataMAE(xdata, experiment)
     xdataNorm <- .normalizeXData(xdata, experiment)
     ydataNorm <- .normalizeYData(xdata, ydata, experiment)

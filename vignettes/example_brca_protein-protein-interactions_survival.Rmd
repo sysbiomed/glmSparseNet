@@ -271,7 +271,7 @@ qplot(myDegree, bins = 100, fill = my.colors(3)) +
 
 ```{r, eval=!is.null(brca)}
 set.seed(params$seed)
-foldid <- glmSparseNet:::balancedCvFolds(!!ydata$status)$output
+foldid <- glmSparseNet:::balancedCvFolds(ydata$status)$output
 ```
 
 

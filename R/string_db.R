@@ -136,7 +136,7 @@ stringDBhomoSapiens <- function(
         # read file into table
         readr::read_delim(delim = " ") |>
         # remove combined score, as we are calculating ourselves
-        dplyr::select(-!!as.name("combined_score"))
+        dplyr::select(-"combined_score")
 
     .calculateCombinedScore(allInteractions, scoreThreshold, removeText)
 }
@@ -219,17 +219,18 @@ buildStringNetwork <- function(
         # keep only proteins that have mapping to gene
         newString <- stringTbl |>
             dplyr::filter(
-                !!(as.name("from")) %in% protMap$ensembl_peptide_id &
-                    !!(as.name("to")) %in% protMap$ensembl_peptide_id
+                .data$from %in% protMap$ensembl_peptide_id &
+                    .data$to %in% protMap$ensembl_peptide_id
             )
 
         # empty gene ids default to previous code
         protMap <- protMap |>
             dplyr::mutate(
                 ensembl_gene_id =
-                    dplyr::if_else(!!(as.name("ensembl_gene_id")) == "",
-                        !!(as.name("ensembl_peptide_id")),
-                        !!(as.name("ensembl_gene_id"))
+                    dplyr::if_else(
+                        .data$ensembl_gene_id == "",
+                        .data$ensembl_peptide_id,
+                        .data$ensembl_gene_id
                     )
             )
 
