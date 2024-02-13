@@ -15,11 +15,14 @@ withr::local_tempdir(pattern = "base.dir") |>
 test_that("Degree with cutoff", {
     covPearsonLocal <- covPearson
     covPearsonLocal[covPearsonLocal < 0.05] <- 0
-    diffDegree <- degreeCov(xdata,
-        method = "pearson", cutoff = 0.05,
-        chunks = 10, n.cores = 2,
-        force.recalc.degree = TRUE,
-        force.recalc.network = TRUE
+    diffDegree <- degreeCov(
+        xdata,
+        method = "pearson",
+        cutoff = 0.05,
+        chunks = 10,
+        nCores = 2,
+        forceRecalcDegree = TRUE,
+        forceRecalcNetwork = TRUE
     ) - Matrix::colSums(covPearsonLocal)
     expect_lt(sum(abs(diffDegree)), 1e-09)
 })
@@ -30,9 +33,9 @@ test_that("Degree forcing recalculation", {
         method = "pearson",
         cutoff = 0,
         chunks = 10,
-        n.cores = 2,
-        force.recalc.degree = TRUE,
-        force.recalc.network = TRUE
+        nCores = 2,
+        forceRecalcDegree = TRUE,
+        forceRecalcNetwork = TRUE
     ) - Matrix::colSums(covPearson)
     expect_lt(sum(abs(diffDegree)), 1e-09)
 })
@@ -43,8 +46,8 @@ test_that("Degree forcing recalculation of degree only", {
         method = "pearson",
         cutoff = 0,
         chunks = 10,
-        n.cores = 2,
-        force.recalc.degree = TRUE
+        nCores = 2,
+        forceRecalcDegree = TRUE
     ) - Matrix::colSums(covPearson)
     expect_lt(sum(abs(diffDegree)), 1e-09)
 })
@@ -55,16 +58,16 @@ test_that("Degree using cache", {
         method = "pearson",
         cutoff = 0,
         chunks = 10,
-        n.cores = 2,
-        force.recalc.degree = FALSE
+        nCores = 2,
+        forceRecalcDegree = FALSE
     ) - Matrix::colSums(covPearson)
     diffDegree <- degreeCov(
         xdata,
         method = "pearson",
         cutoff = 0,
         chunks = 10,
-        n.cores = 2,
-        force.recalc.degree = FALSE
+        nCores = 2,
+        forceRecalcDegree = FALSE
     ) - Matrix::colSums(covPearson)
     expect_lt(sum(abs(diffDegree)), 1e-09)
 })
@@ -79,9 +82,9 @@ test_that("Degree with cutoff", {
         method = "spearman",
         cutoff = 0.05,
         chunks = 10,
-        n.cores = 2,
-        force.recalc.degree = TRUE,
-        force.recalc.network = TRUE
+        nCores = 2,
+        forceRecalcDegree = TRUE,
+        forceRecalcNetwork = TRUE
     ) - Matrix::colSums(covSpearmanLocal)
     expect_lt(sum(abs(diffDegree)), 1e-09)
 })
@@ -92,9 +95,9 @@ test_that("Degree forcing recalculation of all", {
         method = "spearman",
         cutoff = 0,
         chunks = 10,
-        n.cores = 2,
-        force.recalc.degree = TRUE,
-        force.recalc.network = TRUE
+        nCores = 2,
+        forceRecalcDegree = TRUE,
+        forceRecalcNetwork = TRUE
     ) - Matrix::colSums(covSpearman)
     expect_lt(sum(abs(diffDegree)), 1e-09)
 })
@@ -105,17 +108,17 @@ test_that("Degree forcing recalculation of degree", {
         method = "spearman",
         cutoff = 0,
         chunks = 10,
-        n.cores = 2,
-        force.recalc.degree = TRUE,
-        force.recalc.network = TRUE
+        nCores = 2,
+        forceRecalcDegree = TRUE,
+        forceRecalcNetwork = TRUE
     ) - Matrix::colSums(covSpearman)
     diffDegree <- degreeCov(
         xdata,
         method = "spearman",
         cutoff = 0,
         chunks = 10,
-        n.cores = 2,
-        force.recalc.degree = TRUE
+        nCores = 2,
+        forceRecalcDegree = TRUE
     ) - Matrix::colSums(covSpearman)
     expect_lt(sum(abs(diffDegree)), 1e-09)
 })
@@ -127,9 +130,9 @@ test_that("Degree using cache", {
         method = "spearman",
         cutoff = 0,
         chunks = 10,
-        n.cores = 2,
-        force.recalc.degree = TRUE,
-        force.recalc.network = TRUE
+        nCores = 2,
+        forceRecalcDegree = TRUE,
+        forceRecalcNetwork = TRUE
     ) - Matrix::colSums(covSpearman)
     # actual call to get from cache
     diffDegree <- degreeCov(
@@ -137,8 +140,8 @@ test_that("Degree using cache", {
         method = "spearman",
         cutoff = 0,
         chunks = 10,
-        n.cores = 2,
-        force.recalc.degree = FALSE
+        nCores = 2,
+        forceRecalcDegree = FALSE
     ) - Matrix::colSums(covSpearman)
     expect_lt(sum(abs(diffDegree)), 1e-09)
 })
