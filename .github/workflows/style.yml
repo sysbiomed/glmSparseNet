@@ -79,9 +79,7 @@ jobs:
         run: |
           detect <- styler::style_pkg(
             dry = "on",
-            styler::style_pkg(
-              transformers = styler::tidyverse_style(indent_by = 4L)
-            )
+            transformers = styler::tidyverse_style(indent_by = 4L)
           )
           if (any(detect$changed)) {
             problems <- subset(detect$file, detect$changed == T)
