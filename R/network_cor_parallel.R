@@ -27,10 +27,12 @@ networkCorParallel <- function(xdata,
                                showMessage = FALSE,
                                ...,
                                # Deprecated arguments with dots in name
-                               build.output = deprecated(), # nolint: object_name_linter.
-                               n.cores = deprecated(), # nolint: object_name_linter.
-                               force.recalc.network = deprecated(), # nolint: object_name_linter.
-                               show.message = deprecated()) { # nolint: object_name_linter.
+                               # nolint start: object_name_linter.
+                               build.output = deprecated(),
+                               n.cores = deprecated(),
+                               force.recalc.network = deprecated(),
+                               show.message = deprecated()) {
+    # nolint end: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(build.output)) {
         .deprecatedDotParam("networkCorParallel", "build.output")

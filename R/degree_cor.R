@@ -32,10 +32,12 @@ degreeCor <- function(xdata,
                       nCores = 1,
                       ...,
                       # Deprecated arguments with dots in name
-                      consider.unweighted = deprecated(), # nolint: object_name_linter.
-                      force.recalc.degree = deprecated(), # nolint: object_name_linter.
-                      force.recalc.network = deprecated(), # nolint: object_name_linter.
-                      n.cores = deprecated()) { # nolint: object_name_linter.
+                      # nolint start: object_name_linter.
+                      consider.unweighted = deprecated(),
+                      force.recalc.degree = deprecated(),
+                      force.recalc.network = deprecated(),
+                      n.cores = deprecated()) {
+    # nolint end: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(consider.unweighted)) {
         .deprecatedDotParam("separate2GroupsCox", "consider.unweighted")

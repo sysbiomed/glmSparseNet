@@ -33,9 +33,11 @@ networkOptions <- function(method = "pearson",
                            nCores = 1,
                            transFun = function(x) x,
                            # Deprecated arguments with dots in name
-                           min.degree = deprecated(), # nolint: object_name_linter.
-                           n.cores = deprecated(), # nolint: object_name_linter.
-                           trans.fun = deprecated()) { # nolint: object_name_linter.
+                           # nolint start: object_name_linter.
+                           min.degree = deprecated(),
+                           n.cores = deprecated(),
+                           trans.fun = deprecated()) {
+    # nolint end: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(min.degree)) {
         .deprecatedDotParam("networkOptions", "min.degree")
@@ -161,9 +163,11 @@ heuristicScale <- function(x,
                            expMult = -1,
                            subExp = -1,
                            # Deprecated arguments with dots in name
-                           sub.exp10 = deprecated(), # nolint: object_name_linter.
-                           exp.mult = deprecated(), # nolint: object_name_linter.
-                           sub.exp = deprecated()) { # nolint: object_name_linter.
+                           # nolint start: object_name_linter.
+                           sub.exp10 = deprecated(),
+                           exp.mult = deprecated(),
+                           sub.exp = deprecated()) {
+    # nolint end: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(sub.exp10)) {
         .deprecatedDotParam("heuristicScale", "sub.exp10")

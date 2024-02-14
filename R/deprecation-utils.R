@@ -5,7 +5,11 @@
 #'
 .deprecatedDotParam <- function(funName,
                                 argumentName,
-                                newArgumentName = gsub("\\.(\\w)", "\\U\\1", argumentName, perl = TRUE),
+                                newArgumentName = gsub(
+                                    "\\.(\\w)", "\\U\\1",
+                                    argumentName,
+                                    perl = TRUE
+                                ),
                                 version = "1.21.0",
                                 env = rlang::caller_env(),
                                 userEnv = rlang::caller_env(2)) {

@@ -18,9 +18,11 @@ glmHub <- function(xdata,
                    options = networkOptions(),
                    experiment = NULL,
                    # Deprecated arguments with dots in name
-                   network.options = deprecated(), # nolint: object_name_linter.
-                   experiment.name = deprecated(), # nolint: object_name_linter.
+                   # nolint start: object_name_linter.
+                   network.options = deprecated(),
+                   experiment.name = deprecated(),
                    ...) {
+    # nolint end: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(network.options)) {
         .deprecatedDotParam("glmHub", "network.options", "options")
@@ -66,9 +68,11 @@ cv.glmHub <- function(xdata,
                       options = networkOptions(),
                       experiment = NULL,
                       # Deprecated arguments with dots in name
-                      network.options = deprecated(), # nolint: object_name_linter.
-                      experiment.name = deprecated(), # nolint: object_name_linter.
+                      # nolint start: object_name_linter.
+                      network.options = deprecated(),
+                      experiment.name = deprecated(),
                       ...) {
+    # nolint end: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(network.options)) {
         .deprecatedDotParam("cv.glmHub", "network.options", "options")

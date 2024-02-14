@@ -153,8 +153,10 @@ geneNames <- function(ensemblGenes,
                       useCache = TRUE,
                       verbose = FALSE,
                       # Deprecated arguments with dots in name
-                      ensembl.genes = deprecated(), # nolint: object_name_linter.
-                      use.cache = deprecated()) { # nolint: object_name_linter.
+                      # nolint start: object_name_linter.
+                      ensembl.genes = deprecated(),
+                      use.cache = deprecated()) {
+    # nolint end: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(ensembl.genes)) {
         .deprecatedDotParam("geneNames", "ensembl.genes")
@@ -218,8 +220,10 @@ ensemblGeneNames <- function(geneId,
                              useCache = TRUE,
                              verbose = FALSE,
                              # Deprecated arguments with dots in name
-                             gene.id = deprecated(), # nolint: object_name_linter.
-                             use.cache = deprecated()) { # nolint: object_name_linter.
+                             # nolint start: object_name_linter.
+                             gene.id = deprecated(),
+                             use.cache = deprecated()) {
+    # nolint end: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(gene.id)) {
         .deprecatedDotParam("ensemblGeneNames", "gene.id")
@@ -288,8 +292,11 @@ ensemblGeneNames <- function(geneId,
 protein2EnsemblGeneNames <- function(ensemblProteins,
                                      useCache = TRUE,
                                      verbose = FALSE,
-                                     ensembl.proteins = deprecated(), # nolint: object_name_linter.
-                                     use.cache = deprecated()) { # nolint: object_name_linter.
+                                     # Deprecated arguments with dots in name
+                                     # nolint start: object_name_linter.
+                                     ensembl.proteins = deprecated(),
+                                     use.cache = deprecated()) {
+    # nolint end: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(ensembl.proteins)) {
         .deprecatedDotParam("protein2EnsemblGeneNames", "ensembl.proteins")
