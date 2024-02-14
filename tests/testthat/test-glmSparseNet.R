@@ -1,7 +1,8 @@
 test_that("glmSparseNet: simple call", {
     xdata <- matrix(rnorm(100), ncol = 20)
     glmSparseNet(
-        xdata, rnorm(nrow(xdata)), "correlation", family = "gaussian"
+        xdata, rnorm(nrow(xdata)), "correlation",
+        family = "gaussian"
     ) |>
         expect_s3_class("glmnet")
 })

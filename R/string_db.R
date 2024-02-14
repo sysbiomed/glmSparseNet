@@ -11,10 +11,7 @@
 #' @param removeText remove text-based interactions
 #'
 #' @return table with combined score
-.calculateCombinedScore <- function(
-        allInteractions,
-        scoreThreshold,
-        removeText) {
+.combinedScore <- function(allInteractions, scoreThreshold, removeText) {
     # We manually compute using the guide in stringdb's faq
     prior <- 0.041
 
@@ -98,12 +95,12 @@
 #' stringDBhomoSapiens(scoreThreshold = 800)
 #' }
 stringDBhomoSapiens <- function(
-        version = "11.0",
-        scoreThreshold = 0,
-        removeText = TRUE,
-        # Deprecated arguments with dots in name
-        score_threshold = deprecated(), # nolint: object_name_linter.
-        remove.text = deprecated()) { # nolint: object_name_linter.)
+    version = "11.0",
+    scoreThreshold = 0,
+    removeText = TRUE,
+    # Deprecated arguments with dots in name
+    score_threshold = deprecated(), # nolint: object_name_linter.
+    remove.text = deprecated()) { # nolint: object_name_linter.)
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(score_threshold)) {
         .deprecatedDotParam(
@@ -138,7 +135,7 @@ stringDBhomoSapiens <- function(
         # remove combined score, as we are calculating ourselves
         dplyr::select(-"combined_score")
 
-    .calculateCombinedScore(allInteractions, scoreThreshold, removeText)
+    .combinedScore(allInteractions, scoreThreshold, removeText)
 }
 
 #' Build gene network from peptide ids
@@ -172,11 +169,11 @@ stringDBhomoSapiens <- function(
 #' sum(string_network != 0)
 #' }
 buildStringNetwork <- function(
-        stringTbl,
-        useNames = c("protein", "ensembl", "external"),
-        # Deprecated arguments with dots in name
-        string.tbl = deprecated(), # nolint: object_name_linter.
-        use.names = deprecated()) { # nolint: object_name_linter.
+    stringTbl,
+    useNames = c("protein", "ensembl", "external"),
+    # Deprecated arguments with dots in name
+    string.tbl = deprecated(), # nolint: object_name_linter.
+    use.names = deprecated()) { # nolint: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(string.tbl)) {
         .deprecatedDotParam("buildStringNetwork", "string.tbl")

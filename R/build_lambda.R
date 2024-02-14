@@ -20,18 +20,16 @@
 #' @examples
 #' buildLambda(5.4)
 buildLambda <- function(
-        lambdaLargest = NULL,
-        xdata = NULL,
-        ydata = NULL,
-        family = NULL,
-        ordersOfMagnitudeSmaller = 3,
-        lambdaPerOrderMagnitude = 150,
-        # Deprecated arguments with dots in name
-        # nolint start: object_name_linter.
-        lambda.largest = deprecated(),
-        orders.of.magnitude.smaller = deprecated(),
-        lambda.per.order.magnitude = deprecated()) {
-    # nolint end: object_name_linter.
+    lambdaLargest = NULL,
+    xdata = NULL,
+    ydata = NULL,
+    family = NULL,
+    ordersOfMagnitudeSmaller = 3,
+    lambdaPerOrderMagnitude = 150,
+    # Deprecated arguments with dots in name
+    lambda.largest = deprecated(), # nolint: object_name_linter.
+    orders.of.magnitude.smaller = deprecated(), # nolint: object_name_linter.
+    lambda.per.order.magnitude = deprecated()) { # nolint: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(lambda.largest)) {
         .deprecatedDotParam("buildLambda", "lambda.largest")

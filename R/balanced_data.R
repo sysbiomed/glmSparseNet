@@ -39,7 +39,8 @@ balancedCvFolds <- function(..., nfolds = 10) {
                 myTmp <- c(myTmp, outputList[[ix]])
             }
             myCount <- graphics::hist(
-                myTmp, plot = FALSE, breaks = 0:nfolds
+                myTmp,
+                plot = FALSE, breaks = 0:nfolds
             )$counts
             mySample <- rep(
                 seq(nfolds)[sort(myCount, index.return = TRUE)$ix],

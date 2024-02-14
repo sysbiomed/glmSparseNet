@@ -26,17 +26,17 @@
 #' @examples
 #' networkOptions(unweighted = FALSE)
 networkOptions <- function(
-        method = "pearson",
-        unweighted = TRUE,
-        cutoff = 0,
-        centrality = "degree",
-        minDegree = 0,
-        nCores = 1,
-        transFun = function(x) x,
-        # Deprecated arguments with dots in name
-        min.degree = deprecated(), # nolint: object_name_linter.
-        n.cores = deprecated(), # nolint: object_name_linter.
-        trans.fun = deprecated()) { # nolint: object_name_linter.
+    method = "pearson",
+    unweighted = TRUE,
+    cutoff = 0,
+    centrality = "degree",
+    minDegree = 0,
+    nCores = 1,
+    transFun = function(x) x,
+    # Deprecated arguments with dots in name
+    min.degree = deprecated(), # nolint: object_name_linter.
+    n.cores = deprecated(), # nolint: object_name_linter.
+    trans.fun = deprecated()) { # nolint: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(min.degree)) {
         .deprecatedDotParam("networkOptions", "min.degree")
@@ -158,14 +158,14 @@ orphanHeuristic <- function(x) {
 #' @examples
 #' heuristicScale(rnorm(1:10))
 heuristicScale <- function(
-        x,
-        subExp10 = -1,
-        expMult = -1,
-        subExp = -1,
-        # Deprecated arguments with dots in name
-        sub.exp10 = deprecated(), # nolint: object_name_linter.
-        exp.mult = deprecated(), # nolint: object_name_linter.
-        sub.exp = deprecated()) { # nolint: object_name_linter.
+    x,
+    subExp10 = -1,
+    expMult = -1,
+    subExp = -1,
+    # Deprecated arguments with dots in name
+    sub.exp10 = deprecated(), # nolint: object_name_linter.
+    exp.mult = deprecated(), # nolint: object_name_linter.
+    sub.exp = deprecated()) { # nolint: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(sub.exp10)) {
         .deprecatedDotParam("heuristicScale", "sub.exp10")

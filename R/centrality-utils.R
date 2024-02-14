@@ -7,14 +7,14 @@
 #'
 #' @return depends on buildOutput parameter
 .networkGenericParallel <- function(
-        fun,
-        funPrefix,
-        xdata,
-        buildOutput = "matrix",
-        nCores = 1,
-        forceRecalcNetwork = FALSE,
-        showMessage = FALSE,
-        ...) {
+    fun,
+    funPrefix,
+    xdata,
+    buildOutput = "matrix",
+    nCores = 1,
+    forceRecalcNetwork = FALSE,
+    showMessage = FALSE,
+    ...) {
     # Windows only support 1 core
     if (.Platform$OS.type == "windows") {
         nCores <- 1
@@ -138,16 +138,16 @@
 #'
 #' @return a vector of the degrees
 .degreeGeneric <- function(
-        fun = stats::cor,
-        funPrefix = "operator",
-        xdata,
-        cutoff = 0,
-        considerUnweighted = FALSE,
-        chunks = 1000,
-        forceRecalcDegree = FALSE,
-        forceRecalcNetwork = FALSE,
-        nCores = 1,
-        ...) {
+    fun = stats::cor,
+    funPrefix = "operator",
+    xdata,
+    cutoff = 0,
+    considerUnweighted = FALSE,
+    chunks = 1000,
+    forceRecalcDegree = FALSE,
+    forceRecalcNetwork = FALSE,
+    nCores = 1,
+    ...) {
     # fail safe until windows has parallel computing support for mclapply
     if (.Platform$OS.type == "windows") {
         nCores <- 1
@@ -165,14 +165,13 @@
         rlang::abort("xdata argument must be a matrix object")
     }
 
-    chunkFunction <- function(
-            xdata,
-            maxIx,
-            ixOuter,
-            nCores,
-            cutoff,
-            considerUnweighted,
-            ...) {
+    chunkFunction <- function(xdata,
+                              maxIx,
+                              ixOuter,
+                              nCores,
+                              cutoff,
+                              considerUnweighted,
+                              ...) {
         parallel::mclapply(seq(ixOuter, maxIx, 1),
             function(ixI) {
                 line <- .networkWorker(fun, xdata, ixI, ...)

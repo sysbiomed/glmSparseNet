@@ -56,25 +56,25 @@
 #'     bb = c(age = 0, 1.5)
 #' ), xdata, ydata)
 separate2GroupsCox <- function(
-        chosenBetas,
-        xdata,
-        ydata,
-        probs = c(.5, .5),
-        noPlot = FALSE,
-        plotTitle = "SurvivalCurves",
-        xlim = NULL,
-        ylim = NULL,
-        expandYZero = FALSE,
-        legendOutside = FALSE,
-        stopWhenOverlap = TRUE,
-        ...,
-        # Deprecated arguments with dots in name
-        chosen.btas = deprecated(), # nolint: object_name_linter.
-        no.plot = deprecated(), # nolint: object_name_linter.
-        plot.title = deprecated(), # nolint: object_name_linter.
-        expand.yzero = deprecated(), # nolint: object_name_linter.
-        legend.outside = deprecated(), # nolint: object_name_linter.
-        stop.when.overlap = deprecated()) { # nolint: object_name_linter.
+    chosenBetas,
+    xdata,
+    ydata,
+    probs = c(.5, .5),
+    noPlot = FALSE,
+    plotTitle = "SurvivalCurves",
+    xlim = NULL,
+    ylim = NULL,
+    expandYZero = FALSE,
+    legendOutside = FALSE,
+    stopWhenOverlap = TRUE,
+    ...,
+    # Deprecated arguments with dots in name
+    chosen.btas = deprecated(), # nolint: object_name_linter.
+    no.plot = deprecated(), # nolint: object_name_linter.
+    plot.title = deprecated(), # nolint: object_name_linter.
+    expand.yzero = deprecated(), # nolint: object_name_linter.
+    legend.outside = deprecated(), # nolint: object_name_linter.
+    stop.when.overlap = deprecated()) { # nolint: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(chosen.btas)) {
         .deprecatedDotParam("separate2GroupsCox", "chosen.btas", "chosenBetas")
@@ -242,10 +242,10 @@ separate2GroupsCox <- function(
 
 #' @keywords internal
 buildPrognosticIndexDataFrame <- function(
-        ydata,
-        probs,
-        stopWhenOverlap,
-        prognosticIndex) {
+    ydata,
+    probs,
+    stopWhenOverlap,
+    prognosticIndex) {
     prognosticIndexDf <- data.frame(
         time = c(), status = c(), group = c(), index = c()
     )
@@ -332,17 +332,17 @@ buildPrognosticIndexDataFrame <- function(
 
 #' @keywords internal
 .plotSurvival <- function(
-        noPlot,
-        km,
-        pValue,
-        prognosticIndexDf,
-        chosenBetasLen,
-        plotTitle,
-        xlim,
-        ylim,
-        expandYZero,
-        legendOutside,
-        ...) {
+    noPlot,
+    km,
+    pValue,
+    prognosticIndexDf,
+    chosenBetasLen,
+    plotTitle,
+    xlim,
+    ylim,
+    expandYZero,
+    legendOutside,
+    ...) {
     if (noPlot) {
         return(list(pvalue = pValue, plot = NULL, km = km))
     }

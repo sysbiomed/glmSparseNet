@@ -19,13 +19,13 @@
 #'
 #' @keywords internal
 .glmSparseNetPrivate <- function(
-        fun,
-        xdata,
-        ydata,
-        network,
-        experiment = NULL,
-        options = networkOptions(),
-        ...) {
+    fun,
+    xdata,
+    ydata,
+    network,
+    experiment = NULL,
+    options = networkOptions(),
+    ...) {
     checkmate::assert_multi_class(
         xdata,
         c("MultiAssayExperiment", "SummarizedExperiment", "matrix", "Matrix")

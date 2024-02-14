@@ -4,12 +4,12 @@
 #' .deprecatedDotParam("test_me", "n.folds", "1.21")
 #'
 .deprecatedDotParam <- function(
-        funName,
-        argumentName,
-        newArgumentName = gsub("\\.(\\w)", "\\U\\1", argumentName, perl = TRUE),
-        version = "1.21.0",
-        env = rlang::caller_env(),
-        userEnv = rlang::caller_env(2)) {
+    funName,
+    argumentName,
+    newArgumentName = gsub("\\.(\\w)", "\\U\\1", argumentName, perl = TRUE),
+    version = "1.21.0",
+    env = rlang::caller_env(),
+    userEnv = rlang::caller_env(2)) {
     lifecycle::deprecate_warn(
         version,
         paste0(funName, "(", argumentName, " = )"),
@@ -71,11 +71,11 @@ my.symbols <- function(ix = NULL) { # nolint: object_name_linter.
 #'
 #' @export
 hallmarks <- function(
-        genes,
-        metric = "count",
-        hierarchy = "full",
-        generate.plot = TRUE, # nolint: object_name_linter.
-        show.message = FALSE) { # nolint: object_name_linter.
+    genes,
+    metric = "count",
+    hierarchy = "full",
+    generate.plot = TRUE, # nolint: object_name_linter.
+    show.message = FALSE) { # nolint: object_name_linter.
     lifecycle::deprecate_stop(
         "1.21.0", "hallmarks()",
         details = "API is no longer available"
