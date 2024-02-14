@@ -467,8 +467,8 @@ test_that("run.cache baseDir option works", {
 
     if (.Platform$OS.type == "windows") {
         cache0Os <- gsub("\\\\", "\\\\\\\\", cache0)
-        cache1Os <- gsub("\\\\", "\\\\\\\\", cache0)
-        cache2Os <- gsub("\\\\", "\\\\\\\\", cache0)
+        cache1Os <- gsub("\\\\", "\\\\\\\\", cache1)
+        cache2Os <- gsub("\\\\", "\\\\\\\\", cache2)
     } else {
         cache0Os <- cache0
         cache1Os <- cache1
