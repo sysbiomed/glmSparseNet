@@ -1,0 +1,12 @@
+pandoc: 2.19.2
+pkgdown: 2.0.7
+pkgdown_sha: ~
+articles:
+  example_brca_logistic: example_brca_logistic.html
+  example_brca_protein-protein-interactions_survival: example_brca_protein-protein-interactions_survival.html
+  example_brca_survival: example_brca_survival.html
+  example_prad_survival: example_prad_survival.html
+  example_skcm_survival: example_skcm_survival.html
+  separate2GroupsCox: separate2GroupsCox.html
+last_built: 2024-02-14T12:29Z
+

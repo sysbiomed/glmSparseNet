@@ -1,0 +1,13 @@
+This directory was automatically created in R when function .runCache
+was executed (from 'glmSparseNet' package). This might have been done
+by you directly or by another function to cache results.
+
+This folder can be safely deleted as it only contains a cache of the
+results of functions
+
+package link in BioConductor:
+https://bioconductor.org/packages/release/bioc/html/glmSparseNet.html
+github link: 
+   https://github.com/sysbiomed/glmSparseNet
+
+Have a great day
