@@ -291,7 +291,7 @@ buildPrognosticIndexDataFrame <- function(
                 " != ", length(prognosticIndex), ")\n\n"
             )
 
-            if(stopWhenOverlap) {
+            if (stopWhenOverlap) {
                 rlang::abort(paste0(str.message, "Interrupting execution..."))
             }
 
