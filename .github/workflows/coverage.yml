@@ -1,15 +1,33 @@
+---
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
+  # 'push' events are triggered when commits
+  # are pushed to one of these branches
   push:
-    branches: devel
+    branches:
+      - devel
+    tags:
+      - "v*"
+  # 'pull_request' events are triggered when PRs are
+  # created against one of these target branches.
   pull_request:
-    branches: devel
+    types:
+    - opened
+    - synchronize
+    - reopened
+    - ready_for_review
+    branches:
+      - devel
+  # 'workflow_dispatch' gives you the ability
+  # to run this workflow on demand, anytime
+  workflow_dispatch:
 
-name: test-coverage
+name: Check Test Coverage 🧪
 
 jobs:
-  test-coverage:
+  coverage:
+    name: Coverage 📔
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}

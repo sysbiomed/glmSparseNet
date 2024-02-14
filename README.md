@@ -18,10 +18,8 @@ glmSparseNet
 > Elastic-Net models with additional regularization based on network
 > centrality metrics
 
-[![Travis-CI Build
-Status](https://travis-ci.org/sysbiomed/glmSparseNet.svg?branch=master)](https://travis-ci.org/sysbiomed/glmSparseNet)
-[![Coverage
-status](https://codecov.io/gh/sysbiomed/glmSparseNet/branch/master/graph/badge.svg)](https://codecov.io/github/sysbiomed/glmSparseNet?branch=master)
+[![R-CMD-check](https://github.com/sysbiomed/glmSparseNet/actions/workflows/check.yml/badge.svg)](https://github.com/sysbiomed/glmSparseNet/actions/workflows/check.yml)
+[![codecov](https://codecov.io/github/sysbiomed/glmSparseNet/graph/badge.svg?token=spsEKgAbyi)](https://codecov.io/github/sysbiomed/glmSparseNet)
 
 ## Overview
 

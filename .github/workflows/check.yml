@@ -1,9 +1,9 @@
+---
 # For help debugging build failures open an issue on the RStudio community with the 'github-actions' tag.
 # https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: '5 8 * * 0'
+  # 'push' events are triggered when commits
+  # are pushed to one of these branches
   push:
     paths:
       - 'R/*.R'
@@ -11,31 +11,39 @@ on:
       - '.github/workflows/*.yml'
     branches:
       - devel
+  # 'pull_request' events are triggered when PRs are
+  # created against one of these target branches.
   pull_request:
+    types:
+    - opened
+    - synchronize
+    - reopened
+    - ready_for_review
     branches:
       - devel
+  # 'workflow_dispatch' gives you the ability
+  # to run this workflow on demand, anytime
+  workflow_dispatch:
 
-name: R-CMD-check
+
+name: R-CMD-check 📦
 
 jobs:
-  R-CMD-check:
+  check:
     runs-on: ${{ matrix.config.os }}
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }}) 📦
 
     strategy:
       fail-fast: false
       matrix:
         config:
           - {os: windows-latest, r: 'release'}
-          - {os: windows-latest, r: 'oldrel'}
           - {os: windows-latest, r: 'devel'}
           - {os: macOS-latest, r: 'devel'}
           - {os: macOS-latest, r: 'release'}
-          - {os: macOS-latest, r: 'oldrel'}
           - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
           - {os: ubuntu-20.04, r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
-          - {os: ubuntu-20.04, r: 'oldrel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -55,5 +63,6 @@ jobs:
         with:
             extra-packages: |
               any::BiocManager
+              any::rcmdcheck
 
       - uses: r-lib/actions/check-r-package@v2
