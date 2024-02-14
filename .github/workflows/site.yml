@@ -6,7 +6,11 @@ on:
   # are pushed to one of these branches
   push:
     branches:
-      - main
+      - devel
+
+concurrency:
+  group: deploy-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   pkgdown:

@@ -25,6 +25,10 @@ on:
   # to run this workflow on demand, anytime
   workflow_dispatch:
 
+concurrency:
+  group: check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 
 name: R-CMD-check 📦
 
