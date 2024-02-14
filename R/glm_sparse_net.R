@@ -60,16 +60,15 @@
 #'     network = "correlation",
 #'     experiment = "RNASeq2GeneNorm"
 #' )
-glmSparseNet <- function(
-    xdata,
-    ydata,
-    network,
-    options = networkOptions(),
-    experiment = NULL,
-    # Deprecated arguments with dots in name
-    network.options = deprecated(), # nolint: object_name_linter.
-    experiment.name = deprecated(), # nolint: object_name_linter.
-    ...) {
+glmSparseNet <- function(xdata,
+                         ydata,
+                         network,
+                         options = networkOptions(),
+                         experiment = NULL,
+                         # Deprecated arguments with dots in name
+                         network.options = deprecated(), # nolint: object_name_linter.
+                         experiment.name = deprecated(), # nolint: object_name_linter.
+                         ...) {
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(network.options)) {
         .deprecatedDotParam("glmSparseNet", "network.options", "options")
@@ -157,16 +156,15 @@ glmSparseNet <- function(
 #'     network    = "correlation",
 #'     experiment = "RNASeq2GeneNorm"
 #' )
-cv.glmSparseNet <- function(
-    xdata,
-    ydata,
-    network,
-    options = networkOptions(),
-    experiment = NULL,
-    # Deprecated arguments with dots in name
-    network.options = deprecated(), # nolint: object_name_linter.
-    experiment.name = deprecated(), # nolint: object_name_linter.
-    ...) {
+cv.glmSparseNet <- function(xdata,
+                            ydata,
+                            network,
+                            options = networkOptions(),
+                            experiment = NULL,
+                            # Deprecated arguments with dots in name
+                            network.options = deprecated(), # nolint: object_name_linter.
+                            experiment.name = deprecated(), # nolint: object_name_linter.
+                            ...) {
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(network.options)) {
         .deprecatedDotParam("cv.glmSparseNet", "network.options", "options")

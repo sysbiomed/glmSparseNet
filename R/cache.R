@@ -51,16 +51,15 @@
 #' # Using a local folder
 #' # glmSparseNet:::.runCache(c, 1, 2, 3, 4, baseDir = "runcache")
 #' }
-methods::setGeneric(".runCache", function(
-    fun,
-    ...,
-    seed = NULL,
-    baseDir = NULL,
-    cachePrefix = "generic_cache",
-    cacheDigest = list(),
-    showMessage = NULL,
-    forceRecalc = FALSE,
-    addToHash = NULL) {
+methods::setGeneric(".runCache", function(fun,
+                                          ...,
+                                          seed = NULL,
+                                          baseDir = NULL,
+                                          cachePrefix = "generic_cache",
+                                          cacheDigest = list(),
+                                          showMessage = NULL,
+                                          forceRecalc = FALSE,
+                                          addToHash = NULL) {
     message(
         "Wrong arguments, first argument must be a path and second a function!"
     )
@@ -372,13 +371,12 @@ methods::setMethod(
 #'     sum,
 #'     1, 2, 3
 #' )
-.calculateResult <- function(
-    path,
-    compression,
-    forceRecalc,
-    showMessage,
-    fun,
-    ...) {
+.calculateResult <- function(path,
+                             compression,
+                             forceRecalc,
+                             showMessage,
+                             fun,
+                             ...) {
     #
     result <- NULL
     if (file.exists(path) && !forceRecalc) {

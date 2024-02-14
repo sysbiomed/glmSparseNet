@@ -94,13 +94,12 @@
 #' \donttest{
 #' stringDBhomoSapiens(scoreThreshold = 800)
 #' }
-stringDBhomoSapiens <- function(
-    version = "11.0",
-    scoreThreshold = 0,
-    removeText = TRUE,
-    # Deprecated arguments with dots in name
-    score_threshold = deprecated(), # nolint: object_name_linter.
-    remove.text = deprecated()) { # nolint: object_name_linter.)
+stringDBhomoSapiens <- function(version = "11.0",
+                                scoreThreshold = 0,
+                                removeText = TRUE,
+                                # Deprecated arguments with dots in name
+                                score_threshold = deprecated(), # nolint: object_name_linter.
+                                remove.text = deprecated()) { # nolint: object_name_linter.)
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(score_threshold)) {
         .deprecatedDotParam(
@@ -168,12 +167,11 @@ stringDBhomoSapiens <- function(
 #' # number of edges
 #' sum(string_network != 0)
 #' }
-buildStringNetwork <- function(
-    stringTbl,
-    useNames = c("protein", "ensembl", "external"),
-    # Deprecated arguments with dots in name
-    string.tbl = deprecated(), # nolint: object_name_linter.
-    use.names = deprecated()) { # nolint: object_name_linter.
+buildStringNetwork <- function(stringTbl,
+                               useNames = c("protein", "ensembl", "external"),
+                               # Deprecated arguments with dots in name
+                               string.tbl = deprecated(), # nolint: object_name_linter.
+                               use.names = deprecated()) { # nolint: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(string.tbl)) {
         .deprecatedDotParam("buildStringNetwork", "string.tbl")

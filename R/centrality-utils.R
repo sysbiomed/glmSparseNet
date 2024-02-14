@@ -6,15 +6,14 @@
 #' @inheritParams networkCorParallel
 #'
 #' @return depends on buildOutput parameter
-.networkGenericParallel <- function(
-    fun,
-    funPrefix,
-    xdata,
-    buildOutput = "matrix",
-    nCores = 1,
-    forceRecalcNetwork = FALSE,
-    showMessage = FALSE,
-    ...) {
+.networkGenericParallel <- function(fun,
+                                    funPrefix,
+                                    xdata,
+                                    buildOutput = "matrix",
+                                    nCores = 1,
+                                    forceRecalcNetwork = FALSE,
+                                    showMessage = FALSE,
+                                    ...) {
     # Windows only support 1 core
     if (.Platform$OS.type == "windows") {
         nCores <- 1
@@ -137,17 +136,16 @@
 #' @param ... extra parameters for fun
 #'
 #' @return a vector of the degrees
-.degreeGeneric <- function(
-    fun = stats::cor,
-    funPrefix = "operator",
-    xdata,
-    cutoff = 0,
-    considerUnweighted = FALSE,
-    chunks = 1000,
-    forceRecalcDegree = FALSE,
-    forceRecalcNetwork = FALSE,
-    nCores = 1,
-    ...) {
+.degreeGeneric <- function(fun = stats::cor,
+                           funPrefix = "operator",
+                           xdata,
+                           cutoff = 0,
+                           considerUnweighted = FALSE,
+                           chunks = 1000,
+                           forceRecalcDegree = FALSE,
+                           forceRecalcNetwork = FALSE,
+                           nCores = 1,
+                           ...) {
     # fail safe until windows has parallel computing support for mclapply
     if (.Platform$OS.type == "windows") {
         nCores <- 1

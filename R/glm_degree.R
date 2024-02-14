@@ -14,16 +14,15 @@
 #'     family = "gaussian",
 #'     options = networkOptions(minDegree = .2)
 #' )
-glmDegree <- function(
-    xdata,
-    ydata,
-    network,
-    options = networkOptions(),
-    experiment = NULL,
-    # Deprecated arguments with dots in name
-    network.options = deprecated(), # nolint: object_name_linter.
-    experiment.name = deprecated(), # nolint: object_name_linter.
-    ...) {
+glmDegree <- function(xdata,
+                      ydata,
+                      network,
+                      options = networkOptions(),
+                      experiment = NULL,
+                      # Deprecated arguments with dots in name
+                      network.options = deprecated(), # nolint: object_name_linter.
+                      experiment.name = deprecated(), # nolint: object_name_linter.
+                      ...) {
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(network.options)) {
         .deprecatedDotParam("glmDegree", "network.options", "options")
@@ -63,16 +62,15 @@ glmDegree <- function(
 #'     nfolds = 5,
 #'     options = networkOptions(minDegree = .2)
 #' )
-cv.glmDegree <- function(
-    xdata,
-    ydata,
-    network,
-    options = networkOptions(),
-    experiment = NULL,
-    # Deprecated arguments with dots in name
-    network.options = deprecated(), # nolint: object_name_linter.
-    experiment.name = deprecated(), # nolint: object_name_linter.
-    ...) {
+cv.glmDegree <- function(xdata,
+                         ydata,
+                         network,
+                         options = networkOptions(),
+                         experiment = NULL,
+                         # Deprecated arguments with dots in name
+                         network.options = deprecated(), # nolint: object_name_linter.
+                         experiment.name = deprecated(), # nolint: object_name_linter.
+                         ...) {
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(network.options)) {
         .deprecatedDotParam("cv.glmDegree", "network.options", "options")

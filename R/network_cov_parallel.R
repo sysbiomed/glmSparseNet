@@ -9,18 +9,17 @@
 #' n.col <- 6
 #' xdata <- matrix(rnorm(n.col * 4), ncol = n.col)
 #' networkCovParallel(xdata)
-networkCovParallel <- function(
-    xdata,
-    buildOutput = "matrix",
-    nCores = 1,
-    forceRecalcNetwork = FALSE,
-    showMessage = FALSE,
-    ...,
-    # Deprecated arguments with dots in name
-    build.output = deprecated(), # nolint: object_name_linter.
-    n.cores = deprecated(), # nolint: object_name_linter.
-    force.recalc.network = deprecated(), # nolint: object_name_linter.
-    show.message = deprecated()) { # nolint: object_name_linter.
+networkCovParallel <- function(xdata,
+                               buildOutput = "matrix",
+                               nCores = 1,
+                               forceRecalcNetwork = FALSE,
+                               showMessage = FALSE,
+                               ...,
+                               # Deprecated arguments with dots in name
+                               build.output = deprecated(), # nolint: object_name_linter.
+                               n.cores = deprecated(), # nolint: object_name_linter.
+                               force.recalc.network = deprecated(), # nolint: object_name_linter.
+                               show.message = deprecated()) { # nolint: object_name_linter.
     # Lifecycle management: to remove after 1.23.0
     if (lifecycle::is_present(build.output)) {
         .deprecatedDotParam("networkCovParallel", "build.output")
