@@ -8,7 +8,8 @@ test_that("downloadFileLocal: Detects when download is size 0", {
     )
 
     downloadFileLocal(
-        "https://string-db.org/api/tsv-no-header/version"
+        "https://string-db.org/api/tsv-no-header/version",
+        oD = withr::local_tempdir()
     ) |>
-        expect_output("failed to download")
+        expect_message("failed to download")
 })
