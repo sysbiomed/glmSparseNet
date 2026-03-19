@@ -1,5 +1,5 @@
-pandoc: 2.19.2
-pkgdown: 2.0.7
+pandoc: 3.1.11
+pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   example_brca_logistic: example_brca_logistic.html
@@ -8,5 +8,4 @@ articles:
   example_prad_survival: example_prad_survival.html
   example_skcm_survival: example_skcm_survival.html
   separate2GroupsCox: separate2GroupsCox.html
-last_built: 2024-02-14T12:29Z
-
+last_built: 2026-03-19T19:52Z
