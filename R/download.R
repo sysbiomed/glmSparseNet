@@ -52,5 +52,5 @@ downloadFileLocal <- function(urlStr, oD = tempdir()) {
             )
         )
     }
-    return(temp)
+    temp
 }

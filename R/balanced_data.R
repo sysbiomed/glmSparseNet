@@ -54,5 +54,5 @@ balancedCvFolds <- function(..., nfolds = 10) {
         outputList <- outputList[[1L]]
         inputList <- inputList[[1L]]
     }
-    return(list(input = inputList, output = outputList, nfolds = nfolds))
+    list(input = inputList, output = outputList, nfolds = nfolds)
 }

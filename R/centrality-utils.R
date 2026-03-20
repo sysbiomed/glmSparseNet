@@ -47,14 +47,14 @@
                     }
                 )
                 if (buildOutput == "vector" || buildOutput == "matrix") {
-                    return(result)
+                    result
                 } else {
-                    return(TRUE)
+                    TRUE
                 }
             },
             mc.cores = nCores, mc.silent = FALSE, mc.preschedule = TRUE
         )
-        return(result)
+        result
     }
 
     result <- .runCache(
@@ -68,7 +68,7 @@
         ...
     )
     if (buildOutput == "vector") {
-        return(unlist(result))
+        unlist(result)
     } else if (buildOutput == "matrix") {
         sparseData <- data.frame(i = c(), j = c(), p = c())
         for (ix in rev(seq_along(result))) {
@@ -83,16 +83,16 @@
             )
             result[[ix]] <- NULL
         }
-        return(Matrix::sparseMatrix(
+        Matrix::sparseMatrix(
             i = sparseData$i, j = sparseData$j,
             x = sparseData$p, dims = c(
                 ncol(xdata),
                 ncol(xdata)
             ),
             symmetric = TRUE
-        ))
+        )
     } else {
-        return(NULL)
+        NULL
     }
 }
 
@@ -180,8 +180,7 @@
                 if (considerUnweighted) {
                     line[line != 0] <- 1
                 }
-                line <- c(rep(0, ixI - 1), sum(line), line)
-                return(line)
+                c(rep(0, ixI - 1), sum(line), line)
             },
             mc.cores = nCores, mc.allow.recursive = FALSE
         )
@@ -221,7 +220,7 @@
     #
     xdataSha256 <- .digestCache(xdata)
 
-    val <- .runCache(
+    .runCache(
         weigthedAux,
         xdata,
         cutoff,
@@ -232,5 +231,4 @@
         showMessage = FALSE,
         forceRecalc = forceRecalcDegree, ...
     )
-    return(val)
 }

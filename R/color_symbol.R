@@ -23,7 +23,7 @@ myColors <- function(ix = NULL) {
     } else {
         ix <- ix %% length(retColors)
     }
-    return(retColors[ix])
+    retColors[ix]
 }
 
 #' Custom pallete of symbols in plots
@@ -52,5 +52,5 @@ mySymbols <- function(ix = NULL) {
     } else {
         ix <- ix %% length(retSymbols)
     }
-    return(retSymbols[ix])
+    retSymbols[ix]
 }

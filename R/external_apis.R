@@ -37,7 +37,7 @@
         )
     }
 
-    return(result)
+    result
 }
 
 #' Common call to biomaRt to avoid repetitive code

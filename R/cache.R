@@ -88,12 +88,10 @@ methods::setGeneric(".runCache", function(fun,
             names(methodsFound),
             function(ix) {
                 if (is.null(attributes(methodsFound[[ix]])$srcref)) {
-                    return(.digestCache(toString(body(methodsFound[[ix]]))))
+                    .digestCache(toString(body(methodsFound[[ix]])))
                 } else {
-                    return(
-                        .digestCache(
-                            toString(attributes(methodsFound[[ix]])$srcref)
-                        )
+                    .digestCache(
+                        toString(attributes(methodsFound[[ix]])$srcref)
                     )
                 }
             },
@@ -112,7 +110,7 @@ methods::setGeneric(".runCache", function(fun,
         fun
     }
 
-    return(.digestCache(digestFun))
+    .digestCache(digestFun)
 }
 
 #' Write a file in run-cache directory to explain the origin
@@ -344,7 +342,7 @@ methods::setMethod(
             # just calculate
             fun(...)
         }
-        return(result)
+        result
     }
 )
 
@@ -427,5 +425,5 @@ methods::setMethod(
         result <- fun(...)
         .saveRunCache(result, path, compression, showMessage)
     }
-    return(result)
+    result
 }

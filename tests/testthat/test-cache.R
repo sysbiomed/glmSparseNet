@@ -104,9 +104,11 @@ test_that("run_cache baseDir in folder that does have access", {
 
 test_that("run_cache test slight differences in code", {
     # main code to compare
+    # nolint start: return.
     fun1 <- function(val1) {
         return(val1^2)
     }
+    # nolint end: return.
 
     expect_identical(
         glmSparseNet:::.buildFunctionDigest(fun1),
@@ -114,13 +116,13 @@ test_that("run_cache test slight differences in code", {
     )
 
     # main code to compare
-    # nolint start: spaces_inside_linter
-  # styler: off
+    # nolint start: spaces_inside, return, indentation.
+    # styler: off
   fun1OneSpace <- function(val1) {
     return( val1^2)
   }
     # styler: on
-    # nolint end: spaces_inside_linter
+    # nolint end: spaces_inside, return, indentation.
 
     expect_failure(
         expect_identical(
@@ -130,13 +132,13 @@ test_that("run_cache test slight differences in code", {
     )
 
     # changes in spaces
-    # nolint start: spaces_inside_linter
-  # styler: off
+    # nolint start: spaces_inside, return, indentation.
+    # styler: off
   fun1Spaces <- function(val1) {
     return(val1^2 )
   }
     # styler: on
-    # nolint end: spaces_inside_linter
+    # nolint end: spaces_inside, return, indentation.
 
     expect_failure(
         expect_identical(
@@ -146,9 +148,11 @@ test_that("run_cache test slight differences in code", {
     )
 
     # same as fun1 but defined in a different name
+    # nolint start: return.
     fun2 <- function(val1) {
         return(val1^2)
     }
+    # nolint end: return.
 
     expect_identical(
         glmSparseNet:::.buildFunctionDigest(fun1),
@@ -156,9 +160,11 @@ test_that("run_cache test slight differences in code", {
     )
 
     # small difference in argument, but same body
+    # nolint start: return.
     fun2SlightDiff <- function(val2) {
         return(val1^2)
     }
+    # nolint end: return.
 
     expect_failure(
         expect_identical(
@@ -168,9 +174,11 @@ test_that("run_cache test slight differences in code", {
     )
 
     # using different variable
+    # nolint start: return.
     fun2Diff <- function(val2) {
         return(val2^2)
     }
+    # nolint end: return.
 
     expect_failure(
         expect_identical(
@@ -180,9 +188,11 @@ test_that("run_cache test slight differences in code", {
     )
 
     # adds a new argument (usused in body)
+    # nolint start: return.
     fun2DiffArg <- function(val1, val2 = FALSE) {
         return(val1^2)
     }
+    # nolint end: return.
 
     expect_failure(
         expect_identical(

@@ -70,5 +70,5 @@ buildLambda <- function(lambdaLargest = NULL,
         unique() |>
         sort(decreasing = TRUE)
 
-    return(lambda)
+    lambda
 }
