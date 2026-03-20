@@ -119,9 +119,20 @@ TRUE, the XML query to the webservice will be printed.</p></dd>
 <span class="r-in"><span>    <span class="st">"ENSP00000233944"</span>,</span></span>
 <span class="r-in"><span>    <span class="st">"ENSP00000216911"</span></span></span>
 <span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ensembl_peptide_id ensembl_gene_id</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1    ENSP00000216911 ENSG00000087586</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2    ENSP00000235382 ENSG00000116741</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>There was an problem, calling the function with ssl_verifypeer to FALSE</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> 	: Query ERROR: caught BioMart::Exception::Database: Could not connect to mysql database ensembl_mart_115: DBI connect('database=ensembl_mart_115;host=127.0.0.1;port=5316','ensro',...) failed: Can't connect to MySQL server on '127.0.0.1' (111) at /nfs/public/ro/ensweb/live/mart/www_115/biomart-perl/lib/BioMart/Configuration/DBLocation.pm line 98.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>There was a problem getting the genes, trying without a cache.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> 	Error in .processResults(postRes, mart = mart, hostURLsep = sep, fullXmlQuery = fullXmlQuery, : Query ERROR: caught BioMart::Exception::Database: Could not connect to mysql database ensembl_mart_115: DBI connect('database=ensembl_mart_115;host=127.0.0.1;port=5316','ensro',...) failed: Can't connect to MySQL server on '127.0.0.1' (111) at /nfs/public/ro/ensweb/live/mart/www_115/biomart-perl/lib/BioMart/Configuration/DBLocation.pm line 98.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Problem when finding gene names:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> 	Error in .processResults(postRes, mart = mart, hostURLsep = sep, fullXmlQuery = fullXmlQuery, : Query ERROR: caught BioMart::Exception::Database: Could not connect to mysql database ensembl_mart_115: DBI connect('database=ensembl_mart_115;host=127.0.0.1;port=5316','ensro',...) failed: Can't connect to MySQL server on '127.0.0.1' (111) at /nfs/public/ro/ensweb/live/mart/www_115/biomart-perl/lib/BioMart/Configuration/DBLocation.pm line 98.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ensembl_peptide_id ensembl_gene_id external_gene_name</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    ENSP00000235382 ENSP00000235382    ENSP00000235382</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    ENSP00000233944 ENSP00000233944    ENSP00000233944</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    ENSP00000216911 ENSP00000216911    ENSP00000216911</span>
 </code></pre></div>
     </div>
   </div>

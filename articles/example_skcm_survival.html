@@ -89,7 +89,7 @@
                         <h4 data-toc-skip class="author">Eunice
 Carrasquinha and André Veríssimo</h4>
             
-            <h4 data-toc-skip class="date">2026-03-19</h4>
+            <h4 data-toc-skip class="date">2026-03-20</h4>
       
 
       <div class="hidden name"><code>example_skcm_survival.Rmd</code></div>
@@ -256,6 +256,14 @@ best.</p>
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">gene.name</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning in .curlWorkaround(biomaRt::getBM(attributes = attributes, filters = filters, : There was an problem, calling the function with ssl_verifypeer to FALSE</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##  : Query ERROR: caught BioMart::Exception::Database: Could not connect to mysql database ensembl_mart_115: DBI connect('database=ensembl_mart_115;host=127.0.0.1;port=5316','ensro',...) failed: Can't connect to MySQL server on '127.0.0.1' (111) at /nfs/public/ro/ensweb/live/mart/www_115/biomart-perl/lib/BioMart/Configuration/DBLocation.pm line 98.</span></span></code></pre>
+<pre><code><span><span class="co">## Warning in force(expr): restarting interrupted promise evaluation</span></span></code></pre>
+<pre><code><span><span class="co">## Warning in value[[3L]](cond): There was a problem getting the genes, trying without a cache.</span></span>
+<span><span class="co">##  Error in .processResults(postRes, mart = mart, hostURLsep = sep, fullXmlQuery = fullXmlQuery, : Query ERROR: caught BioMart::Exception::Database: Could not connect to mysql database ensembl_mart_115: DBI connect('database=ensembl_mart_115;host=127.0.0.1;port=5316','ensro',...) failed: Can't connect to MySQL server on '127.0.0.1' (111) at /nfs/public/ro/ensweb/live/mart/www_115/biomart-perl/lib/BioMart/Configuration/DBLocation.pm line 98.</span></span></code></pre>
+<pre><code><span><span class="co">## Warning in value[[3L]](cond): Problem when finding gene names:</span></span>
+<span><span class="co">##  Error in .processResults(postRes, mart = mart, hostURLsep = sep, fullXmlQuery = fullXmlQuery, : Query ERROR: caught BioMart::Exception::Database: Could not connect to mysql database ensembl_mart_115: DBI connect('database=ensembl_mart_115;host=127.0.0.1;port=5316','ensro',...) failed: Can't connect to MySQL server on '127.0.0.1' (111) at /nfs/public/ro/ensweb/live/mart/www_115/biomart-perl/lib/BioMart/Configuration/DBLocation.pm line 98.</span></span></code></pre>
 <table class="table">
 <thead><tr class="header">
 <th align="left"></th>
@@ -288,7 +296,7 @@ best.</p>
 <div class="section level3">
 <h3 id="survival-curves-and-log-rank-test">Survival curves and Log rank test<a class="anchor" aria-label="anchor" href="#survival-curves-and-log-rank-test"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/separate2GroupsCox.html">separate2GroupsCox</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">coefsCV</span><span class="op">)</span>,</span>
 <span>    <span class="va">xdata</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">coefsCV</span><span class="op">)</span><span class="op">]</span>,</span>
 <span>    <span class="va">ydata</span>,</span>
@@ -311,7 +319,7 @@ best.</p>
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.5.3 (2026-03-11)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu</span></span>

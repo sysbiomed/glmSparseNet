@@ -97,20 +97,20 @@ directory for the actual cache file (this reduces number of files per folder)</p
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">glmSparseNet</span><span class="fu">:::</span><span class="fu">.createDirectoryForCache</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"abcd"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $baseDir</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpWbnCRn"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmptJEAVC"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parentDir</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpWbnCRn/abcd"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmptJEAVC/abcd"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu">glmSparseNet</span><span class="fu">:::</span><span class="fu">.createDirectoryForCache</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"run-cache"</span><span class="op">)</span>, <span class="st">"abcd"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $baseDir</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpWbnCRn/filee27aeedca90/reference/run-cache"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmptJEAVC/file1c3026ecf480/reference/run-cache"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parentDir</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpWbnCRn/filee27aeedca90/reference/run-cache/abcd"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmptJEAVC/file1c3026ecf480/reference/run-cache/abcd"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>

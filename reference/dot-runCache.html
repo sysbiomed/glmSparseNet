@@ -154,9 +154,9 @@ parameters (...)</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># [optional] save cache in a temporary directory</span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="fu">glmSparseNet</span><span class="fu">:::</span><span class="fu"><a href="dot-baseDir.html">.baseDir</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpWbnCRn"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmptJEAVC"</span>
 <span class="r-in"><span><span class="fu">glmSparseNet</span><span class="fu">:::</span><span class="fu">.runCache</span><span class="op">(</span><span class="va">c</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Saving in cache:  /tmp/RtmpWbnCRn/9a54/cache-generic_cache-H_9a54ea6e9ee52dc8bdcbc4f79272ee77.RData</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Saving in cache:  /tmp/RtmptJEAVC/9a54/cache-generic_cache-H_9a54ea6e9ee52dc8bdcbc4f79272ee77.RData</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4</span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># next three should use the same cache</span></span></span>
@@ -165,13 +165,13 @@ parameters (...)</p></dd>
 <span class="r-in"><span><span class="co">#   for the first argument</span></span></span>
 <span class="r-in"><span><span class="fu">glmSparseNet</span><span class="fu">:::</span><span class="fu">.runCache</span><span class="op">(</span><span class="va">c</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading from cache (not calculating):</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpWbnCRn/9a54/cache-generic_cache-H_9a54ea6e9ee52dc8bdcbc4f79272ee77.RData</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Cache was created at 2026-03-19 19:53:45.664784 using glmSparseNet v1.29.0</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmptJEAVC/9a54/cache-generic_cache-H_9a54ea6e9ee52dc8bdcbc4f79272ee77.RData</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cache was created at 2026-03-20 00:12:21.898965 using glmSparseNet v1.29.0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4</span>
 <span class="r-in"><span><span class="fu">glmSparseNet</span><span class="fu">:::</span><span class="fu">.runCache</span><span class="op">(</span><span class="va">c</span>, a <span class="op">=</span> <span class="fl">1</span>, <span class="fl">2</span>, c <span class="op">=</span> <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading from cache (not calculating):</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpWbnCRn/9a54/cache-generic_cache-H_9a54ea6e9ee52dc8bdcbc4f79272ee77.RData</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Cache was created at 2026-03-19 19:53:45.664784 using glmSparseNet v1.29.0</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmptJEAVC/9a54/cache-generic_cache-H_9a54ea6e9ee52dc8bdcbc4f79272ee77.RData</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cache was created at 2026-03-20 00:12:21.898965 using glmSparseNet v1.29.0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4</span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Using a local folder</span></span></span>
