@@ -81,7 +81,7 @@ methods::setGeneric(".runCache", function(fun,
 #' glmSparseNet:::.buildFunctionDigest(sum)
 #' glmSparseNet:::.buildFunctionDigest(c)
 .buildFunctionDigest <- function(fun) {
-    digestFun <- if (methods::is(fun, "standardGeneric")) {
+    digestFun <- if (methods::is(fun, "genericFunction")) {
         # if it is a generic, then use code for all methods
         methodsFound <- methods::findMethods(fun)
         vapply(
