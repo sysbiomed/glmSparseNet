@@ -83,7 +83,7 @@ test_that("separate2GroupsCox: throws cuttof error when overlapping prob.", {
         expect_error("The cutoff values")
 })
 
-test_that("separate2GroupsCox: throws warni~ng when overlapping prob.", {
+test_that("separate2GroupsCox: throws warning when overlapping prob.", {
     ovarian <- survival::ovarian
     xdata <- survival::ovarian[, c("age", "resid.ds")]
     ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
@@ -95,7 +95,7 @@ test_that("separate2GroupsCox: throws warni~ng when overlapping prob.", {
         expect_warning("The cutoff values")
 })
 
-test_that("separate2GroupsCox: no plot is rturned when argument is given", {
+test_that("separate2GroupsCox: no plot is returned when argument is given", {
     ovarian <- survival::ovarian
     xdata <- survival::ovarian[, c("age", "resid.ds")]
     ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
