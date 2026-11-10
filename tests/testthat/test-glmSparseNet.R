@@ -107,4 +107,3 @@ test_that("cv.glmSparseNet: simple call", {
         expect_warning("'experiments' dropped;") |>
         suppressMessages()
 })
-
