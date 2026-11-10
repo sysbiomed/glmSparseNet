@@ -1,5 +1,3 @@
-context("Correlation matrix")
-
 test_that("networkCorParallel: Default methods", {
     withr::local_tempdir(pattern = "base.dir") |> .baseDir()
     xdata <- randomXData()

@@ -1,5 +1,3 @@
-context("Covariance function")
-
 test_that("networkCovParallel: Default methods", {
     withr::local_tempdir(pattern = "base.dir") |> .baseDir()
     xdata <- randomXData()

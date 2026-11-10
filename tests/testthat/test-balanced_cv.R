@@ -1,5 +1,3 @@
-context("Balanced cv folds")
-
 test_that("Only one set", {
     set1 <- c(
         TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE,

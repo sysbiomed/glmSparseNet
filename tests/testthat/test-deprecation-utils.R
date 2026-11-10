@@ -1,3 +1,5 @@
+
+
 test_that("Deprecated functions", {
     balanced.cv.folds(1:10, nfolds = 10) |> lifecycle::expect_deprecated()
     my.colors() |> lifecycle::expect_deprecated()
@@ -5,7 +7,10 @@ test_that("Deprecated functions", {
     hallmarks() |> lifecycle::expect_defunct()
 })
 
-test_that("glmOrphan: deprecated parameters", {
+test_that("glm*: deprecated parameters", {
+    withr::local_tempdir(pattern = "base.dir") |>
+        .baseDir()
+
     data <- prepareMAE(10)
 
     glmArgs <- list(
@@ -14,7 +19,8 @@ test_that("glmOrphan: deprecated parameters", {
         "correlation",
         family = "cox",
         network.options = networkOptions(minDegree = .2),
-        experiment.name = "RNASeq2GeneNorm"
+        experiment.name = "RNASeq2GeneNorm",
+        cox.ties = "efron"
     )
 
     list(glmOrphan, glmHub, glmDegree, glmSparseNet) |>
@@ -24,7 +30,9 @@ test_that("glmOrphan: deprecated parameters", {
                 nrow() |>
                 expect_equal(nrow(data$xdata[["RNASeq2GeneNorm"]])) |>
                 expect_warning("experiments.* dropped") |>
-                expect_message("harmonizing input")
+                expect_message("harmonizing input") |>
+                lifecycle::expect_deprecated("experiment.name") |>
+                lifecycle::expect_deprecated("network.options")
         })
 })
 
@@ -39,7 +47,9 @@ test_that("networkCorParallel: deprecated parameters", {
     networkCorParallel(xdata, force.recalc.network = TRUE) |>
         lifecycle::expect_deprecated("forceRecalcNetwork")
     networkCorParallel(xdata, show.message = TRUE) |>
-        lifecycle::expect_deprecated("showMessage")
+        lifecycle::expect_deprecated("showMessage") |>
+        expect_message("Loading from cache") |>
+        expect_message("Cache was created")
 })
 
 test_that("networkCovParallel: deprecated parameters", {
@@ -53,10 +63,12 @@ test_that("networkCovParallel: deprecated parameters", {
     networkCovParallel(xdata, force.recalc.network = TRUE) |>
         lifecycle::expect_deprecated("forceRecalcNetwork")
     networkCovParallel(xdata, show.message = TRUE) |>
-        lifecycle::expect_deprecated("showMessage")
+        lifecycle::expect_deprecated("showMessage") |>
+        expect_message("Loading from cache") |>
+        expect_message("Cache was created")
 })
 
-test_that("cv.glmOrphan: deprecated parameters", {
+test_that("cv.glm*: deprecated parameters", {
     data <- prepareMAE(maxRows = 10)
 
     glmArgs <- list(
@@ -66,7 +78,8 @@ test_that("cv.glmOrphan: deprecated parameters", {
         family = "cox",
         nfolds = 5,
         network.options = networkOptions(minDegree = .2),
-        experiment.name = "RNASeq2GeneNorm"
+        experiment.name = "RNASeq2GeneNorm",
+        cox.ties = "efron"
     )
 
     list(cv.glmOrphan, cv.glmHub, cv.glmDegree, cv.glmSparseNet) |>
@@ -76,7 +89,9 @@ test_that("cv.glmOrphan: deprecated parameters", {
                 nrow() |>
                 expect_equal(nrow(data$xdata[["RNASeq2GeneNorm"]])) |>
                 expect_warning("experiments.* dropped") |>
-                expect_message("harmonizing input")
+                expect_message("harmonizing input") |>
+                lifecycle::expect_deprecated("experiment.name") |>
+                lifecycle::expect_deprecated("network.options")
         })
 })
 

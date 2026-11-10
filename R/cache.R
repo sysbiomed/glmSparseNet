@@ -63,9 +63,9 @@ methods::setGeneric(".runCache", function(fun,
     message(
         "Wrong arguments, first argument must be a path and second a function!"
     )
-    message("  Usage: run(tmpBaseDir, functionName, 1, 2, 3, 4, 5)")
+    message("  Usage: .runCache(functionName, 1, 2, 3, 4, 5)")
     message(
-        "  Usage: run(tmpBaseDir, functionName, 1, 2, 3, 4, 5, ",
+        "  Usage: .runCache(functionName, 1, 2, 3, 4, 5, ",
         "cache.prefix = 'someFileName', force.recalc = TRUE)"
     )
     rlang::abort("Arguments not supported in `.runCache`.")

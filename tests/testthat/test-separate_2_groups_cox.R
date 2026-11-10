@@ -1,5 +1,3 @@
-context("separate2GroupsCox")
-
 test_that("Calculates kaplan-meier data", {
     ovarian <- survival::ovarian
     result <- separate2GroupsCox(
@@ -85,19 +83,19 @@ test_that("separate2GroupsCox: throws cuttof error when overlapping prob.", {
         expect_error("The cutoff values")
 })
 
-test_that("separate2GroupsCox: throws warning when overlapping prob.", {
+test_that("separate2GroupsCox: throws warni~ng when overlapping prob.", {
     ovarian <- survival::ovarian
     xdata <- survival::ovarian[, c("age", "resid.ds")]
     ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)
 
     separate2GroupsCox(
         c(1, 0), xdata, ydata,
-        probs = c(.55, .45), stop.when.overlap = FALSE
+        probs = c(.55, .45), stopWhenOverlap = FALSE
     ) |>
         expect_warning("The cutoff values")
 })
 
-test_that("separate2GroupsCox: no plot is returned when argument is given", {
+test_that("separate2GroupsCox: no plot is rturned when argument is given", {
     ovarian <- survival::ovarian
     xdata <- survival::ovarian[, c("age", "resid.ds")]
     ydata <- data.frame(time = ovarian$futime, status = ovarian$fustat)

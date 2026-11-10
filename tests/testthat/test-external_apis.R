@@ -1,4 +1,4 @@
-context("external_apis")
+local_edition(2)
 
 test_that("geneNames: gene name query", {
     if (Sys.getenv("ONLINE_EXTERNAL_API") != "true") {
@@ -190,7 +190,7 @@ test_that(".biomartLoad: handles error gracefully", {
         .package = "biomaRt"
     )
 
-    result <- .biomartLoad(list(), list(), list(), useCache = TRUE, FALSE) |>
-        expect_warning("calling the function with ssl_verifypeer to FALSE") |>
-        expect_equal("success")
+    .biomartLoad(list(), list(), list(), useCache = TRUE, FALSE) |>
+        expect_equal("success") |>
+        expect_warning("calling the function with ssl_verifypeer to FALSE")
 })

@@ -1,5 +1,3 @@
-context("run.cache")
-
 withr::local_tempdir(pattern = "base.dir") |>
     .baseDir()
 
@@ -12,10 +10,7 @@ test_that("digest cache is consistent", {
     word <- "1234567"
     expect_equal(.digestCache(word), rlang::hash(word))
     # taken manually at 2018.04.27
-    expect_equal(
-        .digestCache(word),
-        "cd165630c0265b736b679ae63f597218"
-    )
+    expect_snapshot(.digestCache(word))
 })
 
 test_that("tempdir is correct", {
@@ -24,15 +19,17 @@ test_that("tempdir is correct", {
 })
 
 test_that("run_cache fails with arguments", {
-    expect_error(
-        .runCache(
-            1, 1, 2, 3, 4, 5,
-            # run_cache arguments
-            baseDir = withr::with_tempdir(),
-            forceRecalc = TRUE,
-            showMessage = TRUE
-        )
-    )
+    .runCache(
+        1, 1, 2, 3, 4, 5,
+        # run_cache arguments
+        baseDir = withr::with_tempdir(),
+        forceRecalc = TRUE,
+        showMessage = TRUE
+    ) |>
+        expect_error("Arguments not supported in `.runCache`.") |>
+        expect_message("Wrong arguments") |>
+        expect_message("Usage:") |>
+        expect_message("Usage:")
 })
 
 test_that("run_cache baseDir in folder that does not have access", {
@@ -345,28 +342,26 @@ test_that("run.cache add to hash", {
 test_that("run.cache with seed", {
     baseDir <- withr::local_tempdir()
 
-    expect_message(
-        .runCache(
-            rnorm, 1,
-            # run_cache arguments
-            seed = 10,
-            baseDir = baseDir,
-            forceRecalc = TRUE,
-            showMessage = TRUE
-        ),
-        "Saving in cache"
-    )
-    expect_message(
-        .runCache(
-            rnorm, 1,
-            seed = 11,
-            # run_cache arguments
-            baseDir = baseDir,
-            forceRecalc = TRUE,
-            showMessage = TRUE
-        ),
-        "Saving in cache"
-    )
+    .runCache(
+        rnorm, 1,
+        # run_cache arguments
+        seed = 10,
+        baseDir = baseDir,
+        forceRecalc = TRUE,
+        showMessage = TRUE
+    ) |>
+        expect_message("Saving in cache")
+
+    .runCache(
+        rnorm, 1,
+        seed = 11,
+        # run_cache arguments
+        baseDir = baseDir,
+        forceRecalc = TRUE,
+        showMessage = TRUE
+    ) |>
+        expect_message("Saving in cache")
+
     expect_message(
         rnorm10 <- .runCache(
             rnorm, 1,
@@ -377,7 +372,9 @@ test_that("run.cache with seed", {
             showMessage = TRUE
         ),
         "Loading from cache"
-    )
+    ) |>
+        expect_message("Cache was created")
+
     expect_message(
         rnorm11 <- .runCache(
             rnorm, 1,
@@ -386,9 +383,11 @@ test_that("run.cache with seed", {
             baseDir = baseDir,
             forceRecalc = FALSE,
             showMessage = TRUE
-        ),
+        )
+        ,
         "Loading from cache"
-    )
+    ) |>
+        expect_message("Cache was created")
 
     expect_false(rnorm10 == rnorm11)
 })
@@ -425,7 +424,8 @@ test_that("run.cache uses cache", {
             showMessage = TRUE
         ),
         "Loading from cache"
-    )
+    ) |>
+        expect_message("Cache was created")
 })
 
 test_that("run.cache show.message option works", {
@@ -510,7 +510,8 @@ test_that("run.cache baseDir option works", {
             baseDir = cache0, forceRecalc = FALSE, showMessage = TRUE
         ),
         cache0Os
-    )
+    ) |>
+        expect_message("Cache was created")
 
     .baseDir(cache2)
     expect_message(
